@@ -71,7 +71,7 @@ local function set_mapping(user_opts)
     local f = "<Cmd>lua vim.lsp.buf." .. value.func .. "<CR>"
     if string.find(value.func, 'require') then
       f = "<Cmd>lua " .. value.func .. "<CR>"
-    else if string.find(value.func, 'diagnostic') then
+    elseif string.find(value.func, 'diagnostic') then
       f = "<Cmd>lua vim.lsp." .. value.func .. "<CR>"
     end
     local k = value.key
