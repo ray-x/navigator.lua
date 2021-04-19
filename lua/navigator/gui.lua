@@ -4,6 +4,7 @@ local TextView = require "guihua.textview"
 local View = require "guihua.view"
 local util = require "navigator.util"
 local log = require "navigator.util".log
+local verbose = require "navigator.util".verbose
 
 function M.new_preview(opts)
   return TextView:new(
@@ -44,10 +45,9 @@ function M._preview_location(location, width, pos_x, pos_y)
     syntax = api.nvim_buf_get_option(bufnr, "ft")
   end
 
-  log(syntax, contents)
+  verbose(syntax, contents)
   local opts = {syntax = syntax, width = width, pos_x = pos_x or 0, pos_y = pos_y or 10}
   opts.items = contents
-  log("syntax", opts.syntax)
   return M.new_preview(opts)
 end
 
@@ -58,7 +58,7 @@ end
 --
 
 function M.preview_file(filename, width, line, col, offset_x, offset_y)
-  log("file", filename, line, offset_x, offset_y)
+  verbose("file", filename, line, offset_x, offset_y)
   if line >= 2 then
     line = line - 2
   end
@@ -70,7 +70,7 @@ function M.preview_file(filename, width, line, col, offset_x, offset_y)
 end
 
 function M.preview_uri(uri, width, line, col, offset_x, offset_y)
-  log("uri", uri, line, offset_x, offset_y)
+  verbose("uri", uri, line, offset_x, offset_y)
   if line >= 2 then
     line = line - 2
   end
@@ -133,7 +133,7 @@ function M.new_list_view(opts)
               pos = 1
             end
             local l = data[pos]
-            log("on move", pos, l.text or l, l.uri, l.filename)
+            verbose("on move", pos, l.text or l, l.uri, l.filename)
             -- todo fix
             if l.uri ~= nil then
               return M.preview_uri(l.uri, width, l.lnum, l.col, 0, offset_y)

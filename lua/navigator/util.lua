@@ -96,7 +96,7 @@ local default_config = {
   level = "info"
 }
 
-M._log = require('guihua.log').new({level='debug'}, true)
+M._log = require('guihua.log').new({level='info'}, true)
 
 -- add log to you lsp.log
 M.log = M._log.info

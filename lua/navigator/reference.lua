@@ -1,7 +1,7 @@
 local util = require "navigator.util"
 local lsphelper = require "navigator.lspwrapper"
 local gui = require "navigator.gui"
-local log = require "navigator.util".log
+local verbose = require "navigator.util".verbose
 -- local log = util.log
 -- local partial = util.partial
 -- local cwd = vim.fn.getcwd(0)
@@ -24,7 +24,7 @@ local function ref_hdlr(arg1, api, locations, num, bufnr)
     print "References not found"
     return
   end
-  log(locations)
+  verbose(locations)
   local items = locations_to_items(locations)
   gui.new_list_view({items = items, api = 'Reference'})
 end
