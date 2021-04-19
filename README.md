@@ -1,12 +1,12 @@
 # Navigator
 
-GUI for neovim lsp with a collection of most used LSP/treesitter functions.
-Easy code navigation. Based on LSP.
+GUI for Neovim (nightly) built-in LSP with a collection of most used LSP/treesitter functions.
+Easy code navigation.
 
 # Features:
 
 - LSP easy setup. Support some of the most commonly used lsp client setup
-- GUI
+- GUI with floating windows
 - fzy search
 - Better navigation for diagnostic errors, Navigate through files that contain errors/warnings
 - Group references/implementation/incomming/outgoing based on file names.
@@ -47,6 +47,11 @@ use {'ray-x/navigator.lua', requires = {'ray-x/guihua.lua', run = 'cd lua/fzy &&
 lua require'navigator'.setup()
 ```
 
+## Usage
+
+Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box
+Use <c-e> or `:q!` to kill the floating window, <up/down> to move and <c-o> to open location or apply changes
+
 ## Screenshots
 
 ### Reference
@@ -82,7 +87,3 @@ lua require'navigator'.setup()
 - Early phase, bugs expected
 - Async (some of the requests is slow on large codebase and might be good to use co-rountine)
 - More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Do not test other languages (e.g rust, swift etc)
-
-```
-
-```
