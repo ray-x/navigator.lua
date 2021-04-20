@@ -5,14 +5,15 @@ local View = require "guihua.view"
 local util = require "navigator.util"
 local log = require "navigator.util".log
 local verbose = require "navigator.util".verbose
+local api = vim.api
 
 function M.new_preview(opts)
   return TextView:new(
     {
       loc = "top_center",
       rect = {
-        height = #opts.items + 4,
-        width = opts.width or 90,
+        height = opts.preview_heigh or 12,
+        width = opts.width or 100,
         pos_x = opts.pos_x or 0,
         pos_y = opts.pos_y or 4
       },
@@ -20,16 +21,16 @@ function M.new_preview(opts)
       relative = opts.relative,
       data = opts.items,
       syntax = opts.syntax,
-      enter = opts.enter or false
+      enter = opts.enter or false,
+      hl_line = opts.hl_line
     }
   )
 end
 
-function M._preview_location(location, width, pos_x, pos_y)
-  local api = vim.api
-  local uri = location.targetUri or location.uri
-  if uri == nil then
-    log("invalid uri ", location)
+function M._preview_location(opts) --location, width, pos_x, pos_y
+  local uri = opts.location.targetUri or opts.location.uri
+  if opts.uri == nil then
+    log("invalid/nil uri ")
     return
   end
   local bufnr = vim.uri_to_bufnr(uri)
@@ -37,8 +38,10 @@ function M._preview_location(location, width, pos_x, pos_y)
     vim.fn.bufload(bufnr)
   end
   --
-  local range = location.targetRange or location.range
-  local contents = api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)
+
+  local range = opts.location.targetRange or opts.location.range
+  local contents = api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 10, false)
+
   --
   local syntax = api.nvim_buf_get_option(bufnr, "syntax")
   if syntax == nil or #syntax < 1 then
@@ -46,39 +49,25 @@ function M._preview_location(location, width, pos_x, pos_y)
   end
 
   verbose(syntax, contents)
-  local opts = {syntax = syntax, width = width, pos_x = pos_x or 0, pos_y = pos_y or 10}
-  opts.items = contents
-  return M.new_preview(opts)
+  local win_opts = {syntax = syntax, width = opts.width, pos_x = opts.offset_x or 0, pos_y = opts.offset_y or 10}
+  win_opts.items = contents
+  win_opts.hl_line = opts.lnum - range.start.line
+  local w = M.new_preview(win_opts)
+
+  return w
 end
 
---   local bufnr, winnr =lsp.util.open_floating_preview(contents, syntax, {offset_x=30, offset_y=20})
---
---   vim.api.nvim_buf_set_var(bufnr, "lsp_floating", true)
---   return bufnr, winnr
---
-
-function M.preview_file(filename, width, line, col, offset_x, offset_y)
-  verbose("file", filename, line, offset_x, offset_y)
-  if line >= 2 then
-    line = line - 2
+function M.preview_uri(opts) -- uri, width, line, col, offset_x, offset_y
+  verbose("uri", opts.uri, opts.lnum, opts.offset_x, opts.offset_y)
+  local line_beg = opts.line
+  if opts.lnum >= 2 then
+    line_beg = opts.lnum - 2
   end
-  local loc = {uri = "file:///" .. filename, targetRange = {start = {line = line}}}
-  offset_x = offset_x or 0
-  offset_y = offset_y or 6
-  loc.targetRange["end"] = {line = line + 4}
-  return M._preview_location(loc, width, offset_x, offset_y)
-end
-
-function M.preview_uri(uri, width, line, col, offset_x, offset_y)
-  verbose("uri", uri, line, offset_x, offset_y)
-  if line >= 2 then
-    line = line - 2
-  end
-  offset_x = offset_x or 0
-  offset_y = offset_y or 6
-  local loc = {uri = uri, targetRange = {start = {line = line}}}
-  loc.targetRange["end"] = {line = line + 4}
-  return M._preview_location(loc, width, offset_x, offset_y)
+  local loc = {uri = opts.uri, targetRange = {start = {line = line_beg}}}
+  -- TODO: options for 8
+  loc.targetRange["end"] = {line = opts.lnum + 8}
+  opts.location = loc
+  return M._preview_location(opts)
 end
 
 function M.new_list_view(opts)
@@ -89,9 +78,9 @@ function M.new_list_view(opts)
   else
     data = require "guihua.util".aggregate_filename(items, opts)
   end
-  local wwidth = vim.api.nvim_get_option("columns")
+  local wwidth = api.nvim_get_option("columns")
   local width = opts.width or math.floor(wwidth * 0.8)
-  local wheight = math.floor(vim.api.nvim_get_option("lines") * 0.8)
+  local wheight = math.floor(api.nvim_get_option("lines") * 0.8)
   local prompt = opts.prompt or false
   if data and not vim.tbl_isempty(data) then
     -- replace
@@ -128,18 +117,20 @@ function M.new_list_view(opts)
               util.open_file_at(l.filename, l.lnum)
             end
           end,
-        on_move = opts.on_move or function(pos)
+        on_move = opts.on_move or
+          function(pos)
             if pos == 0 then
               pos = 1
             end
             local l = data[pos]
             verbose("on move", pos, l.text or l, l.uri, l.filename)
             -- todo fix
-            if l.uri ~= nil then
-              return M.preview_uri(l.uri, width, l.lnum, l.col, 0, offset_y)
-            else
-              return M.preview_file(l.filename, width, l.lnum, l.col, 0, offset_y)
+            if l.uri == nil then
+              l.uri = "file:///" .. l.filename
             end
+              return M.preview_uri(
+                {uri = l.uri, width = width, lnum = l.lnum, col = l.col, offsetx = 0, offset_y = offset_y}
+              )
           end
       }
     )

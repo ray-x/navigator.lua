@@ -38,7 +38,7 @@ local function def_preview(timeout_ms)
   -- log("def-preview", result)
   for key, value in pairs(result) do
     if result[key] ~= nil then
-      table.insert(data, result[key].result[1])
+      table.insert(data, value.result[1])
     end
   end
   local range = data[1].targetRange or data[1].range
@@ -55,7 +55,7 @@ local function def_preview(timeout_ms)
   if not vim.api.nvim_buf_is_loaded(bufnr) then
     vim.fn.bufload(bufnr)
   end
-
+  -- TODO: 12 should be an option
   local definition = vim.api.nvim_buf_get_lines(bufnr, row, range["end"].line + 12, false)
   local def_line = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range.start.line + 1, false)
   for _ = 1, math.min(3, #definition), 1 do
@@ -85,7 +85,7 @@ local function def_preview(timeout_ms)
   vim.cmd('set cursorline')
   if #def_line > 0 then
     local niddle = require('guihua.util').add_escape(def_line[1])
-    log(def_line[1], niddle)
+    -- log(def_line[1], niddle)
     vim.fn.matchadd("Search", niddle)
   end
   -- TODO:

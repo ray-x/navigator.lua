@@ -7,7 +7,7 @@ Easy code navigation.
 
 - LSP easy setup. Support some of the most commonly used lsp client setup
 - GUI with floating windows
-- fzy search
+- fzy search with Lua-JIT
 - Better navigation for diagnostic errors, Navigate through files that contain errors/warnings
 - Group references/implementation/incomming/outgoing based on file names.
 
@@ -22,6 +22,7 @@ to tune the plugins to fit my requirements.
 - [nvim-fzy](https://github.com/mfussenegger/nvim-fzy.git)
 - [fuzzy](https://github.com/amirrezaask/fuzzy.nvim)
 - [lspsaga](https://github.com/glepnir/lspsaga.nvim)
+- [fzf-lsp lsp with fzf as gui backend](https://github.com/gfanto/fzf-lsp.nvim)
 
 # Install
 
