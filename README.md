@@ -10,6 +10,7 @@ Easy code navigation.
 - fzy search with Lua-JIT
 - Better navigation for diagnostic errors, Navigate through files that contain errors/warnings
 - Group references/implementation/incomming/outgoing based on file names.
+- Nerdfont for LSP kind
 
 # Why a new plugin
 
@@ -58,6 +59,10 @@ Use <c-e> or `:q!` to kill the floating window, <up/down> to move and <c-o> to o
 ### Reference
 
 ![reference](https://github.com/ray-x/files/blob/master/img/navigator/ref.gif?raw=true)
+
+### Document Symbol
+
+![document symbol](https://github.com/ray-x/files/blob/master/img/navigator/doc_symbol.gif?raw=true)
 
 ### Diagnostic
 

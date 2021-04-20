@@ -1,7 +1,7 @@
 local gui = require "navigator.gui"
 local M = {}
 local log = require "navigator.util".log
-local verbose = require "navigator.util".trace
+local verbose = require "navigator.util".debug
 local lsphelper = require "navigator.lspwrapper"
 local locations_to_items = lsphelper.locations_to_items
 local clone = require "guihua.util".clone
@@ -107,7 +107,7 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
       end
     end
   end
-  verbose(locations)
+  -- verbose(locations)
   -- local items = locations_to_items(locations)
   gui.new_list_view({items = locations, prompt = true, rawdata = true, api = '華 '})
 
