@@ -19,7 +19,7 @@ local function call_hierarchy_handler(direction, err, _, result, _, _, error_mes
     local call_hierarchy_item = call_hierarchy_call[direction]
     local kind = ' '
     if call_hierarchy_item.kind then
-      kind = require'navigator.lspclient.lspkind'.kind(call_hierarchy_item.kind) .. ' '
+      kind = require'navigator.lspclient.lspkind'.symbol_kind(call_hierarchy_item.kind) .. ' '
     end
     for _, range in pairs(call_hierarchy_call.fromRanges) do
       local filename = assert(vim.uri_to_fname(call_hierarchy_item.uri))
@@ -47,13 +47,13 @@ local call_hierarchy_handler_to = partial(call_hierarchy_handler, "to")
 
 local function incoming_calls_handler(bang, err, method, result, client_id, bufnr)
   local results = call_hierarchy_handler_from(err, method, result, client_id, bufnr, "Incoming calls not found")
-  gui.new_list_view({items = results, api = 'incomming'})
+  gui.new_list_view({items = results, api = ' '})
 end
 
 local function outgoing_calls_handler(bang, err, method, result, client_id, bufnr)
   local results = call_hierarchy_handler_to(err, method, result, client_id, bufnr, "Outgoing calls not found")
 
-  gui.new_list_view({items =results, api = 'outgoing'})
+  gui.new_list_view({items =results, api = ' '})
   --fzf_locations(bang, "", "Outgoing Calls", results, false)
 end
 

@@ -132,8 +132,8 @@ function M.setup(user_opts)
   vim.lsp.handlers["textDocument/typeDefinition"] = require "navigator.definition".typeDefinition_handler
   vim.lsp.handlers["textDocument/implementation"] = require "navigator.implementation".implementation_handler
 
-  vim.lsp.handlers["textDocument/documentSymbol"] = require "navigator.symbols".symbol_handler
-  vim.lsp.handlers["workspace/symbol"] = require "navigator.symbols".symbol_handler
+  vim.lsp.handlers["textDocument/documentSymbol"] = require "navigator.symbols".document_symbol_handler
+  vim.lsp.handlers["workspace/symbol"] = require "navigator.symbols".workspace_symbol_handler
   vim.lsp.handlers["textDocument/publishDiagnostics"] = require'navigator.diagnostics'.diagnostic_handler
 
   -- vim.lsp.handlers["textDocument/hover"]  = require 'navigator.hover'.hover_handler

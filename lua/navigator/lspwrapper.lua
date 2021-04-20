@@ -111,18 +111,45 @@ function M.locations_to_items(locations)
     table.insert(items, item)
   end
 
-  -- insert data into lines and loc
-  -- for i, loc in ipairs(items) do
-  --   log(items[i], locations[i])
-  --   local filename = loc.filename:gsub(cwd .. "/", "./", 1)
-  --   items[i].uri = locations[i].uri
-  --   items[i].range = locations[i].range
-  --   items[i].filename = assert(vim.uri_to_fname(loc.uri))
-  --   items[i].display_filename = filename or items[i].filename
-  --   items[i].rpath = util.get_relative_path(cwd, loc.filename)
-  --   log(items[i], locations[i])
-  -- end
   return items
 end
+
+function M.symbol_to_items(locations)
+  local cwd = vim.fn.getcwd(0)
+  if not locations or vim.tbl_isempty(locations) then
+    print("list not avalible")
+    return
+  end
+
+  local items = {} -- lsp.util.locations_to_items(locations)
+  -- items and locations may not matching
+  table.sort(
+    locations,
+    function(i, j)
+      if i.uri == j.uri then
+        if i.range and i.range.start then
+          return i.range.start.line < j.range.start.line
+        end
+        return false
+      else
+        return i.uri < j.uri
+      end
+    end
+  )
+  for i, loc in ipairs(locations) do
+    local item = {} -- lsp.util.locations_to_items({loc})[1]
+    item.uri = locations[i].uri
+    item.range = locations[i].range
+    item.filename = assert(vim.uri_to_fname(item.uri))
+    local filename = item.filename:gsub(cwd .. "/", "./", 1)
+    item.display_filename = filename or item.filename
+    item.rpath = util.get_relative_path(cwd, item.filename)
+    table.insert(items, item)
+  end
+
+  return items
+end
+
+
 
 return M

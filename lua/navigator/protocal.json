@@ -451,3 +451,466 @@ definition.lua:9: { {
     kind = "source.organizeImports",
     title = "Organize Imports"
   } }
+
+
+
+  -- workspace symbols
+
+{ {
+    containerName = "std",
+    kind = 5,
+    location = {
+      range = {
+        end = {
+          character = 44,
+          line = 277
+        },
+        start = {
+          character = 23,
+          line = 277
+        }
+      },
+      uri = "file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c%2B%2B/v1/mutex"
+    },
+    name = "recursive_timed_mutex"
+  }, {
+    containerName = "std::recursive_timed_mutex",
+    kind = 9,
+    location = {
+      range = {
+        end = {
+          character = 25,
+          line = 288
+        },
+        start = {
+          character = 4,
+          line = 288
+        }
+      },
+      uri = "file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c%2B%2B/v1/mutex"
+    },
+    name = "recursive_timed_mutex"
+  }, {
+    containerName = "std::recursive_timed_mutex",
+    kind = 9,
+    location = {
+      range = {
+        end = {
+          character = 26,
+          line = 284
+        },
+        start = {
+          character = 5,
+          line = 284
+        }
+      },
+      uri = "file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c%2B%2B/v1/mutex"
+    },
+    name = "recursive_timed_mutex"
+  }, {
+    containerName = "std",
+    kind = 5,
+    location = {
+      range = {
+        end = {
+          character = 41,
+          line = 683
+        },
+        start = {
+          character = 27,
+          line = 683
+        }
+      },
+      uri = "file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c%2B%2B/v1/type_traits"
+    },
+    name = "remove_const_t"
+  },}
+
+
+-- doc symbols
+{ {
+    children = { {
+        kind = 6,
+        name = "area",
+        range = {
+          end = {
+            character = 15,
+            line = 8
+          },
+          start = {
+            character = 1,
+            line = 8
+          }
+        },
+        selectionRange = {
+          end = {
+            character = 5,
+            line = 8
+          },
+          start = {
+            character = 1,
+            line = 8
+          }
+        }
+      }, {
+        kind = 6,
+        name = "perim",
+        range = {
+          end = {
+            character = 16,
+            line = 9
+          },
+          start = {
+            character = 1,
+            line = 9
+          }
+        },
+        selectionRange = {
+          end = {
+            character = 6,
+            line = 9
+          },
+          start = {
+            character = 1,
+            line = 9
+          }
+        }
+      } },
+    detail = "interface{...}",
+    kind = 11,
+    name = "geometry",
+    range = {
+      end = {
+        character = 1,
+        line = 10
+      },
+      start = {
+        character = 5,
+        line = 7
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 13,
+        line = 7
+      },
+      start = {
+        character = 5,
+        line = 7
+      }
+    }
+  }, {
+    children = { {
+        detail = "float64",
+        kind = 8,
+        name = "width",
+        range = {
+          end = {
+            character = 22,
+            line = 13
+          },
+          start = {
+            character = 1,
+            line = 13
+          }
+        },
+        selectionRange = {
+          end = {
+            character = 6,
+            line = 13
+          },
+          start = {
+            character = 1,
+            line = 13
+          }
+        }
+      }, {
+        detail = "float64",
+        kind = 8,
+        name = "height",
+        range = {
+          end = {
+            character = 22,
+            line = 13
+          },
+          start = {
+            character = 1,
+            line = 13
+          }
+        },
+        selectionRange = {
+          end = {
+            character = 14,
+            line = 13
+          },
+          start = {
+            character = 8,
+            line = 13
+          }
+        }
+      } },
+    detail = "struct{...}",
+    kind = 23,
+    name = "rect",
+    range = {
+      end = {
+        character = 1,
+        line = 14
+      },
+      start = {
+        character = 5,
+        line = 12
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 9,
+        line = 12
+      },
+      start = {
+        character = 5,
+        line = 12
+      }
+    }
+  }, {
+    children = { {
+        detail = "float64",
+        kind = 8,
+        name = "radius",
+        range = {
+          end = {
+            character = 15,
+            line = 17
+          },
+          start = {
+            character = 1,
+            line = 17
+          }
+        },
+        selectionRange = {
+          end = {
+            character = 7,
+            line = 17
+          },
+          start = {
+            character = 1,
+            line = 17
+          }
+        }
+      } },
+    detail = "struct{...}",
+    kind = 23,
+    name = "circle",
+    range = {
+      end = {
+        character = 1,
+        line = 18
+      },
+      start = {
+        character = 5,
+        line = 16
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 11,
+        line = 16
+      },
+      start = {
+        character = 5,
+        line = 16
+      }
+    }
+  }, {
+    detail = "()",
+    kind = 6,
+    name = "(rect).area",
+    range = {
+      end = {
+        character = 1,
+        line = 22
+      },
+      start = {
+        character = 0,
+        line = 20
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 18,
+        line = 20
+      },
+      start = {
+        character = 14,
+        line = 20
+      }
+    }
+  }, {
+    detail = "()",
+    kind = 6,
+    name = "(rect).perim",
+    range = {
+      end = {
+        character = 1,
+        line = 26
+      },
+      start = {
+        character = 0,
+        line = 24
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 19,
+        line = 24
+      },
+      start = {
+        character = 14,
+        line = 24
+      }
+    }
+  }, {
+    detail = "()",
+    kind = 6,
+    name = "(circle).area",
+    range = {
+      end = {
+        character = 1,
+        line = 30
+      },
+      start = {
+        character = 0,
+        line = 28
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 20,
+        line = 28
+      },
+      start = {
+        character = 16,
+        line = 28
+      }
+    }
+  }, {
+    detail = "()",
+    kind = 6,
+    name = "(circle).perim",
+    range = {
+      end = {
+        character = 1,
+        line = 34
+      },
+      start = {
+        character = 0,
+        line = 32
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 21,
+        line = 32
+      },
+      start = {
+        character = 16,
+        line = 32
+      }
+    }
+  }, {
+    detail = "(g geometry)",
+    kind = 12,
+    name = "measure",
+    range = {
+      end = {
+        character = 1,
+        line = 40
+      },
+      start = {
+        character = 0,
+        line = 36
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 12,
+        line = 36
+      },
+      start = {
+        character = 5,
+        line = 36
+      }
+    }
+  }, {
+    detail = "()",
+    kind = 12,
+    name = "m2",
+    range = {
+      end = {
+        character = 1,
+        line = 44
+      },
+      start = {
+        character = 0,
+        line = 42
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 7,
+        line = 42
+      },
+      start = {
+        character = 5,
+        line = 42
+      }
+    }
+  }, {
+    detail = "()",
+    kind = 12,
+    name = "M2",
+    range = {
+      end = {
+        character = 1,
+        line = 48
+      },
+      start = {
+        character = 0,
+        line = 46
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 7,
+        line = 46
+      },
+      start = {
+        character = 5,
+        line = 46
+      }
+    }
+  }, {
+    detail = "()",
+    kind = 12,
+    name = "main",
+    range = {
+      end = {
+        character = 1,
+        line = 57
+      },
+      start = {
+        character = 0,
+        line = 50
+      }
+    },
+    selectionRange = {
+      end = {
+        character = 9,
+        line = 50
+      },
+      start = {
+        character = 5,
+        line = 50
+      }
+    }
+  } }

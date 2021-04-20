@@ -52,6 +52,7 @@ function M._preview_location(opts) --location, width, pos_x, pos_y
   local win_opts = {syntax = syntax, width = opts.width, pos_x = opts.offset_x or 0, pos_y = opts.offset_y or 10}
   win_opts.items = contents
   win_opts.hl_line = opts.lnum - range.start.line
+  log (opts.lnum, range.start.line, win_opts.hl_line)
   local w = M.new_preview(win_opts)
 
   return w
