@@ -10,12 +10,14 @@ Easy code navigation.
 - fzy search with Lua-JIT
 - Better navigation for diagnostic errors, Navigate through files that contain errors/warnings
 - Group references/implementation/incomming/outgoing based on file names.
-- Nerdfont for LSP kind
+- Nerdfont, emoji for LSP kind,
 
 # Why a new plugin
 
 After installed a handful of lsp plugins, I still got ~500 loc for lsp and still increasing. Reason is that I need
-to tune the plugins to fit my requirements.
+to tune the plugins to fit my requirements. The plugin help user setup lspconfig with only a few lines of codes.
+Seconde reason is that lots of plugins serve as an enhance version of quickfix, lots of improvement was made by
+[lspsaga](https://github.com/glepnir/lspsaga.nvim), from which, the plugin was inspired.
 
 # Similar projects / special mentions:
 
@@ -28,7 +30,7 @@ to tune the plugins to fit my requirements.
 # Install
 
 You can remove your lspconfig setup and use this plugin.
-The plugin depends on [guihua.lua](https://github.com/ray-x/guihua.lua), which provides gui and fzy support.
+The plugin depends on [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support.
 
 ```vim
 Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }

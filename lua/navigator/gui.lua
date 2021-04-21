@@ -40,7 +40,8 @@ function M._preview_location(opts) --location, width, pos_x, pos_y
   --
 
   local range = opts.location.targetRange or opts.location.range
-  local contents = api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 10, false)
+  if range.start == nil then print('error invalid range')  return end
+  local contents = api.nvim_buf_get_lines(bufnr, range.start.line, (range["end"].line or 1) + 10, false)
 
   --
   local syntax = api.nvim_buf_get_option(bufnr, "syntax")

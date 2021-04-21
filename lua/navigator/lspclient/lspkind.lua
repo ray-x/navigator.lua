@@ -29,8 +29,8 @@ local kind_symbols = {
 
 local CompletionItemKind = {
   " ",
-  "ƒ ",
-  " ",
+  "𝔉 ",
+  "ⓕ ",
   " ",
   "ﴲ ",
   " ",
@@ -40,7 +40,7 @@ local CompletionItemKind = {
   " ",
   " ",
   " ",
-  "了",
+  "𝕰 ",
   " ",
   "﬌ ",
   " ",
