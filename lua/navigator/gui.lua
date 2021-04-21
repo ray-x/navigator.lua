@@ -40,7 +40,10 @@ function M._preview_location(opts) --location, width, pos_x, pos_y
   --
 
   local range = opts.location.targetRange or opts.location.range
-  if range.start == nil then print('error invalid range')  return end
+  if range.start == nil then
+    print("error invalid range")
+    return
+  end
   local contents = api.nvim_buf_get_lines(bufnr, range.start.line, (range["end"].line or 1) + 10, false)
 
   --
@@ -53,7 +56,7 @@ function M._preview_location(opts) --location, width, pos_x, pos_y
   local win_opts = {syntax = syntax, width = opts.width, pos_x = opts.offset_x or 0, pos_y = opts.offset_y or 10}
   win_opts.items = contents
   win_opts.hl_line = opts.lnum - range.start.line
-  log (opts.lnum, range.start.line, win_opts.hl_line)
+  log(opts.lnum, range.start.line, win_opts.hl_line)
   local w = M.new_preview(win_opts)
 
   return w
@@ -119,8 +122,7 @@ function M.new_list_view(opts)
               util.open_file_at(l.filename, l.lnum)
             end
           end,
-        on_move = opts.on_move or
-          function(pos)
+        on_move = opts.on_move or function(pos)
             if pos == 0 then
               pos = 1
             end
@@ -130,9 +132,9 @@ function M.new_list_view(opts)
             if l.uri == nil then
               l.uri = "file:///" .. l.filename
             end
-              return M.preview_uri(
-                {uri = l.uri, width = width, lnum = l.lnum, col = l.col, offsetx = 0, offset_y = offset_y}
-              )
+            return M.preview_uri(
+              {uri = l.uri, width = width, lnum = l.lnum, col = l.col, offsetx = 0, offset_y = offset_y}
+            )
           end
       }
     )

@@ -90,6 +90,10 @@ Use <c-e> or `:q!` to kill the floating window, <up/down> to move and <c-o> to o
 
 ![incomming](https://github.com/ray-x/files/blob/master/img/navigator/incomming.jpg?raw=true)
 
+### LSP symbol nerdfont/emoji
+
+![nerdfont](https://github.com/ray-x/files/blob/master/img/navigator/icon_nerd.jpg?raw=true)
+
 # Todo
 
 - Early phase, bugs expected
