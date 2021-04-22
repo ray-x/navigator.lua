@@ -57,6 +57,7 @@ function code_action.code_action_handler(err, _, actions, num, _, _, customSelec
         pos = 2
       end
       local l = data[pos]
+      return l
       -- log("on move", l)
     end
   }
@@ -86,7 +87,6 @@ local function _update_virtual_text(line)
   if line then
     local icon_with_indent = "  " .. config.code_action_icon
 
-    -- log("updat text", line, icon_with_indent)
     api.nvim_buf_set_extmark(
       0,
       namespace,
@@ -127,7 +127,6 @@ local need_check_diagnostic = {
 
 function code_action:render_action_virtual_text(line, diagnostics)
   return function(_, _, actions)
-
     if actions == nil or type(actions) ~= "table" or vim.tbl_isempty(actions) then
       if config.code_action_prompt.virtual_text then
         _update_virtual_text(nil)

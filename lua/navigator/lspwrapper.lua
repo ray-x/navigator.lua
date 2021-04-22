@@ -2,6 +2,7 @@ local M = {}
 local util = require "navigator.util"
 local lsp = require "vim.lsp"
 local log = require "navigator.util".log
+local symbol_kind = require "navigator.lspclient.lspkind".symbol_kind
 function M.lines_from_locations(locations, include_filename)
   local fnamemodify = (function(filename)
     if include_filename then
@@ -20,6 +21,37 @@ function M.lines_from_locations(locations, include_filename)
   end
 
   return lines
+end
+
+function M.symbols_to_items(result)
+  local locations = {}
+  -- log(result)
+  for i = 1, #result do
+    local item = result[i].location
+    if item ~= nil and item.range ~= nil then
+      item.kind = result[i].kind
+
+      local kind = symbol_kind(item.kind)
+      item.name = result[i].name --symbol name
+      item.text = result[i].name
+      if kind ~= nil then
+        item.text = kind .. ": " .. item.text
+      end
+      item.filename = vim.uri_to_fname(item.uri)
+      if item.range == nil or item.range.start == nil then
+        log(result[i], item)
+      end
+      item.lnum = item.range.start.line
+
+      if item.containerName ~= nil then
+        item.text = " " .. item.containerName .. item.text
+      end
+      table.insert(locations, item)
+    end
+  end
+  -- local items = locations_to_items(locations)
+  log(locations[1])
+  return locations
 end
 
 local function extract_result(results_lsp)
@@ -149,7 +181,5 @@ function M.symbol_to_items(locations)
 
   return items
 end
-
-
 
 return M

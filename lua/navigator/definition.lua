@@ -24,6 +24,7 @@ local function definition_hdlr(_, _, locations, _, bufnr)
 end
 
 local function def_preview(timeout_ms)
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running")
   local method = "textDocument/definition"
   local params = vim.lsp.util.make_position_params()
   local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 2000)

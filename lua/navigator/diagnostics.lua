@@ -75,7 +75,7 @@ M.show_diagnostic = function()
     end
     log(display_items)
     if #display_items > 0 then
-      gui.new_list_view({items = display_items, api = '⛑ Diagnostic'})
+      gui.new_list_view({items = display_items, api = '⛑  Diagnostic'})
     end
   end
 end

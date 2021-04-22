@@ -1,17 +1,19 @@
 local gui = require "navigator.gui"
 local M = {}
 local log = require "navigator.util".log
-local verbose = require "navigator.util".debug
 local lsphelper = require "navigator.lspwrapper"
 local locations_to_items = lsphelper.locations_to_items
 local clone = require "guihua.util".clone
 local symbol_kind = require "navigator.lspclient.lspkind".symbol_kind
+local symbols_to_items = lsphelper.symbols_to_items
+
 function M.document_symbols(opts)
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running")
   opts = opts or {}
   local params = vim.lsp.util.make_position_params()
   params.context = {includeDeclaration = true}
   params.query = ""
-  local results_lsp = vim.lsp.buf_request_sync(0, "textDocument/documentSymbol", params, opts.timeout or 5000)
+  local results_lsp = vim.lsp.buf_request_sync(0, "textDocument/documentSymbol", params, opts.timeout or 3000)
   local locations = {}
   log(results_lsp)
   for _, server_results in pairs(results_lsp) do
@@ -34,25 +36,36 @@ end
 
 function M.workspace_symbols(opts)
   opts = opts or {}
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running")
+  local lspopts = {
+    loc = "top_center",
+    prompt = true,
+    rawdata = true,
+    api = "華 "
+  }
+  vim.list_extend(lspopts, opts)
   local params = vim.lsp.util.make_position_params()
   params.context = {includeDeclaration = true}
-  params.query = ""
-  local results_lsp = vim.lsp.buf_request_sync(0, "workspace/symbol", params, opts.timeout or 15000)
-
-  log(results_lsp)
-  local locations = {}
-  for _, server_results in pairs(results_lsp) do
-    if server_results.result then
-      vim.list_extend(locations, vim.lsp.util.symbols_to_items(server_results.result) or {})
+  params.query = opts.prompt or ""
+  local results_lsp = vim.lsp.buf_request_sync(0, "workspace/symbol", params, lspopts.timeout or 15000)
+  if not results_lsp or vim.tbl_isempty(results_lsp) then
+    print(bufnr, "symbol not found for buf")
+    return
+  end
+  -- result_lsp
+  local result = {}
+  for i = 1, #results_lsp do
+    if results_lsp[i] ~= nil and results_lsp[i].result ~= nil and #results_lsp[i].result > 0 then
+      result = results_lsp[i].result
     end
   end
-  local lines = {}
 
-  for _, loc in ipairs(locations) do
-    table.insert(lines, string.format("%s:%s:%s", loc.filename, loc.lnum, loc.text))
-  end
-  if #lines > 0 then
-    gui.new_list_view({data = lines})
+  local items = symbols_to_items(result)
+  -- verbose(results_lsp)
+
+  if #items > 0 then
+    lspopts.data = items
+    gui.new_list_view(lspopts)
   else
     print("symbols not found")
   end
@@ -72,7 +85,7 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
   local fname = vim.fn.expand("%:p:f")
   local uri = vim.uri_from_fname(fname)
   -- vim.list_extend(locations, vim.lsp.util.symbols_to_items(result) or {})
-  -- log(locations)
+  log(result[1])
   for i = 1, #result do
     local item = {}
     item.kind = result[i].kind
@@ -81,17 +94,19 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
     item.range = result[i].range
     item.uri = uri
     item.selectionRange = result[i].selectionRange
-    item.detail = result[i].detail or ''
-    if item.detail == '()' then item.detail = 'func' end
+    item.detail = result[i].detail or ""
+    if item.detail == "()" then
+      item.detail = "func"
+    end
 
     item.lnum = result[i].range.start.line + 1
-    item.text = "[" .. kind .. "]" .. item.detail  .. " " .. item.name
+    item.text = "[" .. kind .. "]" .. item.detail .. " " .. item.name
 
     item.filename = fname
 
     table.insert(locations, item)
     if result[i].children ~= nil then
-      for _, c in pairs (result[i].children) do
+      for _, c in pairs(result[i].children) do
         local child = {}
         child.kind = c.kind
         child.name = c.name
@@ -101,7 +116,7 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
         child.fname = fname
         child.uri = uri
         child.lnum = c.range.start.line + 1
-        child.detail = c.detail or ''
+        child.detail = c.detail or ""
         child.text = "   [" .. ckind .. "] " .. child.detail .. " " .. child.name
         table.insert(locations, child)
       end
@@ -109,7 +124,7 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
   end
   -- verbose(locations)
   -- local items = locations_to_items(locations)
-  gui.new_list_view({items = locations, prompt = true, rawdata = true, api = '華 '})
+  gui.new_list_view({items = locations, prompt = true, rawdata = true, api = "華 "})
 
   -- if locations == nil or vim.tbl_isempty(locations) then
   --   print "References not found"
@@ -140,21 +155,23 @@ function M.workspace_symbol_handler(err, _, result, _, bufnr)
     print(bufnr, "symbol not found for buf")
     return
   end
-  log(result)
-  local locations = {}
-  for i = 1, #result do
-    local item = result[i].location or {}
-    item.kind = result[i].kind
-    item.containerName = result[i].containerName
-    item.name = result[i].name
-    item.text = result[i].name
-    if #item.containerName > 0 then
-      item.text = item.text:gsub(item.containerName, "", 1)
-    end
-    table.insert(locations, item)
-  end
-  local items = locations_to_items(locations)
-  gui.new_list_view({items = items, prompt = true, api = '華 '})
+  log(result[1])
+  local items = symbols_to_items(result)
+  log(items[1])
+  -- local locations = {}
+  -- for i = 1, #result do
+  --   local item = result[i].location or {}
+  --   item.kind = result[i].kind
+  --   item.containerName = result[i].containerName or ""
+  --   item.name = result[i].name
+  --   item.text = result[i].name
+  --   if #item.containerName > 0 then
+  --     item.text = item.text:gsub(item.containerName, "", 1)
+  --   end
+  --   table.insert(locations, item)
+  -- end
+  -- local items = locations_to_items(locations)
+  gui.new_list_view({items = items, prompt = true, rowdata = true, api = "華 "})
 
   -- if locations == nil or vim.tbl_isempty(locations) then
   --   print "References not found"

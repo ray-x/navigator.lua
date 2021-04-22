@@ -1,7 +1,6 @@
 local M = {}
 local ListView = require "guihua.listview"
 local TextView = require "guihua.textview"
-local View = require "guihua.view"
 local util = require "navigator.util"
 local log = require "navigator.util".log
 local verbose = require "navigator.util".verbose

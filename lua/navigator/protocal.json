@@ -914,3 +914,44 @@ definition.lua:9: { {
       }
     }
   } }
+
+
+-- workspace request
+{
+  [2] = {
+    result = { {
+        kind = 13,
+        location = {
+          range = {
+            end = {
+              character = 7,
+              line = 0
+            },
+            start = {
+              character = 6,
+              line = 0
+            }
+          },
+          uri = "file:///usr/local/share/nvim/runtime/lua/vim/treesitter/query.lua"
+        },
+        name = "a",
+        range = { 7, 7 }
+      },{
+        kind = 13,
+        location = {
+          range = {
+            end = {
+              character = 14,
+              line = 1
+            },
+            start = {
+              character = 6,
+              line = 1
+            }
+          },
+          uri = "file:///usr/local/share/nvim/runtime/lua/vim/treesitter/query.lua"
+        },
+        name = "language",
+        range = { 25, 32 }
+      },
+    }}

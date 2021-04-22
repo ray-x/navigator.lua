@@ -40,7 +40,6 @@ local lsp_status_cfg = {
   end
 }
 
-
 -- local gopls = {}
 -- gopls["ui.completion.usePlaceholders"] = true
 
@@ -65,7 +64,26 @@ local golang_setup = {
     --"-remote.debug=:0",
     --"-rpc.trace",
   },
-  settings = {},
+  settings = {
+    gopls = {
+      analyses = {
+        unusedparams = true,
+        unreachable = false
+      },
+      codelenses = {
+        generate = true, -- show the `go generate` lens.
+        gc_details = true --  // Show a code lens toggling the display of gc's choices.
+      },
+      usePlaceholders = true,
+      completeUnimported = true,
+      staticcheck = true,
+      matcher = "fuzzy",
+      symbolMatcher = "fuzzy",
+      gofumpt = true,
+      buildFlags = {"-tags", "integration"}
+      -- buildFlags = {"-tags", "functional"}
+    }
+  },
   root_dir = function(fname)
     local util = require("lspconfig").util
     return util.root_pattern("go.mod", ".git")(fname) or util.path.dirname(fname)
@@ -143,7 +161,7 @@ local lua_cfg = {
         library = {
           [vim.fn.expand("$VIMRUNTIME/lua")] = true,
           [vim.fn.expand("$VIMRUNTIME/lua/vim")] = true,
-          [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
+          [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true
           -- [vim.fn.expand("~/repos/nvim/lua")] = true
         }
       }
