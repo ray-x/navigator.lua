@@ -4,13 +4,13 @@ local code_action = {}
 local gui = require "navigator.gui"
 local config = require("navigator").config_values
 local api = vim.api
-function code_action.code_action_handler(err, _, actions, num, _, _, customSelectionHandler)
-  -- log(actions)
+function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customSelectionHandler)
+  log(cid, bufnr)
   if actions == nil or vim.tbl_isempty(actions) then
     print("No code actions available")
     return
   end
-  local data = {"[] Auto Fix  <C-o> Apply <C-e> Exit"}
+  local data = {"   Auto Fix  <C-o> Apply <C-e> Exit"}
   for i, action in ipairs(actions) do
     local title = action.title:gsub("\r\n", "\\r\\n")
     title = title:gsub("\n", "\\n")
@@ -23,20 +23,25 @@ function code_action.code_action_handler(err, _, actions, num, _, _, customSelec
       width = #str
     end
   end
-  -- log(data)
 
   local function apply_action(idx)
     local action_chosen = actions[idx - 1]
+    local switch = string.format('silent b %d', bufnr)
     if action_chosen.edit or type(action_chosen.command) == "table" then
       if action_chosen.edit then
         vim.lsp.util.apply_workspace_edit(action_chosen.edit)
       end
       if type(action_chosen.command) == "table" then
+        -- switch buff
+        vim.cmd(switch)
         vim.lsp.buf.execute_command(action_chosen.command)
       end
     else
+      vim.cmd(switch)
       vim.lsp.buf.execute_command(action_chosen)
     end
+
+    log(action_chosen)
   end
 
   gui.new_list_view {
@@ -58,7 +63,6 @@ function code_action.code_action_handler(err, _, actions, num, _, _, customSelec
       end
       local l = data[pos]
       return l
-      -- log("on move", l)
     end
   }
 end

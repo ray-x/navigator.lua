@@ -66,6 +66,10 @@ Use <c-e> or `:q!` to kill the floating window, <up/down> to move and <c-o> to o
 
 ![document symbol](https://github.com/ray-x/files/blob/master/img/navigator/doc_symbol.gif?raw=true)
 
+### Workspace Symbol
+
+![workspace symbol](https://github.com/ray-x/files/blob/master/img/navigator/workspace_symbol.gif?raw=true)
+
 ### Diagnostic
 
 ![diagnostic](https://github.com/ray-x/files/blob/master/img/navigator/diag.jpg?raw=true)
