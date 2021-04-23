@@ -10,7 +10,7 @@ function code_action.code_action_handler(err, _, actions, num, _, _, customSelec
     print("No code actions available")
     return
   end
-  local data = {"  Auto Fix  <C-o> Apply <C-e> Exit"}
+  local data = {"[] Auto Fix  <C-o> Apply <C-e> Exit"}
   for i, action in ipairs(actions) do
     local title = action.title:gsub("\r\n", "\\r\\n")
     title = title:gsub("\n", "\\n")
@@ -82,12 +82,13 @@ end
 
 local function _update_virtual_text(line)
   local namespace = get_namespace()
-  api.nvim_buf_clear_namespace(0, namespace, 0, -1)
+  pcall(api.nvim_buf_clear_namespace, 0, namespace, 0, -1)
 
   if line then
     local icon_with_indent = "  " .. config.code_action_icon
 
-    api.nvim_buf_set_extmark(
+    pcall(
+      api.nvim_buf_set_extmark,
       0,
       namespace,
       line,
@@ -166,7 +167,8 @@ local special_buffers = {
   ["LspSagaCodecode_action"] = true,
   ["lspsagafinder"] = true,
   ["NvimTree"] = true,
-  ["vist"] = true,
+  ["vista"] = true,
+  ["guihua"] = true,
   ["lspinfo"] = true,
   ["markdown"] = true,
   ["text"] = true
@@ -175,8 +177,8 @@ local special_buffers = {
 --   return Action:action_callback()
 -- end
 
-local action_vritual_call_back = function (line,diagnostics)
-  return code_action:render_action_virtual_text(line,diagnostics)
+local action_vritual_call_back = function(line, diagnostics)
+  return code_action:render_action_virtual_text(line, diagnostics)
 end
 
 local code_action_req = function(_call_back_fn, diagnostics)

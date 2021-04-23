@@ -22,7 +22,7 @@ local key_maps = {
 
   {key = "K", func = "hover()"},
   {key = "ga", mode = 'n', func = "code_action()"},
-  {key = "ca", mode = 'v', func = "range_code_action()"},
+  {key = "ga", mode = 'v', func = "range_code_action()"},
 
   {key = "<Leader>re", func = "rename()"},
   {key = "<Leader>gi", func = "incoming_calls()"},

@@ -26,7 +26,6 @@ function M.document_symbols(opts)
   for _, loc in ipairs(locations) do
     table.insert(lines, string.format("%s:%s:%s", loc.filename, loc.lnum, loc.text))
   end
-  local cmd = table.concat(lines, "\n")
   if #lines > 0 then
     gui.new_list_view({data = lines})
   else
@@ -40,8 +39,8 @@ function M.workspace_symbols(opts)
   local lspopts = {
     loc = "top_center",
     prompt = true,
-    rawdata = true,
-    api = "華 "
+    -- rawdata = true,
+    api = " "
   }
   vim.list_extend(lspopts, opts)
   local params = vim.lsp.util.make_position_params()
@@ -61,10 +60,10 @@ function M.workspace_symbols(opts)
   end
 
   local items = symbols_to_items(result)
-  -- verbose(results_lsp)
+  -- log(#items, items[1])
 
   if #items > 0 then
-    lspopts.data = items
+    lspopts.items = items
     gui.new_list_view(lspopts)
   else
     print("symbols not found")
@@ -124,7 +123,7 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
   end
   -- verbose(locations)
   -- local items = locations_to_items(locations)
-  gui.new_list_view({items = locations, prompt = true, rawdata = true, api = "華 "})
+  gui.new_list_view({items = locations, prompt = true, rawdata = true, api = " "})
 
   -- if locations == nil or vim.tbl_isempty(locations) then
   --   print "References not found"
@@ -171,7 +170,7 @@ function M.workspace_symbol_handler(err, _, result, _, bufnr)
   --   table.insert(locations, item)
   -- end
   -- local items = locations_to_items(locations)
-  gui.new_list_view({items = items, prompt = true, rowdata = true, api = "華 "})
+  gui.new_list_view({items = items, prompt = true, rowdata = true, api = " "})
 
   -- if locations == nil or vim.tbl_isempty(locations) then
   --   print "References not found"

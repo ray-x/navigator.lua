@@ -43,8 +43,17 @@ function M._preview_location(opts) --location, width, pos_x, pos_y
     print("error invalid range")
     return
   end
+  if range.start.line == nil then
+    range.start.line = range["end"].line - 1
+    opts.lnum = range["end"].line + 1
+    log(opts)
+  end
+  if range["end"].line == nil then
+    range["end"].line = range.start.line + 1
+    opts.lnum = range.start.line + 1
+    log(opts)
+  end
   local contents = api.nvim_buf_get_lines(bufnr, range.start.line, (range["end"].line or 1) + 10, false)
-
   --
   local syntax = api.nvim_buf_get_option(bufnr, "syntax")
   if syntax == nil or #syntax < 1 then
@@ -55,6 +64,7 @@ function M._preview_location(opts) --location, width, pos_x, pos_y
   local win_opts = {syntax = syntax, width = opts.width, pos_x = opts.offset_x or 0, pos_y = opts.offset_y or 10}
   win_opts.items = contents
   win_opts.hl_line = opts.lnum - range.start.line
+  if win_opts.hl_line < 0 then win_opts.hl_line = 1 end
   log(opts.lnum, range.start.line, win_opts.hl_line)
   local w = M.new_preview(win_opts)
 
@@ -62,15 +72,16 @@ function M._preview_location(opts) --location, width, pos_x, pos_y
 end
 
 function M.preview_uri(opts) -- uri, width, line, col, offset_x, offset_y
-  verbose("uri", opts.uri, opts.lnum, opts.offset_x, opts.offset_y)
-  local line_beg = opts.line
-  if opts.lnum >= 2 then
-    line_beg = opts.lnum - 2
+  local line_beg = opts.lnum - 1
+  if line_beg >= 2 then
+    line_beg = line_beg - 2
   end
   local loc = {uri = opts.uri, targetRange = {start = {line = line_beg}}}
   -- TODO: options for 8
   loc.targetRange["end"] = {line = opts.lnum + 8}
   opts.location = loc
+
+  -- log("uri", opts.uri, opts.lnum, opts.location)
   return M._preview_location(opts)
 end
 
@@ -88,6 +99,7 @@ function M.new_list_view(opts)
   local prompt = opts.prompt or false
   if data and not vim.tbl_isempty(data) then
     -- replace
+    -- TODO: 10 vimrc opt
     if #data > 10 and opts.prompt == nil then
       prompt = true
     end
@@ -132,7 +144,7 @@ function M.new_list_view(opts)
               l.uri = "file:///" .. l.filename
             end
             return M.preview_uri(
-              {uri = l.uri, width = width, lnum = l.lnum, col = l.col, offsetx = 0, offset_y = offset_y}
+              {uri = l.uri, width = width, lnum = l.lnum, col = l.col, offset_x = 0, offset_y = offset_y}
             )
           end
       }

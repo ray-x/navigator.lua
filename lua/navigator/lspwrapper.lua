@@ -3,6 +3,7 @@ local util = require "navigator.util"
 local lsp = require "vim.lsp"
 local log = require "navigator.util".log
 local symbol_kind = require "navigator.lspclient.lspkind".symbol_kind
+local cwd = vim.fn.getcwd(0)
 function M.lines_from_locations(locations, include_filename)
   local fnamemodify = (function(filename)
     if include_filename then
@@ -38,10 +39,13 @@ function M.symbols_to_items(result)
         item.text = kind .. ": " .. item.text
       end
       item.filename = vim.uri_to_fname(item.uri)
+
+      item.display_filename = item.filename:gsub(cwd .. "/", "./", 1)
+
       if item.range == nil or item.range.start == nil then
-        log(result[i], item)
+        log("range not set", result[i], item)
       end
-      item.lnum = item.range.start.line
+      item.lnum = item.range.start.line + 1
 
       if item.containerName ~= nil then
         item.text = " " .. item.containerName .. item.text
@@ -50,7 +54,7 @@ function M.symbols_to_items(result)
     end
   end
   -- local items = locations_to_items(locations)
-  log(locations[1])
+  -- log(locations[1])
   return locations
 end
 
