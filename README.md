@@ -1,6 +1,5 @@
 # Navigator
 
-GUI for Neovim (nightly) built-in LSP with a collection of most used LSP/🌲Treesitter functions.
 Easy code navigation through LSP symbols and 🌲Treesitter symbols.
 
 # Features:
@@ -10,7 +9,7 @@ Easy code navigation through LSP symbols and 🌲Treesitter symbols.
 - fzy search with Lua-JIT
 - Better navigation for diagnostic errors, Navigate through files that contain errors/warnings
 - Group references/implementation/incomming/outgoing based on file names.
-- Nerdfont, emoji for LSP kind,
+- Nerdfont, emoji for LSP and Treesitter kind
 
 # Why a new plugin
 

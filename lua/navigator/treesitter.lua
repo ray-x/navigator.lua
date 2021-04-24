@@ -63,7 +63,6 @@ local function get_all_nodes(bufnr)
   end
   local display_filename = fname:gsub(cwd .. "/", "./", 1)
 
-
   local all_nodes = {}
   -- Support completion-nvim customized label map
   local customized_labels = vim.g.completion_customize_lsp_label or {}
@@ -93,17 +92,28 @@ local function get_all_nodes(bufnr)
 end
 
 function M.buf_ts()
+  if ts_locals == nil then
+    error("treesitter not loaded")
+    return
+  end
   local all_nodes = get_all_nodes()
   gui.new_list_view({items = all_nodes, prompt = true, rawdata = true, api = "🎄"})
 end
-local exclude_ft = {'scroll', 'help', 'NvimTree'}
+local exclude_ft = {"scroll", "help", "NvimTree"}
 local function exclude(fname)
-   for i = 1, #exclude_ft do
-     if string.find(fname, exclude_ft[i]) then return true end
-   end
-   return false
+  for i = 1, #exclude_ft do
+    if string.find(fname, exclude_ft[i]) then
+      return true
+    end
+  end
+  return false
 end
+
 function M.bufs_ts()
+  if ts_locals == nil then
+    error("treesitter not loaded")
+    return
+  end
   local bufs = vim.api.nvim_list_bufs()
   local ts_opened = {}
   for _, buf in ipairs(bufs) do
