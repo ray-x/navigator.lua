@@ -80,7 +80,7 @@ M.show_diagnostic = function()
     end
   end
   if diagnostic_list[vim.bo.filetype] ~= nil then
-    log(diagnostic_list[vim.bo.filetype])
+    -- log(diagnostic_list[vim.bo.filetype])
     -- vim.fn.setqflist({}, " ", {title = "LSP", items = diagnostic_list[vim.bo.filetype]})
     local results = diagnostic_list[vim.bo.filetype]
     local display_items = {}
