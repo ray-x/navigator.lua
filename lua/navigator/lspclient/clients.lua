@@ -14,6 +14,7 @@ end
 
 lspconfig = require "lspconfig"
 lsp_status = require("lsp-status")
+local highlight = require "navigator.lspclient.highlight"
 if lspconfig == nil then
   error("loading lsp config")
 end
@@ -130,7 +131,7 @@ local sqls_cfg = {
   on_attach = function(client, bufnr)
     client.resolved_capabilities.execute_command = true
     lsp_status.on_attach(client, bufnr)
-    require "utils.highlight".diagnositc_config_sign()
+    highlight.diagnositc_config_sign()
     require "sqls".setup {picker = "telescope"} -- or default
   end,
   settings = {
@@ -217,8 +218,8 @@ local function lsp_status_setup()
 
     lsp_status.config(lsp_status_cfg)
   end
-  require "utils.highlight".diagnositc_config_sign()
-  require "utils.highlight".add_highlight()
+  highlight.diagnositc_config_sign()
+  highlight.add_highlight()
 end
 
 local function setup(user_opts)

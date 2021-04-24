@@ -141,6 +141,7 @@ Treetsitter symbols in all buffers
 - Early phase, bugs expected
 - Async (some of the requests is slow on large codebase and might be good to use co-rountine)
 - More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Do not test other languages (e.g dart, swift etc)
+- Configure options
 
 ```
 
