@@ -99,7 +99,11 @@ Treetsitter symbols in all buffers
 
 ![incomming](https://github.com/ray-x/files/blob/master/img/navigator/incomming.jpg?raw=true)
 
-### LSP symbol nerdfont/emoji
+### Light bulb when codeAction avalible
+
+![lightbulb](https://github.com/ray-x/files/blob/master/img/navigator/lightbulb.jpg?raw=true)
+
+### Predefined LSP symbol nerdfont/emoji
 
 ![nerdfont](https://github.com/ray-x/files/blob/master/img/navigator/icon_nerd.jpg?raw=true)
 
