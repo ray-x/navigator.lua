@@ -1,11 +1,11 @@
 # Navigator
 
-Easy code navigation through LSP symbols and 🌲Treesitter symbols.
+Easy code navigation through LSP and 🌲Treesitter symbols, diagnostic errors.
 
 # Features:
 
 - LSP easy setup. Support some of the most commonly used lsp client setup
-- GUI with floating windows
+- Unorthodox UI with floating windows
 - fzy search with Lua-JIT
 - Better navigation for diagnostic errors, Navigate through files that contain errors/warnings
 - Group references/implementation/incomming/outgoing based on file names.
@@ -13,10 +13,9 @@ Easy code navigation through LSP symbols and 🌲Treesitter symbols.
 
 # Why a new plugin
 
-After installed a handful of lsp plugins, I still got ~500 loc for lsp and still increasing. Reason is that I need
-to tune the plugins to fit my requirements. The plugin help user setup lspconfig with only a few lines of codes.
-Seconde reason is that lots of plugins serve as an enhance version of quickfix, lots of improvement was made by
-[lspsaga](https://github.com/glepnir/lspsaga.nvim), from which, the plugin was inspired.
+After installed a handful of lsp plugins, I still got ~800 loc for lsp and treesitter and still increasing because I need
+to tune the lsp plugins to fit my requirements. Navigator.lua help user setup lspconfig with only a few lines of codes.
+This plugin provide a visual way to manage and navigate through symobls, errors etc.
 It also the first plugin, IMO, that allows you to search in all treesitter symbols in the workspace.
 
 # Similar projects / special mentions:
