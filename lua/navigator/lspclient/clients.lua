@@ -243,7 +243,9 @@ local function setup(user_opts)
       message_level = vim.lsp.protocol.MessageType.error,
       log_level = vim.lsp.protocol.MessageType.error,
       on_attach = on_attach,
-      capabilities = lsp_status.capabilities
+      if lsp_status ~= nil then
+        capabilities = lsp_status.capabilities
+      end
     }
   end
 
