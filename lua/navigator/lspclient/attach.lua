@@ -65,7 +65,9 @@ M.on_attach = function(client, bufnr)
   require("navigator.lspclient.mapping").setup({client = client, bufnr = bufnr, cap = client.resolved_capabilities})
 
   vim.cmd [[packadd vim-illuminate]]
-  require "illuminate".on_attach(client)
+  if package.loaded['vim-illuminate'] then
+    require "illuminate".on_attach(client)
+  end
   require "navigator.lspclient.lspkind".init()
 
   local capabilities = vim.lsp.protocol.make_client_capabilities()
