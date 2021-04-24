@@ -8,7 +8,10 @@ if packer_plugins ~= nil then
     vim.cmd [[packadd lsp-status.nvim]]
   end
 end
-local lsp_status = require("lsp-status")
+local lsp_status = nil
+if package.loaded['lsp-status'] then
+  lsp_status = require("lsp-status")
+end
 
 local diagnostic_map = function(bufnr)
   local opts = {noremap = true, silent = true}
