@@ -239,14 +239,20 @@ local function setup(user_opts)
   lsp_status_setup()
 
   for _, lspclient in ipairs(servers) do
-    lspconfig[lspclient].setup {
-      message_level = vim.lsp.protocol.MessageType.error,
-      log_level = vim.lsp.protocol.MessageType.error,
-      on_attach = on_attach,
-      if lsp_status ~= nil then
-        capabilities = lsp_status.capabilities
-      end
-    }
+    if lsp_status ~= nil and lsp_status.capabilitiess ~= nil then
+      lspconfig[lspclient].setup {
+        message_level = vim.lsp.protocol.MessageType.error,
+        log_level = vim.lsp.protocol.MessageType.error,
+        on_attach = on_attach,
+        capabilities = lsp_status.capabilitiess
+      }
+    else
+      lspconfig[lspclient].setup {
+        message_level = vim.lsp.protocol.MessageType.error,
+        log_level = vim.lsp.protocol.MessageType.error,
+        on_attach = on_attach
+      }
+    end
   end
 
   lspconfig.gopls.setup(golang_setup)
