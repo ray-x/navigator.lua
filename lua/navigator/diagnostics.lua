@@ -1,12 +1,17 @@
 local gui = require "navigator.gui"
 local diagnostic_list = {}
-local log = require "navigator.util".log
+
+local util = require "navigator.util"
+local log = util.log
+
 diagnostic_list[vim.bo.filetype] = {}
 
 local diag_hdlr = function(err, method, result, client_id, br, config)
   -- log(result)
   vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, br, config)
-  if err ~= nil then log(err, config) end
+  if err ~= nil then
+    log(err, config)
+  end
   local cwd = vim.fn.getcwd(0)
   local ft = vim.bo.filetype
   if diagnostic_list[ft] == nil then
@@ -53,7 +58,7 @@ M.diagnostic_handler =
     -- Enable virtual text, override spacing to 0
     virtual_text = {
       spacing = 0,
-      prefix = "👨" --' ,   
+      prefix = "🦊" --' ,   
     },
     -- Use a function to dynamically turn signs off
     -- and on, using buffer local variables
@@ -63,6 +68,17 @@ M.diagnostic_handler =
   }
 )
 M.show_diagnostic = function()
+  vim.lsp.diagnostic.get_all()
+
+  local bufs = vim.api.nvim_list_bufs()
+  for _, buf in ipairs(bufs) do
+    local bname = vim.fn.bufname(buf)
+    if #bname > 0 and not util.exclude(bname) then
+      if vim.api.nvim_buf_is_loaded(buf) then
+        vim.lsp.diagnostic.get(buf, nil)
+      end
+    end
+  end
   if diagnostic_list[vim.bo.filetype] ~= nil then
     log(diagnostic_list[vim.bo.filetype])
     -- vim.fn.setqflist({}, " ", {title = "LSP", items = diagnostic_list[vim.bo.filetype]})
@@ -73,11 +89,12 @@ M.show_diagnostic = function()
         table.insert(display_items, it)
       end
     end
-    log(display_items)
+    -- log(display_items)
     if #display_items > 0 then
-      gui.new_list_view({items = display_items, api = '🚑 Diagnostic'})
+      gui.new_list_view({items = display_items, api = "🚑 Diagnostic"})
     end
   end
 end
+
 
 return M

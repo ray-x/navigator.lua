@@ -3,6 +3,7 @@ local ts_locals = require "nvim-treesitter.locals"
 local parsers = require "nvim-treesitter.parsers"
 local ts_utils = require "nvim-treesitter.ts_utils"
 local api = vim.api
+local util = require'navigator.util'
 local M = {}
 
 local cwd = vim.fn.getcwd(0)
@@ -99,15 +100,6 @@ function M.buf_ts()
   local all_nodes = get_all_nodes()
   gui.new_list_view({items = all_nodes, prompt = true, rawdata = true, api = "🎄"})
 end
-local exclude_ft = {"scroll", "help", "NvimTree"}
-local function exclude(fname)
-  for i = 1, #exclude_ft do
-    if string.find(fname, exclude_ft[i]) then
-      return true
-    end
-  end
-  return false
-end
 
 function M.bufs_ts()
   if ts_locals == nil then
@@ -118,7 +110,7 @@ function M.bufs_ts()
   local ts_opened = {}
   for _, buf in ipairs(bufs) do
     local bname = vim.fn.bufname(buf)
-    if #bname > 0 and not exclude(bname) then
+    if #bname > 0 and not util.exclude(bname) then
       if vim.api.nvim_buf_is_loaded(buf) then
         local all_nodes = get_all_nodes(buf)
         if all_nodes ~= nil then

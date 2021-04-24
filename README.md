@@ -72,6 +72,8 @@ Use <c-e> or `:q!` to kill the floating window, <up/down> to move and <c-o> to o
 ### Diagnostic
 
 ![diagnostic](https://github.com/ray-x/files/blob/master/img/navigator/diag.jpg?raw=true)
+Show diagnostic in files
+![diagnostic multi files](https://github.com/ray-x/files/blob/master/img/navigator/diagnostic_multiplefiles.jpg?raw=true)
 
 ### Implementation
 

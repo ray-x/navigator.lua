@@ -230,4 +230,15 @@ function M.partial(func, arg)
   end)
 end
 
+local exclude_ft = {"scrollbar", "help", "NvimTree"}
+function M.exclude(fname)
+  for i = 1, #exclude_ft do
+    if string.find(fname, exclude_ft[i]) then
+      return true
+    end
+  end
+  return false
+end
+
+
 return M
