@@ -47,10 +47,13 @@ M.on_attach = function(client, bufnr)
   if lsp_status ~= nil then
     lsp_status.on_attach(client, bufnr)
   end
-  require "lsp_signature".on_attach()
+
+  if package.loaded['lsp_signature'] then
+    require "lsp_signature".on_attach()
+  end
   diagnostic_map(bufnr)
   -- lspsaga
-  require "utils.highlight".add_highlight()
+  require "navigator.lspclient.highlight".add_highlight()
 
   api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
@@ -63,7 +66,7 @@ M.on_attach = function(client, bufnr)
 
   vim.cmd [[packadd vim-illuminate]]
   require "illuminate".on_attach(client)
-  require "utils.lspkind".init()
+  require "navigator.lspclient.lspkind".init()
 
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
