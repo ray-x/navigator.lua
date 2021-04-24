@@ -14,6 +14,9 @@ end
 
 lspconfig = require "lspconfig"
 lsp_status = require("lsp-status")
+if lspconfig == nil then
+  error("loading lsp config")
+end
 local cap = vim.lsp.protocol.make_client_capabilities()
 local on_attach = require("navigator.lspclient.attach").on_attach
 local lsp_status_cfg = {
@@ -220,7 +223,7 @@ end
 
 local function setup(user_opts)
   if lspconfig == nil then
-    print("lsp-config need installed and enabled")
+    error("lsp-config need installed and enabled")
     return
   end
 
