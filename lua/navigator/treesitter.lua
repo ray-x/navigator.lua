@@ -20,7 +20,7 @@ local match_kinds = {
 }
 
 local get_icon = function(kind)
-  if match_kinds[kind] == nil then
+  if kind == nil or match_kinds[kind] == nil then
     return "🌲"
   else
     return match_kinds[kind]

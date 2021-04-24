@@ -25,16 +25,16 @@ local diag_hdlr = function(err, method, result, client_id, br, config)
       item.lnum = v.range.start.line + 1
       item.col = v.range.start.character + 1
       item.uri = uri
-      local head = "  "
+      local head = "🐛"
       if v.severity > 1 then
-        head = "  "
+        head = "👎"
       end
       local bufnr = vim.uri_to_bufnr(uri)
       vim.fn.bufload(bufnr)
       local pos = v.range.start
       local row = pos.line
       local line = (vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false) or {""})[1]
-      item.text = head .. tostring(item.lnum) .. ": " .. line .. "   " .. v.message
+      item.text = head .. line .. " 📛 " .. v.message
       table.insert(item_list, item)
     end
     -- local old_items = vim.fn.getqflist()
@@ -53,7 +53,7 @@ M.diagnostic_handler =
     -- Enable virtual text, override spacing to 0
     virtual_text = {
       spacing = 0,
-      prefix = " " --' ,   
+      prefix = "👨" --' ,   
     },
     -- Use a function to dynamically turn signs off
     -- and on, using buffer local variables
@@ -75,7 +75,7 @@ M.show_diagnostic = function()
     end
     log(display_items)
     if #display_items > 0 then
-      gui.new_list_view({items = display_items, api = '⛑  Diagnostic'})
+      gui.new_list_view({items = display_items, api = '🚑 Diagnostic'})
     end
   end
 end
