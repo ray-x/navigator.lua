@@ -2,12 +2,14 @@
 
 local lspconfig = nil
 local lsp_status = nil
-if not packer_plugins["neovim/nvim-lspconfig"] or not packer_plugins["neovim/nvim-lspconfig"].loaded then
-  vim.cmd [[packadd nvim-lspconfig]]
-end
-if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
-  vim.cmd [[packadd lsp-status.nvim]]
-  -- if lazyloading
+if packer_plugins ~= nil then
+  if not packer_plugins["neovim/nvim-lspconfig"] or not packer_plugins["neovim/nvim-lspconfig"].loaded then
+    vim.cmd [[packadd nvim-lspconfig]]
+  end
+  if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
+    vim.cmd [[packadd lsp-status.nvim]]
+    -- if lazyloading
+  end
 end
 
 lspconfig = require "lspconfig"

@@ -3,9 +3,10 @@ local lsp = require("vim.lsp")
 
 local util = require "navigator.util"
 local log = util.log
-
-if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
-  vim.cmd [[packadd lsp-status.nvim]]
+if packer_plugins ~= nil then
+  if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
+    vim.cmd [[packadd lsp-status.nvim]]
+  end
 end
 local lsp_status = require("lsp-status")
 
@@ -64,8 +65,6 @@ M.on_attach = function(client, bufnr)
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
 end
-
-
 
 M.setup = function(cfg)
   return M
