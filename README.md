@@ -50,12 +50,37 @@ use {'ray-x/navigator.lua', requires = {'ray-x/guihua.lua', run = 'cd lua/fzy &&
 lua require'navigator'.setup()
 ```
 
+## Sample vimrc
+
+```vim
+call plug#begin('~/.vim/plugged')
+
+Plug 'neovim/nvim-lspconfig'
+Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
+Plug 'ray-x/navigator.lua'
+
+call plug#end()
+
+lua <<EOF
+local nvim_lsp = require('lspconfig')
+require'navigator'.setup()
+EOF
+
+```
+
+Generally speaking, you could remove most part of your lspconfig.lua and use the hooks in navigator.lua
+
 ## Usage
 
-Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box
-Use <c-e> or `:q!` to kill the floating window, <up/down> to move and <c-o> to open location or apply changes
+Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box.
+
+- Use \<c-e\> or `:q!` to kill the floating window
+- <up/down> to move
+- \<c-o\> to open location or apply code actions
 
 ## Screenshots
+
+colorschema: [aurora](https://github.com/ray-x/aurora)
 
 ### Reference
 
@@ -87,6 +112,9 @@ Show diagnostic in files
 
 ![code actions](https://github.com/ray-x/files/blob/master/img/navigator/codeaction.jpg?raw=true)
 
+Fill struct with gopls
+![code actions fill struct](https://github.com/ray-x/files/blob/master/img/navigator/fill_struct.gif?raw=true)
+
 ### Code preview with highlight
 
 ![code preview](https://github.com/ray-x/files/blob/master/img/navigator/preview_with_hl.jpg?raw=true)
@@ -112,4 +140,8 @@ Treetsitter symbols in all buffers
 
 - Early phase, bugs expected
 - Async (some of the requests is slow on large codebase and might be good to use co-rountine)
-- More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Do not test other languages (e.g rust, swift etc)
+- More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Do not test other languages (e.g dart, swift etc)
+
+```
+
+```
