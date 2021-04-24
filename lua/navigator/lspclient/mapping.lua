@@ -46,7 +46,6 @@ local function set_mapping(user_opts)
 
   local user_key = user_opts.keymaps or {}
   local bufnr = user_opts.bufnr or 0
-  local opts = { noremap=true, silent=true }
 
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
