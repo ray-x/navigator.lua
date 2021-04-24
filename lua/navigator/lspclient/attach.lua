@@ -9,7 +9,7 @@ if packer_plugins ~= nil then
   end
 end
 local lsp_status = nil
-if package.loaded['lsp-status'] then
+if package.loaded["lsp-status"] then
   lsp_status = require("lsp-status")
 end
 
@@ -48,8 +48,9 @@ M.on_attach = function(client, bufnr)
     lsp_status.on_attach(client, bufnr)
   end
 
-  if package.loaded['lsp_signature'] then
-    require "lsp_signature".on_attach()
+  local hassig, sig = pcall(require, "lsp_signature")
+  if hassig then
+    sig.on_attach()
   end
   diagnostic_map(bufnr)
   -- lspsaga
@@ -65,8 +66,9 @@ M.on_attach = function(client, bufnr)
   require("navigator.lspclient.mapping").setup({client = client, bufnr = bufnr, cap = client.resolved_capabilities})
 
   vim.cmd [[packadd vim-illuminate]]
-  if package.loaded['vim-illuminate'] then
-    require "illuminate".on_attach(client)
+  local hasilm, ilm = pcall(require, "illuminate")
+  if hasilm then
+    ilm.on_attach(client)
   end
   require "navigator.lspclient.lspkind".init()
 
