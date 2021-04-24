@@ -10,10 +10,18 @@ if packer_plugins ~= nil then
     vim.cmd [[packadd lsp-status.nvim]]
     -- if lazyloading
   end
+  if not packer_plugins["ray-x/guihua.lua"] or not packer_plugins["guihua.lua"].loaded then
+    vim.cmd [[packadd guihua.lua]]
+    -- if lazyloading
+  end
+end
+if package.loaded['lspconfig'] then
+  lspconfig = require "lspconfig"
+end
+if package.loaded['lsp-status'] then
+  lsp_status = require("lsp-status")
 end
 
-lspconfig = require "lspconfig"
-lsp_status = require("lsp-status")
 local highlight = require "navigator.lspclient.highlight"
 if lspconfig == nil then
   error("loading lsp config")

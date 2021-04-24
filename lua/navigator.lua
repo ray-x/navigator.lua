@@ -40,9 +40,7 @@ M.setup = function(cfg)
   require('navigator.definition')
   require('navigator.hierarchy')
   require('navigator.implementation')
-
-  print("navigator loader")
-
+  -- log("navigator loader")
   if M.config_values.code_action_prompt.enable then
     vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
   end
