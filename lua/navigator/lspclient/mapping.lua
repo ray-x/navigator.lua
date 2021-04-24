@@ -19,6 +19,8 @@ local key_maps = {
   {key = "<c-]>", func = "definition()"},
   {key = "gD", func = "declaration()"},
   {key = "gp", func = "require('navigator.definition').definition_preview()"},
+  {key = "gT", func = "require('navigator.treesitter').buf_ts()"},
+  {key = "GT", func = "require('navigator.treesitter').bufs_ts()"},
 
   {key = "K", func = "hover()"},
   {key = "ga", mode = 'n', func = "code_action()"},

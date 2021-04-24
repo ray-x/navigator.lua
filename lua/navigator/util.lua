@@ -45,19 +45,21 @@ function M.get_base(path)
 end
 
 local function getDir(path)
-    local data = {}
-    local len = #path
-    if len <= 1 then return nil end
-    local last_index = 1
-    for i = 2, len do
-	local cur_char = path:sub(i,i)
-	if cur_char == '/' then
-	    local my_data = path:sub(last_index + 1, i - 1)
-	    table.insert(data, my_data)
-	    last_index = i
-	end
+  local data = {}
+  local len = #path
+  if len <= 1 then
+    return nil
+  end
+  local last_index = 1
+  for i = 2, len do
+    local cur_char = path:sub(i, i)
+    if cur_char == "/" then
+      local my_data = path:sub(last_index + 1, i - 1)
+      table.insert(data, my_data)
+      last_index = i
     end
-    return data
+  end
+  return data
 end
 
 function M.get_relative_path(base_path, my_path)
@@ -96,7 +98,7 @@ local default_config = {
   level = "info"
 }
 
-M._log = require('guihua.log').new({level='info'}, true)
+M._log = require("guihua.log").new({level = "info"}, true)
 
 -- add log to you lsp.log
 M.log = M._log.info

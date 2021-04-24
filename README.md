@@ -1,7 +1,7 @@
 # Navigator
 
-GUI for Neovim (nightly) built-in LSP with a collection of most used LSP/treesitter functions.
-Easy code navigation.
+GUI for Neovim (nightly) built-in LSP with a collection of most used LSP/🌲Treesitter functions.
+Easy code navigation through LSP symbols and 🌲Treesitter symbols.
 
 # Features:
 
@@ -18,6 +18,7 @@ After installed a handful of lsp plugins, I still got ~500 loc for lsp and still
 to tune the plugins to fit my requirements. The plugin help user setup lspconfig with only a few lines of codes.
 Seconde reason is that lots of plugins serve as an enhance version of quickfix, lots of improvement was made by
 [lspsaga](https://github.com/glepnir/lspsaga.nvim), from which, the plugin was inspired.
+It also the first plugin, IMO, that allows you to search in all treesitter symbols in the workspace.
 
 # Similar projects / special mentions:
 
@@ -89,6 +90,11 @@ Use <c-e> or `:q!` to kill the floating window, <up/down> to move and <c-o> to o
 ### Code preview with highlight
 
 ![code preview](https://github.com/ray-x/files/blob/master/img/navigator/preview_with_hl.jpg?raw=true)
+
+### Treesitter symbol
+
+Treetsitter symbols in all buffers
+![treesitter](https://github.com/ray-x/files/blob/master/img/navigator/treesitter.jpg?raw=true)
 
 ### Call hierarchy (incomming/outgoing)
 

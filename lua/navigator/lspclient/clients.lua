@@ -2,24 +2,26 @@
 
 local lspconfig = nil
 local lsp_status = nil
+if not packer_plugins["neovim/nvim-lspconfig"] or not packer_plugins["neovim/nvim-lspconfig"].loaded then
+  vim.cmd [[packadd nvim-lspconfig]]
+end
 if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
   vim.cmd [[packadd lsp-status.nvim]]
-  lsp_status = require("lsp-status")
   -- if lazyloading
-  vim.cmd [[packadd nvim-lspconfig]]
-  lspconfig = require "lspconfig"
 end
 
+lspconfig = require "lspconfig"
+lsp_status = require("lsp-status")
 local cap = vim.lsp.protocol.make_client_capabilities()
 local on_attach = require("navigator.lspclient.attach").on_attach
 local lsp_status_cfg = {
-  status_symbol = "",
-  indicator_errors = "", --'',
-  indicator_warnings = "", --'',
+  status_symbol = " ",
+  indicator_errors = " ", --' ',
+  indicator_warnings = " ", --' ',
   indicator_info = "﯎",
-  --'',
+  --' ',
   indicator_hint = "💡",
-  indicator_ok = "",
+  indicator_ok = " ",
   --'✔️',
   spinner_frames = {"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"},
   select_symbol = function(cursor_pos, symbol)
@@ -102,6 +104,22 @@ local clang_cfg = {
     on_attach(client)
   end
 }
+local rust_cfg = {
+  settings = {
+        ["rust-analyzer"] = {
+            assist = {
+                importMergeBehavior = "last",
+                importPrefix = "by_self",
+            },
+            cargo = {
+                loadOutDirsFromCheck = true
+            },
+            procMacro = {
+                enable = true
+            },
+        }
+    }
+}
 
 local sqls_cfg = {
   on_attach = function(client, bufnr)
@@ -111,7 +129,7 @@ local sqls_cfg = {
     require "sqls".setup {picker = "telescope"} -- or default
   end,
   settings = {
-    cmd = {"sqls", "-config", "$HOME/.config/sqls/config.yml"},
+    cmd = {"sqls", "-config", "$HOME/.config/sqls/config.yml"}
     -- alterantively:
     -- connections = {
     --   {
@@ -119,13 +137,6 @@ local sqls_cfg = {
     --     datasourcename = 'host=127.0.0.1 port=5432 user=postgres password=password dbname=user_db sslmode=disable',
     --   },
     -- },
-    workspace = {
-      library = {
-        -- this loads the `lua` files from nvim into the runtime.
-        [vim.fn.expand("$vimruntime/lua")] = true,
-        [vim.fn.expand("~/repos/nvim/lua")] = true
-      }
-    }
   }
 }
 -- lua setup
@@ -168,34 +179,41 @@ local lua_cfg = {
     }
   }
 }
+local servers = {
+  "gopls",
+  "tsserver",
+  "flow",
+  "bashls",
+  "dockerls",
+  "pyls",
+  "jdtls",
+  "sumneko_lua",
+  "vimls",
+  "html",
+  "jsonls",
+  "cssls",
+  "yamlls",
+  "clangd",
+  "sqls",
+  "denols",
+  "dartls",
+  "dotls",
+  "kotlin_language_server",
+  "nimls",
+  "phpactor",
+  "r_language_server",
+  "rust_analyzer",
+  "terraformls"
+}
 
 local function lsp_status_setup()
-  local servers = {
-    "gopls",
-    "tsserver",
-    "flow",
-    "bashls",
-    "dockerls",
-    "pyls",
-    "sumneko_lua",
-    "vimls",
-    "html",
-    "jsonls",
-    "cssls",
-    "yamlls",
-    "clangd",
-    "sqls"
-  }
+  if lsp_status ~= nil then
+    lsp_status.register_progress()
 
-  for _, lspclient in ipairs(servers) do
-    if lsp_status ~= nl then
-      lsp_status.register_progress()
-
-      lsp_status.config(lsp_status_cfg)
-    end
-    require "utils.highlight".diagnositc_config_sign()
-    require "utils.highlight".add_highlight()
+    lsp_status.config(lsp_status_cfg)
   end
+  require "utils.highlight".diagnositc_config_sign()
+  require "utils.highlight".add_highlight()
 end
 
 local function setup(user_opts)
@@ -206,7 +224,7 @@ local function setup(user_opts)
 
   lsp_status_setup()
 
-  for _, lspclient in ipairs({"tsserver", "bashls", "flow", "dockerls", "vimls", "html", "jsonls", "cssls", "yamlls"}) do
+  for _, lspclient in ipairs(servers) do
     lspconfig[lspclient].setup {
       message_level = vim.lsp.protocol.MessageType.error,
       log_level = vim.lsp.protocol.MessageType.error,
@@ -218,20 +236,10 @@ local function setup(user_opts)
   lspconfig.gopls.setup(golang_setup)
   lspconfig.sqls.setup(sqls_cfg)
 
-  require "lspconfig".sumneko_lua.setup(lua_cfg)
+  lspconfig.sumneko_lua.setup(lua_cfg)
 
   lspconfig.clangd.setup(clang_cfg)
-  servers = {
-    "dockerls",
-    "bashls",
-    "rust_analyzer",
-    "pyls"
-  }
 
-  for _, server in ipairs(servers) do
-    lspconfig[server].setup {
-      on_attach = on_attach
-    }
-  end
+  lspconfig.rust_analyzer.setup(rust_cfg)
 end
 return {setup = setup, cap = cap}

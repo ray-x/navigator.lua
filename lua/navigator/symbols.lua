@@ -7,31 +7,31 @@ local clone = require "guihua.util".clone
 local symbol_kind = require "navigator.lspclient.lspkind".symbol_kind
 local symbols_to_items = lsphelper.symbols_to_items
 
-function M.document_symbols(opts)
-  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running")
-  opts = opts or {}
-  local params = vim.lsp.util.make_position_params()
-  params.context = {includeDeclaration = true}
-  params.query = ""
-  local results_lsp = vim.lsp.buf_request_sync(0, "textDocument/documentSymbol", params, opts.timeout or 3000)
-  local locations = {}
-  log(results_lsp)
-  for _, server_results in pairs(results_lsp) do
-    if server_results.result then
-      vim.list_extend(locations, vim.lsp.util.symbols_to_items(server_results.result) or {})
-    end
-  end
-  local lines = {}
-
-  for _, loc in ipairs(locations) do
-    table.insert(lines, string.format("%s:%s:%s", loc.filename, loc.lnum, loc.text))
-  end
-  if #lines > 0 then
-    gui.new_list_view({data = lines})
-  else
-    print("symbols not found")
-  end
-end
+-- function M.document_symbols(opts)
+--   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running")
+--   opts = opts or {}
+--   local params = vim.lsp.util.make_position_params()
+--   params.context = {includeDeclaration = true}
+--   params.query = ""
+--   local results_lsp = vim.lsp.buf_request_sync(0, "textDocument/documentSymbol", params, opts.timeout or 3000)
+--   local locations = {}
+--   log(results_lsp)
+--   for _, server_results in pairs(results_lsp) do
+--     if server_results.result then
+--       vim.list_extend(locations, vim.lsp.util.symbols_to_items(server_results.result) or {})
+--     end
+--   end
+--   local lines = {}
+--
+--   for _, loc in ipairs(locations) do
+--     table.insert(lines, string.format("%s:%s:%s", loc.filename, loc.lnum, loc.text))
+--   end
+--   if #lines > 0 then
+--     gui.new_list_view({data = lines})
+--   else
+--     print("symbols not found")
+--   end
+-- end
 
 function M.workspace_symbols(opts)
   opts = opts or {}
