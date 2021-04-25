@@ -1,6 +1,6 @@
 # Navigator
 
-Easy code navigation through LSP and 🌲Treesitter symbols, diagnostic errors.
+Easy code navigation through LSP and 🌲🏡Treesitter symbols, diagnostic errors.
 
 # Features:
 
@@ -73,10 +73,10 @@ EOF
 
 Generally speaking, you could remove most part of your lspconfig.lua and use the hooks in navigator.lua
 
-## Depency
+## Dependency
 
 - lspconfig
-- guihua (provides floating window, FZY)
+- guihua.lua (provides floating window, FZY)
 - Optional:
   - treesitter (list treesitter symbols)
   - lsp-status
@@ -95,7 +95,7 @@ Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be a
 
 ## Screenshots
 
-colorschema: [aurora](https://github.com/ray-x/aurora)
+colorscheme: [aurora](https://github.com/ray-x/aurora)
 
 ### Reference
 
@@ -111,8 +111,12 @@ colorschema: [aurora](https://github.com/ray-x/aurora)
 
 ### Diagnostic
 
+Diagnostic in single bufer
+
 ![diagnostic](https://github.com/ray-x/files/blob/master/img/navigator/diag.jpg?raw=true)
-Show diagnostic in files
+
+Show diagnostic in all buffers
+
 ![diagnostic multi files](https://github.com/ray-x/files/blob/master/img/navigator/diagnostic_multiplefiles.jpg?raw=true)
 
 ### Implementation
