@@ -31,7 +31,13 @@ local diag_hdlr = function(err, method, result, client_id, br, config)
       item.col = v.range.start.character + 1
       item.uri = uri
       local head = "🐛"
-      if v.severity > 1 then
+      if v.severity == 1 then
+        head = "🈲"
+      end
+      if v.severity == 2 then
+        head = "☣️"
+      end
+      if v.severity > 2 then
         head = "👎"
       end
       local bufnr = vim.uri_to_bufnr(uri)
@@ -67,6 +73,7 @@ M.diagnostic_handler =
     update_in_insert = false
   }
 )
+
 M.show_diagnostic = function()
   vim.lsp.diagnostic.get_all()
 
@@ -91,10 +98,9 @@ M.show_diagnostic = function()
     end
     -- log(display_items)
     if #display_items > 0 then
-      gui.new_list_view({items = display_items, api = "🚑 Diagnostic"})
+      gui.new_list_view({items = display_items, api = "🚑🐛 Diagnostic "})
     end
   end
 end
-
 
 return M

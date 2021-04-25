@@ -4,9 +4,10 @@ _NgConfigValues ={
   code_action_icon = ' ',
   width = nil,   -- valeu of cols TODO allow float e.g. 0.6
   height = nil,
-  on_attach = function(client, bufnr)
-    -- your on_attach will be called at end of navigator on_attach
-  end,
+  on_attach = nil,
+  -- function(client, bufnr)
+  --   -- your on_attach will be called at end of navigator on_attach
+  -- end,
   sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
   sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
   code_action_prompt = {

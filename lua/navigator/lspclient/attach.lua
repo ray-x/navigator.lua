@@ -75,7 +75,9 @@ M.on_attach = function(client, bufnr)
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
   local config = require'navigator'.config_value
-  if config ~= nil then config.on_attach(client, bufnr) end
+  if config ~= nil and config.on_attach ~= nil then
+    config.on_attach(client, bufnr)
+  end
 end
 
 M.setup = function(cfg)
