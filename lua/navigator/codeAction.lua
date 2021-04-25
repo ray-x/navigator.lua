@@ -26,7 +26,7 @@ function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customS
 
   local function apply_action(idx)
     local action_chosen = actions[idx - 1]
-    local switch = string.format('silent b %d', bufnr)
+    local switch = string.format("silent b %d", bufnr)
     if action_chosen.edit or type(action_chosen.command) == "table" then
       if action_chosen.edit then
         vim.lsp.util.apply_workspace_edit(action_chosen.edit)
@@ -108,7 +108,10 @@ end
 
 local function _update_sign(line)
   local winid = get_current_winid()
-  if code_action[winid] and code_action[winid].lightbulb_line ~= 0 then
+  if code_action[winid] == nil then
+    code_action[winid] = {}
+  end
+  if code_action[winid].lightbulb_line ~= 0 then
     vim.fn.sign_unplace(sign_group, {id = code_action[winid].lightbulb_line, buffer = "%"})
   end
 
