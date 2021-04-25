@@ -132,6 +132,7 @@ function M.new_list_view(opts)
             end
             local l = data[pos]
             if l.filename ~= nil then
+              -- log ('openfile ', l.filename, l.lnum)
               util.open_file_at(l.filename, l.lnum)
             end
           end,

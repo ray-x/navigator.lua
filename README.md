@@ -59,6 +59,9 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
 Plug 'ray-x/navigator.lua'
 
+" optional if you need treesitter symbol support
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
 call plug#end()
 
 lua <<EOF
@@ -75,6 +78,7 @@ Generally speaking, you could remove most part of your lspconfig.lua and use the
 - lspconfig
 - guihua (provides floating window, FZY)
 - Optional:
+  - treesitter (list treesitter symbols)
   - lsp-status
   - lsp-signature
   - vim-illuminate
