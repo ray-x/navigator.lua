@@ -46,13 +46,13 @@ M.config_values = function() return _NgConfigValues end
 M.setup = function(cfg)
   extend_config(cfg)
   -- print("loading navigator")
-  require('navigator.lspclient').setup(M.config_values)
+  require('navigator.lspclient').setup(_NgConfigValues)
   require('navigator.reference')
   require('navigator.definition')
   require('navigator.hierarchy')
   require('navigator.implementation')
   -- log("navigator loader")
-  if M.config_values.code_action_prompt.enable then
+  if _NgConfigValues.code_action_prompt.enable then
     vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
   end
 

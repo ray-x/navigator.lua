@@ -86,7 +86,7 @@ The plugin can be loaded lazily (packer `opt = true` ), And it will check if opt
 Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box.
 
 - Use \<c-e\> or `:q!` to kill the floating window
-- <up/down> to move
+- <up/down> (or \<c-n\>, \<c-p\>) to move
 - \<c-o\> to open location or apply code actions
 
 ## Screenshots
