@@ -2,7 +2,7 @@ local util = require "navigator.util"
 local log = util.log
 local code_action = {}
 local gui = require "navigator.gui"
-local config = require("navigator").config_values
+local config = require("navigator").config_values()
 local api = vim.api
 function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customSelectionHandler)
   log(cid, bufnr)

@@ -86,6 +86,8 @@ function M.preview_uri(opts) -- uri, width, line, col, offset_x, offset_y
 end
 
 function M.new_list_view(opts)
+  local config = require("navigator").config_values()
+
   local items = opts.items
   local data = {}
   if opts.rawdata then
@@ -94,8 +96,8 @@ function M.new_list_view(opts)
     data = require "guihua.util".aggregate_filename(items, opts)
   end
   local wwidth = api.nvim_get_option("columns")
-  local width = opts.width or math.floor(wwidth * 0.8)
-  local wheight = math.floor(api.nvim_get_option("lines") * 0.8)
+  local width = config.width or opts.width or math.floor(wwidth * 0.8)
+  local wheight = config.height or math.floor(api.nvim_get_option("lines") * 0.8)
   local prompt = opts.prompt or false
   if data and not vim.tbl_isempty(data) then
     -- replace

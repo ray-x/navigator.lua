@@ -26,6 +26,8 @@ local highlight = require "navigator.lspclient.highlight"
 if lspconfig == nil then
   error("loading lsp config")
 end
+local config = require'navigator'.config_values()
+
 local cap = vim.lsp.protocol.make_client_capabilities()
 local on_attach = require("navigator.lspclient.attach").on_attach
 local lsp_status_cfg = {
@@ -154,8 +156,8 @@ local sqls_cfg = {
   }
 }
 -- lua setup
-local sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server"
-local sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server"
+local sumneko_root_path = config.sumneko_root_path
+local sumneko_binary = config.sumneko_binary
 
 local lua_cfg = {
   cmd = {sumneko_binary, "-E", sumneko_root_path .. "/main.lua"},
@@ -237,7 +239,6 @@ local function setup(user_opts)
   end
 
   lsp_status_setup()
-
   for _, lspclient in ipairs(servers) do
     if lsp_status ~= nil and lsp_status.capabilitiess ~= nil then
       lspconfig[lspclient].setup {
@@ -257,11 +258,10 @@ local function setup(user_opts)
 
   lspconfig.gopls.setup(golang_setup)
   lspconfig.sqls.setup(sqls_cfg)
-
   lspconfig.sumneko_lua.setup(lua_cfg)
-
   lspconfig.clangd.setup(clang_cfg)
-
   lspconfig.rust_analyzer.setup(rust_cfg)
+
+
 end
 return {setup = setup, cap = cap}

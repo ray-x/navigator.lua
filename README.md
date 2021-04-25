@@ -70,6 +70,17 @@ EOF
 
 Generally speaking, you could remove most part of your lspconfig.lua and use the hooks in navigator.lua
 
+## Depency
+
+- lspconfig
+- guihua (provides floating window, FZY)
+- Optional:
+  - lsp-status
+  - lsp-signature
+  - vim-illuminate
+
+The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existance and load those plugins only if they existed.
+
 ## Usage
 
 Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box.
@@ -138,11 +149,7 @@ Treetsitter symbols in all buffers
 
 # Todo
 
-- Early phase, bugs expected
-- Async (some of the requests is slow on large codebase and might be good to use co-rountine)
+- Early phase, bugs expected, PR and suggestions are welcome
+- Async (some of the requests is slow on large codebases and might be good to use co-rountine)
 - More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Do not test other languages (e.g dart, swift etc)
-- Configure options
-
-```
-
-```
+- Configuration options
