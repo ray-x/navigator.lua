@@ -1,9 +1,11 @@
 local M = {}
 local util = require "navigator.util"
+local gutil = require "guihua.util"
 local lsp = require "vim.lsp"
 local log = require "navigator.util".log
 local symbol_kind = require "navigator.lspclient.lspkind".symbol_kind
 local cwd = vim.fn.getcwd(0)
+cwd = gutil.add_pec(cwd)
 function M.lines_from_locations(locations, include_filename)
   local fnamemodify = (function(filename)
     if include_filename then
@@ -41,7 +43,6 @@ function M.symbols_to_items(result)
       item.filename = vim.uri_to_fname(item.uri)
 
       item.display_filename = item.filename:gsub(cwd .. "/", "./", 1)
-
       if item.range == nil or item.range.start == nil then
         log("range not set", result[i], item)
       end
@@ -115,7 +116,6 @@ function M.call_async(method, params, handler)
 end
 
 function M.locations_to_items(locations)
-  local cwd = vim.fn.getcwd(0)
   if not locations or vim.tbl_isempty(locations) then
     print("list not avalible")
     return
@@ -143,6 +143,7 @@ function M.locations_to_items(locations)
     item.filename = assert(vim.uri_to_fname(item.uri))
     local filename = item.filename:gsub(cwd .. "/", "./", 1)
     item.display_filename = filename or item.filename
+
     item.rpath = util.get_relative_path(cwd, item.filename)
     table.insert(items, item)
   end
@@ -151,7 +152,6 @@ function M.locations_to_items(locations)
 end
 
 function M.symbol_to_items(locations)
-  local cwd = vim.fn.getcwd(0)
   if not locations or vim.tbl_isempty(locations) then
     print("list not avalible")
     return
@@ -179,6 +179,7 @@ function M.symbol_to_items(locations)
     item.filename = assert(vim.uri_to_fname(item.uri))
     local filename = item.filename:gsub(cwd .. "/", "./", 1)
     item.display_filename = filename or item.filename
+
     item.rpath = util.get_relative_path(cwd, item.filename)
     table.insert(items, item)
   end

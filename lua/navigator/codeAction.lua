@@ -1,5 +1,6 @@
 local util = require "navigator.util"
 local log = util.log
+local verbose = util.verbose
 local code_action = {}
 local gui = require "navigator.gui"
 local config = require("navigator").config_values()
@@ -41,7 +42,7 @@ function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customS
       vim.lsp.buf.execute_command(action_chosen)
     end
 
-    log(action_chosen)
+    verbose(action_chosen)
   end
 
   gui.new_list_view {

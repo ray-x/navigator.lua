@@ -8,17 +8,17 @@ if packer_plugins ~= nil then
   end
   if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
     vim.cmd [[packadd lsp-status.nvim]]
-    -- if lazyloading
+  -- if lazyloading
   end
   if not packer_plugins["ray-x/guihua.lua"] or not packer_plugins["guihua.lua"].loaded then
     vim.cmd [[packadd guihua.lua]]
-    -- if lazyloading
+  -- if lazyloading
   end
 end
-if package.loaded['lspconfig'] then
+if package.loaded["lspconfig"] then
   lspconfig = require "lspconfig"
 end
-if package.loaded['lsp-status'] then
+if package.loaded["lsp-status"] then
   lsp_status = require("lsp-status")
 end
 
@@ -26,7 +26,7 @@ local highlight = require "navigator.lspclient.highlight"
 if lspconfig == nil then
   error("loading lsp config")
 end
-local config = require'navigator'.config_values()
+local config = require "navigator".config_values()
 
 local cap = vim.lsp.protocol.make_client_capabilities()
 local on_attach = require("navigator.lspclient.attach").on_attach
@@ -122,19 +122,19 @@ local clang_cfg = {
 }
 local rust_cfg = {
   settings = {
-        ["rust-analyzer"] = {
-            assist = {
-                importMergeBehavior = "last",
-                importPrefix = "by_self",
-            },
-            cargo = {
-                loadOutDirsFromCheck = true
-            },
-            procMacro = {
-                enable = true
-            },
-        }
+    ["rust-analyzer"] = {
+      assist = {
+        importMergeBehavior = "last",
+        importPrefix = "by_self"
+      },
+      cargo = {
+        loadOutDirsFromCheck = true
+      },
+      procMacro = {
+        enable = true
+      }
     }
+  }
 }
 
 local sqls_cfg = {
@@ -202,6 +202,7 @@ local servers = {
   "bashls",
   "dockerls",
   "pyls",
+  "jedi_language_server",
   "jdtls",
   "sumneko_lua",
   "vimls",
@@ -240,12 +241,30 @@ local function setup(user_opts)
 
   lsp_status_setup()
   for _, lspclient in ipairs(servers) do
-    if lsp_status ~= nil and lsp_status.capabilitiess ~= nil then
+    if lspconfig[lspclient] == nil then
+      print("not supported", lspclient)
+      goto continue
+    end
+    local lspft = lspconfig[lspclient].filetypes
+    if lspft ~= nil and #lspft > 0 then
+      local ft = vim.bo.filetype
+      local should_load = false
+      for _, value in ipairs(lspft) do
+        if ft == value then
+          should_load = true
+        end
+      end
+      if not should_load then
+        goto continue
+      end
+    end
+
+    if lsp_status ~= nil and lsp_status.capabilities ~= nil then
       lspconfig[lspclient].setup {
         message_level = vim.lsp.protocol.MessageType.error,
         log_level = vim.lsp.protocol.MessageType.error,
         on_attach = on_attach,
-        capabilities = lsp_status.capabilitiess
+        capabilities = vim.tbl_extend('keep', lspconfig[lspclient].capabilities or {}, lsp_status.capabilities)
       }
     else
       lspconfig[lspclient].setup {
@@ -254,6 +273,7 @@ local function setup(user_opts)
         on_attach = on_attach
       }
     end
+    ::continue::
   end
 
   lspconfig.gopls.setup(golang_setup)
@@ -261,7 +281,5 @@ local function setup(user_opts)
   lspconfig.sumneko_lua.setup(lua_cfg)
   lspconfig.clangd.setup(clang_cfg)
   lspconfig.rust_analyzer.setup(rust_cfg)
-
-
 end
 return {setup = setup, cap = cap}
