@@ -7,7 +7,7 @@ if packer_plugins ~= nil then
     vim.cmd [[packadd nvim-lspconfig]]
   end
   if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
-    vim.cmd [[packadd lsp-status.nvim]]
+    vim.cmd [[silent! packadd lsp-status.nvim]]
   -- if lazyloading
   end
   if not packer_plugins["ray-x/guihua.lua"] or not packer_plugins["guihua.lua"].loaded then

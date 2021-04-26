@@ -5,7 +5,7 @@ local util = require "navigator.util"
 local log = util.log
 if packer_plugins ~= nil then
   if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
-    vim.cmd [[packadd lsp-status.nvim]]
+    vim.cmd [[silent! packadd lsp-status.nvim]]
   end
 end
 local lsp_status = nil
@@ -65,7 +65,7 @@ M.on_attach = function(client, bufnr)
 
   require("navigator.lspclient.mapping").setup({client = client, bufnr = bufnr, cap = client.resolved_capabilities})
 
-  vim.cmd [[packadd vim-illuminate]]
+  vim.cmd [[silent! packadd vim-illuminate]]
   local hasilm, ilm = pcall(require, "illuminate")   -- package.loaded["illuminate"]
   if hasilm then
     ilm.on_attach(client)
