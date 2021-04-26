@@ -79,7 +79,6 @@ Generally speaking, you could remove most part of your lspconfig.lua and use the
 - guihua.lua (provides floating window, FZY)
 - Optional:
   - treesitter (list treesitter symbols)
-  - lsp-status
   - lsp-signature
   - vim-illuminate
 
@@ -92,6 +91,17 @@ Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be a
 - Use \<c-e\> or `:q!` to kill the floating window
 - <up/down> (or \<c-n\>, \<c-p\>) to move
 - \<c-o\> to open location or apply code actions
+
+## Configuration
+
+In `navigator.lua` there is a default configration. You can override the values by pass you own values
+
+e.g
+
+```lua
+-- The attach will be call at end of navigator on_attach()
+require'navigator'.setup({on_attach = function(client, bufnr) require 'illuminate'.on_attach(client)})
+```
 
 ## Screenshots
 

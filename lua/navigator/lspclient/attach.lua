@@ -3,15 +3,6 @@ local lsp = require("vim.lsp")
 
 local util = require "navigator.util"
 local log = util.log
-if packer_plugins ~= nil then
-  if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
-    vim.cmd [[silent! packadd lsp-status.nvim]]
-  end
-end
-local lsp_status = nil
-if package.loaded["lsp-status"] then
-  lsp_status = require("lsp-status")
-end
 
 local diagnostic_map = function(bufnr)
   local opts = {noremap = true, silent = true}
@@ -44,9 +35,6 @@ end
 
 M.on_attach = function(client, bufnr)
   log("attaching")
-  if lsp_status ~= nil then
-    lsp_status.on_attach(client, bufnr)
-  end
 
   local hassig, sig = pcall(require, "lsp_signature")
   if hassig then

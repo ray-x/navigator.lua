@@ -1,6 +1,6 @@
 local M = {}
 _NgConfigValues ={
-  debug = false,  -- log output
+  debug = false,  -- log output not implemented
   code_action_icon = ' ',
   width = nil,   -- valeu of cols TODO allow float e.g. 0.6
   height = nil,

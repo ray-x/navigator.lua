@@ -1,14 +1,9 @@
 -- todo allow config passed in
 
 local lspconfig = nil
-local lsp_status = nil
 if packer_plugins ~= nil then
   if not packer_plugins["neovim/nvim-lspconfig"] or not packer_plugins["neovim/nvim-lspconfig"].loaded then
     vim.cmd [[packadd nvim-lspconfig]]
-  end
-  if not packer_plugins["nvim-lua/lsp-status.nvim"] or not packer_plugins["lsp-status.nvim"].loaded then
-    vim.cmd [[silent! packadd lsp-status.nvim]]
-  -- if lazyloading
   end
   if not packer_plugins["ray-x/guihua.lua"] or not packer_plugins["guihua.lua"].loaded then
     vim.cmd [[packadd guihua.lua]]
@@ -17,9 +12,6 @@ if packer_plugins ~= nil then
 end
 if package.loaded["lspconfig"] then
   lspconfig = require "lspconfig"
-end
-if package.loaded["lsp-status"] then
-  lsp_status = require("lsp-status")
 end
 
 local highlight = require "navigator.lspclient.highlight"
@@ -30,34 +22,6 @@ local config = require "navigator".config_values()
 
 local cap = vim.lsp.protocol.make_client_capabilities()
 local on_attach = require("navigator.lspclient.attach").on_attach
-local lsp_status_cfg = {
-  status_symbol = " ",
-  indicator_errors = " ", --' ',
-  indicator_warnings = " ", --' ',
-  indicator_info = "﯎",
-  --' ',
-  indicator_hint = "💡",
-  indicator_ok = " ",
-  --'✔️',
-  spinner_frames = {"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"},
-  select_symbol = function(cursor_pos, symbol)
-    if symbol.valuerange then
-      local value_range = {
-        ["start"] = {
-          character = 0,
-          line = vim.fn.byte2line(symbol.valuerange[1])
-        },
-        ["end"] = {
-          character = 0,
-          line = vim.fn.byte2line(symbol.valuerange[2])
-        }
-      }
-
-      return require("lsp-status.util").in_range(cursor_pos, value_range)
-    end
-  end
-}
-
 -- local gopls = {}
 -- gopls["ui.completion.usePlaceholders"] = true
 
@@ -140,7 +104,6 @@ local rust_cfg = {
 local sqls_cfg = {
   on_attach = function(client, bufnr)
     client.resolved_capabilities.execute_command = true
-    lsp_status.on_attach(client, bufnr)
     highlight.diagnositc_config_sign()
     require "sqls".setup {picker = "telescope"} -- or default
   end,
@@ -223,23 +186,12 @@ local servers = {
   "terraformls"
 }
 
-local function lsp_status_setup()
-  if lsp_status ~= nil then
-    lsp_status.register_progress()
-
-    lsp_status.config(lsp_status_cfg)
-  end
-  highlight.diagnositc_config_sign()
-  highlight.add_highlight()
-end
-
 local function setup(user_opts)
   if lspconfig == nil then
     error("lsp-config need installed and enabled")
     return
   end
 
-  lsp_status_setup()
   for _, lspclient in ipairs(servers) do
     if lspconfig[lspclient] == nil then
       print("not supported", lspclient)
@@ -259,20 +211,11 @@ local function setup(user_opts)
       end
     end
 
-    if lsp_status ~= nil and lsp_status.capabilities ~= nil then
-      lspconfig[lspclient].setup {
-        message_level = vim.lsp.protocol.MessageType.error,
-        log_level = vim.lsp.protocol.MessageType.error,
-        on_attach = on_attach,
-        capabilities = vim.tbl_extend('keep', lspconfig[lspclient].capabilities or {}, lsp_status.capabilities)
-      }
-    else
-      lspconfig[lspclient].setup {
-        message_level = vim.lsp.protocol.MessageType.error,
-        log_level = vim.lsp.protocol.MessageType.error,
-        on_attach = on_attach
-      }
-    end
+    lspconfig[lspclient].setup {
+      message_level = vim.lsp.protocol.MessageType.error,
+      log_level = vim.lsp.protocol.MessageType.error,
+      on_attach = on_attach
+    }
     ::continue::
   end
 
