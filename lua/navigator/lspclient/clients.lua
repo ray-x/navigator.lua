@@ -192,6 +192,8 @@ local function setup(user_opts)
     return
   end
 
+  highlight.diagnositc_config_sign()
+  highlight.add_highlight()
   for _, lspclient in ipairs(servers) do
     if lspconfig[lspclient] == nil then
       print("not supported", lspclient)

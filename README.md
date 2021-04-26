@@ -7,7 +7,7 @@ Easy code navigation through LSP and 🌲🏡Treesitter symbols, diagnostic erro
 - LSP easy setup. Support some of the most commonly used lsp client setup
 - Unorthodox UI with floating windows
 - Async request with lsp.buf_request for reference search
-- Treesitter symbol search. It is handy for large file (Do you know sumneko_lua has 100kb size limitation?)
+- Treesitter symbol search. It is handy for large file (Do you know some of LSP e.g. sumneko_lua, there is a 100kb limition?)
 - fzy search with Lua-JIT
 - Better navigation for diagnostic errors, Navigate through files that contain errors/warnings
 - Group references/implementation/incomming/outgoing based on file names.
