@@ -110,9 +110,8 @@ function M.call_async(method, params, handler)
     util.show(...)
     handler(...)
   end
-  local results_lsp, canceller = lsp.buf_request(0, method, params, callback)
-  return results_lsp, canceller
-  -- handler(err, method, extract_result(results_lsp), nil, nil)
+  return  lsp.buf_request(0, method, params, callback)
+  -- results_lsp, canceller
 end
 
 function M.locations_to_items(locations)
