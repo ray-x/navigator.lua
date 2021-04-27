@@ -137,8 +137,11 @@ function M.setup(user_opts)
   vim.lsp.handlers["workspace/symbol"] = require "navigator.symbols".workspace_symbol_handler
   vim.lsp.handlers["textDocument/publishDiagnostics"] = require'navigator.diagnostics'.diagnostic_handler
   vim.lsp.handlers["textDocument/publishDiagnostics"] = require'navigator.diagnostics'.diagnostic_handler
-  vim.lsp.handlers["textDocument/signatureHelp"] = require'navigator.signature'.signature_handler
 
+  local hassig, sig = pcall(require, "lsp_signature")
+  if not hassig then
+    vim.lsp.handlers["textDocument/signatureHelp"] = require'navigator.signature'.signature_handler
+  end
   -- vim.lsp.handlers["textDocument/hover"]  = require 'navigator.hover'.hover_handler
 end
 
