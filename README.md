@@ -161,6 +161,8 @@ Improved signature help with current parameter highlighted
 
 ![signature](https://github.com/ray-x/files/blob/master/img/navigator/signature_with_highlight.jpg?raw=true)
 
+![show_signature](https://github.com/ray-x/files/blob/master/img/navigator/show_signnature.gif?raw=true "show_signature")
+
 ### Call hierarchy (incomming/outgoing)
 
 ![incomming](https://github.com/ray-x/files/blob/master/img/navigator/incomming.jpg?raw=true)
