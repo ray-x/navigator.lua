@@ -96,7 +96,7 @@ function M.new_list_view(opts)
     data = require "guihua.util".aggregate_filename(items, opts)
   end
   local wwidth = api.nvim_get_option("columns")
-  local width = config.width or opts.width or math.floor(wwidth * 0.8)
+  local width = math.min( opts.width or config.width or 120, math.floor(wwidth * 0.8))
   local wheight = config.height or math.floor(api.nvim_get_option("lines") * 0.8)
   local prompt = opts.prompt or false
   if data and not vim.tbl_isempty(data) then

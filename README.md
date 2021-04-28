@@ -31,7 +31,7 @@ It also the first plugin, IMO, that allows you to search in all treesitter symbo
 # Install
 
 You can remove your lspconfig setup and use this plugin.
-The plugin depends on [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support.
+The plugin depends on [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(thanks [romgrk](romgrk/fzy-lua-native)).
 
 ```vim
 Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
