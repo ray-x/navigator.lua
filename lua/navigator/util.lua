@@ -95,10 +95,10 @@ local default_config = {
   plugin = "navigator",
   use_console = false,
   use_file = true,
-  level = "info"
+  level = "error"
 }
 
-M._log = require("guihua.log").new({level = "error"}, true)
+M._log = require("guihua.log").new({level = default_config.level}, true)
 
 -- add log to you lsp.log
 M.log = M._log.info
@@ -192,10 +192,10 @@ function M.show(...)
   return string .. "\n"
 end
 
-function M.split(s, sep)
+function M.split2(s, sep)
   local fields = {}
 
-  local sep = sep or " "
+  sep = sep or " "
   local pattern = string.format("([^%s]+)", sep)
   string.gsub(
     s,
@@ -239,6 +239,5 @@ function M.exclude(fname)
   end
   return false
 end
-
 
 return M
