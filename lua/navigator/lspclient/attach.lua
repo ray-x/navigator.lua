@@ -54,7 +54,7 @@ M.on_attach = function(client, bufnr)
   require("navigator.lspclient.mapping").setup({client = client, bufnr = bufnr, cap = client.resolved_capabilities})
 
   vim.cmd [[silent! packadd vim-illuminate]]
-  local hasilm, ilm = pcall(require, "illuminate")   -- package.loaded["illuminate"]
+  local hasilm, ilm = pcall(require, "illuminate") -- package.loaded["illuminate"]
   if hasilm then
     ilm.on_attach(client)
   end
@@ -62,7 +62,7 @@ M.on_attach = function(client, bufnr)
 
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
-  local config = require'navigator'.config_value
+  local config = require "navigator".config_value
   if config ~= nil and config.on_attach ~= nil then
     config.on_attach(client, bufnr)
   end

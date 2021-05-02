@@ -47,9 +47,7 @@ local function set_mapping(user_opts)
     local user_key = user_opts.keymaps or {}
     local bufnr = user_opts.bufnr or 0
 
-    local function buf_set_keymap(...)
-        vim.api.nvim_buf_set_keymap(bufnr, ...)
-    end
+    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
 
     -- local function buf_set_option(...)
     --   vim.api.nvim_buf_set_option(bufnr, ...)
@@ -80,13 +78,25 @@ local function set_mapping(user_opts)
 
     -- format setup
 
+    local range_fmt = false
+    local doc_fmt = false
+    for _, value in pairs(vim.lsp.buf_get_clients(0)) do
+      if value == nil or value.resolved_capabilities == nil then return end
+      if value.resolved_capabilities.document_formatting then doc_fmt = true end
+      if value.resolved_capabilities.document_range_formatting then range = true end
+    end
+
     -- if user_opts.cap.document_formatting then
-    buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>",
+    if doc_fmt then
+      buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>",
                    opts)
-    vim.cmd([[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()]])
+      vim.cmd([[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()]])
+                 end
     -- if user_opts.cap.document_range_formatting then
-    buf_set_keymap("v", "<space>ff",
+    if range_fmt then
+      buf_set_keymap("v", "<space>ff",
                    "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
+    end
 end
 
 local function set_event_handler(user_opts)

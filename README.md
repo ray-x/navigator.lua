@@ -48,6 +48,8 @@ use {'ray-x/navigator.lua', requires = {'ray-x/guihua.lua', run = 'cd lua/fzy &&
 
 ## Setup
 
+Easy setup lspconfig and navigator with one liner
+
 ```lua
 lua require'navigator'.setup()
 ```

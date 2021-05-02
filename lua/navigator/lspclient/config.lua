@@ -1,6 +1,6 @@
 local lsp = require("vim.lsp")
 
-M={}
+M = {}
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
@@ -18,6 +18,6 @@ vim.cmd("command! -nargs=0 LspLog call v:lua.open_lsp_log()")
 vim.cmd("command! -nargs=0 LspRestart call v:lua.reload_lsp()")
 
 local cfg = {}
-require('lsp.clients').setup(cfg)
-require('lsp.mappings').setup(cfg)
+
+require("lsp.clients").setup(cfg)
 return M
