@@ -87,12 +87,11 @@ local clang_cfg = {
   end
 }
 local rust_cfg = {
-  filetypes = {"rust"},
   root_dir = util.root_pattern("Cargo.toml", "rust-project.json", ".git"),
+  filetypes = { "rust" },
   message_level = vim.lsp.protocol.MessageType.error,
   on_attach = on_attach,
   settings = {
-    root_dir = util.root_pattern("Cargo.toml", "rust-project.json", ".git"),
     ["rust-analyzer"] = {
       assist = {importMergeBehavior = "last", importPrefix = "by_self"},
       cargo = {loadOutDirsFromCheck = true},
@@ -207,7 +206,14 @@ local default_cfg = {on_attach = on_attach}
 
 local function load_cfg(client, cfg)
   local ft = vim.bo.filetype
-
+  if ft == nil then
+    ft = vim.api.nvim_buf_get_option(0,'filetype')
+  end
+  if ft == nil or ft == '' then
+    log('nil filetype')
+    return
+  end
+  -- log(client, "loaded for", ft)
   if lspconfig[client] == nil then
     log("not supported", client)
     return
@@ -216,6 +222,7 @@ local function load_cfg(client, cfg)
 
   local should_load = false
   if lspft ~= nil and #lspft > 0 then
+    -- log(client, "loaded for", ft, lspft)
     for _, value in ipairs(lspft) do
       if ft == value then
         should_load = true
@@ -245,9 +252,9 @@ local function setup(user_opts)
   load_cfg("sqls", sqls_cfg)
   load_cfg("sumneko_lua", lua_cfg)
   load_cfg("clangd", clang_cfg)
-  load_cfg("rust_analyzer", rust_cfg)
+  -- load_cfg("rust_analyzer", rust_cfg)
   load_cfg("pyright", pyright_cfg)
-
+  lspconfig.rust_analyzer.setup(rust_cfg)
   log("setup all clients finished")
 end
 return {setup = setup, cap = cap}
