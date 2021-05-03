@@ -48,7 +48,7 @@ use {'ray-x/navigator.lua', requires = {'ray-x/guihua.lua', run = 'cd lua/fzy &&
 
 ## Setup
 
-Easy setup lspconfig and navigator with one liner
+Easy setup **BOTH** lspconfig and navigator with one liner. Navigator covers arounds 20 most used LSP setup.
 
 ```lua
 lua require'navigator'.setup()

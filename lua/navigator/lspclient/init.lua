@@ -1,3 +1,4 @@
+-- local log = require "navigator.util".log
 local M = {}
 M.setup = function(cfg)
   cfg = cfg or {}
