@@ -88,7 +88,7 @@ local clang_cfg = {
 }
 local rust_cfg = {
   root_dir = util.root_pattern("Cargo.toml", "rust-project.json", ".git"),
-  filetypes = { "rust" },
+  filetypes = {"rust"},
   message_level = vim.lsp.protocol.MessageType.error,
   on_attach = on_attach,
   settings = {
@@ -204,13 +204,14 @@ local servers = {
 }
 local default_cfg = {on_attach = on_attach}
 
+-- check and load based on file type
 local function load_cfg(client, cfg)
   local ft = vim.bo.filetype
   if ft == nil then
-    ft = vim.api.nvim_buf_get_option(0,'filetype')
+    ft = vim.api.nvim_buf_get_option(0, "filetype")
   end
-  if ft == nil or ft == '' then
-    log('nil filetype')
+  if ft == nil or ft == "" then
+    log("nil filetype")
     return
   end
   -- log(client, "loaded for", ft)
@@ -252,9 +253,7 @@ local function setup(user_opts)
   load_cfg("sqls", sqls_cfg)
   load_cfg("sumneko_lua", lua_cfg)
   load_cfg("clangd", clang_cfg)
-  -- load_cfg("rust_analyzer", rust_cfg)
+  load_cfg("rust_analyzer", rust_cfg)
   load_cfg("pyright", pyright_cfg)
-  lspconfig.rust_analyzer.setup(rust_cfg)
-  log("setup all clients finished")
 end
 return {setup = setup, cap = cap}

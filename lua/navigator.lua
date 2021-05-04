@@ -22,6 +22,7 @@ _NgConfigValues ={
 
 vim.cmd("command! -nargs=0 LspLog call v:lua.open_lsp_log()")
 vim.cmd("command! -nargs=0 LspRestart call v:lua.reload_lsp()")
+vim.cmd([[autocmd filetype * lua require'navigator'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
 
 local extend_config = function(opts)
   opts = opts or {}
@@ -56,7 +57,8 @@ M.setup = function(cfg)
   if _NgConfigValues.code_action_prompt.enable then
     vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
   end
-
+  -- vim.cmd("autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4")
+  
 end
 
 return M

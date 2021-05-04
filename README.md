@@ -4,13 +4,14 @@ Easy code navigation through LSP and 🌲🏡Treesitter symbols, diagnostic erro
 
 # Features:
 
-- LSP easy setup. Support some of the most commonly used lsp client setup
+- LSP easy setup. Support some of the most commonly used lsp client setup. Smart loading lsp clients based on buffer type.
+- Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP powered IDE
 - Unorthodox UI with floating windows
 - Async request with lsp.buf_request for reference search
-- Treesitter symbol search. It is handy for large file (Do you know some of LSP e.g. sumneko_lua, there is a 100kb limition?)
+- Treesitter symbol search. It is handy for large filas (Some of LSP e.g. sumneko_lua, there is a 100kb file size limition?)
 - fzy search with Lua-JIT
-- Better navigation for diagnostic errors, Navigate through files that contain errors/warnings
-- Group references/implementation/incomming/outgoing based on file names.
+- Better navigation for diagnostic errors, Navigate through all files/buffers that contain errors/warnings
+- Grouping references/implementation/incomming/outgoing based on file names.
 - Nerdfont, emoji for LSP and Treesitter kind
 
 # Why a new plugin
@@ -54,7 +55,7 @@ Easy setup **BOTH** lspconfig and navigator with one liner. Navigator covers aro
 lua require'navigator'.setup()
 ```
 
-## Sample vimrc
+## Sample vimrc turning your neovim into a full-featured IDE
 
 ```vim
 call plug#begin('~/.vim/plugged')
@@ -63,19 +64,22 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
 Plug 'ray-x/navigator.lua'
 
-" optional if you need treesitter symbol support
+" Plug 'hrsh7th/nvim-compe' and other plugins you commenly use...
+
+" optional, if you need treesitter symbol support
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
 call plug#end()
 
+" No need for rquire('lspconfig'), navigator will configure it for you
 lua <<EOF
-local nvim_lsp = require('lspconfig')
 require'navigator'.setup()
 EOF
 
 ```
 
-Generally speaking, you could remove most part of your lspconfig.lua and use the hooks in navigator.lua
+Generally speaking, you could remove most part of your lspconfig.lua and use the hooks in navigator.lua. As the
+navigator will bind keys and handler for you. The lsp will be loaded lazily based on filetype.
 
 ## Dependency
 
@@ -83,8 +87,7 @@ Generally speaking, you could remove most part of your lspconfig.lua and use the
 - guihua.lua (provides floating window, FZY)
 - Optional:
   - treesitter (list treesitter symbols)
-  - lsp-signature
-  - vim-illuminate
+  - lsp-signature (better signature help)
 
 The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existance and load those plugins only if they existed.
 
@@ -181,5 +184,5 @@ Improved signature help with current parameter highlighted
 
 - Early phase, bugs expected, PR and suggestions are welcome
 - Async (some of the requests is slow on large codebases and might be good to use co-rountine)
-- More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Do not test other languages (e.g dart, swift etc)
+- More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Did not test other languages (e.g dart, swift etc)
 - Configuration options

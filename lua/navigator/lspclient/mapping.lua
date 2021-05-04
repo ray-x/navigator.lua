@@ -161,7 +161,6 @@ function M.setup(user_opts)
     vim.lsp.handlers["textDocument/signatureHelp"] = require "navigator.signature".signature_handler
   end
   -- vim.lsp.handlers["textDocument/hover"]  = require 'navigator.hover'.hover_handler
-
 end
 
 return M
