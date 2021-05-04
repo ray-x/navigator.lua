@@ -1,5 +1,4 @@
 -- todo allow config passed in
-local lspconfig = nil
 local log = require "navigator.util".log
 local verbose = require "navigator.util".verbose
 
@@ -12,14 +11,13 @@ if packer_plugins ~= nil then
   -- if lazyloading
   end
 end
-if package.loaded["lspconfig"] then
-  lspconfig = require "lspconfig"
-end
 
-local highlight = require "navigator.lspclient.highlight"
-if lspconfig == nil then
+local has_lsp, lspconfig = pcall(require, "lspconfig")
+if not has_lsp then
   error("loading lsp config")
 end
+local highlight = require "navigator.lspclient.highlight"
+
 local util = lspconfig.util
 local config = require "navigator".config_values()
 
@@ -205,16 +203,10 @@ local servers = {
 local default_cfg = {on_attach = on_attach}
 
 -- check and load based on file type
-local function load_cfg(client, cfg)
-  local ft = vim.bo.filetype
-  if ft == nil then
-    ft = vim.api.nvim_buf_get_option(0, "filetype")
-  end
-  if ft == nil or ft == "" then
-    log("nil filetype")
-    return
-  end
+local function load_cfg(ft, client, cfg, loaded)
+  -- log("trying", client)
   -- log(client, "loaded for", ft)
+
   if lspconfig[client] == nil then
     log("not supported", client)
     return
@@ -230,12 +222,21 @@ local function load_cfg(client, cfg)
       end
     end
     if should_load then
-      log(client, "loaded for", ft)
+      for _, c in pairs(loaded) do
+        if client == c then
+          -- loaded
+          log(client, "already been loaded for", ft, loaded)
+          return
+        end
+      end
+
       lspconfig[client].setup(cfg)
+      log(client, "loaded for", ft)
     end
   end
 end
 
+vim.cmd([[autocmd filetype * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
 local function setup(user_opts)
   verbose(debug.traceback())
 
@@ -246,14 +247,30 @@ local function setup(user_opts)
 
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
-  for _, lspclient in ipairs(servers) do
-    load_cfg(lspclient, default_cfg)
+
+  local ft = vim.bo.filetype
+  if ft == nil then
+    ft = vim.api.nvim_buf_get_option(0, "filetype")
   end
-  load_cfg("gopls", golang_setup)
-  load_cfg("sqls", sqls_cfg)
-  load_cfg("sumneko_lua", lua_cfg)
-  load_cfg("clangd", clang_cfg)
-  load_cfg("rust_analyzer", rust_cfg)
-  load_cfg("pyright", pyright_cfg)
+  if ft == nil or ft == "" then
+    log("nil filetype")
+    return
+  end
+  local clients = vim.lsp.get_active_clients() or {}
+  local loaded = {}
+  for _, client in ipairs(clients) do
+    if client ~= nil then
+      table.insert(loaded, client.name)
+    end
+  end
+  for _, lspclient in ipairs(servers) do
+    load_cfg(ft, lspclient, default_cfg, loaded)
+  end
+  load_cfg(ft, "gopls", golang_setup, loaded)
+  load_cfg(ft, "sqls", sqls_cfg, loaded)
+  load_cfg(ft, "sumneko_lua", lua_cfg, loaded)
+  load_cfg(ft, "clangd", clang_cfg, loaded)
+  load_cfg(ft, "rust_analyzer", rust_cfg, loaded)
+  load_cfg(ft, "pyright", pyright_cfg, loaded)
 end
 return {setup = setup, cap = cap}
