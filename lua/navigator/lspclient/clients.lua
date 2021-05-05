@@ -184,11 +184,13 @@ local ccls_cfg = {
 }
 
 local servers = {
+  "angularls",
   "gopls",
   "tsserver",
   "flow",
   "bashls",
   "dockerls",
+  "julials",
   "pyls",
   "pyright",
   "jedi_language_server",
@@ -197,6 +199,7 @@ local servers = {
   "vimls",
   "html",
   "jsonls",
+  "solargraph",
   "cssls",
   "yamlls",
   "clangd",
@@ -208,7 +211,9 @@ local servers = {
   "kotlin_language_server",
   "nimls",
   "intelephense",
+  "vuels",
   "phpactor",
+  "omnisharp",
   "r_language_server",
   "rust_analyzer",
   "terraformls"
