@@ -95,7 +95,7 @@ local default_config = {
   plugin = "navigator",
   use_console = false,
   use_file = true,
-  level = "error"
+  level = "info"
 }
 
 M._log = require("guihua.log").new({level = default_config.level}, true)
