@@ -91,6 +91,8 @@ navigator will bind keys and handler for you. The lsp will be loaded lazily base
 
 The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existance and load those plugins only if they existed.
 
+The termianl will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
+
 ## Usage
 
 Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box.

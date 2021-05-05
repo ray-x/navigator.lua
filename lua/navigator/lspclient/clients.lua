@@ -66,7 +66,6 @@ local golang_setup = {
     }
   },
   root_dir = function(fname)
-    local util = require("lspconfig").util
     return util.root_pattern("go.mod", ".git")(fname) or util.path.dirname(fname)
   end
 }
@@ -171,6 +170,19 @@ local pyright_cfg = {
   }
 }
 
+local ccls_cfg = {
+  init_options = {
+    compilationDatabaseDirectory = "build",
+    root_dir = [[ util.root_pattern("compile_commands.json", "compile_flags.txt", "CMakeLists.txt", "Makefile", ".git") or util.path.dirname ]],
+    index = {
+      threads = 2
+    },
+    clang = {
+      excludeArgs = {"-frounding-math"}
+    }
+  }
+}
+
 local servers = {
   "gopls",
   "tsserver",
@@ -188,6 +200,7 @@ local servers = {
   "cssls",
   "yamlls",
   "clangd",
+  "ccls",
   "sqls",
   "denols",
   "dartls",
@@ -272,5 +285,6 @@ local function setup(user_opts)
   load_cfg(ft, "clangd", clang_cfg, loaded)
   load_cfg(ft, "rust_analyzer", rust_cfg, loaded)
   load_cfg(ft, "pyright", pyright_cfg, loaded)
+  load_cfg(ft, "ccls", ccls_cfg, loaded)
 end
 return {setup = setup, cap = cap}
