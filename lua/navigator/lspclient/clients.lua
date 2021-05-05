@@ -156,7 +156,8 @@ local setups = {
       python = {
         analysis = {
           autoSearchPaths = true,
-          useLibraryCodeForTypes = true
+          useLibraryCodeForTypes = true,
+          diagnosticMode = "workspace"
         }
       }
     }
@@ -239,7 +240,7 @@ local function load_cfg(ft, client, cfg, loaded)
         end
       end
       lspconfig[client].setup(cfg)
-      log(client, "loading for", ft)
+      log(client, "loading for", ft, cfg)
     end
   end
   -- need to verify the lsp server is up
