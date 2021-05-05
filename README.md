@@ -4,8 +4,8 @@ Easy code navigation through LSP and 🌲🏡Treesitter symbols, diagnostic erro
 
 # Features:
 
-- LSP easy setup. Support some of the most commonly used lsp client setup. Smart loading lsp clients based on buffer type.
-- Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP powered IDE
+- LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type.
+- Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP & Treesitter powered IDE
 - Unorthodox UI with floating windows
 - Async request with lsp.buf_request for reference search
 - Treesitter symbol search. It is handy for large filas (Some of LSP e.g. sumneko_lua, there is a 100kb file size limition?)
@@ -18,7 +18,7 @@ Easy code navigation through LSP and 🌲🏡Treesitter symbols, diagnostic erro
 
 After installed a handful of lsp plugins, I still got ~800 loc for lsp and treesitter and still increasing because I need
 to tune the lsp plugins to fit my requirements. Navigator.lua help user setup lspconfig with only a few lines of codes.
-This plugin provide a visual way to manage and navigate through symobls, errors etc.
+This plugin provides a visual way to manage and navigate through symobls, errors, reference etc.
 It also the first plugin, IMO, that allows you to search in all treesitter symbols in the workspace.
 
 # Similar projects / special mentions:
