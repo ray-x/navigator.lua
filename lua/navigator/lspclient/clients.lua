@@ -251,34 +251,35 @@ end
 local function wait_lsp_startup(ft)
   local clients = vim.lsp.get_active_clients() or {}
   local loaded = {}
-
-  for _, client in ipairs(clients) do
-    if client ~= nil then
-      table.insert(loaded, client.name)
-    end
-  end
-  for _, lspclient in ipairs(servers) do
-    local cfg = setups[lspclient] or default_cfg
-    load_cfg(ft, lspclient, cfg, loaded)
-  end
-  --
-  local timer = vim.loop.new_timer()
-  local i = 0
-  timer:start(
-    200,
-    200,
-    function()
-      clients = vim.lsp.get_active_clients() or {}
-      i = i + 1
-      if i > 5 or #clients > 0 then
-        timer:close() -- Always close handles to avoid leaks.
-        log("active", #clients, i)
-        _Loading = false
-        return true
+  for i = 1, 2 do
+    for _, client in ipairs(clients) do
+      if client ~= nil then
+        table.insert(loaded, client.name)
       end
-      _Loading = false
     end
-  )
+    for _, lspclient in ipairs(servers) do
+      local cfg = setups[lspclient] or default_cfg
+      load_cfg(ft, lspclient, cfg, loaded)
+    end
+    --
+    local timer = vim.loop.new_timer()
+    local i = 0
+    vim.wait(
+      1000,
+      function()
+        clients = vim.lsp.get_active_clients() or {}
+        i = i + 1
+        if i > 10 or #clients > 0 then
+          timer:close() -- Always close handles to avoid leaks.
+          log("active", #clients, i)
+          _Loading = false
+          return true
+        end
+        _Loading = false
+      end,
+      200
+    )
+  end
 end
 
 vim.cmd([[autocmd filetype * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
