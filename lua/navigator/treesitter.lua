@@ -2,6 +2,7 @@ local gui = require "navigator.gui"
 local ts_locals = require "nvim-treesitter.locals"
 local parsers = require "nvim-treesitter.parsers"
 local ts_utils = require "nvim-treesitter.ts_utils"
+local utils = require "nvim-treesitter.utils"
 local api = vim.api
 local util = require "navigator.util"
 local M = {}
@@ -37,22 +38,28 @@ local function get_definitions(bufnr)
   local nodes_set = {}
   for _, loc in ipairs(local_nodes) do
     if loc.definition then
-      ts_locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
-        -- lua doesn't compare tables by value,
-        -- use the value from byte count instead.
-        local _, _, start = node:start()
-        nodes_set[start] = {node = node, type = match or ""}
-      end)
+      ts_locals.recurse_local_nodes(
+        loc.definition,
+        function(_, node, _, match)
+          -- lua doesn't compare tables by value,
+          -- use the value from byte count instead.
+          local _, _, start = node:start()
+          nodes_set[start] = {node = node, type = match or ""}
+        end
+      )
     end
   end
 
   -- Sort by order of appearance.
   local definition_nodes = vim.tbl_values(nodes_set)
-  table.sort(definition_nodes, function (a, b)
-    local _, _, start_a = a.node:start()
-    local _, _, start_b = b.node:start()
-    return start_a < start_b
-  end)
+  table.sort(
+    definition_nodes,
+    function(a, b)
+      local _, _, start_a = a.node:start()
+      local _, _, start_b = b.node:start()
+      return start_a < start_b
+    end
+  )
 
   return definition_nodes
 end
@@ -78,6 +85,41 @@ local function prepare_node(node, kind)
     end
   end
   return matches
+end
+
+local lsp_reference = require "navigator.dochighlight".goto_adjent_reference
+
+function M.goto_adjacent_usage(bufnr, delta)
+  local opt = {forward = true}
+  log(delta)
+  if delta < 0 then
+    opt = {forward = false}
+  end
+  local bufnr = bufnr or api.nvim_get_current_buf()
+  local node_at_point = ts_utils.get_node_at_cursor()
+  if not node_at_point then
+    lsp_reference(opt)
+    return
+  end
+
+  local def_node, scope = ts_locals.find_definition(node_at_point, bufnr)
+  local usages = ts_locals.find_usages(def_node, scope, bufnr)
+
+  local index = utils.index_of(usages, node_at_point)
+  if not index then
+    lsp_reference(opt)
+    return
+  end
+
+  local target_index = (index + delta + #usages - 1) % #usages + 1
+  ts_utils.goto_node(usages[target_index])
+end
+
+function M.goto_next_usage(bufnr)
+  return M.goto_adjacent_usage(bufnr, 1)
+end
+function M.goto_previous_usage(bufnr)
+  return M.goto_adjacent_usage(bufnr, -1)
 end
 
 local function get_all_nodes(bufnr)
@@ -130,8 +172,10 @@ local function get_all_nodes(bufnr)
       item.kind = node.kind
       item.node_scope = get_smallest_context(item.tsdata)
       local start_line_node, _, _ = item.tsdata:start()
-      item.node_text = ts_utils.get_node_text(item.tsdata, bufnr)[1]
-      if item.node_text == '_' then goto continue end
+      item.node_text = ts_utils.get_node_tex(item.tsdata, bufnr)[1]
+      if item.node_text == "_" then
+        goto continue
+      end
       item.full_text = vim.trim(api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1] or "")
       item.range = ts_utils.node_to_lsp_range(item.tsdata)
       item.uri = uri
@@ -141,8 +185,10 @@ local function get_all_nodes(bufnr)
       item.lnum, item.col, _ = def.node:start()
       item.lnum = item.lnum + 1
       item.col = item.col + 1
-      local indent=""
-      if #parents > 1 then indent =  string.rep('  ', #parents - 1)  .. ' ' end
+      local indent = ""
+      if #parents > 1 then
+        indent = string.rep("  ", #parents - 1) .. " "
+      end
 
       item.text = string.format("%s%s%-10s\t🧩 %s", item.kind, indent, item.node_text, item.full_text)
       if #item.text > length then

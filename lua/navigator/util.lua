@@ -95,7 +95,7 @@ local default_config = {
   plugin = "navigator",
   use_console = false,
   use_file = true,
-  level = "info"
+  level = "error"
 }
 
 M._log = require("guihua.log").new({level = default_config.level}, true)
@@ -238,6 +238,44 @@ function M.exclude(fname)
     end
   end
   return false
+end
+
+--- virtual text
+
+-- name space search
+local nss
+local api = vim.api
+local bufs
+
+function M.set_virt_eol(bufnr, lnum, chunks, priority, id)
+  if nss == nil then
+    nss = api.nvim_create_namespace("navigator_search")
+  end
+  bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
+  bufs[bufnr] = true
+  -- id may be nil
+  return api.nvim_buf_set_extmark(bufnr, nss, lnum, -1, {id = id, virt_text = chunks, priority = priority})
+end
+
+function M.clear_buf(bufnr)
+  if not bufnr then
+    return
+  end
+  bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
+  if bufs[bufnr] then
+    if api.nvim_buf_is_valid(bufnr) then
+      api.nvim_buf_clear_namespace(bufnr, nss, 0, -1)
+    -- nvim_buf_del_extmark
+    end
+    bufs[bufnr] = nil
+  end
+end
+
+function M.clear_all_buf()
+  for bufnr in pairs(bufs) do
+    M.clear_buf(bufnr)
+  end
+  bufs = {}
 end
 
 return M

@@ -36,6 +36,8 @@ local key_maps = {
   {key = "gG", func = "require('navigator.diagnostics').show_diagnostic()"},
   {key = "]d", func = "diagnostic.goto_next()"},
   {key = "[d", func = "diagnostic.goto_prev()"},
+  {key = "]r", func = "require('navigator.treesitter').goto_next_usage()"},
+  {key = "[r", func = "require('navigator.treesitter').goto_previous_usage()"},
   {key = "<C-LeftMouse>", func = "definition()"},
   {key = "g<LeftMouse>", func = "implementation()"}
 }
@@ -160,6 +162,7 @@ function M.setup(user_opts)
   if not hassig then
     vim.lsp.handlers["textDocument/signatureHelp"] = require "navigator.signature".signature_handler
   end
+
   -- vim.lsp.handlers["textDocument/hover"]  = require 'navigator.hover'.hover_handler
 end
 

@@ -2,6 +2,8 @@
 local log = require "navigator.util".log
 local verbose = require "navigator.util".verbose
 
+_Loading = false
+
 if packer_plugins ~= nil then
   if not packer_plugins["neovim/nvim-lspconfig"] or not packer_plugins["neovim/nvim-lspconfig"].loaded then
     vim.cmd [[packadd nvim-lspconfig]]
@@ -240,15 +242,52 @@ local function load_cfg(ft, client, cfg, loaded)
         end
       end
       lspconfig[client].setup(cfg)
-      log(client, "loading for", ft, cfg)
+      log(client, "loading for", ft)
     end
   end
   -- need to verify the lsp server is up
 end
 
+local function wait_lsp_startup(ft)
+  local clients = vim.lsp.get_active_clients() or {}
+  local loaded = {}
+
+  for _, client in ipairs(clients) do
+    if client ~= nil then
+      table.insert(loaded, client.name)
+    end
+  end
+  for _, lspclient in ipairs(servers) do
+    local cfg = setups[lspclient] or default_cfg
+    load_cfg(ft, lspclient, cfg, loaded)
+  end
+  --
+  local timer = vim.loop.new_timer()
+  local i = 0
+  timer:start(
+    200,
+    200,
+    function()
+      clients = vim.lsp.get_active_clients() or {}
+      i = i + 1
+      if i > 5 or #clients > 0 then
+        timer:close() -- Always close handles to avoid leaks.
+        log("active", #clients, i)
+        _Loading = false
+        return true
+      end
+      _Loading = false
+    end
+  )
+end
+
 vim.cmd([[autocmd filetype * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
+
 local function setup(user_opts)
   verbose(debug.traceback())
+  if _Loading == true then
+    return
+  end
 
   if lspconfig == nil then
     error("lsp-config need installed and enabled")
@@ -267,35 +306,7 @@ local function setup(user_opts)
     return
   end
 
-  for i = 1, 2 do
-    local clients = vim.lsp.get_active_clients() or {}
-    local loaded = {}
-    for _, client in ipairs(clients) do
-      if client ~= nil then
-        table.insert(loaded, client.name)
-      end
-    end
-    for _, lspclient in ipairs(servers) do
-      local cfg = setups[lspclient] or default_cfg
-      load_cfg(ft, lspclient, cfg, loaded)
-    end
-
-    local timer = vim.loop.new_timer()
-    local i = 0
-    -- Waits 20ms, then repeats every 20ms until lsp is loaded.
-    timer:start(
-      20,
-      20,
-      function()
-        local clients = vim.lsp.get_active_clients() or {}
-        if i > 20 or #clients > 0 then
-          timer:close() -- Always close handles to avoid leaks.
-          log("active", #clients)
-          return true
-        end
-        i = i + 1
-      end
-    )
-  end
+  _Loading = true
+  wait_lsp_startup(ft)
 end
 return {setup = setup, cap = cap}

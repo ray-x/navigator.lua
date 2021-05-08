@@ -9,7 +9,7 @@ Easy code navigation through LSP and 🌲🏡Treesitter symbols, diagnostic erro
 - Unorthodox UI with floating windows
 - Async request with lsp.buf_request for reference search
 - Treesitter symbol search. It is handy for large filas (Some of LSP e.g. sumneko_lua, there is a 100kb file size limition?)
-- fzy search with Lua-JIT
+- FZY search with Lua-JIT
 - Better navigation for diagnostic errors, Navigate through all files/buffers that contain errors/warnings
 - Grouping references/implementation/incomming/outgoing based on file names.
 - Nerdfont, emoji for LSP and Treesitter kind
@@ -120,6 +120,7 @@ colorscheme: [aurora](https://github.com/ray-x/aurora)
 
 ![reference](https://github.com/ray-x/files/blob/master/img/navigator/ref.gif?raw=true)
 
+
 ### Document Symbol
 
 ![document symbol](https://github.com/ray-x/files/blob/master/img/navigator/doc_symbol.gif?raw=true)
@@ -127,6 +128,12 @@ colorscheme: [aurora](https://github.com/ray-x/aurora)
 ### Workspace Symbol
 
 ![workspace symbol](https://github.com/ray-x/files/blob/master/img/navigator/workspace_symbol.gif?raw=true)
+
+# Current symbol highlight and jump backword/forward between symbols
+
+Document highlight provided by LSP.
+Jump between symbols between symbols with treesitter
+![doc jump](https://github.com/ray-x/files/blob/master/img/navigator/doc_hl_jump.gif?raw=true)
 
 ### Diagnostic
 

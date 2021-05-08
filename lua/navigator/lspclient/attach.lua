@@ -9,29 +9,6 @@ local diagnostic_map = function(bufnr)
   api.nvim_buf_set_keymap(bufnr, "n", "]O", ":lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 end
 local M = {}
-local function documentHighlight()
-  api.nvim_exec(
-    [[
-      hi LspReferenceRead cterm=bold gui=Bold ctermbg=yellow guibg=DarkOrchid3
-      hi LspReferenceText cterm=bold gui=Bold ctermbg=red guibg=gray27
-      hi LspReferenceWrite cterm=bold gui=Bold,Italic ctermbg=red guibg=MistyRose
-      augroup lsp_document_highlight
-        autocmd! * <buffer>
-        autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-        autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-      augroup END
-    ]],
-    false
-  )
-  vim.lsp.handlers["textDocument/documentHighlight"] = function(_, _, result, _)
-    if not result then
-      return
-    end
-    bufnr = api.nvim_get_current_buf()
-    vim.lsp.util.buf_clear_references(bufnr)
-    vim.lsp.util.buf_highlight_references(bufnr, result)
-  end
-end
 
 M.on_attach = function(client, bufnr)
   log("attaching")
@@ -46,19 +23,21 @@ M.on_attach = function(client, bufnr)
 
   api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
-  -- https://github.com/fsouza
-  if client.resolved_capabilities.document_highlight then
-    documentHighlight()
-  end
-
   require("navigator.lspclient.mapping").setup({client = client, bufnr = bufnr, cap = client.resolved_capabilities})
 
-  vim.cmd [[silent! packadd vim-illuminate]]
-  local hasilm, ilm = pcall(require, "illuminate") -- package.loaded["illuminate"]
-  if hasilm then
-    ilm.on_attach(client)
+  if client.resolved_capabilities.document_highlight then
+    require("navigator.dochighlight").documentHighlight()
   end
+
   require "navigator.lspclient.lspkind".init()
+
+  if not package.loaded["illuminate"] then
+    vim.cmd [[silent! packadd vim-illuminate]]
+    local hasilm, ilm = pcall(require, "illuminate") -- package.loaded["illuminate"]
+    if hasilm then
+      ilm.on_attach(client)
+    end
+  end
 
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
