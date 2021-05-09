@@ -84,7 +84,9 @@ local setups = {
     end
   },
   rust_analyzer = {
-    root_dir = util.root_pattern("Cargo.toml", "rust-project.json", ".git"),
+    root_dir = function(fname)
+      return util.root_pattern("Cargo.toml", "rust-project.json", ".git")(fname) or util.path.dirname(fname)
+    end,
     filetypes = {"rust"},
     message_level = vim.lsp.protocol.MessageType.error,
     on_attach = on_attach,
