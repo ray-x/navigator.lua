@@ -31,13 +31,6 @@ M.on_attach = function(client, bufnr)
 
   require "navigator.lspclient.lspkind".init()
 
-  if not package.loaded["illuminate"] then
-    vim.cmd [[silent! packadd vim-illuminate]]
-    local hasilm, ilm = pcall(require, "illuminate") -- package.loaded["illuminate"]
-    if hasilm then
-      ilm.on_attach(client)
-    end
-  end
 
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true

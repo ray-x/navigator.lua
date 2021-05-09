@@ -5,11 +5,13 @@ local verbose = require "navigator.util".verbose
 _Loading = false
 
 if packer_plugins ~= nil then
+  -- packer installed
+  local loader = require "packer".loader
   if not packer_plugins["neovim/nvim-lspconfig"] or not packer_plugins["neovim/nvim-lspconfig"].loaded then
-    vim.cmd [[packadd nvim-lspconfig]]
+    loader("nvim-lspconfig")
   end
   if not packer_plugins["ray-x/guihua.lua"] or not packer_plugins["guihua.lua"].loaded then
-    vim.cmd [[packadd guihua.lua]]
+    loader("guihua.lua")
   -- if lazyloading
   end
 end

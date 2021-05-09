@@ -18,7 +18,7 @@ Easy code navigation through LSP and 🌲🏡Treesitter symbols, diagnostic erro
 
 After installed a handful of lsp plugins, I still got ~800 loc for lsp and treesitter and still increasing because I need
 to tune the lsp plugins to fit my requirements. Navigator.lua help user setup lspconfig with only a few lines of codes.
-This plugin provides a visual way to manage and navigate through symobls, errors, reference etc.
+This plugin provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc.
 It also the first plugin, IMO, that allows you to search in all treesitter symbols in the workspace.
 
 # Similar projects / special mentions:
@@ -32,9 +32,10 @@ It also the first plugin, IMO, that allows you to search in all treesitter symbo
 # Install
 
 You can remove your lspconfig setup and use this plugin.
-The plugin depends on [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(thanks [romgrk](romgrk/fzy-lua-native)).
+The plugin depends on lspconfig and [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(thanks [romgrk](romgrk/fzy-lua-native)).
 
 ```vim
+Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
 Plug 'ray-x/navigator.lua'
 ```
