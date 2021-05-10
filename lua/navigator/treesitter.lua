@@ -172,7 +172,7 @@ local function get_all_nodes(bufnr)
       item.kind = node.kind
       item.node_scope = get_smallest_context(item.tsdata)
       local start_line_node, _, _ = item.tsdata:start()
-      item.node_text = ts_utils.get_node_tex(item.tsdata, bufnr)[1]
+      item.node_text = ts_utils.get_node_text(item.tsdata, bufnr)[1]
       if item.node_text == "_" then
         goto continue
       end

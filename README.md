@@ -2,6 +2,8 @@
 
 Easy code navigation through LSP and 🌲🏡Treesitter symbols, diagnostic errors.
 
+![document symbol](https://github.com/ray-x/files/blob/master/img/navigator/doc_symbol.gif?raw=true)
+
 # Features:
 
 - LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type.
@@ -133,7 +135,7 @@ colorscheme: [aurora](https://github.com/ray-x/aurora)
 # Current symbol highlight and jump backword/forward between symbols
 
 Document highlight provided by LSP.
-Jump between symbols between symbols with treesitter
+Jump between symbols between symbols with treesitter (with `]r` and `[r`)
 ![doc jump](https://github.com/ray-x/files/blob/master/img/navigator/doc_hl_jump.gif?raw=true)
 
 ### Diagnostic

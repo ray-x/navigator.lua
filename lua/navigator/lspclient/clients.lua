@@ -252,7 +252,8 @@ local function load_cfg(ft, client, cfg, loaded)
   -- need to verify the lsp server is up
 end
 
-local function wait_lsp_startup(ft)
+local function wait_lsp_startup(ft, retry)
+  retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
   local loaded = {}
   for i = 1, 2 do
@@ -265,6 +266,9 @@ local function wait_lsp_startup(ft)
       local cfg = setups[lspclient] or default_cfg
       load_cfg(ft, lspclient, cfg, loaded)
     end
+    if not retry or ft == nil then
+      return
+    end
     --
     local timer = vim.loop.new_timer()
     local i = 0
@@ -273,7 +277,7 @@ local function wait_lsp_startup(ft)
       function()
         clients = vim.lsp.get_active_clients() or {}
         i = i + 1
-        if i > 10 or #clients > 0 then
+        if i > 5 or #clients > 0 then
           timer:close() -- Always close handles to avoid leaks.
           log("active", #clients, i)
           _Loading = false
@@ -286,14 +290,41 @@ local function wait_lsp_startup(ft)
   end
 end
 
-vim.cmd([[autocmd filetype * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
+vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
 
 local function setup(user_opts)
   verbose(debug.traceback())
   if _Loading == true then
     return
   end
+  local ft = vim.bo.filetype
+  if ft == nil then
+    ft = vim.api.nvim_buf_get_option(0, "filetype")
+  end
 
+  if ft == nil or ft == "" then
+    log("nil filetype")
+    return
+  end
+  log("loading for ft ", ft)
+  local retry = true
+  local disable_ft = {
+    "NvimTree",
+    "guihua",
+    "clap_input",
+    "clap_spinner",
+    "vista",
+    "TelescopePrompt",
+    "csv",
+    "txt",
+    "markdown",
+    "defx"
+  }
+  for i = 1, #disable_ft do
+    if ft == disable_ft[i] then
+      retry = false
+    end
+  end
   if lspconfig == nil then
     error("lsp-config need installed and enabled")
     return
@@ -302,16 +333,8 @@ local function setup(user_opts)
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
 
-  local ft = vim.bo.filetype
-  if ft == nil then
-    ft = vim.api.nvim_buf_get_option(0, "filetype")
-  end
-  if ft == nil or ft == "" then
-    log("nil filetype")
-    return
-  end
-
   _Loading = true
-  wait_lsp_startup(ft)
+  wait_lsp_startup(ft, retry)
+  _Loading = false
 end
 return {setup = setup, cap = cap}
