@@ -64,8 +64,10 @@ function M._preview_location(opts) --location, width, pos_x, pos_y
   local win_opts = {syntax = syntax, width = opts.width, pos_x = opts.offset_x or 0, pos_y = opts.offset_y or 10}
   win_opts.items = contents
   win_opts.hl_line = opts.lnum - range.start.line
-  if win_opts.hl_line < 0 then win_opts.hl_line = 1 end
-  log(opts.lnum, range.start.line, win_opts.hl_line)
+  if win_opts.hl_line < 0 then
+    win_opts.hl_line = 1
+  end
+  verbose(opts.lnum, range.start.line, win_opts.hl_line)
   local w = M.new_preview(win_opts)
 
   return w
@@ -96,7 +98,7 @@ function M.new_list_view(opts)
     data = require "guihua.util".aggregate_filename(items, opts)
   end
   local wwidth = api.nvim_get_option("columns")
-  local width = math.min( opts.width or config.width or 120, math.floor(wwidth * 0.8))
+  local width = math.min(opts.width or config.width or 120, math.floor(wwidth * 0.8))
   local wheight = config.height or math.floor(api.nvim_get_option("lines") * 0.8)
   local prompt = opts.prompt or false
   if data and not vim.tbl_isempty(data) then
@@ -132,8 +134,8 @@ function M.new_list_view(opts)
             end
             local l = data[pos]
             if l.filename ~= nil then
-              -- log ('openfile ', l.filename, l.lnum)
-              util.open_file_at(l.filename, l.lnum)
+              verbose("openfile ", l.filename, l.lnum, l.col)
+              util.open_file_at(l.filename, l.lnum, l.col)
             end
           end,
         on_move = opts.on_move or function(pos)

@@ -212,8 +212,10 @@ M.open_file = function(filename)
   vim.api.nvim_command(string.format("e! %s", filename))
 end
 
-M.open_file_at = function(filename, line)
+M.open_file_at = function(filename, line, col)
   vim.api.nvim_command(string.format("e! +%s %s", line, filename))
+  col = col or 1
+  vim.api.nvim_command(string.format("normal! %dl", col-1))
 end
 
 function M.exists(var)

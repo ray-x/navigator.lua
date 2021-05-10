@@ -322,7 +322,7 @@ local function setup(user_opts)
   }
   for i = 1, #disable_ft do
     if ft == disable_ft[i] then
-      retry = false
+      return
     end
   end
   if lspconfig == nil then
