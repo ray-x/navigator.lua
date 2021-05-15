@@ -8,13 +8,14 @@ local util = require "navigator.util"
 local M = {}
 
 local cwd = vim.fn.getcwd(0)
-local log = require "navigator.util".log
+local log = require"navigator.util".log
+local verbose = require"navigator.util".verbose
 
 local match_kinds = {
-  var = "👹", -- Vampaire
-  method = "🍔", -- mac
-  ["function"] = "🤣", -- Fun
-  parameter = " ", -- Pi
+  var = " ", -- "👹", -- Vampaire
+  method = "ƒ ", --  "🍔", -- mac
+  ["function"] = " ", -- "🤣", -- Fun
+  parameter = "  ", -- Pi
   associated = "🤝",
   namespace = "🚀",
   type = " ",
@@ -38,30 +39,35 @@ local function get_definitions(bufnr)
   local nodes_set = {}
   for _, loc in ipairs(local_nodes) do
     if loc.definition then
-      ts_locals.recurse_local_nodes(
-        loc.definition,
-        function(_, node, _, match)
-          -- lua doesn't compare tables by value,
-          -- use the value from byte count instead.
-          local _, _, start = node:start()
-          nodes_set[start] = {node = node, type = match or ""}
-        end
-      )
+      ts_locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
+        -- lua doesn't compare tables by value,
+        -- use the value from byte count instead.
+        local _, _, start = node:start()
+        nodes_set[start] = {node = node, type = match or ""}
+      end)
     end
   end
 
   -- Sort by order of appearance.
   local definition_nodes = vim.tbl_values(nodes_set)
-  table.sort(
-    definition_nodes,
-    function(a, b)
-      local _, _, start_a = a.node:start()
-      local _, _, start_b = b.node:start()
-      return start_a < start_b
-    end
-  )
+  table.sort(definition_nodes, function(a, b)
+    local _, _, start_a = a.node:start()
+    local _, _, start_b = b.node:start()
+    return start_a < start_b
+  end)
 
   return definition_nodes
+end
+
+local function prepare_node(node, kind)
+  local matches = {}
+  kind = kind or node.type
+  if node.node then
+    table.insert(matches, {kind = get_icon(kind), def = node.node, type = kind})
+  else
+    for name, item in pairs(node) do vim.list_extend(matches, prepare_node(item, name)) end
+  end
+  return matches
 end
 
 local function get_smallest_context(source)
@@ -70,32 +76,22 @@ local function get_smallest_context(source)
 
   while current ~= nil and not vim.tbl_contains(scopes, current) do
     current = current:parent()
+    log(current)
+    log(current.node)
+    log(current:range())
+    -- local nod = prepare_node(current)
+    -- log(nod)
   end
   return current or nil
 end
 
-local function prepare_node(node, kind)
-  local matches = {}
-
-  if node.node then
-    table.insert(matches, {kind = get_icon(kind), def = node.node})
-  else
-    for name, item in pairs(node) do
-      vim.list_extend(matches, prepare_node(item, name))
-    end
-  end
-  return matches
-end
-
-local lsp_reference = require "navigator.dochighlight".goto_adjent_reference
+local lsp_reference = require"navigator.dochighlight".goto_adjent_reference
 
 function M.goto_adjacent_usage(bufnr, delta)
   local opt = {forward = true}
   log(delta)
-  if delta < 0 then
-    opt = {forward = false}
-  end
-  local bufnr = bufnr or api.nvim_get_current_buf()
+  if delta < 0 then opt = {forward = false} end
+  bufnr = bufnr or api.nvim_get_current_buf()
   local node_at_point = ts_utils.get_node_at_cursor()
   if not node_at_point then
     lsp_reference(opt)
@@ -115,18 +111,13 @@ function M.goto_adjacent_usage(bufnr, delta)
   ts_utils.goto_node(usages[target_index])
 end
 
-function M.goto_next_usage(bufnr)
-  return M.goto_adjacent_usage(bufnr, 1)
-end
-function M.goto_previous_usage(bufnr)
-  return M.goto_adjacent_usage(bufnr, -1)
-end
+function M.goto_next_usage(bufnr) return M.goto_adjacent_usage(bufnr, 1) end
+function M.goto_previous_usage(bufnr) return M.goto_adjacent_usage(bufnr, -1) end
 
-local function get_all_nodes(bufnr)
+local function get_all_nodes(bufnr, filter, summary)
   bufnr = bufnr or 0
-  if not parsers.has_parser() then
-    print("ts not loaded")
-  end
+  summary = summary or false
+  if not parsers.has_parser() then print("ts not loaded") end
   local fname = vim.fn.expand("%:p:f")
   local uri = vim.uri_from_fname(fname)
   if bufnr ~= 0 then
@@ -141,12 +132,7 @@ local function get_all_nodes(bufnr)
 
   -- Force some types to act like they are parents
   -- instead of neighbors of the next nodes.
-  local containers = {
-    ["function"] = true,
-    ["type"] = true,
-    ["method"] = true
-  }
-
+  local containers = {["function"] = true, ["type"] = true, ["method"] = true}
   -- Step 2 find correct completions
   local length = 10
   local parents = {} -- stack of nodes a clever algorithm from treesiter refactor @Santos Gallegos
@@ -155,10 +141,8 @@ local function get_all_nodes(bufnr)
     for i = 1, n do
       local index = n + 1 - i
       local parent_def = parents[index]
-      if
-        ts_utils.is_parent(parent_def.node, def.node) or
-          (containers[parent_def.type] and ts_utils.is_parent(parent_def.node:parent(), def.node))
-       then
+      if ts_utils.is_parent(parent_def.node, def.node) or
+          (containers[parent_def.type] and ts_utils.is_parent(parent_def.node:parent(), def.node)) then
         break
       else
         parents[index] = nil
@@ -167,17 +151,25 @@ local function get_all_nodes(bufnr)
     parents[#parents + 1] = def
     local nodes = prepare_node(def)
     local item = {}
+
     for _, node in ipairs(nodes) do
-      item.tsdata = node.def or {}
       item.kind = node.kind
-      item.node_scope = get_smallest_context(item.tsdata)
-      local start_line_node, _, _ = item.tsdata:start()
-      item.node_text = ts_utils.get_node_text(item.tsdata, bufnr)[1]
-      if item.node_text == "_" then
+      item.type = node.type
+      local tsdata = node.def
+      local scope = get_smallest_context(tsdata)
+      if node.def == nil then goto continue end
+      local start_line_node, _, _ = tsdata:start()
+      item.range = ts_utils.node_to_lsp_range(tsdata)
+      item.node_text = ts_utils.get_node_text(tsdata, bufnr)[1]
+      if filter ~= nil and not filter[item.type] then goto continue end
+      if summary then
+        table.insert(all_nodes, item)
         goto continue
       end
+
+      item.node_scope = scope
+      if item.node_text == "_" then goto continue end
       item.full_text = vim.trim(api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1] or "")
-      item.range = ts_utils.node_to_lsp_range(item.tsdata)
       item.uri = uri
       item.name = node.node_text
       item.filename = fname
@@ -186,14 +178,10 @@ local function get_all_nodes(bufnr)
       item.lnum = item.lnum + 1
       item.col = item.col + 1
       local indent = ""
-      if #parents > 1 then
-        indent = string.rep("  ", #parents - 1) .. " "
-      end
+      if #parents > 1 then indent = string.rep("  ", #parents - 1) .. " " end
 
-      item.text = string.format("%s%s%-10s\t🧩 %s", item.kind, indent, item.node_text, item.full_text)
-      if #item.text > length then
-        length = #item.text
-      end
+      item.text = string.format(" %s %s%-10s\t %s", item.kind, indent, item.node_text, item.full_text)
+      if #item.text > length then length = #item.text end
       table.insert(all_nodes, item)
       ::continue::
     end
@@ -201,13 +189,30 @@ local function get_all_nodes(bufnr)
   return all_nodes, length
 end
 
+function M.buf_func()
+  if ts_locals == nil then
+    error("treesitter not loaded")
+    return
+  end
+
+  local bufnr = api.nvim_get_current_buf()
+  local all_nodes, width = get_all_nodes(bufnr, {["function"] = true, ["method"] = true}, true)
+  -- log(all_nodes, width)
+  return all_nodes
+
+end
+
 function M.buf_ts()
   if ts_locals == nil then
     error("treesitter not loaded")
     return
   end
-  local all_nodes, width = get_all_nodes()
-  gui.new_list_view({items = all_nodes, prompt = true, rawdata = true, width = width + 10, api = "🎄"})
+
+  local bufnr = api.nvim_get_current_buf()
+  local all_nodes, width = get_all_nodes(bufnr)
+
+  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
+  gui.new_list_view({items = all_nodes, prompt = true, ft = ft, rawdata = true, width = width + 10, api = "🎄"})
 end
 
 function M.bufs_ts()
@@ -224,17 +229,17 @@ function M.bufs_ts()
       if vim.api.nvim_buf_is_loaded(buf) then
         local all_nodes, length = get_all_nodes(buf)
         if all_nodes ~= nil then
-          if length > max_length then
-            max_length = length
-          end
+          if length > max_length then max_length = length end
           vim.list_extend(ts_opened, all_nodes)
         end
       end
     end
   end
   if #ts_opened > 1 then
-    log(ts_opened)
-    gui.new_list_view({items = ts_opened, prompt = true, width = max_length + 10, api = "🎄"})
+    verbose(ts_opened)
+
+    local ft = vim.api.nvim_buf_get_option(0, "ft")
+    gui.new_list_view({items = ts_opened, prompt = true, ft = ft, width = max_length + 10, api = "🎄"})
   end
 end
 
