@@ -9,12 +9,15 @@ _NgConfigValues = {
   --   -- your on_attach will be called at end of navigator on_attach
   -- end,
   sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
-  sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
-  code_action_prompt = {
-    enable = true,
-    sign = true,
-    sign_priority = 40,
-    virtual_text = true
+  sumneko_binary = vim.fn.expand("$HOME") ..
+      "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
+  code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+  lsp = {
+    format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+    tsserver = {
+      filetypes = {'typescript'} -- disable javascript etc,
+      -- set to {} to disable the lspclient for all filetype
+    }
   }
 }
 
@@ -23,27 +26,21 @@ vim.cmd("command! -nargs=0 LspRestart call v:lua.reload_lsp()")
 
 local extend_config = function(opts)
   opts = opts or {}
-  if next(opts) == nil then
-    return
-  end
+  if next(opts) == nil then return end
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then
       error(string.format("[] Key %s not valid", key))
       return
     end
-    if type(M.config_values[key]) == "table" then
-      for k, v in pairs(value) do
-        _NgConfigValues[key][k] = v
-      end
+    if type(_NgConfigValues[key]) == "table" then
+      for k, v in pairs(value) do _NgConfigValues[key][k] = v end
     else
       _NgConfigValues[key] = value
     end
   end
 end
 
-M.config_values = function()
-  return _NgConfigValues
-end
+M.config_values = function() return _NgConfigValues end
 
 M.setup = function(cfg)
   extend_config(cfg)
