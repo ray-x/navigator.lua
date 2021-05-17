@@ -5,8 +5,16 @@ local gui = require "navigator.gui"
 local log = util.log
 local TextView = require("guihua.textview")
 -- callback for lsp definition, implementation and declaration handler
-local function definition_hdlr(_, _, locations, _, bufnr)
+local function definition_hdlr(err, _, locations, _, bufnr)
   -- log(locations)
+  if err ~= nil then
+    print(err)
+    return
+  end
+  if type(locations) == "number" then
+    log(locations)
+    err("unable to handle request")
+  end
   if locations == nil or vim.tbl_isempty(locations) then
     print "Definition not found"
     return
@@ -38,9 +46,7 @@ local function def_preview(timeout_ms)
   -- result = {vim.tbl_deep_extend("force", {}, unpack(result))}
   -- log("def-preview", result)
   for key, value in pairs(result) do
-    if result[key] ~= nil then
-      table.insert(data, value.result[1])
-    end
+    if result[key] ~= nil then table.insert(data, value.result[1]) end
   end
   local range = data[1].targetRange or data[1].range
 
@@ -49,13 +55,9 @@ local function def_preview(timeout_ms)
   row = math.max(row - 3, 1)
   local delta = range.start.line - row + 1
   local uri = data[1].uri or data[1].targetUri
-  if not uri then
-    return
-  end
+  if not uri then return end
   local bufnr = vim.uri_to_bufnr(uri)
-  if not vim.api.nvim_buf_is_loaded(bufnr) then
-    vim.fn.bufload(bufnr)
-  end
+  if not vim.api.nvim_buf_is_loaded(bufnr) then vim.fn.bufload(bufnr) end
   -- TODO: 12 should be an option
   local definition = vim.api.nvim_buf_get_lines(bufnr, row, range["end"].line + 12, false)
   local def_line = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range.start.line + 1, false)

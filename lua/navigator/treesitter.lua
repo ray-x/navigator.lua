@@ -1,5 +1,9 @@
 local gui = require "navigator.gui"
-local ts_locals = require "nvim-treesitter.locals"
+
+local ok, ts_locals = pcall(require, "nvim-treesitter.locals")
+
+if not ok then error("treesitter not installed") end
+
 local parsers = require "nvim-treesitter.parsers"
 local ts_utils = require "nvim-treesitter.ts_utils"
 local utils = require "nvim-treesitter.utils"
@@ -70,26 +74,47 @@ local function prepare_node(node, kind)
   return matches
 end
 
+local function get_var_context(source)
+  local sbl, sbc, sel, sec = source:range()
+  local current = source
+  local result = current
+  local next = ts_utils.get_next_node(source)
+  local parent = current:parent()
+
+  if next == nil or parent == nil then return end
+  if next:type() == "function" or next:type() == "arrow_function" then
+    log(current:type(), current:range())
+    return parent
+  else
+    return source
+  end
+  -- while current ~= nil do
+  --   log(current:type(), current:range())
+  --   if current:type() == "variable_declarator" or current:type() == "function_declaration" then
+  --     return current
+  --   end
+  --   -- local bl, bc, el, ec = current:range()
+  --   -- if bl == sbl and bc == sbc and el >= sel and ec >= sec then result = current end
+  --   current = current:parent()
+  -- end
+  -- log(current)
+end
+
 local function get_smallest_context(source)
   local scopes = ts_locals.get_scopes()
   local current = source
-
-  while current ~= nil and not vim.tbl_contains(scopes, current) do
-    current = current:parent()
-    log(current)
-    log(current.node)
-    log(current:range())
-    -- local nod = prepare_node(current)
-    -- log(nod)
-  end
-  return current or nil
+  while current ~= nil and not vim.tbl_contains(scopes, current) do current = current:parent() end
+  log(current)
+  if current ~= nil then return current end
+  return get_var_context(source)
+  -- if source:type() == "identifier" then return get_var_context(source) end
 end
 
 local lsp_reference = require"navigator.dochighlight".goto_adjent_reference
 
 function M.goto_adjacent_usage(bufnr, delta)
   local opt = {forward = true}
-  log(delta)
+  -- log(delta)
   if delta < 0 then opt = {forward = false} end
   bufnr = bufnr or api.nvim_get_current_buf()
   local node_at_point = ts_utils.get_node_at_cursor()
@@ -132,7 +157,13 @@ local function get_all_nodes(bufnr, filter, summary)
 
   -- Force some types to act like they are parents
   -- instead of neighbors of the next nodes.
-  local containers = {["function"] = true, ["type"] = true, ["method"] = true}
+  local containers = {
+    ["function"] = true,
+    ["arrow_function"] = true,
+    ["type"] = true,
+    ["class"] = true,
+    ["method"] = true
+  }
   -- Step 2 find correct completions
   local length = 10
   local parents = {} -- stack of nodes a clever algorithm from treesiter refactor @Santos Gallegos
@@ -156,20 +187,28 @@ local function get_all_nodes(bufnr, filter, summary)
       item.kind = node.kind
       item.type = node.type
       local tsdata = node.def
-      local scope = get_smallest_context(tsdata)
+
+      log(item.type, tsdata:type())
       if node.def == nil then goto continue end
-      local start_line_node, _, _ = tsdata:start()
-      item.range = ts_utils.node_to_lsp_range(tsdata)
       item.node_text = ts_utils.get_node_text(tsdata, bufnr)[1]
+
+      local scope = get_smallest_context(tsdata)
+      if scope ~= nil then
+        -- it is strange..
+        log(item.node_text, item.kind, item.type)
+        item.node_scope = ts_utils.node_to_lsp_range(scope)
+      end
       if filter ~= nil and not filter[item.type] then goto continue end
       if summary then
-        table.insert(all_nodes, item)
+        if item.node_scope ~= nil then table.insert(all_nodes, item) end
         goto continue
       end
 
-      item.node_scope = scope
+      item.range = ts_utils.node_to_lsp_range(tsdata)
+      local start_line_node, _, _ = tsdata:start()
       if item.node_text == "_" then goto continue end
-      item.full_text = vim.trim(api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1] or "")
+      item.full_text = vim.trim(api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1,
+                                                       false)[1] or "")
       item.uri = uri
       item.name = node.node_text
       item.filename = fname
@@ -180,24 +219,44 @@ local function get_all_nodes(bufnr, filter, summary)
       local indent = ""
       if #parents > 1 then indent = string.rep("  ", #parents - 1) .. " " end
 
-      item.text = string.format(" %s %s%-10s\t %s", item.kind, indent, item.node_text, item.full_text)
+      item.text = string.format(" %s %s%-10s\t %s", item.kind, indent, item.node_text,
+                                item.full_text)
       if #item.text > length then length = #item.text end
       table.insert(all_nodes, item)
       ::continue::
     end
   end
+  verbose(all_nodes)
   return all_nodes, length
 end
 
-function M.buf_func()
-  if ts_locals == nil then
+function M.buf_func(bufnr)
+  if not ok or ts_locals == nil then
     error("treesitter not loaded")
     return
   end
 
-  local bufnr = api.nvim_get_current_buf()
-  local all_nodes, width = get_all_nodes(bufnr, {["function"] = true, ["method"] = true}, true)
-  -- log(all_nodes, width)
+  bufnr = bufnr or api.nvim_get_current_buf()
+  local all_nodes, width = get_all_nodes(bufnr, {
+    ["function"] = true,
+    ["var"] = true,
+    ["method"] = true,
+    ["class"] = true,
+    ["type"] = true
+  }, true)
+  table.sort(all_nodes, function(i, j)
+    if i.range and j.range then
+      if i.range.start.line == j.range.start.line then
+        return i.range['end'].line < j.range['end'].line
+      else
+        return i.range.start.line < j.range.start.line
+      end
+    end
+    return false
+  end)
+
+  verbose(all_nodes, width)
+
   return all_nodes
 
 end
@@ -212,7 +271,14 @@ function M.buf_ts()
   local all_nodes, width = get_all_nodes(bufnr)
 
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
-  gui.new_list_view({items = all_nodes, prompt = true, ft = ft, rawdata = true, width = width + 10, api = "🎄"})
+  gui.new_list_view({
+    items = all_nodes,
+    prompt = true,
+    ft = ft,
+    rawdata = true,
+    width = width + 10,
+    api = "🎄"
+  })
 end
 
 function M.bufs_ts()
@@ -239,7 +305,13 @@ function M.bufs_ts()
     verbose(ts_opened)
 
     local ft = vim.api.nvim_buf_get_option(0, "ft")
-    gui.new_list_view({items = ts_opened, prompt = true, ft = ft, width = max_length + 10, api = "🎄"})
+    gui.new_list_view({
+      items = ts_opened,
+      prompt = true,
+      ft = ft,
+      width = max_length + 10,
+      api = "🎄"
+    })
   end
 end
 

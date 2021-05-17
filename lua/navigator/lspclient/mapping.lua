@@ -3,7 +3,8 @@ local function set_keymap(...) vim.api.nvim_set_keymap(...) end
 
 local event_hdlrs = {
   {ev = "BufWritePre", func = "diagnostic.set_loclist({open_loclist = false})"},
-  {ev = "CursorHold", func = "document_highlight()"}, {ev = "CursorHoldI", func = "document_highlight()"},
+  {ev = "CursorHold", func = "document_highlight()"},
+  {ev = "CursorHoldI", func = "document_highlight()"},
   {ev = "CursorMoved", func = "clear_references()"}
 }
 
@@ -11,13 +12,15 @@ local key_maps = {
   {key = "gr", func = "references()"}, {mode = "i", key = "<M-k>", func = "signature_help()"},
   {key = "gs", func = "signature_help()"}, {key = "g0", func = "document_symbol()"},
   {key = "gW", func = "workspace_symbol()"}, {key = "<c-]>", func = "definition()"},
-  {key = "gD", func = "declaration()"}, {key = "gp", func = "require('navigator.definition').definition_preview()"},
+  {key = "gD", func = "declaration()"},
+  {key = "gp", func = "require('navigator.definition').definition_preview()"},
   {key = "gT", func = "require('navigator.treesitter').buf_ts()"},
   {key = "GT", func = "require('navigator.treesitter').bufs_ts()"}, {key = "K", func = "hover()"},
-  {key = "ga", mode = "n", func = "code_action()"}, {key = "ga", mode = "v", func = "range_code_action()"},
-  {key = "<Leader>re", func = "rename()"}, {key = "<Leader>gi", func = "incoming_calls()"},
-  {key = "<Leader>go", func = "outgoing_calls()"}, {key = "gi", func = "implementation()"},
-  {key = "gt", func = "type_definition()"}, {key = "gL", func = "diagnostic.show_line_diagnostics()"},
+  {key = "ga", mode = "n", func = "code_action()"},
+  {key = "ga", mode = "v", func = "range_code_action()"}, {key = "<Leader>re", func = "rename()"},
+  {key = "<Leader>gi", func = "incoming_calls()"}, {key = "<Leader>go", func = "outgoing_calls()"},
+  {key = "gi", func = "implementation()"}, {key = "gt", func = "type_definition()"},
+  {key = "gL", func = "diagnostic.show_line_diagnostics()"},
   {key = "gG", func = "require('navigator.diagnostics').show_diagnostic()"},
   {key = "]d", func = "diagnostic.goto_next()"}, {key = "[d", func = "diagnostic.goto_prev()"},
   {key = "]r", func = "require('navigator.treesitter').goto_next_usage()"},
@@ -77,7 +80,9 @@ local function set_mapping(user_opts)
     vim.cmd([[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()]])
   end
   -- if user_opts.cap.document_range_formatting then
-  if range_fmt then buf_set_keymap("v", "<space>ff", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts) end
+  if range_fmt then
+    buf_set_keymap("v", "<space>ff", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
+  end
 end
 
 local function set_event_handler(user_opts)
@@ -94,7 +99,8 @@ local function set_event_handler(user_opts)
     else
       f = "lua vim.lsp.buf." .. value.func
     end
-    local cmd = "autocmd FileType " .. file_types .. " autocmd nvim_lsp_autos " .. value.ev .. " <buffer> silent! " .. f
+    local cmd = "autocmd FileType " .. file_types .. " autocmd nvim_lsp_autos " .. value.ev ..
+                    " <buffer> silent! " .. f
     vim.api.nvim_command(cmd)
   end
   vim.api.nvim_command([[augroup END]])
@@ -110,8 +116,10 @@ function M.setup(user_opts)
   set_event_handler(user_opts)
   local cap = user_opts.cap or {}
   if cap.call_hierarchy or cap.callHierarchy then
-    vim.lsp.handlers["callHierarchy/incomingCalls"] = require"navigator.hierarchy".incoming_calls_handler
-    vim.lsp.handlers["callHierarchy/outgoingCalls"] = require"navigator.hierarchy".outgoing_calls_handler
+    vim.lsp.handlers["callHierarchy/incomingCalls"] =
+        require"navigator.hierarchy".incoming_calls_handler
+    vim.lsp.handlers["callHierarchy/outgoingCalls"] =
+        require"navigator.hierarchy".outgoing_calls_handler
   end
 
   vim.lsp.handlers["textDocument/references"] = require"navigator.reference".reference_handler
@@ -122,15 +130,21 @@ function M.setup(user_opts)
     vim.lsp.handlers["textDocument/declaration"] = require"navigator.definition".declaration_handler
   end
 
-  vim.lsp.handlers["textDocument/typeDefinition"] = require"navigator.definition".typeDefinition_handler
-  vim.lsp.handlers["textDocument/implementation"] = require"navigator.implementation".implementation_handler
+  vim.lsp.handlers["textDocument/typeDefinition"] =
+      require"navigator.definition".typeDefinition_handler
+  vim.lsp.handlers["textDocument/implementation"] =
+      require"navigator.implementation".implementation_handler
 
-  vim.lsp.handlers["textDocument/documentSymbol"] = require"navigator.symbols".document_symbol_handler
+  vim.lsp.handlers["textDocument/documentSymbol"] =
+      require"navigator.symbols".document_symbol_handler
   vim.lsp.handlers["workspace/symbol"] = require"navigator.symbols".workspace_symbol_handler
-  vim.lsp.handlers["textDocument/publishDiagnostics"] = require"navigator.diagnostics".diagnostic_handler
+  vim.lsp.handlers["textDocument/publishDiagnostics"] =
+      require"navigator.diagnostics".diagnostic_handler
 
   local hassig, sig = pcall(require, "lsp_signature")
-  if not hassig then vim.lsp.handlers["textDocument/signatureHelp"] = require"navigator.signature".signature_handler end
+  if not hassig then
+    vim.lsp.handlers["textDocument/signatureHelp"] = require"navigator.signature".signature_handler
+  end
 
   -- vim.lsp.handlers["textDocument/hover"]  = require 'navigator.hover'.hover_handler
 end

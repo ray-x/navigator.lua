@@ -17,19 +17,17 @@ end
 
 local function implementation_handler(bang, err, method, result, client_id, bufnr)
   local results = location_handler(err, method, result, client_id, bufnr, "Implementation not found")
-  gui.new_list_view({items =results, api = 'Implementation'})
+  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
+  gui.new_list_view({items = results, ft = ft, api = 'Implementation'})
 end
 
 function M.implementation(bang, opts)
-  if not lsphelper.check_capabilities("implementation") then
-    return
-  end
+  if not lsphelper.check_capabilities("implementation") then return end
 
   local params = vim.lsp.util.make_position_params()
+
   util.call_sync("textDocument/implementation", params, opts, partial(implementation_handler, bang))
 end
-
-
 
 M.implementation_call = partial(M.implementation, 0)
 

@@ -1,10 +1,10 @@
 local gui = require "navigator.gui"
 local M = {}
-local log = require "navigator.util".log
+local log = require"navigator.util".log
 local lsphelper = require "navigator.lspwrapper"
 local locations_to_items = lsphelper.locations_to_items
-local clone = require "guihua.util".clone
-local symbol_kind = require "navigator.lspclient.lspkind".symbol_kind
+local clone = require"guihua.util".clone
+local symbol_kind = require"navigator.lspclient.lspkind".symbol_kind
 local symbols_to_items = lsphelper.symbols_to_items
 
 -- function M.document_symbols(opts)
@@ -46,7 +46,8 @@ function M.workspace_symbols(opts)
   local params = vim.lsp.util.make_position_params()
   params.context = {includeDeclaration = true}
   params.query = opts.prompt or ""
-  local results_lsp = vim.lsp.buf_request_sync(0, "workspace/symbol", params, lspopts.timeout or 15000)
+  local results_lsp = vim.lsp.buf_request_sync(0, "workspace/symbol", params,
+                                               lspopts.timeout or 15000)
   if not results_lsp or vim.tbl_isempty(results_lsp) then
     print(bufnr, "symbol not found for buf")
     return
@@ -54,16 +55,18 @@ function M.workspace_symbols(opts)
   -- result_lsp
   local result = {}
   for i = 1, #results_lsp do
-    if results_lsp[i] ~= nil and results_lsp[i].result ~= nil and #results_lsp[i].result > 0 then
-      result = results_lsp[i].result
-    end
+    if results_lsp[i] ~= nil and results_lsp[i].result ~= nil and
+        #results_lsp[i].result > 0 then result = results_lsp[i].result end
   end
 
   local items = symbols_to_items(result)
   -- log(#items, items[1])
 
+  local ft = vim.api.nvim_buf_get_option(0, "ft")
+
   if #items > 0 then
     lspopts.items = items
+    lspopts.ft = ft
     gui.new_list_view(lspopts)
   else
     print("symbols not found")
@@ -71,9 +74,7 @@ function M.workspace_symbols(opts)
 end
 
 function M.document_symbol_handler(err, _, result, _, bufnr)
-  if err then
-    print(bufnr, "failed to get document symbol")
-  end
+  if err then print(bufnr, "failed to get document symbol") end
 
   if not result or vim.tbl_isempty(result) then
     print(bufnr, "symbol not found for buf")
@@ -94,9 +95,7 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
     item.uri = uri
     item.selectionRange = result[i].selectionRange
     item.detail = result[i].detail or ""
-    if item.detail == "()" then
-      item.detail = "func"
-    end
+    if item.detail == "()" then item.detail = "func" end
 
     item.lnum = result[i].range.start.line + 1
     item.text = "[" .. kind .. "]" .. item.detail .. " " .. item.name
@@ -116,14 +115,23 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
         child.uri = uri
         child.lnum = c.range.start.line + 1
         child.detail = c.detail or ""
-        child.text = "   [" .. ckind .. "] " .. child.detail .. " " .. child.name
+        child.text = "   [" .. ckind .. "] " .. child.detail .. " " ..
+                         child.name
         table.insert(locations, child)
       end
     end
   end
+
+  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
   -- verbose(locations)
   -- local items = locations_to_items(locations)
-  gui.new_list_view({items = locations, prompt = true, rawdata = true, api = " "})
+  gui.new_list_view({
+    items = locations,
+    prompt = true,
+    rawdata = true,
+    ft = ft,
+    api = " "
+  })
 
   -- if locations == nil or vim.tbl_isempty(locations) then
   --   print "References not found"
@@ -147,9 +155,7 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
 end
 
 function M.workspace_symbol_handler(err, _, result, _, bufnr)
-  if err then
-    print(bufnr, "failed to get workspace symbol")
-  end
+  if err then print(bufnr, "failed to get workspace symbol") end
   if not result or vim.tbl_isempty(result) then
     print(bufnr, "symbol not found for buf")
     return
@@ -170,7 +176,15 @@ function M.workspace_symbol_handler(err, _, result, _, bufnr)
   --   table.insert(locations, item)
   -- end
   -- local items = locations_to_items(locations)
-  gui.new_list_view({items = items, prompt = true, rowdata = true, api = " "})
+
+  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
+  gui.new_list_view({
+    items = items,
+    prompt = true,
+    ft = ft,
+    rowdata = true,
+    api = " "
+  })
 
   -- if locations == nil or vim.tbl_isempty(locations) then
   --   print "References not found"

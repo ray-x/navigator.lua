@@ -23,37 +23,13 @@ local kind_symbols = {
   Struct = " ",
   Event = "ﳅ",
   Operator = "",
-  TypeParameter = "",
+  TypeParameter = " ",
   Default = ""
 }
 
 local CompletionItemKind = {
-  " ",
-  "𝔉 ",
-  "ⓕ ",
-  " ",
-  "ﴲ ",
-  " ",
-  " ",
-  "ﰮ ",
-  " ",
-  " ",
-  " ",
-  " ",
-  "𝕰 ",
-  " ",
-  "﬌ ",
-  " ",
-  " ",
-  " ",
-  " ",
-  " ",
-  " ",
-  " ",
-  "ﳅ ",
-  " ",
-  " ",
-  " "
+  " ", "𝔉 ", "ⓕ ", " ", "ﴲ ", " ", " ", "ﰮ ", " ", " ", " ", " ", "𝕰 ", " ",
+  "﬌ ", " ", " ", " ", " ", " ", " ", " ", "ﳅ ", " ", " ", " "
 }
 
 -- A symbol kind.
@@ -87,18 +63,14 @@ local SymbolKind = {
 }
 
 local SymbolItemKind = {
-  " ", " ", " ", " ", "פּ ", "ƒ ", " ", "ﴲ ", " ", "𝕰 ", "蘒", " ", " ", " ", " ", " ", " ", " ", " ", " ", "ﳠ ", " ", " ", "ﳅ ", " ", " ", " " }
+  " ", " ", " ", " ", "פּ ", "ƒ ", " ", "ﴲ ", " ", "𝕰 ", "蘒", " ", " ", " ", " ",
+  " ", " ", " ", " ", " ", "ﳠ ", " ", " ", "ﳅ ", " ", " ", " "
+}
 
 local lspkind = {}
-function lspkind.comp_kind(kind)
-  return CompletionItemKind[kind] or ""
-end
+function lspkind.comp_kind(kind) return CompletionItemKind[kind] or "" end
 
-function lspkind.symbol_kind(kind)
-  return SymbolItemKind[kind] or ""
-end
+function lspkind.symbol_kind(kind) return SymbolItemKind[kind] or "" end
 
-function lspkind.init()
-   require('vim.lsp.protocol').CompletionItemKind = CompletionItemKind
-end
+function lspkind.init() require('vim.lsp.protocol').CompletionItemKind = CompletionItemKind end
 return lspkind
