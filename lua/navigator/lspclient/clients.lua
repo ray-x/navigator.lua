@@ -1,6 +1,6 @@
 -- todo allow config passed in
 local log = require"navigator.util".log
-local verbose = require"navigator.util".verbose
+local trace = require"navigator.util".trace
 
 _Loading = false
 
@@ -8,7 +8,9 @@ if packer_plugins ~= nil then
   -- packer installed
   local loader = require"packer".loader
   if not packer_plugins["neovim/nvim-lspconfig"] or
-      not packer_plugins["neovim/nvim-lspconfig"].loaded then loader("nvim-lspconfig") end
+      not packer_plugins["neovim/nvim-lspconfig"].loaded then
+    loader("nvim-lspconfig")
+  end
   if not packer_plugins["ray-x/guihua.lua"] or not packer_plugins["guihua.lua"].loaded then
     loader("guihua.lua")
     -- if lazyloading
@@ -16,13 +18,15 @@ if packer_plugins ~= nil then
 end
 
 local has_lsp, lspconfig = pcall(require, "lspconfig")
-if not has_lsp then error("loading lsp config") end
+if not has_lsp then
+  error("loading lsp config")
+end
 local highlight = require "navigator.lspclient.highlight"
 
 local util = lspconfig.util
 local config = require"navigator".config_values()
 
-local cap = vim.lsp.protocol.make_client_capabilities()
+-- local cap = vim.lsp.protocol.make_client_capabilities()
 local on_attach = require("navigator.lspclient.attach").on_attach
 -- gopls["ui.completion.usePlaceholders"] = true
 
@@ -48,7 +52,9 @@ add("$VIMRUNTIME")
 
 -- add your config
 local home = vim.fn.expand("$HOME")
-if vim.fn.isdirectory(home .. "/.config/nvim") then add(home .. "/.config/nvim") end
+if vim.fn.isdirectory(home .. "/.config/nvim") then
+  add(home .. "/.config/nvim")
+end
 
 -- add plugins it may be very slow to add all in path
 -- if vim.fn.isdirectory(home .. "/.config/share/nvim/site/pack/packer") then
@@ -64,7 +70,7 @@ library[vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true
 local setups = {
   gopls = {
     on_attach = on_attach,
-    capabilities = cap,
+    -- capabilities = cap,
     filetypes = {"go", "gomod"},
     message_level = vim.lsp.protocol.MessageType.Error,
     cmd = {
@@ -86,8 +92,9 @@ local setups = {
         completeUnimported = true,
         staticcheck = true,
         matcher = "fuzzy",
+        experimentalDiagnosticsDelay = "500ms",
         symbolMatcher = "fuzzy",
-        gofumpt = true,
+        gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
         buildFlags = {"-tags", "integration"}
         -- buildFlags = {"-tags", "functional"}
       }
@@ -204,22 +211,25 @@ local default_cfg = {on_attach = on_attach}
 
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
-  -- log("trying", client)
 
   if lspconfig[client] == nil then
-    log("not supported", client)
+    log("not supported by nvim", client)
     return
   end
   local lspft = lspconfig[client].document_config.default_config.filetypes
 
   local should_load = false
   if lspft ~= nil and #lspft > 0 then
-    for _, value in ipairs(lspft) do if ft == value then should_load = true end end
+    for _, value in ipairs(lspft) do
+      if ft == value then
+        should_load = true
+      end
+    end
     if should_load then
       for _, c in pairs(loaded) do
         if client == c then
           -- loaded
-          verbose(client, "already been loaded for", ft, loaded)
+          trace(client, "already been loaded for", ft, loaded)
           return
         end
       end
@@ -230,19 +240,36 @@ local function load_cfg(ft, client, cfg, loaded)
   -- need to verify the lsp server is up
 end
 
-local function wait_lsp_startup(ft, retry)
+local function wait_lsp_startup(ft, retry, lsp_opts)
   retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
   local loaded = {}
-  for i = 1, 2 do
+  for _ = 1, 2 do
     for _, client in ipairs(clients) do
-      if client ~= nil then table.insert(loaded, client.name) end
+      if client ~= nil then
+        table.insert(loaded, client.name)
+      end
     end
     for _, lspclient in ipairs(servers) do
+      if lsp_opts[lspclient] ~= nil and lsp_opts[lspclient].filetypes ~= nil then
+        if not vim.tbl_contains(lsp_opts[lspclient].filetypes, ft) then
+          trace("ft", ft, "disabled for", lspclient)
+          goto continue
+        end
+      end
       local cfg = setups[lspclient] or default_cfg
+      -- if user provides override values
+      -- if lsp_opts[lspclient] ~= nil and lsp_opts[lspclient] ~= nil then
+      --   local ret = vim.tbl_extend("force", cfg, lsp_opts[lspclient])
+      --   log(lsp_opts[lspclient].settings, cfg, ret)
+      -- end
+
       load_cfg(ft, lspclient, cfg, loaded)
+      ::continue::
     end
-    if not retry or ft == nil then return end
+    if not retry or ft == nil then
+      return
+    end
     --
     local timer = vim.loop.new_timer()
     local i = 0
@@ -251,7 +278,7 @@ local function wait_lsp_startup(ft, retry)
       i = i + 1
       if i > 5 or #clients > 0 then
         timer:close() -- Always close handles to avoid leaks.
-        verbose("active", #clients, i)
+        trace("active", #clients, i)
         _Loading = false
         return true
       end
@@ -260,18 +287,19 @@ local function wait_lsp_startup(ft, retry)
   end
 end
 
-vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
-
 local function setup(user_opts)
-  verbose(debug.traceback())
-  if lspconfig == nil then
-    error("lsp-config need installed and enabled")
+
+  log(user_opts)
+  trace(debug.traceback())
+  user_opts = user_opts or _NgConfigValues -- incase setup was triggered from autocmd
+
+  if _Loading == true then
     return
   end
-
-  if _Loading == true then return end
   local ft = vim.bo.filetype
-  if ft == nil then ft = vim.api.nvim_buf_get_option(0, "filetype") end
+  if ft == nil then
+    ft = vim.api.nvim_buf_get_option(0, "filetype")
+  end
 
   if ft == nil or ft == "" then
     log("nil filetype")
@@ -284,24 +312,32 @@ local function setup(user_opts)
   }
   for i = 1, #disable_ft do
     if ft == disable_ft[i] then
-      log("navigator disabled for ft", ft)
+      trace("navigator disabled for ft", ft)
       return
     end
   end
+
   local bufnr = vim.fn.bufnr()
   local uri = vim.uri_from_bufnr(bufnr)
 
-  log("loading for ft ", ft, uri)
   if uri == 'file://' or uri == 'file:///' then
     log("skip loading for ft ", ft, uri)
     return
   end
 
+  log('setup', user_opts)
+  log("loading for ft ", ft, uri)
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
-
+  local lsp_opts = user_opts.lsp
   _Loading = true
-  wait_lsp_startup(ft, retry)
+  wait_lsp_startup(ft, retry, lsp_opts)
+
   _Loading = false
+
+  -- if not _NgConfigValues.loaded then
+  --   vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
+  --   _NgConfigValues.loaded = true
+  -- end
 end
 return {setup = setup, cap = cap}

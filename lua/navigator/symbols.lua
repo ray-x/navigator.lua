@@ -55,8 +55,9 @@ function M.workspace_symbols(opts)
   -- result_lsp
   local result = {}
   for i = 1, #results_lsp do
-    if results_lsp[i] ~= nil and results_lsp[i].result ~= nil and
-        #results_lsp[i].result > 0 then result = results_lsp[i].result end
+    if results_lsp[i] ~= nil and results_lsp[i].result ~= nil and #results_lsp[i].result > 0 then
+      result = results_lsp[i].result
+    end
   end
 
   local items = symbols_to_items(result)
@@ -115,23 +116,16 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
         child.uri = uri
         child.lnum = c.range.start.line + 1
         child.detail = c.detail or ""
-        child.text = "   [" .. ckind .. "] " .. child.detail .. " " ..
-                         child.name
+        child.text = "   [" .. ckind .. "] " .. child.detail .. " " .. child.name
         table.insert(locations, child)
       end
     end
   end
 
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
-  -- verbose(locations)
+  -- trace(locations)
   -- local items = locations_to_items(locations)
-  gui.new_list_view({
-    items = locations,
-    prompt = true,
-    rawdata = true,
-    ft = ft,
-    api = " "
-  })
+  gui.new_list_view({items = locations, prompt = true, rawdata = true, ft = ft, api = " "})
 
   -- if locations == nil or vim.tbl_isempty(locations) then
   --   print "References not found"
@@ -178,13 +172,7 @@ function M.workspace_symbol_handler(err, _, result, _, bufnr)
   -- local items = locations_to_items(locations)
 
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
-  gui.new_list_view({
-    items = items,
-    prompt = true,
-    ft = ft,
-    rowdata = true,
-    api = " "
-  })
+  gui.new_list_view({items = items, prompt = true, ft = ft, rowdata = true, api = " "})
 
   -- if locations == nil or vim.tbl_isempty(locations) then
   --   print "References not found"

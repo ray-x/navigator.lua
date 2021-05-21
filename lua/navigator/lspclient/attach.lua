@@ -3,7 +3,7 @@ local lsp = require("vim.lsp")
 
 local util = require "navigator.util"
 local log = util.log
-local verbose = util.verbose
+local trace = util.trace
 
 local diagnostic_map = function(bufnr)
   local opts = {noremap = true, silent = true}
@@ -20,7 +20,7 @@ M.on_attach = function(client, bufnr)
     return
   end
   log("attaching", bufnr)
-  verbose(client)
+  trace(client)
   local hassig, sig = pcall(require, "lsp_signature")
   if hassig then sig.on_attach() end
   diagnostic_map(bufnr)

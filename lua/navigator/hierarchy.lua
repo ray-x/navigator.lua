@@ -6,25 +6,22 @@ local lsphelper = require "navigator.lspwrapper"
 local cwd = vim.fn.getcwd(0)
 local M = {}
 
-local function call_hierarchy_handler(direction, err, _, result, _, _,
-                                      error_message)
+local function call_hierarchy_handler(direction, err, _, result, _, _, error_message)
   -- log('call_hierarchy')
 
-  assert(#vim.lsp.buf_get_clients() > 0,
-         "Must have a client running to use lsp_tags")
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
   if err ~= nil then
+    log("dir", direction, "result", result, "err", err)
     print("ERROR: " .. error_message)
     return
   end
 
-  -- log("dir", direction, "result", result)
   local items = {}
   for _, call_hierarchy_call in pairs(result) do
     local call_hierarchy_item = call_hierarchy_call[direction]
     local kind = ' '
     if call_hierarchy_item.kind then
-      kind = require'navigator.lspclient.lspkind'.symbol_kind(
-                 call_hierarchy_item.kind) .. ' '
+      kind = require'navigator.lspclient.lspkind'.symbol_kind(call_hierarchy_item.kind) .. ' '
     end
     for _, range in pairs(call_hierarchy_call.fromRanges) do
       local filename = assert(vim.uri_to_fname(call_hierarchy_item.uri))
@@ -47,21 +44,18 @@ end
 local call_hierarchy_handler_from = partial(call_hierarchy_handler, "from")
 local call_hierarchy_handler_to = partial(call_hierarchy_handler, "to")
 
-local function incoming_calls_handler(bang, err, method, result, client_id,
-                                      bufnr)
-  assert(#vim.lsp.buf_get_clients() > 0,
-         "Must have a client running to use lsp_tags")
-  local results = call_hierarchy_handler_from(err, method, result, client_id,
-                                              bufnr, "Incoming calls not found")
+local function incoming_calls_handler(bang, err, method, result, client_id, bufnr)
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
+  local results = call_hierarchy_handler_from(err, method, result, client_id, bufnr,
+                                              "Incoming calls not found")
 
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
   gui.new_list_view({items = results, ft = ft, api = ' '})
 end
 
-local function outgoing_calls_handler(bang, err, method, result, client_id,
-                                      bufnr)
-  local results = call_hierarchy_handler_to(err, method, result, client_id,
-                                            bufnr, "Outgoing calls not found")
+local function outgoing_calls_handler(bang, err, method, result, client_id, bufnr)
+  local results = call_hierarchy_handler_to(err, method, result, client_id, bufnr,
+                                            "Outgoing calls not found")
 
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
   gui.new_list_view({items = results, ft = ft, api = ' '})
@@ -69,23 +63,23 @@ local function outgoing_calls_handler(bang, err, method, result, client_id,
 end
 
 function M.incoming_calls(bang, opts)
-  assert(#vim.lsp.buf_get_clients() > 0,
-         "Must have a client running to use lsp_tags")
-  if not lsphelper.check_capabilities("call_hierarchy") then return end
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
+  if not lsphelper.check_capabilities("call_hierarchy") then
+    return
+  end
 
   local params = vim.lsp.util.make_position_params()
-  util.call_sync("callHierarchy/incomingCalls", params, opts,
-                 partial(incoming_calls_handler, bang))
+  util.call_sync("callHierarchy/incomingCalls", params, opts, partial(incoming_calls_handler, bang))
 end
 
 function M.outgoing_calls(bang, opts)
-  assert(#vim.lsp.buf_get_clients() > 0,
-         "Must have a client running to use lsp_tags")
-  if not lsphelper.check_capabilities("call_hierarchy") then return end
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
+  if not lsphelper.check_capabilities("call_hierarchy") then
+    return
+  end
 
   local params = vim.lsp.util.make_position_params()
-  util.call_sync("callHierarchy/outgoingCalls", params, opts,
-                 partial(outgoing_calls_handler, bang))
+  util.call_sync("callHierarchy/outgoingCalls", params, opts, partial(outgoing_calls_handler, bang))
 end
 
 M.incoming_calls_call = partial(M.incoming_calls, 0)

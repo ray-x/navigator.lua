@@ -3,7 +3,7 @@ local log = util.log
 local lsphelper = require "navigator.lspwrapper"
 local gui = require "navigator.gui"
 local lsp = require "navigator.lspwrapper"
-local verbose = require"navigator.util".verbose
+local trace = require"navigator.util".trace
 -- local log = util.log
 -- local partial = util.partial
 -- local cwd = vim.fn.getcwd(0)
@@ -16,7 +16,7 @@ local function ref_hdlr(err, api, locations, num, bufnr)
   local opts = {}
   -- log("arg1", arg1)
   -- log(api)
-  -- log(locations)
+  trace(locations)
   -- log("num", num)
   -- log("bfnr", bufnr)
   if err ~= nil then
@@ -24,7 +24,6 @@ local function ref_hdlr(err, api, locations, num, bufnr)
     return
   end
   if type(locations) ~= 'table' then
-    log("arg1", arg1)
     log(api)
     log(locations)
     log("num", num)
@@ -36,10 +35,11 @@ local function ref_hdlr(err, api, locations, num, bufnr)
     return
   end
   local items, width = locations_to_items(locations)
+
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
 
   local wwidth = vim.api.nvim_get_option("columns")
-  width = math.min(width + 24 or 120, math.floor(wwidth * 0.8))
+  width = math.min(width + 30, 120, math.floor(wwidth * 0.8))
   gui.new_list_view({items = items, ft = ft, width = width, api = "Reference"})
 end
 
