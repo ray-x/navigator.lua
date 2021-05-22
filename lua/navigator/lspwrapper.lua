@@ -13,7 +13,7 @@ ts_nodes = {}
 ts_nodes_time = {}
 local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
 
-local calltree_enabled = require"navigator".config_values().treesitter_call_tree
+local TS_analysis_enabled = require"navigator".config_values().treesitter_analysis
 
 -- extract symbol from range
 local function get_symbol(text, range)
@@ -24,8 +24,15 @@ local function get_symbol(text, range)
 end
 
 local function check_lhs(text, symbol)
-  local s = string.find(text, symbol)
+  local find = require'guihua.util'.word_find
+  local s = find(text, symbol)
   local eq = string.find(text, '=') or 0
+  if not s or not eq then
+    return false
+  end
+  if s < eq then
+    log(symbol, "modified")
+  end
   return s < eq
 end
 
@@ -136,7 +143,7 @@ function M.call_async(method, params, handler)
 end
 
 local function ts_functions(uri)
-  if not ts_enabled or not calltree_enabled then
+  if not ts_enabled or not TS_analysis_enabled then
     lerr("ts not enabled")
     return nil
   end
@@ -171,6 +178,32 @@ local function ts_functions(uri)
   trace(funcs, ts_nodes)
   log(string.format("elapsed time: %.4f\n", os.clock() - x))
   return funcs
+end
+
+local function ts_defination(uri, range)
+  if not ts_enabled or not TS_analysis_enabled then
+    lerr("ts not enabled")
+    return nil
+  end
+  local ts_def = require"navigator.treesitter".find_definition
+  local bufnr = vim.uri_to_bufnr(uri)
+  local x = os.clock()
+  trace(ts_nodes)
+  local unload = false
+  if not api.nvim_buf_is_loaded(bufnr) then
+    log("! load buf !", uri, bufnr)
+    vim.fn.bufload(bufnr)
+    unload = true
+  end
+
+  local def_range = ts_def(range, bufnr)
+  if unload then
+    local cmd = string.format("bd %d", bufnr)
+    log(cmd)
+    -- vim.cmd(cmd)  -- todo: not sure if it is needed
+  end
+  log(string.format(" ts def elapsed time: %.4f\n", os.clock() - x), def_range)
+  return def_range
 end
 
 local function find_ts_func_by_range(funcs, range)
@@ -209,11 +242,30 @@ function M.locations_to_items(locations)
       return i.uri < j.uri
     end
   end)
+  local uri_def = {}
   for i, loc in ipairs(locations) do
     local item = lsp.util.locations_to_items({loc})[1]
     item.uri = locations[i].uri
     local funcs = ts_functions(item.uri)
+
     item.range = locations[i].range
+
+    if TS_analysis_enabled then
+      if uri_def[item.uri] == nil then
+        -- find def in file
+        local def = ts_defination(item.uri, item.range)
+        uri_def[item.uri] = def or {}
+      end
+      log(uri_def[item.uri], item.range)
+      local def = uri_def[item.uri]
+      if def.start and item.range then
+        if def.start.line == item.range.start.line then
+          log("ts def found")
+          item.definition = true
+        end
+      end
+    end
+
     item.filename = assert(vim.uri_to_fname(item.uri))
     local filename = item.filename:gsub(cwd .. "/", "./", 1)
     item.display_filename = filename or item.filename
@@ -224,6 +276,7 @@ function M.locations_to_items(locations)
     item.symbol_name = get_symbol(item.text, item.range)
     item.lhs = check_lhs(item.text, item.symbol_name)
   end
+  trace(uri_def)
   return items, width + 24 -- TODO handle long line?
 end
 

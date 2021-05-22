@@ -2,45 +2,57 @@
 
 - Easy code navigation through LSP and 🌲🏡Treesitter symbols; view diagnostic errors.
 
-- Combine LSP and treesitter parser together. Not only providing better highlight but also help you analysis symbol context
-and scope.
+- A plugin combine LSP and treesitter parser together. Not only providing a better highlight but also help you analyse symbol context effectively.
 
-Here is an example
+Here are examples
 
-Following screen shot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming&outgoing calls from LSP. It is designed for the symbol analysis.
+#### Example: Javascripts closure
+
+The following screenshot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming&outgoing calls from LSP. It is designed for the symbol analysis.
 ![js_closure_call_tree](https://user-images.githubusercontent.com/1681295/119120589-cee23700-ba6f-11eb-95c5-b9ac8d445c31.jpg)
 
-Explains:
-- First line of floating windows shows there are 3 references for the symbol <span style="color:red"> *browser* </span> in closure.js
-- The first reference of browser is an assigement, an emoji of 📝 indicates the value changed in this line. In many
-cases, we search for reference to find out where the value changed.
+Explanation:
+- The first line of floating windows shows there are 3 references for the symbol <span style="color:red"> *browser* </span> in closure.js
+- The first reference of browser is an assignment, an emoji  📝 indicates the value changed in this line. In many
+cases, we search for references to find out where the value changed.
 - The second reference of `browser` is inside function `displayName` and `displayName` sit inside `makeFunc`, So you
 will see ` displayName{} <-  makeFunc{}`
 - The third similar to the second, as var browser is on the right side of '=', the value not changed in this line
 and emoji is not shown.
 
+#### Example: C++ defination
+
+Another example for C++
+![cpp_ref](https://user-images.githubusercontent.com/1681295/119215215-8bd7a080-bb0f-11eb-82fc-8cdf1955e6e7.jpg)
+You may find that a 🦕 dinosaur(d) on the line of `Rectangle rect;`  which means there is a defination (d for def) of rect in this line
+
+#### Golang struct type
 Struct type references in multiple Go ﳑ files
 
 ![go_reference](https://user-images.githubusercontent.com/1681295/119123823-54b3b180-ba73-11eb-8790-097601e10f6a.gif)
 
 This feature can provide you info in which function/class/method the variable was referenced. It is handy for large
-project where class/function defination is too long to fit into preview window. Also provides a birdview of where the
-variable is referenced.
+project where class/function definition is too long to fit into the preview window. Also provides a birdview of where the
+variable is
+- Referenced
+- Modified
+- Defined
+- called
 
 # Features:
 
 - LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type. This
-also enable you handle workspace combine mix types of codes (e.g. Go + javascript + yml)
+also enables you to handle workspace combine mixed types of codes (e.g. Go + javascript + yml)
 
 - Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP & Treesitter powered IDE
 
-- Unorthodox UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc. Is covers
-all features(handler) provided by LSP from commenly used search reference, to less commenly used search for interface
+- Unorthodox UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc. It covers
+all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
 implementation.
 
 - Async request with lsp.buf_request for reference search
 
-- Treesitter symbol search. It is handy for large filas (Some of LSP e.g. sumneko_lua, there is a 100kb file size limition?)
+- Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limition?)
 
 - FZY search with Lua-JIT
 
@@ -144,7 +156,7 @@ require.'navigator'.setup({
   --   -- the on_attach will be called at end of navigator on_attach
   -- end,
 
-  treesitter_call_tree = true, -- treesitter variable context
+  treesitter_analysis = true, -- treesitter variable context
   sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
   sumneko_binary = vim.fn.expand("$HOME") ..
       "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
@@ -166,6 +178,18 @@ require.'navigator'.setup({
 
 ```
 
+The plugin can work with multiple LSP, e.g  sqls+gopls+efm.  But there are cases you may need to disable some of the
+servers.  (Prevent loading multiple LSP for same source code.)  e.g. I saw strange behaviours when I use pyls+pyright+pyls_ms
+together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
+To disable a LSP server, set `filetypes` to {} e.g.
+```lua
+
+require.'navigator'.setup({
+ pyls={filetype={}}
+})
+
+```
+
 
 ## Dependency
 
@@ -177,7 +201,7 @@ require.'navigator'.setup({
 
 The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existance and load those plugins only if they existed.
 
-The termianl will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
+The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
 ## Usage
 
@@ -185,11 +209,11 @@ Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be a
 
 - Use \<c-e\> or `:q!` to kill the floating window
 - <up/down> (or \<c-n\>, \<c-p\>) to move
-- \<c-o\> or \<CR\> to open location or apply code actions. Note: \<CR\> might be binded in insert mode by other plugins
+- \<c-o\> or \<CR\> to open location or apply code actions. Note: \<CR\> might be bound in insert mode by other plugins
 
 ## Configuration
 
-In `navigator.lua` there is a default configration. You can override the values by pass you own values
+In `navigator.lua` there is a default configuration. You can override the values by passing your own values
 
 e.g
 
@@ -204,7 +228,7 @@ colorscheme: [aurora](https://github.com/ray-x/aurora)
 
 ### Reference
 
-Pls check first part of README
+Pls check the first part of README
 
 ### Document Symbol
 
@@ -280,7 +304,7 @@ Improved signature help with current parameter highlighted
 
 # Todo
 
-- Early phase, bugs expected, PR and suggestions are welcome
+- The project is in the early phase, bugs expected, PRs and suggestions are welcome
 - Async (some of the requests is slow on large codebases and might be good to use co-rountine)
 - More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Did not test other languages (e.g dart, swift etc)
 - Configuration options

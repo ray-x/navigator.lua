@@ -57,24 +57,31 @@ end
 
 -- use lsp range to find def
 function M.find_definition(range, bufnr)
-  if not range then
-
+  if not range or not range.start then
+    lerr("find_def incorrect range", range)
     return
   end
   bufnr = bufnr or api.nvim_get_current_buf()
-  local cursor = {range.start.line, range.start.character} -- +1 or not?
-
-  local node_at_point = ts_utils.get_node_at_cursor()
-
+  local parser = parsers.get_parser(bufnr)
+  local symbolpos = {range.start.line, range.start.character} -- +1 or not?
+  local root = ts_utils.get_root_for_position(range.start.line, range.start.character, parser)
+  if not root then
+    return {}
+  end
+  local node_at_point = root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1],
+                                                        symbolpos[2])
   if not node_at_point then
     lerr("no node at cursor")
-    return
+    return {}
   end
 
   local definition = locals.find_definition(node_at_point, bufnr)
-
-  log(definition)
-  return
+  log("def found:", definition, definition:range())
+  if definition then
+    local r, c = definition:range()
+    return {start = {line = r, character = c}}
+  end
+  return {}
 end
 
 --- Get definitions of bufnr (unique and sorted by order of appearance).
@@ -137,6 +144,18 @@ local function get_scope(type, source)
     if parent:type() == 'function_name_field' then
       return parent:parent():parent(), true
     end
+
+    -- for C++
+    local n = source
+    for i = 1, 4, 1 do
+      if n == nil or n:parent() == nil then
+        break
+      end
+      n = n:parent()
+      if n:type() == 'function_definition' then
+        return n, true
+      end
+    end
     return parent, true
   end
 
@@ -151,8 +170,9 @@ local function get_scope(type, source)
       trace(source, source:type())
       return source, false
     end
-  else -- M.fun1 = function() end
-    -- lets work up and see next node
+  else
+    -- M.fun1 = function() end
+    -- lets work up and see next node, lua
     local n = source
     for i = 1, 4, 1 do
       if n == nil or n:parent() == nil then

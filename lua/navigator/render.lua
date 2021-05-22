@@ -95,10 +95,15 @@ function M.prepare_for_render(items, opts)
     item = clone(items[i])
     item.text = require'navigator.util'.trim_and_pad(item.text)
     item.text = string.format("%4i: %s", item.lnum, item.text)
-    local call_by = ""
+    local ts_report = ""
     if item.lhs then
-      call_by = '📝 '
+      ts_report = '📝 '
     end
+
+    if item.definition then
+      ts_report = ts_report .. '🦕 '
+    end
+    trace(ts_report)
 
     item.text = item.text:gsub('%s*[%[%(%{]*%s*$', '')
     if item.call_by ~= nil and #item.call_by > 0 then
@@ -109,29 +114,29 @@ function M.prepare_for_render(items, opts)
           local endwise = '{}'
           if value.type == 'method' or value.type == 'function' then
             endwise = '()'
-            call_by = ' '
+            ts_report = ts_report .. ' '
           end
-          if #call_by > 8 then
-            call_by = call_by .. '  '
+          if #ts_report > 8 then
+            ts_report = ts_report .. '  '
           end
-          call_by = call_by .. value.kind .. txt .. endwise
+          ts_report = ts_report .. value.kind .. txt .. endwise
           trace(item)
         end
       end
     end
-    if #call_by > 1 then
-      space = get_pads(win_width, item.text, call_by)
-      if #space + #item.text + #call_by >= win_width then
-        if #item.text + #call_by > win_width then
-          log("exceeding", #item.text, #call_by, win_width)
+    if #ts_report > 1 then
+      space = get_pads(win_width, item.text, ts_report)
+      if #space + #item.text + #ts_report >= win_width then
+        if #item.text + #ts_report > win_width then
+          log("exceeding", #item.text, #ts_report, win_width)
           space = '   '
         else
-          local remain = win_width - #item.text - #call_by
+          local remain = win_width - #item.text - #ts_report
           log("remain", remain)
           space = string.rep(' ', remain)
         end
       end
-      item.text = item.text .. space .. call_by
+      item.text = item.text .. space .. ts_report
     end
     local tail = display_items[#display_items].text
     if tail ~= item.text then -- deduplicate
