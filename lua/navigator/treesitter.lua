@@ -344,6 +344,8 @@ local function get_all_nodes(bufnr, filter, summary)
       end
       item.full_text = vim.trim(api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1,
                                                        false)[1] or "")
+
+      item.full_text = item.full_text:gsub('%s*[%[%(%{]*%s*$', '')
       item.uri = uri
       item.name = node.node_text
       item.filename = fname
