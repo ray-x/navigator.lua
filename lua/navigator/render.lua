@@ -103,6 +103,7 @@ function M.prepare_for_render(items, opts)
     if item.definition then
       ts_report = ts_report .. '🦕 '
     end
+    local header_len = #ts_report + 2 -- magic number 2
     trace(ts_report)
 
     item.text = item.text:gsub('%s*[%[%(%{]*%s*$', '')
@@ -116,7 +117,7 @@ function M.prepare_for_render(items, opts)
             endwise = '()'
             ts_report = ts_report .. ' '
           end
-          if #ts_report > 8 then
+          if #ts_report > header_len then
             ts_report = ts_report .. '  '
           end
           ts_report = ts_report .. value.kind .. txt .. endwise

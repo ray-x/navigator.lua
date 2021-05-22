@@ -39,7 +39,7 @@ local get_icon = function(kind)
     return match_kinds[kind]
   end
 end
-
+-- require'navigator.treesitter'.goto_definition()
 function M.goto_definition(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
   local node_at_point = ts_utils.get_node_at_cursor()
@@ -51,6 +51,7 @@ function M.goto_definition(bufnr)
   local definition = locals.find_definition(node_at_point, bufnr)
 
   if definition ~= node_at_point then
+    log("def found:", definition:range())
     ts_utils.goto_node(definition)
   end
 end
@@ -66,22 +67,24 @@ function M.find_definition(range, bufnr)
   local symbolpos = {range.start.line, range.start.character} -- +1 or not?
   local root = ts_utils.get_root_for_position(range.start.line, range.start.character, parser)
   if not root then
-    return {}
+    return
   end
   local node_at_point = root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1],
                                                         symbolpos[2])
   if not node_at_point then
     lerr("no node at cursor")
-    return {}
+    return
   end
 
   local definition = locals.find_definition(node_at_point, bufnr)
-  log("def found:", definition, definition:range())
-  if definition then
+
+  if definition ~= node_at_point then
+    log("def found:", definition:range())
     local r, c = definition:range()
     return {start = {line = r, character = c}}
+  else
+    log("def not found in ", bufnr)
   end
-  return {}
 end
 
 --- Get definitions of bufnr (unique and sorted by order of appearance).

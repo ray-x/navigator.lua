@@ -251,16 +251,25 @@ function M.locations_to_items(locations)
     item.range = locations[i].range
 
     if TS_analysis_enabled then
-      if uri_def[item.uri] == nil then
+      if uri_def[item.uri] == nil or uri_def[item.uri] == {} then
         -- find def in file
         local def = ts_defination(item.uri, item.range)
-        uri_def[item.uri] = def or {}
+        if def and def.start then
+          uri_def[item.uri] = def
+          if def.start then -- find for the 1st time
+            for i = 1, #items do
+              if items[i].uri == item.uri and items[i].range.start.line == def.start.line then
+                items[i].definition = true
+              end
+            end
+          end
+        end
       end
       log(uri_def[item.uri], item.range)
       local def = uri_def[item.uri]
-      if def.start and item.range then
+      if def and def.start and item.range then
         if def.start.line == item.range.start.line then
-          log("ts def found")
+          log("ts def in current line")
           item.definition = true
         end
       end
@@ -271,10 +280,11 @@ function M.locations_to_items(locations)
     item.display_filename = filename or item.filename
     item.call_by = find_ts_func_by_range(funcs, item.range)
     item.rpath = util.get_relative_path(cwd, item.filename)
-    table.insert(items, item)
     width = math.max(width, #item.text)
     item.symbol_name = get_symbol(item.text, item.range)
     item.lhs = check_lhs(item.text, item.symbol_name)
+
+    table.insert(items, item)
   end
   trace(uri_def)
   return items, width + 24 -- TODO handle long line?
