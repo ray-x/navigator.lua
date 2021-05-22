@@ -85,7 +85,7 @@ function M.get_relative_path(base_path, my_path)
   return data
 end
 
-local default_config = {plugin = "navigator", use_console = false, use_file = true, level = "error"}
+local default_config = {plugin = "navigator", use_console = false, use_file = true, level = "info"}
 
 M._log = require("guihua.log").new({level = default_config.level}, true)
 

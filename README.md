@@ -1,14 +1,14 @@
 # Navigator
 
-- Easy code navigation through LSP and 🌲🏡Treesitter symbols; view diagnostic errors.
+- Easy code navigation, view diagnostic errors, see relationships of functions, variables
 
-- A plugin combine LSP and treesitter parser together. Not only providing a better highlight but also help you analyse symbol context effectively.
+- A plugin combines power of LSP and 🌲🏡 treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
 
 Here are examples
 
 #### Example: Javascripts closure
 
-The following screenshot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming&outgoing calls from LSP. It is designed for the symbol analysis.
+The following screenshot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming & outgoing calls from LSP. It is designed for the symbol analysis.
 ![js_closure_call_tree](https://user-images.githubusercontent.com/1681295/119120589-cee23700-ba6f-11eb-95c5-b9ac8d445c31.jpg)
 
 Explanation:

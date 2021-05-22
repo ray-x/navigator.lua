@@ -4,6 +4,7 @@ local trace = require"navigator.util".trace
 
 _Loading = false
 
+_LoadedClients = {}
 if packer_plugins ~= nil then
   -- packer installed
   local loader = require"packer".loader
@@ -288,15 +289,20 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
 end
 
 local function setup(user_opts)
-
-  log(user_opts)
+  local ft = vim.bo.filetype
+  if _LoadedClients[ft] then
+    trace("navigator is loaded for ft", ft)
+    return
+  end
+  if user_opts ~= nil then
+    log(user_opts)
+  end
   trace(debug.traceback())
   user_opts = user_opts or _NgConfigValues -- incase setup was triggered from autocmd
 
   if _Loading == true then
     return
   end
-  local ft = vim.bo.filetype
   if ft == nil then
     ft = vim.api.nvim_buf_get_option(0, "filetype")
   end
@@ -311,8 +317,8 @@ local function setup(user_opts)
     "csv", "txt", "markdown", "defx"
   }
   for i = 1, #disable_ft do
-    if ft == disable_ft[i] then
-      trace("navigator disabled for ft", ft)
+    if ft == disable_ft[i] or _LoadedClients[ft] then
+      trace("navigator disabled for ft or it is loaded", ft)
       return
     end
   end
@@ -332,7 +338,7 @@ local function setup(user_opts)
   local lsp_opts = user_opts.lsp
   _Loading = true
   wait_lsp_startup(ft, retry, lsp_opts)
-
+  _LoadedClients[ft] = true
   _Loading = false
 
   -- if not _NgConfigValues.loaded then
@@ -340,4 +346,4 @@ local function setup(user_opts)
   --   _NgConfigValues.loaded = true
   -- end
 end
-return {setup = setup, cap = cap}
+return {setup = setup}
