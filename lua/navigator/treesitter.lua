@@ -1,3 +1,5 @@
+--- Note: some of the functions/code coped from treesitter/refactor/navigation.lua and may be modified
+-- to fit in navigator.lua
 local gui = require "navigator.gui"
 
 local ok, ts_locals = pcall(require, "nvim-treesitter.locals")
@@ -7,14 +9,16 @@ if not ok then
 end
 
 local parsers = require "nvim-treesitter.parsers"
-local ts_utils = require "nvim-treesitter.ts_utils"
 local utils = require "nvim-treesitter.utils"
+local locals = require 'nvim-treesitter.locals'
+local ts_utils = require 'nvim-treesitter.ts_utils'
 local api = vim.api
 local util = require "navigator.util"
 local M = {}
 
 local cwd = vim.fn.getcwd(0)
 local log = require"navigator.util".log
+local lerr = require"navigator.util".error
 local trace = require"navigator.util".trace
 
 local match_kinds = {
@@ -34,6 +38,43 @@ local get_icon = function(kind)
   else
     return match_kinds[kind]
   end
+end
+
+function M.goto_definition(bufnr)
+  bufnr = bufnr or api.nvim_get_current_buf()
+  local node_at_point = ts_utils.get_node_at_cursor()
+
+  if not node_at_point then
+    return
+  end
+
+  local definition = locals.find_definition(node_at_point, bufnr)
+
+  if definition ~= node_at_point then
+    ts_utils.goto_node(definition)
+  end
+end
+
+-- use lsp range to find def
+function M.find_definition(range, bufnr)
+  if not range then
+
+    return
+  end
+  bufnr = bufnr or api.nvim_get_current_buf()
+  local cursor = {range.start.line, range.start.character} -- +1 or not?
+
+  local node_at_point = ts_utils.get_node_at_cursor()
+
+  if not node_at_point then
+    lerr("no node at cursor")
+    return
+  end
+
+  local definition = locals.find_definition(node_at_point, bufnr)
+
+  log(definition)
+  return
 end
 
 --- Get definitions of bufnr (unique and sorted by order of appearance).

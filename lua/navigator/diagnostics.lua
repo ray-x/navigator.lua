@@ -3,16 +3,21 @@ local diagnostic_list = {}
 
 local util = require "navigator.util"
 local log = util.log
+local error = util.error
 
 diagnostic_list[vim.bo.filetype] = {}
 
 local diag_hdlr = function(err, method, result, client_id, br, config)
   -- log(result)
   vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, br, config)
-  if err ~= nil then log(err, config) end
+  if err ~= nil then
+    log(err, config)
+  end
   local cwd = vim.fn.getcwd(0)
   local ft = vim.bo.filetype
-  if diagnostic_list[ft] == nil then diagnostic_list[vim.bo.filetype] = {} end
+  if diagnostic_list[ft] == nil then
+    diagnostic_list[vim.bo.filetype] = {}
+  end
   -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
 
   local uri = result.uri
@@ -27,16 +32,26 @@ local diag_hdlr = function(err, method, result, client_id, br, config)
       item.col = v.range.start.character + 1
       item.uri = uri
       local head = "🐛"
-      if v.severity == 1 then head = "🈲" end
-      if v.severity == 2 then head = "☣️" end
-      if v.severity > 2 then head = "👎" end
+      if v.severity == 1 then
+        head = "🈲"
+      end
+      if v.severity == 2 then
+        head = "☣️"
+      end
+      if v.severity > 2 then
+        head = "👎"
+      end
       local bufnr = vim.uri_to_bufnr(uri)
       vim.fn.bufload(bufnr)
       local pos = v.range.start
       local row = pos.line
       local line = (vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false) or {""})[1]
-      item.text = head .. line .. " 📛 " .. v.message
-      table.insert(item_list, item)
+      if line ~= nil then
+        item.text = head .. line .. " 📛 " .. v.message
+        table.insert(item_list, item)
+      else
+        error("diagnostic result empty line", v, item)
+      end
     end
     -- local old_items = vim.fn.getqflist()
     diagnostic_list[ft][uri] = item_list
@@ -67,7 +82,9 @@ M.show_diagnostic = function()
   for _, buf in ipairs(bufs) do
     local bname = vim.fn.bufname(buf)
     if #bname > 0 and not util.exclude(bname) then
-      if vim.api.nvim_buf_is_loaded(buf) then vim.lsp.diagnostic.get(buf, nil) end
+      if vim.api.nvim_buf_is_loaded(buf) then
+        vim.lsp.diagnostic.get(buf, nil)
+      end
     end
   end
   if diagnostic_list[vim.bo.filetype] ~= nil then
@@ -76,7 +93,9 @@ M.show_diagnostic = function()
     local results = diagnostic_list[vim.bo.filetype]
     local display_items = {}
     for _, items in pairs(results) do
-      for _, it in pairs(items) do table.insert(display_items, it) end
+      for _, it in pairs(items) do
+        table.insert(display_items, it)
+      end
     end
     -- log(display_items)
     if #display_items > 0 then

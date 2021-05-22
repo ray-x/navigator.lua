@@ -91,6 +91,7 @@ M._log = require("guihua.log").new({level = default_config.level}, true)
 
 -- add log to you lsp.log
 M.log = M._log.info
+M.info = M._log.info
 M.trace = M._log.trace
 M.error = M._log.error
 

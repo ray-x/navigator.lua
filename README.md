@@ -2,17 +2,16 @@
 
 - Easy code navigation through LSP and 🌲🏡Treesitter symbols; view diagnostic errors.
 
-- Put language server and tree sitter's parser together. Not only for better highlight but also display symbol context
+- Combine LSP and treesitter parser together. Not only providing better highlight but also help you analysis symbol context
 and scope.
 
 Here is an example
 
-Show javascript call tree 🌲 of a variable inside a closure. Similar to incoming&outgoing calls from LSP. This feature
-is designed for the symbol analysis.
+Following screen shot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming&outgoing calls from LSP. It is designed for the symbol analysis.
 ![js_closure_call_tree](https://user-images.githubusercontent.com/1681295/119120589-cee23700-ba6f-11eb-95c5-b9ac8d445c31.jpg)
 
 Explains:
-- There are 3 references for the symbol <span style="color:red"> *browser* </span> in closure.js
+- First line of floating windows shows there are 3 references for the symbol <span style="color:red"> *browser* </span> in closure.js
 - The first reference of browser is an assigement, an emoji of 📝 indicates the value changed in this line. In many
 cases, we search for reference to find out where the value changed.
 - The second reference of `browser` is inside function `displayName` and `displayName` sit inside `makeFunc`, So you

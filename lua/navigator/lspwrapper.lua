@@ -4,6 +4,7 @@ local gutil = require "guihua.util"
 local lsp = require "vim.lsp"
 local api = vim.api
 local log = require"navigator.util".log
+local lerr = require"navigator.util".error
 local trace = require"navigator.util".trace
 local symbol_kind = require"navigator.lspclient.lspkind".symbol_kind
 local cwd = vim.fn.getcwd(0)
@@ -136,6 +137,7 @@ end
 
 local function ts_functions(uri)
   if not ts_enabled or not calltree_enabled then
+    lerr("ts not enabled")
     return nil
   end
   local ts_func = require"navigator.treesitter".buf_func
