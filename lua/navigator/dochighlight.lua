@@ -26,12 +26,9 @@ local function handle_document_highlight(_, _, result, _, bufnr, _)
     return
   end
 
-  table.sort(
-    result,
-    function(a, b)
-      return before(a.range, b.range)
-    end
-  )
+  table.sort(result, function(a, b)
+    return before(a.range, b.range)
+  end)
   references[bufnr] = result
 end
 -- modify from vim-illuminate
@@ -76,39 +73,34 @@ local function goto_adjent_reference(opt)
 end
 
 local function documentHighlight()
-  api.nvim_exec(
-    [[
-      hi LspReferenceRead cterm=bold gui=Bold ctermbg=yellow guibg=purple4
+  api.nvim_exec([[
+      hi LspReferenceRead cterm=bold gui=Bold ctermbg=yellow guifg=yellow guibg=purple4
       hi LspReferenceText cterm=bold gui=Bold ctermbg=red guibg=gray27
-      hi LspReferenceWrite cterm=bold gui=Bold,Italic ctermbg=red guibg=MistyRose
+      hi LspReferenceWrite cterm=bold gui=Bold,Italic ctermbg=red guifg=DarkSlateBlue guibg=MistyRose
       augroup lsp_document_highlight
         autocmd! * <buffer>
         autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
         autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
       augroup END
-    ]],
-    false
-  )
-  vim.lsp.handlers["textDocument/documentHighlight"] = function(_, _, result, _, bufnr)
-    if not result then
-      return
-    end
-    bufnr = api.nvim_get_current_buf()
-    vim.lsp.util.buf_clear_references(bufnr)
-    vim.lsp.util.buf_highlight_references(bufnr, result)
-    bufnr = bufnr or 0
-    if type(result) ~= "table" then
-      vim.lsp.util.buf_clear_references(bufnr)
-      return
-    end
-    table.sort(
-      result,
-      function(a, b)
-        return before(a.range, b.range)
+    ]], false)
+  vim.lsp.handlers["textDocument/documentHighlight"] =
+      function(_, _, result, _, bufnr)
+        if not result then
+          return
+        end
+        bufnr = api.nvim_get_current_buf()
+        vim.lsp.util.buf_clear_references(bufnr)
+        vim.lsp.util.buf_highlight_references(bufnr, result)
+        bufnr = bufnr or 0
+        if type(result) ~= "table" then
+          vim.lsp.util.buf_clear_references(bufnr)
+          return
+        end
+        table.sort(result, function(a, b)
+          return before(a.range, b.range)
+        end)
+        references[bufnr] = result
       end
-    )
-    references[bufnr] = result
-  end
 end
 
 return {
