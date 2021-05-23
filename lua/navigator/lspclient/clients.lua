@@ -336,6 +336,7 @@ local function setup(user_opts)
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
   local lsp_opts = user_opts.lsp
+
   _Loading = true
   wait_lsp_startup(ft, retry, lsp_opts)
   _LoadedClients[ft] = true

@@ -155,6 +155,7 @@ require.'navigator'.setup({
   -- function(client, bufnr)
   --   -- the on_attach will be called at end of navigator on_attach
   -- end,
+  -- The attach code will apply to all LSP clients
 
   treesitter_analysis = true, -- treesitter variable context
   sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
@@ -168,6 +169,12 @@ require.'navigator'.setup({
       -- set to {} to disable the lspclient for all filetype
     },
     gopls = {   -- gopls setting
+      on_attach = function(client, bufnr)  -- on_attach for gopls
+        -- your special on attach here
+        -- e.g. disable gopls format because a known issue https://github.com/golang/go/issues/45732
+        print("i am a hook, I will disable document format")
+        client.resolved_capabilities.document_formatting = false
+      end,
       settings = {
         gopls = {gofumpt = false} -- disable gofumpt etc,
       }

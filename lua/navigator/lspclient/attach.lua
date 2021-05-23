@@ -12,17 +12,12 @@ end
 local M = {}
 
 M.on_attach = function(client, bufnr)
-  local uri = vim.uri_from_bufnr(bufnr)
-
-  log("loading for ft ", ft, uri)
-  if uri == 'file://' or uri == 'file:///' then
-    log("skip loading for ft ", ft, uri)
-    return
-  end
-  log("attaching", bufnr)
+  log("attaching", bufnr, client.name)
   trace(client)
   local hassig, sig = pcall(require, "lsp_signature")
-  if hassig then sig.on_attach() end
+  if hassig then
+    sig.on_attach()
+  end
   diagnostic_map(bufnr)
   -- lspsaga
   require"navigator.lspclient.highlight".add_highlight()
@@ -43,10 +38,20 @@ M.on_attach = function(client, bufnr)
 
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
-  local config = require"navigator".config_value
-  if config ~= nil and config.on_attach ~= nil then config.on_attach(client, bufnr) end
+  local config = require"navigator".config_values()
+  trace(client.name, "navigator on attach")
+  if config.on_attach ~= nil then
+    trace(client.name, "general attach")
+    config.on_attach(client, bufnr)
+  end
+  if config.lsp and config.lsp[client.name] and config.lsp[client.name].on_attach ~= nil then
+    trace(client.name, "custom attach")
+    config.lsp[client.name].on_attach(client, bufnr)
+  end
 end
 
-M.setup = function(cfg) return M end
+M.setup = function(cfg)
+  return M
+end
 
 return M
