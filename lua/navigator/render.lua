@@ -12,10 +12,12 @@ local function extension(url)
 end
 
 local function get_pads(win_width, text, postfix)
+  local trim = false
   local margin = win_width - #text - #postfix
   if margin < 0 then
+    log('line too long', win_width, #text, #postfix)
     if #postfix > 1 then
-      text = text:sub(1, #text - 20)
+      trim = true
     end
   end
   local sz = #text
@@ -27,7 +29,7 @@ local function get_pads(win_width, text, postfix)
   i = i * 10 - #text
   space = string.rep(' ', i)
   trace(text, i, postfix, win_width)
-  return space
+  return space, trim
 end
 
 function M.prepare_for_render(items, opts)
@@ -62,6 +64,7 @@ function M.prepare_for_render(items, opts)
 
   for i = 1, #items do
     local space = ''
+    local trim = false
     local lspapi_display = lspapi
     items[i].symbol_name = items[i].symbol_name or "" -- some LSP API does not have range for this
     if last_summary_idx == 1 then
@@ -71,8 +74,17 @@ function M.prepare_for_render(items, opts)
 
     -- trace(items[i], items[i].filename, last_summary_idx, display_items[last_summary_idx].filename)
     if items[i].filename == display_items[last_summary_idx].filename then
-      space = get_pads(opts.width, icon .. ' ' .. display_items[last_summary_idx].display_filename,
-                       lspapi_display .. ' 12')
+      space, trim = get_pads(opts.width,
+                             icon .. ' ' .. display_items[last_summary_idx].display_filename,
+                             lspapi_display .. ' 12')
+      if trim then
+        display_items[last_summary_idx].display_filename = string.sub(
+                                                               display_items[last_summary_idx]
+                                                                   .display_filename, 1,
+                                                               opts.width - 20)
+        display_items[last_summary_idx].display_filename =
+            display_items[last_summary_idx].display_filename .. ""
+      end
       display_items[last_summary_idx].text = string.format("%s  %s%s%s %i", icon,
                                                            display_items[last_summary_idx]
                                                                .display_filename, space,
@@ -83,7 +95,11 @@ function M.prepare_for_render(items, opts)
       lspapi_display = lspapi
       item = clone(items[i])
 
-      space = get_pads(opts.width, icon .. '  ' .. item.display_filename, lspapi_display .. ' 12')
+      space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename,
+                             lspapi_display .. ' 12')
+      if trim then
+        item.text = string.sub(item.text, 1, opts.width - 20) .. ""
+      end
       item.text = string.format("%s  %s%s%s 1", icon, item.display_filename, space, lspapi_display)
 
       trace(item.text)
@@ -126,7 +142,10 @@ function M.prepare_for_render(items, opts)
       end
     end
     if #ts_report > 1 then
-      space = get_pads(win_width, item.text, ts_report)
+      space, trim = get_pads(win_width, item.text, ts_report)
+      if trim then
+        item.text = string.sub(item.text, 1, opts.width - 20) .. ""
+      end
       if #space + #item.text + #ts_report >= win_width then
         if #item.text + #ts_report > win_width then
           log("exceeding", #item.text, #ts_report, win_width)

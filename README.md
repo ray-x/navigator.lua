@@ -197,6 +197,17 @@ require.'navigator'.setup({
 
 ```
 
+### Colors:
+
+Set highlight GHListDark (listview) and GHTextViewDark (code view)
+
+e.g.
+
+```vim
+hi default GHTextViewDark guifg=#e0d8f4 guibg=#332e55
+hi default GHListDark guifg=#e0d8f4 guibg=#103234
+```
+
 
 ## Dependency
 
