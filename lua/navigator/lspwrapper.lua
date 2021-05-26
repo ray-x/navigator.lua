@@ -27,13 +27,14 @@ local function check_lhs(text, symbol)
   local find = require'guihua.util'.word_find
   local s = find(text, symbol)
   local eq = string.find(text, '=') or 0
+  local eq2 = string.find(text, '==') or 0
   if not s or not eq then
     return false
   end
-  if s < eq then
+  if s < eq and eq ~= eq2 then
     log(symbol, "modified")
   end
-  return s < eq
+  return s < eq and eq ~= eq2
 end
 
 function M.lines_from_locations(locations, include_filename)
@@ -47,8 +48,8 @@ function M.lines_from_locations(locations, include_filename)
 
   local lines = {}
   for _, loc in ipairs(locations) do
-    table.insert(lines, (fnamemodify(loc["filename"]) .. loc["lnum"] .. ":" .. loc["col"] .. ": " ..
-                     vim.trim(loc["text"])))
+    table.insert(lines, (fnamemodify(loc["filename"]) .. loc["lnum"] .. ":" .. loc["col"] .. ": "
+                     .. vim.trim(loc["text"])))
   end
 
   return lines
@@ -215,8 +216,8 @@ local function find_ts_func_by_range(funcs, range)
   for _, value in pairs(funcs) do
     local func_range = value.node_scope
     -- note treesitter is C style
-    if func_range and func_range.start.line <= range.start.line and func_range['end'].line >=
-        range['end'].line then
+    if func_range and func_range.start.line <= range.start.line and func_range['end'].line
+        >= range['end'].line then
       table.insert(result, value)
     end
   end
