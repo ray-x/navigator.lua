@@ -52,8 +52,8 @@ function M.prepare_for_render(items, opts)
     icon = devicons.get_icon(fn, ext) or icon
   end
   local call_by_presented = false
-
-  opts.width = opts.width or 100
+  local width = 100
+  opts.width = opts.width or width
   local win_width = opts.width - 2 -- buf
 
   for i = 1, #items do
@@ -73,17 +73,16 @@ function M.prepare_for_render(items, opts)
     end
 
     -- trace(items[i], items[i].filename, last_summary_idx, display_items[last_summary_idx].filename)
-    if items[i].filename == display_items[last_summary_idx].filename then
-      space, trim = get_pads(opts.width,
-                             icon .. ' ' .. display_items[last_summary_idx].display_filename,
-                             lspapi_display .. ' 12')
-      if trim then
-        display_items[last_summary_idx].display_filename = string.sub(
-                                                               display_items[last_summary_idx]
-                                                                   .display_filename, 1,
-                                                               opts.width - 20)
-        display_items[last_summary_idx].display_filename =
-            display_items[last_summary_idx].display_filename .. ""
+    -- TODO refact display_filename generate part
+    local fn = display_items[last_summary_idx].filename
+    if items[i].filename == fn then
+      space, trim = get_pads(opts.width, icon .. ' ' .. fn, lspapi_display .. ' 12')
+      if trim and opts.width > 50 and #fn > opts.width - 20 then
+        local fn1 = string.sub(fn, 1, opts.width - 50)
+        local fn2 = string.sub(fn, #fn - 10, #fn)
+        display_items[last_summary_idx].display_filename = fn1 .. "" .. fn2
+        space = '  '
+        -- log("trim", fn1, fn2)
       end
       display_items[last_summary_idx].text = string.format("%s  %s%s%s %i", icon,
                                                            display_items[last_summary_idx]
@@ -97,8 +96,12 @@ function M.prepare_for_render(items, opts)
 
       space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename,
                              lspapi_display .. ' 12')
-      if trim then
-        item.text = string.sub(item.text, 1, opts.width - 20) .. ""
+      if trim and opts.width > 52 and item.display_filename > opts.width - 20 then
+        item.display_filename = string.sub(item.display_filename, 1, opts.width - 52) .. ""
+                                    .. string.sub(item.display_filename,
+                                                  #item.display_filename - 10,
+                                                  #item.display_filename)
+        space = '  '
       end
       item.text = string.format("%s  %s%s%s 1", icon, item.display_filename, space, lspapi_display)
 

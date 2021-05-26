@@ -79,7 +79,7 @@ function M.find_definition(range, bufnr)
   local definition = locals.find_definition(node_at_point, bufnr)
 
   if definition ~= node_at_point then
-    log("def found:", definition:range())
+    log("def found:", definition:range(), definition:type())
     local r, c = definition:range()
     return {start = {line = r, character = c}}
   else
@@ -163,8 +163,8 @@ local function get_scope(type, source)
   end
 
   if type == "var" and next ~= nil then
-    if next:type() == "function" or next:type() == "arrow_function" or next:type() ==
-        "function_definition" then
+    if next:type() == "function" or next:type() == "arrow_function" or next:type()
+        == "function_definition" then
       trace(current:type(), current:range())
       return next, true
     elseif parent:type() == 'function_declaration' then
@@ -281,8 +281,8 @@ local function get_all_nodes(bufnr, filter, summary)
     for i = 1, n do
       local index = n + 1 - i
       local parent_def = parents[index]
-      if ts_utils.is_parent(parent_def.node, def.node) or
-          (containers[parent_def.type] and ts_utils.is_parent(parent_def.node:parent(), def.node)) then
+      if ts_utils.is_parent(parent_def.node, def.node)
+          or (containers[parent_def.type] and ts_utils.is_parent(parent_def.node:parent(), def.node)) then
         break
       else
         parents[index] = nil
@@ -316,8 +316,8 @@ local function get_all_nodes(bufnr, filter, summary)
       if is_func then
         -- hack for lua and maybe other language aswell
         local parent = tsdata:parent()
-        if parent ~= nil and parent:type() == 'function_name' or parent:type() ==
-            'function_name_field' then
+        if parent ~= nil and parent:type() == 'function_name' or parent:type()
+            == 'function_name_field' then
           item.node_text = ts_utils.get_node_text(parent, bufnr)[1]
           log(parent:type(), item.node_text)
         end
