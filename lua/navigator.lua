@@ -10,8 +10,8 @@ _NgConfigValues = {
   --   -- your on_attach will be called at end of navigator on_attach
   -- end,
   sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
-  sumneko_binary = vim.fn.expand("$HOME") ..
-      "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
+  sumneko_binary = vim.fn.expand("$HOME")
+      .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
   lsp = {

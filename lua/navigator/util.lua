@@ -85,8 +85,14 @@ function M.get_relative_path(base_path, my_path)
   return data
 end
 
-local default_config = {plugin = "navigator", use_console = false, use_file = true, level = "error"}
+local level = "error"
+if _NgConfigValues.debug == true then
+  level = "debug"
+elseif _NgConfigValues.debug == "trace" then
+  level = "trace"
+end
 
+local default_config = {plugin = "navigator", use_console = false, use_file = true, level = level}
 M._log = require("guihua.log").new({level = default_config.level}, true)
 
 -- add log to you lsp.log

@@ -8,8 +8,8 @@ _LoadedClients = {}
 if packer_plugins ~= nil then
   -- packer installed
   local loader = require"packer".loader
-  if not packer_plugins["neovim/nvim-lspconfig"] or
-      not packer_plugins["neovim/nvim-lspconfig"].loaded then
+  if not packer_plugins["neovim/nvim-lspconfig"]
+      or not packer_plugins["neovim/nvim-lspconfig"].loaded then
     loader("nvim-lspconfig")
   end
   if not packer_plugins["ray-x/guihua.lua"] or not packer_plugins["guihua.lua"].loaded then
@@ -117,8 +117,8 @@ local setups = {
   },
   rust_analyzer = {
     root_dir = function(fname)
-      return util.root_pattern("Cargo.toml", "rust-project.json", ".git")(fname) or
-                 util.path.dirname(fname)
+      return util.root_pattern("Cargo.toml", "rust-project.json", ".git")(fname)
+                 or util.path.dirname(fname)
     end,
     filetypes = {"rust"},
     message_level = vim.lsp.protocol.MessageType.error,

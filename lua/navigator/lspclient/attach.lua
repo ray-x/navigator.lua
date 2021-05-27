@@ -12,7 +12,13 @@ end
 local M = {}
 
 M.on_attach = function(client, bufnr)
-  log("attaching", bufnr, client.name)
+
+  local uri = vim.uri_from_bufnr(bufnr)
+  if uri == "file://" or uri == "file:///" then
+    log("skip for float buffer", uri)
+    return
+  end
+  log("attaching", bufnr, client.name, uri)
   trace(client)
   local hassig, sig = pcall(require, "lsp_signature")
   if hassig then
