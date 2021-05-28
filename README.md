@@ -157,6 +157,8 @@ require.'navigator'.setup({
   -- end,
   -- The attach code will apply to all LSP clients
 
+  default_mapping = true,  -- set to false if you will remap every key
+  keymaps = {{key = "gK", func = "declaration()"}}, -- a list of key maps
   treesitter_analysis = true, -- treesitter variable context
   sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
   sumneko_binary = vim.fn.expand("$HOME") ..

@@ -5,6 +5,7 @@ _NgConfigValues = {
   width = 0.6, -- valeu of cols TODO allow float e.g. 0.6
   preview_height = 0.35,
   height = nil,
+  default_mapping = true,
   on_attach = nil,
   -- function(client, bufnr)
   --   -- your on_attach will be called at end of navigator on_attach

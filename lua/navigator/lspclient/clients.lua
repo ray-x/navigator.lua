@@ -245,6 +245,9 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
   retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
   local loaded = {}
+  local capabilities = vim.lsp.protocol.make_client_capabilities()
+  capabilities.textDocument.completion.completionItem.snippetSupport = true
+
   for _ = 1, 2 do
     for _, client in ipairs(clients) do
       if client ~= nil then
@@ -259,6 +262,7 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
         end
       end
       local cfg = setups[lspclient] or default_cfg
+      cfg.capabilities = capabilities
       -- if user provides override values
       -- if lsp_opts[lspclient] ~= nil and lsp_opts[lspclient] ~= nil then
       --   local ret = vim.tbl_extend("force", cfg, lsp_opts[lspclient])
@@ -291,7 +295,7 @@ end
 local function setup(user_opts)
   local ft = vim.bo.filetype
   if _LoadedClients[ft] then
-    trace("navigator is loaded for ft", ft)
+    log("navigator is loaded for ft", ft)
     return
   end
   if user_opts ~= nil then

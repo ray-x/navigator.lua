@@ -9,14 +9,15 @@ local diagnostic_map = function(bufnr)
   local opts = {noremap = true, silent = true}
   api.nvim_buf_set_keymap(bufnr, "n", "]O", ":lua vim.lsp.diagnostic.set_loclist()<CR>", opts)
 end
+
 local M = {}
 
 M.on_attach = function(client, bufnr)
 
   local uri = vim.uri_from_bufnr(bufnr)
-  if uri == "file://" or uri == "file:///" then
+  if uri == "file://" or uri == "file:///" or #uri < 11 then
     log("skip for float buffer", uri)
-    return
+    return {error = "invalid file", result = nil}
   end
   log("attaching", bufnr, client.name, uri)
   trace(client)
@@ -25,7 +26,7 @@ M.on_attach = function(client, bufnr)
     sig.on_attach()
   end
   diagnostic_map(bufnr)
-  -- lspsaga
+  -- add highlight for Lspxxx
   require"navigator.lspclient.highlight".add_highlight()
 
   api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
@@ -42,8 +43,6 @@ M.on_attach = function(client, bufnr)
 
   require"navigator.lspclient.lspkind".init()
 
-  local capabilities = vim.lsp.protocol.make_client_capabilities()
-  capabilities.textDocument.completion.completionItem.snippetSupport = true
   local config = require"navigator".config_values()
   trace(client.name, "navigator on attach")
   if config.on_attach ~= nil then
@@ -56,8 +55,8 @@ M.on_attach = function(client, bufnr)
   end
 end
 
-M.setup = function(cfg)
-  return M
-end
+-- M.setup = function(cfg)
+--   return M
+-- end
 
 return M
