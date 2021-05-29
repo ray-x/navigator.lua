@@ -122,8 +122,8 @@ function M.prepare_for_render(items, opts)
     if item.definition then
       ts_report = ts_report .. '🦕 '
     end
-    local header_len = #ts_report + 2 -- magic number 2
-    trace(ts_report)
+    local header_len = #ts_report + 4 -- magic number 2
+    log(ts_report, header_len)
 
     item.text = item.text:gsub('%s*[%[%(%{]*%s*$', '')
     if item.call_by ~= nil and #item.call_by > 0 then

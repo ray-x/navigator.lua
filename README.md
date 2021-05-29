@@ -56,6 +56,8 @@ implementation.
 
 - FZY search with Lua-JIT
 
+- LSP multiple symbol highlight and jump between reference
+
 - Better navigation for diagnostic errors, Navigate through all files/buffers that contain errors/warnings
 
 - Grouping references/implementation/incoming/outgoing based on file names.
@@ -257,6 +259,9 @@ Pls check the first part of README
 ### Workspace Symbol
 
 ![workspace symbol](https://github.com/ray-x/files/blob/master/img/navigator/workspace_symbol.gif?raw=true)
+
+### highlight document symbol and jump between reference
+![multiple_symbol_hi3](https://user-images.githubusercontent.com/1681295/120067627-f9f80680-c0bf-11eb-9216-18e5c8547f59.gif)
 
 # Current symbol highlight and jump backward/forward between symbols
 

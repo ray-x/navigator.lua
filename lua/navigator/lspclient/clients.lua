@@ -1,7 +1,7 @@
 -- todo allow config passed in
 local log = require"navigator.util".log
 local trace = require"navigator.util".trace
-
+local uv = vim.loop
 _Loading = false
 
 _LoadedClients = {}
@@ -68,6 +68,23 @@ library[vim.fn.expand("$VIMRUNTIME/lua/vim")] = true
 library[vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true
 -- [vim.fn.expand("~/repos/nvim/lua")] = true
 
+-- TODO remove onece PR #944 merged to lspconfig
+local is_windows = uv.os_uname().version:match("Windows")
+local path_sep = is_windows and "\\" or "/"
+local strip_dir_pat = path_sep .. "([^" .. path_sep .. "]+)$"
+local strip_sep_pat = path_sep .. "$"
+local dirname = function(path)
+  if not path or #path == 0 then
+    return
+  end
+  local result = path:gsub(strip_sep_pat, ""):gsub(strip_dir_pat, "")
+  if #result == 0 then
+    return "/"
+  end
+  return result
+end
+-- TODO end
+
 local setups = {
   gopls = {
     on_attach = on_attach,
@@ -101,7 +118,7 @@ local setups = {
       }
     },
     root_dir = function(fname)
-      return util.root_pattern("go.mod", ".git")(fname) or util.path.dirname(fname)
+      return util.root_pattern("go.mod", ".git")(fname) or dirname(fname) -- util.path.dirname(fname)
     end
   },
   clangd = {

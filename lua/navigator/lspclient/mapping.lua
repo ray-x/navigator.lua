@@ -27,7 +27,8 @@ local key_maps = {
   {key = "]d", func = "diagnostic.goto_next()"}, {key = "[d", func = "diagnostic.goto_prev()"},
   {key = "]r", func = "require('navigator.treesitter').goto_next_usage()"},
   {key = "[r", func = "require('navigator.treesitter').goto_previous_usage()"},
-  {key = "<C-LeftMouse>", func = "definition()"}, {key = "g<LeftMouse>", func = "implementation()"}
+  {key = "<C-LeftMouse>", func = "definition()"}, {key = "g<LeftMouse>", func = "implementation()"},
+  {key = "<Leader>k", func = "require('navigator.dochighlight').hi_symbol()"}
 }
 
 local function set_mapping(user_opts)
@@ -99,6 +100,15 @@ local function set_mapping(user_opts)
   end
 end
 
+local function autocmd(user_opts)
+  vim.api.nvim_exec([[
+            aug NavigatorAu
+                au!
+                au CmdlineLeave : lua require('navigator.dochighlight').cmd_nohl()
+            aug END
+        ]], false)
+end
+
 local function set_event_handler(user_opts)
   user_opts = user_opts or {}
   local file_types =
@@ -129,6 +139,7 @@ function M.setup(user_opts)
     set_mapping(user_opts)
   end
 
+  autocmd(user_opts)
   set_event_handler(user_opts)
 
   local cap = user_opts.cap or vim.lsp.protocol.make_client_capabilities()

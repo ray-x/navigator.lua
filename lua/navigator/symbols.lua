@@ -75,7 +75,9 @@ function M.workspace_symbols(opts)
 end
 
 function M.document_symbol_handler(err, _, result, _, bufnr)
-  if err then print(bufnr, "failed to get document symbol") end
+  if err then
+    print(bufnr, "failed to get document symbol")
+  end
 
   if not result or vim.tbl_isempty(result) then
     print(bufnr, "symbol not found for buf")
@@ -96,10 +98,12 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
     item.uri = uri
     item.selectionRange = result[i].selectionRange
     item.detail = result[i].detail or ""
-    if item.detail == "()" then item.detail = "func" end
+    if item.detail == "()" then
+      item.detail = "func"
+    end
 
     item.lnum = result[i].range.start.line + 1
-    item.text = "[" .. kind .. "]" .. item.detail .. " " .. item.name
+    item.text = "[" .. kind .. "]" .. item.name .. " " .. item.detail
 
     item.filename = fname
 
@@ -116,7 +120,7 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
         child.uri = uri
         child.lnum = c.range.start.line + 1
         child.detail = c.detail or ""
-        child.text = "   [" .. ckind .. "] " .. child.detail .. " " .. child.name
+        child.text = "   [" .. ckind .. "] " .. child.name .. " " .. child.detail
         table.insert(locations, child)
       end
     end
@@ -149,7 +153,9 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
 end
 
 function M.workspace_symbol_handler(err, _, result, _, bufnr)
-  if err then print(bufnr, "failed to get workspace symbol") end
+  if err then
+    print(bufnr, "failed to get workspace symbol")
+  end
   if not result or vim.tbl_isempty(result) then
     print(bufnr, "symbol not found for buf")
     return

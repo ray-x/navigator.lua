@@ -1,7 +1,127 @@
 local util = require "navigator.util"
 local log = util.log
+local trace = util.trace
 local api = vim.api
 local references = {}
+_NG_hi_list = {}
+_NG_current_symbol = ""
+_NG_ref_hi_idx = 1
+
+-- extract symbol from cursor
+local function get_symbol()
+  local currentWord = vim.fn.expand('<cword>')
+  return currentWord
+end
+
+local function add_locs(bufnr, result)
+  local symbol = get_symbol()
+  if #result < 1 then
+    return
+  end
+  symbol = string.format("%s_%i_%i_%i", symbol, bufnr, result[1].range.start.line,
+                         result[1].range.start.character)
+  if _NG_hi_list[symbol] == nil then
+    _NG_hi_list[symbol] = {range = {}}
+  end
+  if _NG_hi_list[symbol] ~= nil then
+    log("already added", symbol)
+    _NG_hi_list[symbol].range = {}
+    -- vim.fn.matchdelete(hid)
+  end
+  trace("add ", symbol)
+  _NG_hi_list[symbol].range = result
+  _NG_current_symbol = symbol
+end
+
+local function nohl()
+  for key, value in pairs(_NG_hi_list) do
+    if value.hi_ids ~= nil then
+      for _, v in ipairs(value.hi_ids) do
+        log("delete", v)
+        vim.fn.matchdelete(v)
+      end
+      _NG_hi_list[key].hi_ids = nil
+    end
+  end
+end
+
+local function hi_symbol()
+  local symbol_wd = get_symbol()
+  local symbol = _NG_current_symbol
+  if string.find(symbol, symbol_wd) == nil then
+    vim.lsp.buf.document_highlight()
+    symbol = _NG_current_symbol
+  end
+  if symbol == nil or symbol == "" then
+    log("nil symbol")
+    return
+  end
+
+  _NG_ref_hi_idx = _NG_ref_hi_idx + 1
+  if _NG_ref_hi_idx > 6 then --  6 magic number for colors
+    _NG_ref_hi_idx = 1
+  end
+
+  local range = _NG_hi_list[symbol].range or {}
+  if _NG_hi_list[symbol].hi_ids ~= nil then
+    for _, value in ipairs(_NG_hi_list[symbol].hi_ids) do
+      log("delete", value)
+      vim.fn.matchdelete(value)
+    end
+    _NG_hi_list[symbol].hi_ids = nil
+    return
+  end
+  local cur_pos = vim.fn.getpos('.')
+  _NG_hi_list[symbol].hi_ids = {}
+  local totalref = #range
+  local cmd = string.format("%s/\\<%s\\>//gn", "%s", symbol_wd)
+  local total_match = 0
+  local match_result = vim.api.nvim_exec(cmd, true)
+  local p = match_result:find(" match")
+  vim.cmd("nohl")
+  vim.fn.setpos('.', cur_pos)
+  if p ~= nil then
+    p = match_result:sub(1, p)
+    total_match = tonumber(p)
+  end
+  if total_match == totalref then -- same number as matchpos
+    log(total_match, "use matchadd()")
+    local k = range[1].kind
+    local hi_name = string.format("NGHiReference_%i_%i", _NG_ref_hi_idx, k)
+    local m = string.format("\\<%s\\>", symbol_wd)
+    local r = vim.fn.matchadd(hi_name, m, 20)
+    trace("hi id", m, hi_name, r)
+    table.insert(_NG_hi_list[symbol].hi_ids, r)
+    --
+    -- vim.fn.matchdelete(r)
+  else
+    for _, value in ipairs(range) do
+      local k = value.kind
+      local l = value.range.start.line + 1
+      local el = value.range['end'].line + 1
+
+      local cs = value.range.start.character + 1
+      local ecs = value.range['end'].character + 1
+      if el ~= l and cs == 1 and ecs > 1 then
+        l = el
+      end
+      local w = value.range['end'].character - value.range.start.character
+      local hi_name = string.format("NGHiReference_%i_%i", _NG_ref_hi_idx, k)
+      log(hi_name, {l, cs, w})
+      local m = vim.fn.matchaddpos(hi_name, {{l, cs, w}}, 10)
+      table.insert(_NG_hi_list[symbol].hi_ids, m)
+    end
+  end
+
+  -- clean the _NG_hi_list
+  for key, value in pairs(_NG_hi_list) do
+    if value.hi_ids == nil then
+      _NG_hi_list[key] = nil
+    end
+  end
+
+  -- log(_NG_hi_list)
+end
 
 -- returns r1 < r2 based on start of range
 local function before(r1, r2)
@@ -71,10 +191,14 @@ local function goto_adjent_reference(opt)
   vim.api.nvim_win_set_cursor(0, {next.start.line + 1, next.start.character})
   return next
 end
---       autocmd ColorScheme *
--- \ hi default LspReferenceRead cterm=bold gui=Bold ctermbg=yellow guifg=yellow guibg=purple4 |
--- \ hi default LspReferenceText cterm=bold gui=Bold ctermbg=red guifg=SlateBlue guibg=MidnightBlue |
--- \ hi default LspReferenceWrite cterm=bold gui=Bold,Italic ctermbg=red guifg=DarkSlateBlue guibg=MistyRose
+
+local function cmd_nohl()
+  local cl = vim.trim(vim.fn.getcmdline())
+  if #cl > 3 and ('nohlsearch'):match(cl) then
+    vim.schedule(nohl)
+  end
+end
+
 local function documentHighlight()
   api.nvim_exec([[
       autocmd ColorScheme * |
@@ -89,10 +213,15 @@ local function documentHighlight()
       augroup END
     ]], false)
   vim.lsp.handlers["textDocument/documentHighlight"] =
-      function(_, _, result, _, bufnr)
+      function(err, _, result, _, bufnr)
+        if err then
+          print(err)
+          return
+        end
         if not result then
           return
         end
+        trace("dochl", result)
         bufnr = api.nvim_get_current_buf()
         vim.lsp.util.buf_clear_references(bufnr)
         vim.lsp.util.buf_highlight_references(bufnr, result)
@@ -105,11 +234,15 @@ local function documentHighlight()
           return before(a.range, b.range)
         end)
         references[bufnr] = result
+        add_locs(bufnr, result)
       end
 end
 
 return {
   documentHighlight = documentHighlight,
   goto_adjent_reference = goto_adjent_reference,
-  handle_document_highlight = handle_document_highlight
+  handle_document_highlight = handle_document_highlight,
+  hi_symbol = hi_symbol,
+  nohl = nohl,
+  cmd_nohl = cmd_nohl
 }

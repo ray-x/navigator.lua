@@ -151,6 +151,28 @@ function M.new_list_view(opts)
       offset_y = offset_y + 1 -- need to check this out
     end
 
+    local function idx(data_list, pos)
+      -- first check if fzy is set
+      local fzy_on = false
+      for _, value in ipairs(data_list) do
+        if value.fzy ~= nil then
+          fzy_on = true
+          break
+        end
+      end
+      if fzy_on == true then
+        local i = 1
+        for _, value in ipairs(data_list) do
+          if value.fzy ~= nil then
+            if i == pos then
+              return value
+            end
+            i = i + 1
+          end
+        end
+      end
+      return data[pos]
+    end
     return ListView:new({
       loc = loc,
       prompt = prompt,
@@ -166,7 +188,8 @@ function M.new_list_view(opts)
         if pos == 0 then
           pos = 1
         end
-        local l = data[pos]
+        local l = idx(data, pos) -- bug it not work with fzy filter
+        log(data)
         if l.filename ~= nil then
           trace("openfile ", l.filename, l.lnum, l.col)
           util.open_file_at(l.filename, l.lnum, l.col)
@@ -176,7 +199,9 @@ function M.new_list_view(opts)
         if pos == 0 then
           pos = 1
         end
-        local l = data[pos]
+
+        local l = idx(data, pos) -- bug it not work with fzy filter
+        log(data)
         trace("on move", pos, l)
         trace("on move", pos, l.text or l, l.uri, l.filename)
         -- todo fix
