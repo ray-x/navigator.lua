@@ -16,7 +16,7 @@ local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
 local TS_analysis_enabled = require"navigator".config_values().treesitter_analysis
 
 -- extract symbol from range
-local function get_symbol(text, range)
+function M.get_symbol(text, range)
   if range == nil then
     return ""
   end
@@ -282,7 +282,7 @@ function M.locations_to_items(locations)
     item.call_by = find_ts_func_by_range(funcs, item.range)
     item.rpath = util.get_relative_path(cwd, item.filename)
     width = math.max(width, #item.text)
-    item.symbol_name = get_symbol(item.text, item.range)
+    item.symbol_name = M.get_symbol(item.text, item.range)
     item.lhs = check_lhs(item.text, item.symbol_name)
 
     table.insert(items, item)

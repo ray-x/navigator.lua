@@ -31,22 +31,30 @@ local function definition_hdlr(err, _, locations, _, bufnr)
   end
 end
 
+local function get_symbol()
+  local currentWord = vim.fn.expand('<cword>')
+  return currentWord
+end
+
 local function def_preview(timeout_ms)
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running")
   local method = "textDocument/definition"
   local params = vim.lsp.util.make_position_params()
-  local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 2000)
+  local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)
 
   if result == nil or vim.tbl_isempty(result) then
     print("No result found: " .. method)
     return nil
   end
 
+  log(result)
   local data = {}
   -- result = {vim.tbl_deep_extend("force", {}, unpack(result))}
   -- log("def-preview", result)
   for key, value in pairs(result) do
-    if result[key] ~= nil then table.insert(data, value.result[1]) end
+    if result[key] ~= nil then
+      table.insert(data, value.result[1])
+    end
   end
   local range = data[1].targetRange or data[1].range
 
@@ -55,9 +63,13 @@ local function def_preview(timeout_ms)
   row = math.max(row - 3, 1)
   local delta = range.start.line - row + 1
   local uri = data[1].uri or data[1].targetUri
-  if not uri then return end
+  if not uri then
+    return
+  end
   local bufnr = vim.uri_to_bufnr(uri)
-  if not vim.api.nvim_buf_is_loaded(bufnr) then vim.fn.bufload(bufnr) end
+  if not vim.api.nvim_buf_is_loaded(bufnr) then
+    vim.fn.bufload(bufnr)
+  end
   -- TODO: 12 should be an option
   local definition = vim.api.nvim_buf_get_lines(bufnr, row, range["end"].line + 12, false)
   local def_line = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range.start.line + 1, false)
@@ -69,7 +81,14 @@ local function def_preview(timeout_ms)
       break
     end
   end
-  definition = vim.list_extend({"    " .. "Definition: "}, definition)
+  local width = 40
+  for key, value in pairs(definition) do
+    log(key, value, width)
+    width = math.max(width, #value)
+    width = math.min(90, width)
+
+  end
+  definition = vim.list_extend({"    [" .. get_symbol() .. "] Definition: "}, definition)
   local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
 
   -- TODO multiple resuts?
@@ -77,6 +96,7 @@ local function def_preview(timeout_ms)
     relative = "cursor",
     style = "minimal",
     ft = filetype,
+    width = width,
     data = definition,
     enter = true
   }
