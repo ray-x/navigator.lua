@@ -24,7 +24,7 @@ local function add_locs(bufnr, result)
     _NG_hi_list[symbol] = {range = {}}
   end
   if _NG_hi_list[symbol] ~= nil then
-    log("already added", symbol)
+    trace("already added", symbol)
     _NG_hi_list[symbol].range = {}
     -- vim.fn.matchdelete(hid)
   end
@@ -37,7 +37,7 @@ local function nohl()
   for key, value in pairs(_NG_hi_list) do
     if value.hi_ids ~= nil then
       for _, v in ipairs(value.hi_ids) do
-        log("delete", v)
+        trace("delete", v)
         vim.fn.matchdelete(v)
       end
       _NG_hi_list[key].hi_ids = nil
@@ -85,7 +85,7 @@ local function hi_symbol()
     total_match = tonumber(p)
   end
   if total_match == totalref then -- same number as matchpos
-    log(total_match, "use matchadd()")
+    trace(total_match, "use matchadd()")
     local k = range[1].kind
     local hi_name = string.format("NGHiReference_%i_%i", _NG_ref_hi_idx, k)
     local m = string.format("\\<%s\\>", symbol_wd)
@@ -107,7 +107,7 @@ local function hi_symbol()
       end
       local w = value.range['end'].character - value.range.start.character
       local hi_name = string.format("NGHiReference_%i_%i", _NG_ref_hi_idx, k)
-      log(hi_name, {l, cs, w})
+      trace(hi_name, {l, cs, w})
       local m = vim.fn.matchaddpos(hi_name, {{l, cs, w}}, 10)
       table.insert(_NG_hi_list[symbol].hi_ids, m)
     end
@@ -153,7 +153,7 @@ local function handle_document_highlight(_, _, result, _, bufnr, _)
 end
 -- modify from vim-illuminate
 local function goto_adjent_reference(opt)
-  log(opt)
+  trace(opt)
   opt = vim.tbl_extend("force", {forward = true, wrap = true}, opt or {})
 
   local bufnr = vim.api.nvim_get_current_buf()
@@ -187,7 +187,7 @@ local function goto_adjent_reference(opt)
     next = refs[nexti].range
   end
 
-  log(next)
+  trace(next)
   vim.api.nvim_win_set_cursor(0, {next.start.line + 1, next.start.character})
   return next
 end

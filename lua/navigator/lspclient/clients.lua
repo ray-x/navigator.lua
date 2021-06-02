@@ -20,7 +20,11 @@ end
 
 local has_lsp, lspconfig = pcall(require, "lspconfig")
 if not has_lsp then
-  error("loading lsp config")
+  return {
+    setup = function()
+      print("loading lsp config failed LSP may not working correctly")
+    end
+  }
 end
 local highlight = require "navigator.lspclient.highlight"
 

@@ -116,7 +116,7 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
         child.range = c.range
         local ckind = symbol_kind(child.kind)
         child.selectionRange = c.selectionRange
-        child.fname = fname
+        child.filename = fname
         child.uri = uri
         child.lnum = c.range.start.line + 1
         child.detail = c.detail or ""

@@ -189,9 +189,8 @@ function M.new_list_view(opts)
           pos = 1
         end
         local l = idx(data, pos) -- bug it not work with fzy filter
-        log(data)
         if l.filename ~= nil then
-          trace("openfile ", l.filename, l.lnum, l.col)
+          log("openfile ", l.filename, l.lnum, l.col)
           util.open_file_at(l.filename, l.lnum, l.col)
         end
       end,

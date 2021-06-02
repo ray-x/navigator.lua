@@ -10,21 +10,25 @@ local event_hdlrs = {
   {ev = "CursorMoved", func = "clear_references()"}
 }
 
+local double = {"╔", "═", "╗", "║", "╝", "═", "╚", "║"}
+local single = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
 local key_maps = {
   {key = "gr", func = "references()"}, {mode = "i", key = "<M-k>", func = "signature_help()"},
   {key = "gs", func = "signature_help()"}, {key = "g0", func = "document_symbol()"},
   {key = "gW", func = "workspace_symbol()"}, {key = "<c-]>", func = "definition()"},
-  {key = "gD", func = "declaration()"},
+  {key = "gD", func = "declaration({ popup_opts = { border = 'single' }})"},
   {key = "gp", func = "require('navigator.definition').definition_preview()"},
   {key = "gT", func = "require('navigator.treesitter').buf_ts()"},
-  {key = "GT", func = "require('navigator.treesitter').bufs_ts()"}, {key = "K", func = "hover()"},
+  {key = "GT", func = "require('navigator.treesitter').bufs_ts()"},
+  {key = "K", func = "hover({ popup_opts = { border = single }})"},
   {key = "ga", mode = "n", func = "code_action()"},
   {key = "ga", mode = "v", func = "range_code_action()"}, {key = "<Leader>re", func = "rename()"},
   {key = "<Leader>gi", func = "incoming_calls()"}, {key = "<Leader>go", func = "outgoing_calls()"},
   {key = "gi", func = "implementation()"}, {key = "gt", func = "type_definition()"},
   {key = "gL", func = "diagnostic.show_line_diagnostics()"},
   {key = "gG", func = "require('navigator.diagnostics').show_diagnostic()"},
-  {key = "]d", func = "diagnostic.goto_next()"}, {key = "[d", func = "diagnostic.goto_prev()"},
+  {key = "]d", func = "diagnostic.goto_next({ popup_opts = { border = single }})"},
+  {key = "[d", func = "diagnostic.goto_next({ popup_opts = { border = single }})"},
   {key = "]r", func = "require('navigator.treesitter').goto_next_usage()"},
   {key = "[r", func = "require('navigator.treesitter').goto_previous_usage()"},
   {key = "<C-LeftMouse>", func = "definition()"}, {key = "g<LeftMouse>", func = "implementation()"},
@@ -174,7 +178,7 @@ function M.setup(user_opts)
     vim.lsp.handlers["textDocument/signatureHelp"] = require"navigator.signature".signature_handler
   end
 
-  -- vim.lsp.handlers["textDocument/hover"]  = require 'navigator.hover'.hover_handler
+  vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})
 end
 
 return M

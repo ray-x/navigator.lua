@@ -143,6 +143,34 @@ EOF
 You can remove your lspconfig.lua and use the hooks of navigator.lua. As the
 navigator will bind keys and handler for you. The LSP will be loaded lazily based on filetype.
 
+A treesitter only mode. In some cases LSP is buggy or not available, you can also us treesitter
+standalone
+
+```vim
+call plug#begin('~/.vim/plugged')
+
+Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
+Plug 'ray-x/navigator.lua'
+
+" Plug 'hrsh7th/nvim-compe' and other plugins you commenly use...
+
+" optional, if you need treesitter symbol support
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+" optional:
+Plug 'nvim-treesitter/nvim-treesitter-refactor' " this provides "go to def" etc
+
+call plug#end()
+
+lua <<EOF
+require'navigator'.setup()
+EOF
+
+
+```
+
+
+
+
 Nondefault configuration example:
 
 ```lua
@@ -243,6 +271,21 @@ e.g
 -- The attach will be call at end of navigator on_attach()
 require'navigator'.setup({on_attach = function(client, bufnr) require 'illuminate'.on_attach(client)})
 ```
+
+## Highlight
+
+Highlight I am using:
+
+* LspReferenceRead, LspReferenceText and LspReferenceWrite are used for `autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()`
+That is where you saw current symbol been highlighted.
+
+* GHListDark and GHTextViewDark is used for floating listvew and TextView. They are be based on current background
+(Normal) and PmenuSel
+
+* In future, I will use NormalFloat for floating view. But ATM, most of colorscheme does not define NormalFloat
+
+You can override above highlight to fit your current colorscheme
+
 
 ## Screenshots
 
