@@ -134,7 +134,15 @@ function M.prepare_for_render(items, opts)
           local endwise = '{}'
           if value.type == 'method' or value.type == 'function' then
             endwise = '()'
-            ts_report = ts_report .. ' '
+            local syb = items[i].symbol_name
+            if txt == items[i].symbol_name or (#txt > #syb and txt:sub(#txt - #syb + 1) == syb) then
+              if ts_report ~= '🦕 ' then
+                ts_report = ts_report .. '🦕 '
+              end
+              header_len = #ts_report + 1
+            else
+              ts_report = ts_report .. ' '
+            end
           end
           if #ts_report > header_len then
             ts_report = ts_report .. '  '
