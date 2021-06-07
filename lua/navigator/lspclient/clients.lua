@@ -283,12 +283,14 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
         end
       end
       local cfg = setups[lspclient] or default_cfg
-      cfg.capabilities = capabilities
       -- if user provides override values
-      -- if lsp_opts[lspclient] ~= nil and lsp_opts[lspclient] ~= nil then
-      --   local ret = vim.tbl_extend("force", cfg, lsp_opts[lspclient])
-      --   log(lsp_opts[lspclient].settings, cfg, ret)
-      -- end
+
+      cfg.capabilities = capabilities
+      if lsp_opts[lspclient] ~= nil then
+        -- log(lsp_opts[lspclient], cfg)
+        cfg = vim.tbl_deep_extend("force", cfg, lsp_opts[lspclient])
+        -- log(cfg)
+      end
 
       load_cfg(ft, lspclient, cfg, loaded)
       ::continue::
