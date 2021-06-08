@@ -24,17 +24,20 @@ local function get_pads(win_width, text, postfix)
   if sz < 30 then
     sz = 30
   end
-  local space = ''
+  local space
   local i = math.floor((sz + 10) / 10)
   i = i * 10 - #text
 
   if i + #text + #postfix + 2 < win_width then
     -- push to left twice
     local rem = win_width - i - #text - #postfix
-    local rem2 = (rem - 2) / 10
-    if rem2 > 0 then
-      i = i + rem2 * 10
+    rem = (rem - 2) / 10
+    if rem > 0 then
+      i = i + rem * 10
+      rem = (i + #text) % 10
+      -- i = i - rem
     end
+
   end
 
   space = string.rep(' ', i)

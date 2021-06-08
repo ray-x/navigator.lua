@@ -36,8 +36,6 @@ local on_attach = require("navigator.lspclient.attach").on_attach
 -- gopls["ui.completion.usePlaceholders"] = true
 
 -- lua setup
-local sumneko_root_path = config.sumneko_root_path
-local sumneko_binary = config.sumneko_binary
 local library = {}
 
 local path = vim.split(package.path, ";")
@@ -171,7 +169,7 @@ local setups = {
     }
   },
   sumneko_lua = {
-    cmd = {sumneko_binary, "-E", sumneko_root_path .. "/main.lua"},
+    cmd = {"lua-language-server"},
     filetypes = {"lua"},
     on_attach = on_attach,
     settings = {
@@ -289,7 +287,7 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
       if lsp_opts[lspclient] ~= nil then
         -- log(lsp_opts[lspclient], cfg)
         cfg = vim.tbl_deep_extend("force", cfg, lsp_opts[lspclient])
-        -- log(cfg)
+        trace(cfg)
       end
 
       load_cfg(ft, lspclient, cfg, loaded)
@@ -306,7 +304,7 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
       i = i + 1
       if i > 5 or #clients > 0 then
         timer:close() -- Always close handles to avoid leaks.
-        trace("active", #clients, i)
+        log("active", #clients, i)
         _Loading = false
         return true
       end
@@ -358,13 +356,24 @@ local function setup(user_opts)
     return
   end
 
-  log('setup', user_opts)
+  trace('setup', user_opts)
   log("loading for ft ", ft, uri)
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
   local lsp_opts = user_opts.lsp
 
   _Loading = true
+
+  if vim.bo.filetype == 'lua' then
+    local slua = lsp_opts.sumneko_lua
+    if slua and not slua.cmd then
+      if slua.sumneko_root_path and slua.sumneko_binary then
+        lsp_opts.sumneko_lua.cmd = {slua.sumneko_binary, "-E", slua.sumneko_root_path .. "/main.lua"}
+      else
+        lsp_opts.sumneko_lua.cmd = {"lua-language-server"}
+      end
+    end
+  end
   wait_lsp_startup(ft, retry, lsp_opts)
   _LoadedClients[ft] = true
   _Loading = false

@@ -10,9 +10,6 @@ _NgConfigValues = {
   -- function(client, bufnr)
   --   -- your on_attach will be called at end of navigator on_attach
   -- end,
-  sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
-  sumneko_binary = vim.fn.expand("$HOME")
-      .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
   lsp = {
@@ -20,6 +17,11 @@ _NgConfigValues = {
     tsserver = {
       filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetype
+    },
+    sumneko_lua = {
+      -- sumneko_root_path = sumneko_root_path,
+      -- sumneko_binary = sumneko_binary,
+      -- cmd = {'lua-language-server'}
     }
   }
 }
@@ -44,6 +46,9 @@ local extend_config = function(opts)
     else
       _NgConfigValues[key] = value
     end
+  end
+  if _NgConfigValues.sumneko_root_path or _NgConfigValues.sumneko_binary then
+    vim.notify("Please put sumneko setup in lsp['sumneko_lua']", vim.log.levels.WARN)
   end
 end
 
