@@ -27,6 +27,16 @@ local function get_pads(win_width, text, postfix)
   local space = ''
   local i = math.floor((sz + 10) / 10)
   i = i * 10 - #text
+
+  if i + #text + #postfix + 2 < win_width then
+    -- push to left twice
+    local rem = win_width - i - #text - #postfix
+    local rem2 = (rem - 2) / 10
+    if rem2 > 0 then
+      i = i + rem2 * 10
+    end
+  end
+
   space = string.rep(' ', i)
   trace(text, i, postfix, win_width)
   return space, trim
