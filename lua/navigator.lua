@@ -75,6 +75,8 @@ M.setup = function(cfg)
   -- vim.cmd("autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4")
   if not _NgConfigValues.loaded then
     vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
+    -- TODO: Check this should be hooked in on_attach, but if stopping working...
+    vim.cmd([[autocmd FileType * lua require'navigator.lspclient.mapping'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
     _NgConfigValues.loaded = true
   end
 end
