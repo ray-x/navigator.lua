@@ -46,6 +46,10 @@ local function set_mapping(user_opts)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
   end
 
+  local function set_keymap(...)
+    vim.api.nvim_set_keymap(...)
+  end
+
   -- local function buf_set_option(...)
   --   vim.api.nvim_buf_set_option(bufnr, ...)
   -- end
@@ -72,7 +76,7 @@ local function set_mapping(user_opts)
     end
     local k = value.key
     local m = value.mode or "n"
-    buf_set_keymap(m, k, f, opts)
+    set_keymap(m, k, f, opts)
   end
 
   -- format setup
@@ -102,6 +106,7 @@ local function set_mapping(user_opts)
   if range_fmt then
     buf_set_keymap("v", "<space>ff", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
   end
+  log("enable format ", doc_fmt, range_fmt)
 end
 
 local function autocmd(user_opts)
@@ -138,7 +143,7 @@ end
 local M = {}
 
 function M.setup(user_opts)
-
+  user_opts = user_opts or _NgConfigValues
   if _NgConfigValues.default_mapping == true then
     set_mapping(user_opts)
   end
