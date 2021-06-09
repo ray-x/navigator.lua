@@ -323,7 +323,7 @@ local function get_all_nodes(bufnr, filter, summary)
         end
       end
 
-      log(item.node_text, item.kind, item.type)
+      trace(item.node_text, item.kind, item.type)
       if scope ~= nil then
         -- it is strange..
         if not is_func and summary then
@@ -336,7 +336,10 @@ local function get_all_nodes(bufnr, filter, summary)
           table.insert(all_nodes, item)
         end
 
-        log(item.type, tsdata:type(), item.node_text, item.kind, item.node_text, item.node_scope)
+        if item.node_scope then
+          log(item.type, tsdata:type(), item.node_text, item.kind, item.node_text, "range",
+              item.node_scope.start.line, item.node_scope['end'].line)
+        end
         goto continue
       end
 

@@ -27,15 +27,15 @@ local function get_pads(win_width, text, postfix)
   local space
   local i = math.floor((sz + 10) / 10)
   i = i * 10 - #text
-
-  if i + #text + #postfix + 2 < win_width then
-    -- push to left twice
+  log(i, #text, #postfix, postfix, text, win_width)
+  if i + #text + #postfix < win_width then
     local rem = win_width - i - #text - #postfix
-    rem = (rem - 2) / 10
+    rem = math.floor(rem / 10)
     if rem > 0 then
       i = i + rem * 10
-      rem = (i + #text) % 10
+      -- rem = (i + #text) % 10
       -- i = i - rem
+      log(i)
     end
 
   end
@@ -67,7 +67,7 @@ function M.prepare_for_render(items, opts)
   local call_by_presented = false
   local width = 100
   opts.width = opts.width or width
-  local win_width = opts.width - 2 -- buf
+  local win_width = opts.width  -- buf
 
   for i = 1, #items do
     if items[i].call_by and #items[i].call_by > 0 then
@@ -76,23 +76,25 @@ function M.prepare_for_render(items, opts)
   end
 
   for i = 1, #items do
-    local space = ''
-    local trim = false
+    local space
+    local trim
     local lspapi_display = lspapi
     items[i].symbol_name = items[i].symbol_name or "" -- some LSP API does not have range for this
+
+    local fn = display_items[last_summary_idx].filename
+    local dfn = items[i].display_filename
     if last_summary_idx == 1 then
       lspapi_display = items[i].symbol_name .. ' ' .. lspapi_display
-      trace(items[1], lspapi_display)
+      trace(items[1], lspapi_display, display_items[last_summary_idx])
     end
 
     -- trace(items[i], items[i].filename, last_summary_idx, display_items[last_summary_idx].filename)
     -- TODO refact display_filename generate part
-    local fn = display_items[last_summary_idx].filename
     if items[i].filename == fn then
-      space, trim = get_pads(opts.width, icon .. ' ' .. fn, lspapi_display .. ' 12')
-      if trim and opts.width > 50 and #fn > opts.width - 20 then
-        local fn1 = string.sub(fn, 1, opts.width - 50)
-        local fn2 = string.sub(fn, #fn - 10, #fn)
+      space, trim = get_pads(opts.width, icon .. ' ' .. dfn, lspapi_display .. ' 12')
+      if trim and opts.width > 50 and #dfn > opts.width - 20 then
+        local fn1 = string.sub(dfn, 1, opts.width - 50)
+        local fn2 = string.sub(dfn, #dfn - 10, #dfn)
         display_items[last_summary_idx].display_filename = fn1 .. "" .. fn2
         space = '  '
         -- log("trim", fn1, fn2)

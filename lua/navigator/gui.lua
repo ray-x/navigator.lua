@@ -200,7 +200,7 @@ function M.new_list_view(opts)
         end
 
         local l = idx(data, pos) -- bug it not work with fzy filter
-        log(data)
+        trace(data)
         trace("on move", pos, l)
         trace("on move", pos, l.text or l, l.uri, l.filename)
         -- todo fix
