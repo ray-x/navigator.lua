@@ -67,7 +67,7 @@ function M.prepare_for_render(items, opts)
   local call_by_presented = false
   local width = 100
   opts.width = opts.width or width
-  local win_width = opts.width  -- buf
+  local win_width = opts.width -- buf
 
   for i = 1, #items do
     if items[i].call_by and #items[i].call_by > 0 then
@@ -111,7 +111,7 @@ function M.prepare_for_render(items, opts)
 
       space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename,
                              lspapi_display .. ' 12')
-      if trim and opts.width > 52 and item.display_filename > opts.width - 20 then
+      if trim and opts.width > 52 and #item.display_filename > opts.width - 20 then
         item.display_filename = string.sub(item.display_filename, 1, opts.width - 52) .. ""
                                     .. string.sub(item.display_filename,
                                                   #item.display_filename - 10,

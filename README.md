@@ -2,19 +2,19 @@
 
 - Easy code navigation, view diagnostic errors, see relationships of functions, variables
 
-- A plugin combines power of LSP and 🌲🏡 treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
+- A plugin combines power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
 
-Here are examples
+Here are some examples
 
-#### Example: Javascripts closure
+#### Example: Javascript closure
 
 The following screenshot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming & outgoing calls from LSP. It is designed for the symbol analysis.
 ![js_closure_call_tree](https://user-images.githubusercontent.com/1681295/119120589-cee23700-ba6f-11eb-95c5-b9ac8d445c31.jpg)
 
 Explanation:
 - The first line of floating windows shows there are 3 references for the symbol <span style="color:red"> *browser* </span> in closure.js
-- The first reference of browser is an assignment, an emoji  📝 indicates the value changed in this line. In many
-cases, we search for references to find out where the value changed.
+- The first reference of browser is an assignment, an emoji  📝 indicates the value is changed in this line. In many
+cases, we search for references to find out when the value changed.
 - The second reference of `browser` is inside function `displayName` and `displayName` sit inside `makeFunc`, So you
 will see ` displayName{} <-  makeFunc{}`
 - The third similar to the second, as var browser is on the right side of '=', the value not changed in this line
@@ -31,18 +31,18 @@ Struct type references in multiple Go ﳑ files
 
 ![go_reference](https://user-images.githubusercontent.com/1681295/119123823-54b3b180-ba73-11eb-8790-097601e10f6a.gif)
 
-This feature can provide you info in which function/class/method the variable was referenced. It is handy for large
+This feature can provide you info in which function/class/method the variable was referenced. It is handy for a large
 project where class/function definition is too long to fit into the preview window. Also provides a birdview of where the
 variable is
 - Referenced
 - Modified
 - Defined
-- called
+- Called
 
 # Features:
 
 - LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type. This
-also enables you to handle workspace combine mixed types of codes (e.g. Go + javascript + yml)
+also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml)
 
 - Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP & Treesitter powered IDE
 
@@ -52,11 +52,11 @@ implementation.
 
 - Async request with lsp.buf_request for reference search
 
-- Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limition?)
+- Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?)
 
 - FZY search with Lua-JIT
 
-- LSP multiple symbol highlight and jump between reference
+- LSP multiple symbol highlight and jump between references
 
 - Better navigation for diagnostic errors, Navigate through all files/buffers that contain errors/warnings
 
@@ -65,7 +65,7 @@ implementation.
 - Treesitter based variable/function context analysis. It is 10x times faster compared to purely rely on LSP. In most
 of the case, it takes treesitter less than 4 ms to read and render all nodes for a file of 1,000 LOC.
 
-- The first plugin, IMO, that allows you to search in all treesitter symbols in the workspace.
+- The first plugin, IMO, allows you to search in all treesitter symbols in the workspace.
 
 - Nerdfont, emoji for LSP and Treesitter kind
 
@@ -110,7 +110,7 @@ use {'ray-x/navigator.lua', requires = {'ray-x/guihua.lua', run = 'cd lua/fzy &&
 
 ## Setup
 
-Easy setup **BOTH** lspconfig and navigator with one liner. Navigator covers arounds 20 most used LSP setup.
+Easy setup **BOTH** lspconfig and navigator with one liner. Navigator covers around 20 most used LSP setup.
 
 ```lua
 lua require'navigator'.setup()
@@ -143,7 +143,7 @@ EOF
 You can remove your lspconfig.lua and use the hooks of navigator.lua. As the
 navigator will bind keys and handler for you. The LSP will be loaded lazily based on filetype.
 
-A treesitter only mode. In some cases LSP is buggy or not available, you can also us treesitter
+A treesitter only mode. In some cases LSP is buggy or not available, you can also use treesitter
 standalone
 
 ```vim
@@ -228,6 +228,38 @@ require.'navigator'.setup({
 })
 
 ```
+### Default keymaps
+
+|  mode 	|  key 	|  function 	|
+|---	|---	|---	|
+|  n 	|  gr 	|  show reference and context 	|
+|  i 	|  \<m-k\> 	|  signature help 	|
+|  n 	|  gs 	|  signature  help 	|
+|  n 	|  gW 	|  workspace symbol 	|
+|  n 	|  gD 	|  declaration 	|
+|  n 	|  g0 	|  document symbol 	|
+|  n 	|  \<C-]\> 	|  go to defination (if multiple show listview)	|
+|  n 	|  gp 	|  defination 	|
+|  n 	|  \<C-LeftMouse\> 	|  definition|
+|  n 	|  g\<LeftMouse\> 	|  implementation|
+|  n 	|  gT 	| treesitter document symbol	|
+|  n 	|  GT 	| treesitter symbol for all open buffers	|
+|  n 	|  K 	|  hover doc 	|
+|  n 	|  ga 	|  code action (when you see 💡 ) 	|
+|  v 	|  ga 	|  range code action (when you see 💡 ) 	|
+|  n 	|  \<Leader\>re 	| rename|
+|  n 	|  \<Leader\>gi 	| incoming calls|
+|  n 	|  \<Leader\>go 	| outgoing calls|
+|  n 	|  gi 	|  implementation 	|
+|  n 	|  gt 	|  type definition 	|
+|  n 	|  gL 	|  show line diagnostic 	|
+|  n 	|  gG 	|  show diagnostic for all buffers 	|
+|  n 	|  ]d 	|  next diagnostic|
+|  n 	|  [d 	|  previous diagnostic|
+|  n 	|  ]r 	|  next treesitter reference/usage|
+|  n 	|  [r 	|  previous treesitter reference/usage|
+|  n 	|  \<Leader\>k 	| toggle reference highlight |
+
 
 ### Colors:
 
@@ -277,14 +309,14 @@ require'navigator'.setup({on_attach = function(client, bufnr) require 'illuminat
 Highlight I am using:
 
 * LspReferenceRead, LspReferenceText and LspReferenceWrite are used for `autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()`
-That is where you saw current symbol been highlighted.
+That is where you saw the current symbol been highlighted.
 
 * GHListDark and GHTextViewDark is used for floating listvew and TextView. They are be based on current background
 (Normal) and PmenuSel
 
 * In future, I will use NormalFloat for floating view. But ATM, most of colorscheme does not define NormalFloat
 
-You can override above highlight to fit your current colorscheme
+You can override the above highlight to fit your current colorscheme
 
 
 ## Screenshots
@@ -309,7 +341,7 @@ Pls check the first part of README
 # Current symbol highlight and jump backward/forward between symbols
 
 Document highlight provided by LSP.
-Jump between symbols between symbols with treesitter (with `]r` and `[r`)
+Jump between symbols with treesitter (with `]r` and `[r`)
 ![doc jump](https://github.com/ray-x/files/blob/master/img/navigator/doc_hl_jump.gif?raw=true)
 
 ### Diagnostic

@@ -25,7 +25,7 @@ local key_maps = {
   {key = "ga", mode = "v", func = "range_code_action()"}, {key = "<Leader>re", func = "rename()"},
   {key = "<Leader>gi", func = "incoming_calls()"}, {key = "<Leader>go", func = "outgoing_calls()"},
   {key = "gi", func = "implementation()"}, {key = "gt", func = "type_definition()"},
-  {key = "gL", func = "diagnostic.show_line_diagnostics()"},
+  {key = "gL", func = "diagnostic.show_line_diagnostics({ popup_opts = { border = single }})"},
   {key = "gG", func = "require('navigator.diagnostics').show_diagnostic()"},
   {key = "]d", func = "diagnostic.goto_next({ popup_opts = { border = single }})"},
   {key = "[d", func = "diagnostic.goto_next({ popup_opts = { border = single }})"},
