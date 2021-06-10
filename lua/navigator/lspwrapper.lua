@@ -28,12 +28,22 @@ local function check_lhs(text, symbol)
   local s = find(text, symbol)
   local eq = string.find(text, '=') or 0
   local eq2 = string.find(text, '==') or 0
+  local eq3 = string.find(text, '!=') or 0
+  local eq4 = string.find(text, '~=') or 0
   if not s or not eq then
     return false
   end
   if s < eq and eq ~= eq2 then
     log(symbol, "modified")
   end
+  if eq == eq3 + 1 then
+    return false
+  end
+
+  if eq == eq4 + 1 then
+    return false
+  end
+
   return s < eq and eq ~= eq2
 end
 

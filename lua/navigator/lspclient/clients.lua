@@ -46,7 +46,9 @@ table.insert(path, "lua/?/init.lua")
 local function add(lib)
   for _, p in pairs(vim.fn.expand(lib, false, true)) do
     p = vim.loop.fs_realpath(p)
-    library[p] = true
+    if p then
+      library[p] = true
+    end
   end
 end
 
@@ -54,10 +56,8 @@ end
 add("$VIMRUNTIME")
 
 -- add your config
-local home = vim.fn.expand("$HOME")
-if vim.fn.isdirectory(home .. "/.config/nvim") then
-  add(home .. "/.config/nvim")
-end
+-- local home = vim.fn.expand("$HOME")
+add(vim.fn.stdpath('config'))
 
 -- add plugins it may be very slow to add all in path
 -- if vim.fn.isdirectory(home .. "/.config/share/nvim/site/pack/packer") then
@@ -368,7 +368,9 @@ local function setup(user_opts)
     local slua = lsp_opts.sumneko_lua
     if slua and not slua.cmd then
       if slua.sumneko_root_path and slua.sumneko_binary then
-        lsp_opts.sumneko_lua.cmd = {slua.sumneko_binary, "-E", slua.sumneko_root_path .. "/main.lua"}
+        lsp_opts.sumneko_lua.cmd = {
+          slua.sumneko_binary, "-E", slua.sumneko_root_path .. "/main.lua"
+        }
       else
         lsp_opts.sumneko_lua.cmd = {"lua-language-server"}
       end
