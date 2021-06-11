@@ -259,7 +259,14 @@ require.'navigator'.setup({
 |  n 	|  ]r 	|  next treesitter reference/usage|
 |  n 	|  [r 	|  previous treesitter reference/usage|
 |  n 	|  \<Leader\>k 	| toggle reference highlight |
-
+|  i/n	|  \<C-p\> 	| previous item in list|
+|  i/n	|  \<C-n\> 	| next item in list|
+|  i/n	|  \<Up\> 	| previous item in list|
+|  i/n	|  \<Down\> 	| next item in list|
+|  i/n	|  \<C-o\> 	| Open preview/Apply action|
+|  n	|  \<Enter\> 	| Open preview/Apply action|
+|  i/n	|  \<C-b\> 	| Previous in list|
+|  i/n	|  \<C-f\> 	| next page in list|
 
 ### Colors:
 

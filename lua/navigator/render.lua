@@ -15,7 +15,7 @@ local function get_pads(win_width, text, postfix)
   local trim = false
   local margin = win_width - #text - #postfix
   if margin < 0 then
-    log('line too long', win_width, #text, #postfix)
+    trace('line too long', win_width, #text, #postfix)
     if #postfix > 1 then
       trim = true
     end
@@ -27,15 +27,13 @@ local function get_pads(win_width, text, postfix)
   local space
   local i = math.floor((sz + 10) / 10)
   i = i * 10 - #text
-  log(i, #text, #postfix, postfix, text, win_width)
+  trace(i, #text, #postfix, postfix, text, win_width)
   if i + #text + #postfix < win_width then
     local rem = win_width - i - #text - #postfix
     rem = math.floor(rem / 10)
     if rem > 0 then
       i = i + rem * 10
-      -- rem = (i + #text) % 10
-      -- i = i - rem
-      log(i)
+      -- log(i)
     end
 
   end
@@ -138,7 +136,7 @@ function M.prepare_for_render(items, opts)
       ts_report = ts_report .. '🦕 '
     end
     local header_len = #ts_report + 4 -- magic number 2
-    log(ts_report, header_len)
+    trace(ts_report, header_len)
 
     item.text = item.text:gsub('%s*[%[%(%{]*%s*$', '')
     if item.call_by ~= nil and #item.call_by > 0 then
@@ -174,11 +172,11 @@ function M.prepare_for_render(items, opts)
       end
       if #space + #item.text + #ts_report >= win_width then
         if #item.text + #ts_report > win_width then
-          log("exceeding", #item.text, #ts_report, win_width)
+          trace("exceeding", #item.text, #ts_report, win_width)
           space = '   '
         else
           local remain = win_width - #item.text - #ts_report
-          log("remain", remain)
+          trace("remain", remain)
           space = string.rep(' ', remain)
         end
       end

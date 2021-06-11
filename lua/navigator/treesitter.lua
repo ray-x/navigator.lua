@@ -79,11 +79,11 @@ function M.find_definition(range, bufnr)
   local definition = locals.find_definition(node_at_point, bufnr)
 
   if definition ~= node_at_point then
-    log("def found:", definition:range(), definition:type())
+    trace("err: def found:", definition:range(), definition:type())
     local r, c = definition:range()
     return {start = {line = r, character = c}}
   else
-    log("def not found in ", bufnr)
+    trace("err: def not found in ", bufnr)
   end
 end
 
@@ -337,8 +337,8 @@ local function get_all_nodes(bufnr, filter, summary)
         end
 
         if item.node_scope then
-          log(item.type, tsdata:type(), item.node_text, item.kind, item.node_text, "range",
-              item.node_scope.start.line, item.node_scope['end'].line)
+          trace(item.type, tsdata:type(), item.node_text, item.kind, item.node_text, "range",
+                item.node_scope.start.line, item.node_scope['end'].line) -- set to log if need to trace result
         end
         goto continue
       end
@@ -392,7 +392,7 @@ function M.buf_func(bufnr)
     ["type"] = true
   }, true)
   if #all_nodes < 1 then
-    log("no node found for ", bufnr)
+    trace("no node found for ", bufnr) -- set to log
     return
   end
 

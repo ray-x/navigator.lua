@@ -173,7 +173,7 @@ local function ts_functions(uri)
   end
   local unload = false
   if not api.nvim_buf_is_loaded(bufnr) then
-    log("! load buf !", uri, bufnr)
+    trace("! load buf !", uri, bufnr)
     vim.fn.bufload(bufnr)
     unload = true
   end
@@ -181,13 +181,13 @@ local function ts_functions(uri)
   local funcs = ts_func(bufnr)
   if unload then
     local cmd = string.format("bd %d", bufnr)
-    log(cmd)
+    trace(cmd)
     -- vim.cmd(cmd)  -- todo: not sure if it is needed
   end
   ts_nodes[uri] = funcs
   ts_nodes_time[uri] = os.time()
   trace(funcs, ts_nodes)
-  log(string.format("elapsed time: %.4f\n", os.clock() - x))
+  trace(string.format("elapsed time: %.4f\n", os.clock() - x)) -- how long it tooks
   return funcs
 end
 
@@ -213,7 +213,7 @@ local function ts_defination(uri, range)
     log(cmd)
     -- vim.cmd(cmd)  -- todo: not sure if it is needed
   end
-  log(string.format(" ts def elapsed time: %.4f\n", os.clock() - x), def_range)
+  trace(string.format(" ts def elapsed time: %.4f\n", os.clock() - x), def_range) -- how long it takes
   return def_range
 end
 
@@ -276,7 +276,7 @@ function M.locations_to_items(locations)
           end
         end
       end
-      log(uri_def[item.uri], item.range)
+      trace(uri_def[item.uri], item.range) -- set to log if need to get all in rnge
       local def = uri_def[item.uri]
       if def and def.start and item.range then
         if def.start.line == item.range.start.line then
