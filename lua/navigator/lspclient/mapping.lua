@@ -99,7 +99,12 @@ local function set_mapping(user_opts)
   if doc_fmt then
     buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
     if _NgConfigValues.lsp.format_on_save then
-      vim.cmd([[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()]])
+      vim.cmd([[
+      aug NavigatorAuFormat
+        au!
+        autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()
+      aug END
+      ]])
     end
   end
   -- if user_opts.cap.document_range_formatting then
@@ -111,7 +116,7 @@ end
 
 local function autocmd(user_opts)
   vim.api.nvim_exec([[
-            aug NavigatorAu
+            aug NavigatorDocHlAu
                 au!
                 au CmdlineLeave : lua require('navigator.dochighlight').cmd_nohl()
             aug END
