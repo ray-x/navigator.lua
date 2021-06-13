@@ -9,8 +9,8 @@ local api = vim.api
 local top_center = require"guihua.location".top_center
 
 function M._preview_location(opts) -- location, width, pos_x, pos_y
-  local uri = opts.location.uri
-  if opts.uri == nil then
+  local uri = opts.uri
+  if uri == nil then
     log("invalid/nil uri ")
     return
   end
@@ -54,7 +54,7 @@ function M._preview_location(opts) -- location, width, pos_x, pos_y
     range = opts.range,
     display_range = display_range,
     uri = uri,
-    allow_edit = true
+    allow_edit = opts.enable_edit
   }
   -- win_opts.items = contents
   win_opts.hl_line = opts.lnum - display_range.start.line
@@ -62,6 +62,7 @@ function M._preview_location(opts) -- location, width, pos_x, pos_y
     win_opts.hl_line = 1
   end
   trace(opts.lnum, opts.range.start.line, win_opts.hl_line)
+  log(win_opts)
   local w = TextView:new({
     loc = "offset_center",
     rect = {
@@ -78,8 +79,10 @@ function M._preview_location(opts) -- location, width, pos_x, pos_y
     syntax = win_opts.syntax,
     enter = win_opts.enter or false,
     range = win_opts.range,
+    border = opts.border,
     display_range = win_opts.display_range,
-    hl_line = win_opts.hl_line
+    hl_line = win_opts.hl_line,
+    allow_edit = win_opts.allow_edit
   })
   return w
 end
@@ -184,6 +187,7 @@ function M.new_list_view(opts)
       ft = opts.ft or 'guihua',
       -- data = display_data,
       data = data,
+      border = border,
       on_confirm = opts.on_confirm or function(pos)
         if pos == 0 then
           pos = 1
@@ -217,7 +221,8 @@ function M.new_list_view(opts)
           range = l.range,
           offset_x = 0,
           offset_y = offset_y,
-          border = border
+          border = border,
+          enable_edit = opts.enable_preview_edit or false
         })
       end
     })

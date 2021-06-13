@@ -1,4 +1,18 @@
+parameter
+{
+  position = {
+    character = 6,
+    line = 13
+  },
+  textDocument = {
+  uri = "file:///Users/ray.xu/lsp_test/go/interface.go"
+  }
+}
+
+
 --[[ -- incomming/outgoing
+
+
 dir from result { {
     from = {
       detail = "command-line-arguments • interface.go",

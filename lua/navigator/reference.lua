@@ -40,7 +40,13 @@ local function ref_hdlr(err, api, locations, num, bufnr)
 
   local wwidth = vim.api.nvim_get_option("columns")
   width = math.min(width + 30, 120, math.floor(wwidth * 0.8))
-  gui.new_list_view({items = items, ft = ft, width = width, api = "Reference"})
+  gui.new_list_view({
+    items = items,
+    ft = ft,
+    width = width,
+    api = "Reference",
+    enable_preview_edit = true
+  })
 end
 
 local async_reference_request = function()
