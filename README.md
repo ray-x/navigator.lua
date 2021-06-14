@@ -50,6 +50,8 @@ also enables you to handle workspace with mixed types of codes (e.g. Go + javasc
 all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
 implementation.
 
+- Edit your code in preview window
+
 - Async request with lsp.buf_request for reference search
 
 - Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?)
@@ -267,6 +269,7 @@ require.'navigator'.setup({
 |  n	|  \<Enter\> 	| Open preview/Apply action|
 |  i/n	|  \<C-b\> 	| Previous in list|
 |  i/n	|  \<C-f\> 	| next page in list|
+|  i/n	|  \<C-s\> 	| Save the moditification to preview window to file|
 
 ### Colors:
 
@@ -360,6 +363,11 @@ Diagnostic in single bufer
 Show diagnostic in all buffers
 
 ![diagnostic multi files](https://github.com/ray-x/files/blob/master/img/navigator/diagnostic_multiplefiles.jpg?raw=true)
+
+### Edit in preview window
+You can in place edit your code in floating window
+[![Edit in preview window](https://img.youtube.com/vi/b4s9MhasGn4/0.jpg)](https://www.youtube.com/watch?v=b4s9MhasGn4)
+(Note: This feature only avalible in `find reference` and `find diagnostic`, You can not add/remove lines in floating window)
 
 ### Implementation
 
