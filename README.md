@@ -365,8 +365,12 @@ Show diagnostic in all buffers
 ![diagnostic multi files](https://github.com/ray-x/files/blob/master/img/navigator/diagnostic_multiplefiles.jpg?raw=true)
 
 ### Edit in preview window
+
 You can in place edit your code in floating window
-[![Edit in preview window](https://img.youtube.com/vi/b4s9MhasGn4/0.jpg)](https://www.youtube.com/watch?v=b4s9MhasGn4)
+
+https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9778-11d0f356b38d.mov
+
+
 (Note: This feature only avalible in `find reference` and `find diagnostic`, You can not add/remove lines in floating window)
 
 ### Implementation
