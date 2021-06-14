@@ -2,7 +2,7 @@
 
 - Easy code navigation, view diagnostic errors, see relationships of functions, variables
 
-- A plugin combines power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
+- A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
 
 Here are some examples
 
@@ -265,11 +265,11 @@ require.'navigator'.setup({
 |  i/n	|  \<C-n\> 	| next item in list|
 |  i/n	|  \<Up\> 	| previous item in list|
 |  i/n	|  \<Down\> 	| next item in list|
-|  i/n	|  \<C-o\> 	| Open preview/Apply action|
-|  n	|  \<Enter\> 	| Open preview/Apply action|
-|  i/n	|  \<C-b\> 	| Previous in list|
-|  i/n	|  \<C-f\> 	| next page in list|
-|  i/n	|  \<C-s\> 	| Save the moditification to preview window to file|
+|  i/n	|  \<C-o\> 	| open preview file in nvim/Apply action|
+|  n	|  \<Enter\> 	| open preview file in nvim/Apply action|
+|  i/n	|  \<C-b\> 	| previous page in listview|
+|  i/n	|  \<C-f\> 	| next page in listview|
+|  i/n	|  \<C-s\> 	| save the modification to preview window to file|
 
 ### Colors:
 
