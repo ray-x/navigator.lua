@@ -1,7 +1,6 @@
 local M = {}
 _NgConfigValues = {
   debug = false, -- log output not implemented
-  code_action_icon = " ",
   width = 0.6, -- valeu of cols TODO allow float e.g. 0.6
   preview_height = 0.35,
   height = nil,
@@ -23,6 +22,33 @@ _NgConfigValues = {
       -- sumneko_binary = sumneko_binary,
       -- cmd = {'lua-language-server'}
     }
+  },
+  icons = {
+    -- Code action
+    code_action_icon = " ",
+    -- Diagnostics
+    diagnostic_head = '🐛',
+    diagnostic_head_severity_1 = "🈲",
+    diagnostic_head_severity_2 = "☣️",
+    diagnostic_head_severity_3 = "👎",
+    diagnostic_head_description = "📛",
+    diagnostic_virtual_text = "🦊",
+    diagnostic_file = "🚑",
+    -- Values
+    value_changed = "📝",
+    value_definition = "🦕",
+    -- Treesitter
+    match_kinds = {
+      var = " ", -- "👹", -- Vampaire
+      method = "ƒ ", --  "🍔", -- mac
+      ["function"] = " ", -- "🤣", -- Fun
+      parameter = "  ", -- Pi
+      associated = "🤝",
+      namespace = "🚀",
+      type = " ",
+      field = "🏈",
+    },
+    treesitter_defult = "🌲",
   }
 }
 
