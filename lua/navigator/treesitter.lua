@@ -21,22 +21,11 @@ local log = require"navigator.util".log
 local lerr = require"navigator.util".error
 local trace = require"navigator.util".trace
 
-local match_kinds = {
-  var = " ", -- "👹", -- Vampaire
-  method = "ƒ ", --  "🍔", -- mac
-  ["function"] = " ", -- "🤣", -- Fun
-  parameter = "  ", -- Pi
-  associated = "🤝",
-  namespace = "🚀",
-  type = " ",
-  field = "🏈"
-}
-
 local get_icon = function(kind)
-  if kind == nil or match_kinds[kind] == nil then
-    return "🌲"
+  if kind == nil or _NgConfigValues.icons.match_kinds[kind] == nil then
+    return _NgConfigValues.icons.treesitter_defult
   else
-    return match_kinds[kind]
+    return _NgConfigValues.icons.match_kinds[kind]
   end
 end
 -- require'navigator.treesitter'.goto_definition()
@@ -440,7 +429,7 @@ function M.buf_ts()
     ft = ft,
     rawdata = true,
     width = width + 10,
-    api = "🎄"
+    api = _NgConfigValues.icons.treesitter_defult
   })
 end
 
@@ -475,7 +464,7 @@ function M.bufs_ts()
       prompt = true,
       ft = ft,
       width = max_length + 10,
-      api = "🎄"
+      api = _NgConfigValues.icons.treesitter_defult
     })
   end
 end

@@ -82,7 +82,7 @@ end
 local sign_name = "NavigatorLightBulb"
 
 if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
-  vim.fn.sign_define(sign_name, {text = config.code_action_icon, texthl = "LspDiagnosticsSignHint"})
+  vim.fn.sign_define(sign_name, {text = config.icons.code_action_icon, texthl = "LspDiagnosticsSignHint"})
 end
 
 local function _update_virtual_text(line)
@@ -90,7 +90,7 @@ local function _update_virtual_text(line)
   pcall(api.nvim_buf_clear_namespace, 0, namespace, 0, -1)
 
   if line then
-    local icon_with_indent = "  " .. config.code_action_icon
+    local icon_with_indent = "  " .. config.icons.code_action_icon
 
     pcall(
       api.nvim_buf_set_extmark,

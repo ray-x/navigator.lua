@@ -129,11 +129,11 @@ function M.prepare_for_render(items, opts)
     item.text = string.format("%4i: %s", item.lnum, item.text)
     local ts_report = ""
     if item.lhs then
-      ts_report = '📝 '
+      ts_report = _NgConfigValues.icons.value_changed
     end
 
     if item.definition then
-      ts_report = ts_report .. '🦕 '
+      ts_report = ts_report .. _NgConfigValues.icons.value_definition .. ' '
     end
     local header_len = #ts_report + 4 -- magic number 2
     trace(ts_report, header_len)
@@ -149,8 +149,8 @@ function M.prepare_for_render(items, opts)
             endwise = '()'
             local syb = items[i].symbol_name
             if txt == items[i].symbol_name or (#txt > #syb and txt:sub(#txt - #syb + 1) == syb) then
-              if ts_report ~= '🦕 ' then
-                ts_report = ts_report .. '🦕 '
+              if ts_report ~= _NgConfigValues.icons.value_definition .. ' ' then
+                ts_report = ts_report .. _NgConfigValues.icons.value_definition .. ' '
               end
               header_len = #ts_report + 1
             else

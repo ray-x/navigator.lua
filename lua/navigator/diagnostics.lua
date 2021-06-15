@@ -31,15 +31,15 @@ local diag_hdlr = function(err, method, result, client_id, br, config)
       item.lnum = v.range.start.line + 1
       item.col = v.range.start.character + 1
       item.uri = uri
-      local head = "🐛"
+      local head = _NgConfigValues.icons.diagnostic_head
       if v.severity == 1 then
-        head = "🈲"
+        head = _NgConfigValues.icons.diagnostic_head_severity_1
       end
       if v.severity == 2 then
-        head = "☣️"
+        head = _NgConfigValues.icons.diagnostic_head_severity_2
       end
       if v.severity > 2 then
-        head = "👎"
+        head = _NgConfigValues.icons.diagnostic_head_severity_3
       end
       local bufnr = vim.uri_to_bufnr(uri)
       vim.fn.bufload(bufnr)
@@ -47,7 +47,7 @@ local diag_hdlr = function(err, method, result, client_id, br, config)
       local row = pos.line
       local line = (vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false) or {""})[1]
       if line ~= nil then
-        item.text = head .. line .. " 📛 " .. v.message
+        item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description .. v.message
         table.insert(item_list, item)
       else
         error("diagnostic result empty line", v, item)
@@ -66,7 +66,7 @@ M.diagnostic_handler = vim.lsp.with(diag_hdlr, {
   -- Enable virtual text, override spacing to 0
   virtual_text = {
     spacing = 0,
-    prefix = "🦊" -- ' ,   
+    prefix = _NgConfigValues.icons.diagnostic_virtual_text
   },
   -- Use a function to dynamically turn signs off
   -- and on, using buffer local variables
@@ -101,7 +101,7 @@ M.show_diagnostic = function()
     if #display_items > 0 then
       gui.new_list_view({
         items = display_items,
-        api = "🚑🐛 Diagnostic ",
+        api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head .. " Diagnostic ",
         enable_preview_edit = true
       })
     end
