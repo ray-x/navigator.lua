@@ -182,6 +182,7 @@ require.'navigator'.setup({
   code_action_icon = " ",
   width = 0.75, -- number of cols for the floating window
   height = 0.3, -- preview window size, 0.3 by default
+  border = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}, -- border style
   on_attach = nil,
   -- put a on_attach of your own here, e.g
   -- function(client, bufnr)
