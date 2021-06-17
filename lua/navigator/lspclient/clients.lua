@@ -103,7 +103,8 @@ local setups = {
     },
     settings = {
       gopls = {
-        flags = {allow_incremental_sync = true, debounce_text_changes = 500},
+        -- flags = {allow_incremental_sync = true, debounce_text_changes = 500},
+        -- not supported
         analyses = {unusedparams = true, unreachable = false},
         codelenses = {
           generate = true, -- show the `go generate` lens.

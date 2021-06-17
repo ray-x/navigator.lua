@@ -208,7 +208,7 @@ require.'navigator'.setup({
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     tsserver = {
       filetypes = {'typescript'} -- disable javascript etc,
-      -- set to {} to disable the lspclient for all filetype
+      -- set to {} to disable the lspclient for all filetypes
     },
     gopls = {   -- gopls setting
       on_attach = function(client, bufnr)  -- on_attach for gopls
