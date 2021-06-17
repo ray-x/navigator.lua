@@ -284,9 +284,9 @@ require.'navigator'.setup({
 |  i/n	|  \<C-f\> 	| next page in listview|
 |  i/n	|  \<C-s\> 	| save the modification to preview window to file|
 
-### Colors:
+### Colors/Highlight:
 
-Set highlight GHListDark (listview) and GHTextViewDark (code view)
+You can override default highlight GHListDark (listview) and GHTextViewDark (code view)
 
 e.g.
 
@@ -294,6 +294,10 @@ e.g.
 hi default GHTextViewDark guifg=#e0d8f4 guibg=#332e55
 hi default GHListDark guifg=#e0d8f4 guibg=#103234
 ```
+
+There are other Lsp highlight been used in  this plugin, e.g LspReferenceRead/Text/Write are used for document highlight,
+LspDiagnosticsXXX are used for diagnostic. Please check highlight.lua and dochighlight.lua for more info.
+
 
 
 ## Dependency
