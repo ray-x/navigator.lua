@@ -53,6 +53,7 @@ M.on_attach = function(client, bufnr)
     trace(client.name, "custom attach")
     config.lsp[client.name].on_attach(client, bufnr)
   end
+
 end
 
 -- M.setup = function(cfg)

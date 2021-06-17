@@ -199,6 +199,7 @@ function M.setup(user_opts)
   end
 
   vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})
+  vim.lsp.handlers["textDocument/formatting"] = require"navigator.formatting".format_hdl
 end
 
 return M
