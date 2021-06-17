@@ -8,11 +8,12 @@ M.rename = function()
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_option(bufnr, "buftype", "prompt")
   vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
-  vim.api.nvim_buf_add_highlight(bufnr, -1, "RenamePrompt", 0, 0, #rename_prompt)
+  vim.api.nvim_buf_add_highlight(bufnr, -1, "NGPreviewTitle", 0, 0, #rename_prompt)
   vim.fn.prompt_setprompt(bufnr, rename_prompt)
+  local width = #current_name + #rename_prompt + 10
   local winnr = vim.api.nvim_open_win(bufnr, true, {
     relative = "cursor",
-    width = 50,
+    width = width,
     height = 1,
     row = -3,
     col = 1,
@@ -38,6 +39,5 @@ M.callback = function()
   params.newName = new_name
   vim.lsp.buf_request(0, "textDocument/rename", params)
 end
-M.rename()
 -- M.callback()
 return M

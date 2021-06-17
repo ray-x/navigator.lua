@@ -42,7 +42,8 @@ variable is
 # Features:
 
 - LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type. This
-also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml)
+also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better default setup is
+included for LSP clients.
 
 - Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP & Treesitter powered IDE
 
@@ -260,7 +261,8 @@ require.'navigator'.setup({
 |  n 	|  K 	|  hover doc 	|
 |  n 	|  ga 	|  code action (when you see 💡 ) 	|
 |  v 	|  ga 	|  range code action (when you see 💡 ) 	|
-|  n 	|  \<Leader\>re 	| rename|
+|  n 	|  \<Leader\>re 	| rename (lsp default)|
+|  n 	|  \<Space\>re 	| rename with floating window|
 |  n 	|  \<Leader\>gi 	| incoming calls|
 |  n 	|  \<Leader\>go 	| outgoing calls|
 |  n 	|  gi 	|  implementation 	|

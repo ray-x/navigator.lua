@@ -24,7 +24,7 @@ function M.add_highlight()
   api.nvim_command("hi! link LspDiagnosticsUnderlineWarning SpellRare")
   api.nvim_command("hi! link LspDiagnosticsUnderlineInformation SpellRare")
   api.nvim_command("hi! link LspDiagnosticsUnderlineHint SpellRare")
-  api.nvim_command("hi def link DefinitionPreviewTitle Title")
+  api.nvim_command("hi def link NGPreviewTitle Title")
 
   local colors = {
     {'#aefe00', '#aede00', '#aebe00', '#4e7efe'}, {'#ff00e0', '#df00e0', '#af00e0', '#fedefe'},

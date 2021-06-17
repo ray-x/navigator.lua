@@ -33,7 +33,7 @@ local key_maps = {
   {key = "K", func = "hover({ popup_opts = { border = single }})"},
   {key = "ga", mode = "n", func = "code_action()"},
   {key = "ga", mode = "v", func = "range_code_action()"}, {key = "<Leader>re", func = "rename()"},
-  {key = "<Space>rn", func = "require('navigator.rename').rename()"},
+  {key = "<Space>re", func = "require('navigator.rename').rename()"},
   {key = "<Leader>gi", func = "incoming_calls()"}, {key = "<Leader>go", func = "outgoing_calls()"},
   {key = "gi", func = "implementation()"}, {key = "gt", func = "type_definition()"},
   {key = "gL", func = "diagnostic.show_line_diagnostics({ popup_opts = { border = single }})"},
