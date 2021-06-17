@@ -194,6 +194,7 @@ function M.setup(user_opts)
   vim.lsp.handlers["textDocument/publishDiagnostics"] =
       require"navigator.diagnostics".diagnostic_handler
 
+  -- TODO: when active signature merge to neovim, remove this setup:
   local hassig, sig = pcall(require, "lsp_signature")
   if not hassig then
     vim.lsp.handlers["textDocument/signatureHelp"] = require"navigator.signature".signature_handler

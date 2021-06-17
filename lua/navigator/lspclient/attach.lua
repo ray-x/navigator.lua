@@ -21,10 +21,7 @@ M.on_attach = function(client, bufnr)
   end
   log("attaching", bufnr, client.name, uri)
   trace(client)
-  local hassig, sig = pcall(require, "lsp_signature")
-  if hassig then
-    sig.on_attach()
-  end
+
   diagnostic_map(bufnr)
   -- add highlight for Lspxxx
   require"navigator.lspclient.highlight".add_highlight()
