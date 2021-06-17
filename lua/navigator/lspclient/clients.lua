@@ -103,7 +103,7 @@ local setups = {
     },
     settings = {
       gopls = {
-        flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+        flags = {allow_incremental_sync = true, debounce_text_changes = 500},
         analyses = {unusedparams = true, unreachable = false},
         codelenses = {
           generate = true, -- show the `go generate` lens.
@@ -125,7 +125,7 @@ local setups = {
     end
   },
   clangd = {
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
     cmd = {
       "clangd", "--background-index", "--suggest-missing-includes", "--clang-tidy",
       "--header-insertion=iwyu"
@@ -151,7 +151,7 @@ local setups = {
         procMacro = {enable = true}
       }
     },
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500}
   },
   sqls = {
     filetypes = {"sql"},
@@ -160,7 +160,7 @@ local setups = {
       highlight.diagnositc_config_sign()
       require"sqls".setup {picker = "telescope"} -- or default
     end,
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
     settings = {
       cmd = {"sqls", "-config", "$HOME/.config/sqls/config.yml"}
       -- alterantively:
@@ -176,7 +176,7 @@ local setups = {
     cmd = {"lua-language-server"},
     filetypes = {"lua"},
     on_attach = on_attach,
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
     settings = {
       Lua = {
         runtime = {
@@ -194,8 +194,8 @@ local setups = {
         workspace = {
           -- Make the server aware of Neovim runtime files
           library = library,
-          maxPreload = 256,
-          preloadFileSize = 50000
+          maxPreload = 1000,
+          preloadFileSize = 10000
         },
         telemetry = {enable = false}
       }
@@ -204,7 +204,7 @@ local setups = {
   pyright = {
     cmd = {"pyright-langserver", "--stdio"},
     filetypes = {"python"},
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500},
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
     settings = {
       python = {
         analysis = {
@@ -222,7 +222,7 @@ local setups = {
       index = {threads = 2},
       clang = {excludeArgs = {"-frounding-math"}}
     },
-    flags = { allow_incremental_sync = true },
+    flags = {allow_incremental_sync = true}
   }
 }
 
@@ -234,7 +234,10 @@ local servers = {
   "terraformls"
 }
 
-local default_cfg = {on_attach = on_attach, flags = { allow_incremental_sync = true, debounce_text_changes = 500 },}
+local default_cfg = {
+  on_attach = on_attach,
+  flags = {allow_incremental_sync = true, debounce_text_changes = 500}
+}
 
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
@@ -294,9 +297,7 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
       if lsp_opts[lspclient] ~= nil then
         -- log(lsp_opts[lspclient], cfg)
         cfg = vim.tbl_deep_extend("force", cfg, lsp_opts[lspclient])
-        trace(cfg)
       end
-
 
       load_cfg(ft, lspclient, cfg, loaded)
       ::continue::

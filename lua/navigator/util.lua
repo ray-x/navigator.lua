@@ -28,6 +28,31 @@ function M.get_data_from_file(filename, startLine)
   return {data = data, line = displayLine}
 end
 
+M.merge = function(t1, t2)
+  for k, v in pairs(t2) do
+    t1[k] = v
+  end
+  return t1
+end
+
+M.map = function(modes, key, result, options)
+  options = M.merge({noremap = true, silent = false, expr = false, nowait = false}, options or {})
+  local buffer = options.buffer
+  options.buffer = nil
+
+  if type(modes) ~= "table" then
+    modes = {modes}
+  end
+
+  for i = 1, #modes do
+    if buffer then
+      vim.api.nvim_buf_set_keymap(0, modes[i], key, result, options)
+    else
+      vim.api.nvim_set_keymap(modes[i], key, result, options)
+    end
+  end
+end
+
 function M.get_base(path)
   local len = #path
   for i = len, 1, -1 do
