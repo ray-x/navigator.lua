@@ -5,6 +5,7 @@ local uv = vim.loop
 _Loading = false
 
 _LoadedClients = {}
+-- packer only
 if packer_plugins ~= nil then
   -- packer installed
   local loader = require"packer".loader
@@ -195,12 +196,18 @@ local setups = {
         workspace = {
           -- Make the server aware of Neovim runtime files
           library = library,
-          maxPreload = 1000,
-          preloadFileSize = 10000
+          maxPreload = 2000,
+          preloadFileSize = 40000
         },
         telemetry = {enable = false}
       }
-    }
+    },
+    on_new_config = function(cfg, root)
+      local libs = vim.tbl_deep_extend('force', {}, library)
+      libs[root] = nil
+      cfg.settings.Lua.workspace.library = libs
+      return cfg
+    end
   },
   pyright = {
     cmd = {"pyright-langserver", "--stdio"},
@@ -230,9 +237,9 @@ local setups = {
 local servers = {
   "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pyls", "pyright",
   "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
-  "yamlls", "clangd", "ccls", "sqls", "denols", "dartls", "dotls", "kotlin_language_server",
-  "nimls", "intelephense", "vuels", "phpactor", "omnisharp", "r_language_server", "rust_analyzer",
-  "terraformls"
+  "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
+  "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
+  "r_language_server", "rust_analyzer", "terraformls"
 }
 
 local default_cfg = {
