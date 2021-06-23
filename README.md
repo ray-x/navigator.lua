@@ -75,6 +75,8 @@ of the case, it takes treesitter less than 4 ms to read and render all nodes for
 - Optimize display (remove trailing bracket/space), display the caller of reference, de-duplicate lsp results (e.g reference
 in the same line). Using treesitter for file preview highlighter etc
 
+- ccls call hierarchy (Non-standard `ccls/call` API) supports
+
 # Why a new plugin
 
 I'd like to go beyond what the system is providing.
