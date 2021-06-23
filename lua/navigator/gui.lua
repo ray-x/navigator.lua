@@ -153,29 +153,8 @@ function M.new_list_view(opts)
     if prompt then
       offset_y = offset_y + 1 -- need to check this out
     end
+    local idx = require"guihua.util".fzy_idx
 
-    local function idx(data_list, pos)
-      -- first check if fzy is set
-      local fzy_on = false
-      for _, value in ipairs(data_list) do
-        if value.fzy ~= nil then
-          fzy_on = true
-          break
-        end
-      end
-      if fzy_on == true then
-        local i = 1
-        for _, value in ipairs(data_list) do
-          if value.fzy ~= nil then
-            if i == pos then
-              return value
-            end
-            i = i + 1
-          end
-        end
-      end
-      return data[pos]
-    end
     return ListView:new({
       loc = loc,
       prompt = prompt,

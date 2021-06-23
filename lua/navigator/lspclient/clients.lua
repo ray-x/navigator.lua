@@ -210,6 +210,7 @@ local setups = {
     end
   },
   pyright = {
+    on_attach = on_attach,
     cmd = {"pyright-langserver", "--stdio"},
     filetypes = {"python"},
     flags = {allow_incremental_sync = true, debounce_text_changes = 500},
@@ -224,6 +225,7 @@ local setups = {
     }
   },
   ccls = {
+    on_attach = on_attach,
     init_options = {
       compilationDatabaseDirectory = "build",
       root_dir = [[ util.root_pattern("compile_commands.json", "compile_flags.txt", "CMakeLists.txt", "Makefile", ".git") or util.path.dirname ]],
@@ -326,7 +328,7 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
         return true
       end
       _Loading = false
-    end, 200)
+    end, 300)
   end
 end
 

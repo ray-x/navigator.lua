@@ -46,6 +46,11 @@ local key_maps = {
   {key = "<Leader>k", func = "require('navigator.dochighlight').hi_symbol()"}
 }
 
+local ccls_mappings = {
+  {key = "<Leader>gi", func = "require('navigator.cclshierarchy').incoming_calls()"},
+  {key = "<Leader>go", func = "require('navigator.cclshierarchy').outgoing_calls()"}
+}
+
 local function set_mapping(user_opts)
   local opts = {noremap = true, silent = true}
   user_opts = user_opts or {}
@@ -55,10 +60,6 @@ local function set_mapping(user_opts)
 
   local function buf_set_keymap(...)
     vim.api.nvim_buf_set_keymap(bufnr, ...)
-  end
-
-  local function set_keymap(...)
-    vim.api.nvim_set_keymap(...)
   end
 
   -- local function buf_set_option(...)
@@ -94,6 +95,8 @@ local function set_mapping(user_opts)
 
   local range_fmt = false
   local doc_fmt = false
+  local ccls = false
+  log(vim.lsp.buf_get_clients(0))
   for _, value in pairs(vim.lsp.buf_get_clients(0)) do
     if value == nil or value.resolved_capabilities == nil then
       return
@@ -104,8 +107,24 @@ local function set_mapping(user_opts)
     if value.resolved_capabilities.document_range_formatting then
       range_fmt = true
     end
+
+    log("override ccls", value.config)
+    if value.config.name == "ccls" then
+
+      ccls = true
+    end
   end
 
+  if ccls then
+    log("override ccls", ccls_mappings)
+    for _, value in pairs(ccls_mappings) do
+      f = "<Cmd>lua " .. value.func .. "<CR>"
+      local k = value.key
+      local m = value.mode or "n"
+      log(f, k, m)
+      set_keymap(m, k, f, opts)
+    end
+  end
   -- if user_opts.cap.document_formatting then
   if doc_fmt then
     buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)

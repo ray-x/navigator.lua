@@ -42,7 +42,9 @@ local diag_hdlr = function(err, method, result, client_id, br, config)
         head = _NgConfigValues.icons.diagnostic_head_severity_3
       end
       local bufnr = vim.uri_to_bufnr(uri)
-      vim.fn.bufload(bufnr)
+      if not vim.api.nvim_buf_is_loaded(bufnr) then
+        vim.fn.bufload(bufnr)
+      end
       local pos = v.range.start
       local row = pos.line
       local line = (vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false) or {""})[1]
@@ -64,10 +66,7 @@ M.diagnostic_handler = vim.lsp.with(diag_hdlr, {
   -- Enable underline, use default values
   underline = true,
   -- Enable virtual text, override spacing to 0
-  virtual_text = {
-    spacing = 0,
-    prefix = _NgConfigValues.icons.diagnostic_virtual_text
-  },
+  virtual_text = {spacing = 0, prefix = _NgConfigValues.icons.diagnostic_virtual_text},
   -- Use a function to dynamically turn signs off
   -- and on, using buffer local variables
   signs = true,
@@ -101,7 +100,8 @@ M.show_diagnostic = function()
     if #display_items > 0 then
       gui.new_list_view({
         items = display_items,
-        api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head .. " Diagnostic ",
+        api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head
+            .. " Diagnostic ",
         enable_preview_edit = true
       })
     end

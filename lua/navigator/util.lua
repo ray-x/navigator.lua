@@ -13,7 +13,9 @@ function M.get_data_from_file(filename, startLine)
   end
   local uri = "file:///" .. filename
   local bufnr = vim.uri_to_bufnr(uri)
-  vim.fn.bufload(bufnr)
+  if not vim.api.nvim_buf_is_loaded(bufnr) then
+    vim.fn.bufload(bufnr)
+  end
   local data = vim.api.nvim_buf_get_lines(bufnr, startLine, startLine + 8, false)
   if data == nil or vim.tbl_isempty(data) then
     startLine = nil

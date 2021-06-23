@@ -13,7 +13,7 @@ end
 local M = {}
 
 M.on_attach = function(client, bufnr)
-
+  log("on_attach")
   local uri = vim.uri_from_bufnr(bufnr)
   if uri == "file://" or uri == "file:///" or #uri < 11 then
     log("skip for float buffer", uri)
@@ -50,6 +50,8 @@ M.on_attach = function(client, bufnr)
     trace(client.name, "custom attach")
     config.lsp[client.name].on_attach(client, bufnr)
   end
+
+  require("navigator.lspclient.mapping").setup(_NgConfigValues)
 
 end
 

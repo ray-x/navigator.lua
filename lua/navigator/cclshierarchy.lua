@@ -6,37 +6,42 @@ local lsphelper = require "navigator.lspwrapper"
 local cwd = vim.fn.getcwd(0)
 local M = {}
 
-local function call_hierarchy_handler(direction, err, _, result, _, _, error_message)
+local function call_hierarchy_handler(direction, err, api, result, _, _, error_message)
   log('call_hierarchy')
+  log('call_hierarchy', direction, err, result)
+
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
   if err ~= nil then
-    log("dir", direction, "result", result, "err", err)
+    log(api, "dir", direction, "result", result, "err", err)
     print("ERROR: " .. error_message)
     return
   end
-
+  -- local funcs = vim.lsp.util.locations_to_items(result)
+  -- log(funcs)
   local items = {}
-
-  for _, call_hierarchy_call in pairs(result) do
-    local call_hierarchy_item = call_hierarchy_call[direction]
+  for _, call_hierarchy in pairs(result) do
     local kind = ' '
-    if call_hierarchy_item.kind then
-      kind = require'navigator.lspclient.lspkind'.symbol_kind(call_hierarchy_item.kind) .. ' '
+    range = call_hierarchy.range
+    local filename = assert(vim.uri_to_fname(call_hierarchy.uri))
+    local display_filename = filename:gsub(cwd .. "/", "./", 1)
+
+    local bufnr = vim.uri_to_bufnr(call_hierarchy.uri)
+    local row = range.start.line
+    local line = (vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false) or {""})[1]
+    fn = ""
+    if line ~= nil then
+      fn = line:sub(range.start.character, range['end'].character + 1)
     end
-    for _, range in pairs(call_hierarchy_call.fromRanges) do
-      local filename = assert(vim.uri_to_fname(call_hierarchy_item.uri))
-      local display_filename = filename:gsub(cwd .. "/", "./", 1)
-      table.insert(items, {
-        uri = call_hierarchy_item.uri,
-        filename = filename,
-        -- display_filename = filename:gsub(cwd .. "/", "./", 1),
-        display_filename = call_hierarchy_item.detail or display_filename,
-        text = kind .. call_hierarchy_item.name,
-        range = range,
-        lnum = range.start.line,
-        col = range.start.character
-      })
-    end
+    table.insert(items, {
+      uri = call_hierarchy.uri,
+      filename = filename,
+      -- display_filename = filename:gsub(cwd .. "/", "./", 1),
+      display_filename = display_filename,
+      text = kind .. fn,
+      range = range,
+      lnum = range.start.line + 1,
+      col = range.start.character
+    })
   end
   return items
 end
@@ -64,24 +69,27 @@ end
 
 function M.incoming_calls(bang, opts)
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
-  if not lsphelper.check_capabilities("call_hierarchy") then
-    return
-  end
+  -- if not lsphelper.check_capabilities("call_hierarchy") then
+  --   return
+  -- end
 
   local params = vim.lsp.util.make_position_params()
-  lsphelper.call_sync("callHierarchy/incomingCalls", params, opts,
-                      partial(incoming_calls_handler, bang))
+  -- params['hierarchy'] = true
+  params['levels'] = 2
+  params['callee'] = false
+  -- params['callee'] = true
+  log(params)
+  log(opts)
+  lsphelper.call_sync("$ccls/call", params, opts, partial(incoming_calls_handler, bang))
 end
 
 function M.outgoing_calls(bang, opts)
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
-  if not lsphelper.check_capabilities("call_hierarchy") then
-    return
-  end
-
   local params = vim.lsp.util.make_position_params()
-  lsphelper.call_sync("callHierarchy/outgoingCalls", params, opts,
-                      partial(outgoing_calls_handler, bang))
+  params['levels'] = 2
+  params['callee'] = true
+  log(params)
+  lsphelper.call_sync("$ccls/call", params, opts, partial(outgoing_calls_handler, bang))
 end
 
 M.incoming_calls_call = partial(M.incoming_calls, 0)
