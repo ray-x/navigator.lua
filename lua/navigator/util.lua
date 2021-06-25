@@ -5,11 +5,21 @@ local M = {log_path = vim.lsp.get_log_path()}
 local path_sep = vim.loop.os_uname().sysname == "Windows" and "\\" or "/"
 -- local is_windows = uv.os_uname().version:match("Windows")
 M.path_sep = function()
-  return vim.loop.os_uname().sysname == "Windows" and "\\" or "/"
+  local is_win = vim.loop.os_uname().sysname:find("Windows")
+  if is_win then
+    return "\\"
+  else
+    return "/"
+  end
 end
 
 M.path_cur = function()
-  return vim.loop.os_uname().sysname == "Windows" and ".\\" or "./"
+  local is_win = vim.loop.os_uname().sysname:find("Windows")
+  if is_win then
+    return ".\\"
+  else
+    return "./"
+  end
 end
 
 function M.get_data_from_file(filename, startLine)
