@@ -3,7 +3,7 @@ _NgConfigValues = {
   debug = false, -- log output not implemented
   width = 0.6, -- valeu of cols TODO allow float e.g. 0.6
   preview_height = 0.35,
-  height = nil,
+  height = 0.35,
   default_mapping = true,
   on_attach = nil,
   -- function(client, bufnr)
@@ -46,9 +46,9 @@ _NgConfigValues = {
       associated = "🤝",
       namespace = "🚀",
       type = " ",
-      field = "🏈",
+      field = "🏈"
     },
-    treesitter_defult = "🌲",
+    treesitter_defult = "🌲"
   }
 }
 

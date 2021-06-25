@@ -96,7 +96,7 @@ local function set_mapping(user_opts)
   local range_fmt = false
   local doc_fmt = false
   local ccls = false
-  log(vim.lsp.buf_get_clients(0))
+  -- log(vim.lsp.buf_get_clients(0))
   for _, value in pairs(vim.lsp.buf_get_clients(0)) do
     if value == nil or value.resolved_capabilities == nil then
       return
@@ -108,7 +108,7 @@ local function set_mapping(user_opts)
       range_fmt = true
     end
 
-    log("override ccls", value.config)
+    -- log("override ccls", value.config)
     if value.config.name == "ccls" then
 
       ccls = true

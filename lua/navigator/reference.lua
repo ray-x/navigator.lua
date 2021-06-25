@@ -39,7 +39,8 @@ local function ref_hdlr(err, api, locations, num, bufnr)
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
 
   local wwidth = vim.api.nvim_get_option("columns")
-  width = math.min(width + 30, 120, math.floor(wwidth * 0.8))
+  local mwidth = _NgConfigValues.width
+  width = math.min(width + 30, 120, math.floor(wwidth * mwidth))
   gui.new_list_view({
     items = items,
     ft = ft,

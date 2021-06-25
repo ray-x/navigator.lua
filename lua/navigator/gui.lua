@@ -50,7 +50,7 @@ function M._preview_location(opts) -- location, width, pos_x, pos_y
     syntax = syntax,
     width = opts.width,
     height = display_range['end'].line - display_range.start.line + 1,
-    preview_height = opts.preview_height,
+    preview_height = opts.height or opts.preview_height,
     pos_x = opts.offset_x,
     pos_y = opts.offset_y,
     range = opts.range,
@@ -113,13 +113,16 @@ function M.new_list_view(opts)
   local wwidth = api.nvim_get_option("columns")
 
   local loc = "top_center"
-  local width = math.floor(wwidth * 0.75)
+
+  local mwidth = _NgConfigValues.width
+  local width = math.floor(wwidth * mwidth)
   if config.width ~= nil and config.width > 0.3 and config.width < 0.99 then
     width = math.floor(wwidth * config.width)
   end
-  width = math.min(opts.width or 120, width)
-  opts.width = width
-  local wheight = config.height or math.floor(api.nvim_get_option("lines") * 0.8)
+  width = math.min(120, width)
+  local wheight = math.floor(1 + api.nvim_get_option("lines")
+                                 * (_NgConfigValues.height + _NgConfigValues.preview_height))
+  local pheight = math.floor(api.nvim_get_option("lines") * _NgConfigValues.preview_height)
   local prompt = opts.prompt or false
   if opts.rawdata then
     data = items
@@ -137,8 +140,7 @@ function M.new_list_view(opts)
       prompt = true
     end
 
-    local lheight = math.min(#data, math.floor(wheight / 2))
-    local pheight = math.min(wheight - lheight, math.floor(wheight / 2))
+    local lheight = math.min(#data, math.floor(wheight * _NgConfigValues.height))
 
     local r, _ = top_center(lheight, width)
 
