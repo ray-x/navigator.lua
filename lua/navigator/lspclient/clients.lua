@@ -72,8 +72,7 @@ library[vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true
 -- [vim.fn.expand("~/repos/nvim/lua")] = true
 
 -- TODO remove onece PR #944 merged to lspconfig
-local is_windows = uv.os_uname().version:match("Windows")
-local path_sep = is_windows and "\\" or "/"
+local path_sep = require"navigator.util".path_sep()
 local strip_dir_pat = path_sep .. "([^" .. path_sep .. "]+)$"
 local strip_sep_pat = path_sep .. "$"
 local dirname = function(path)

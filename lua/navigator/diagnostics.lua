@@ -5,6 +5,8 @@ local util = require "navigator.util"
 local log = util.log
 local error = util.error
 
+local path_sep = require"navigator.util".path_sep()
+local path_cur = require"navigator.util".path_cur()
 diagnostic_list[vim.bo.filetype] = {}
 
 local diag_hdlr = function(err, method, result, client_id, br, config)
@@ -27,7 +29,7 @@ local diag_hdlr = function(err, method, result, client_id, br, config)
     for _, v in ipairs(result.diagnostics) do
       local item = v
       item.filename = assert(vim.uri_to_fname(uri))
-      item.display_filename = item.filename:gsub(cwd .. "/", "./", 1)
+      item.display_filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
       item.lnum = v.range.start.line + 1
       item.col = v.range.start.character + 1
       item.uri = uri

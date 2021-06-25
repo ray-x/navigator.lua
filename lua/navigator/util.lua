@@ -2,6 +2,16 @@
 -- and line to highlight
 -- Some of function copied from https://github.com/RishabhRD/nvim-lsputils
 local M = {log_path = vim.lsp.get_log_path()}
+local path_sep = vim.loop.os_uname().sysname == "Windows" and "\\" or "/"
+-- local is_windows = uv.os_uname().version:match("Windows")
+M.path_sep = function()
+  return vim.loop.os_uname().sysname == "Windows" and "\\" or "/"
+end
+
+M.path_cur = function()
+  return vim.loop.os_uname().sysname == "Windows" and ".\\" or "./"
+end
+
 function M.get_data_from_file(filename, startLine)
   local displayLine
   if startLine < 3 then
@@ -58,7 +68,7 @@ end
 function M.get_base(path)
   local len = #path
   for i = len, 1, -1 do
-    if path:sub(i, i) == "/" then
+    if path:sub(i, i) == path_sep then
       local ret = path:sub(i + 1, len)
       return ret
     end
@@ -74,7 +84,7 @@ local function getDir(path)
   local last_index = 1
   for i = 2, len do
     local cur_char = path:sub(i, i)
-    if cur_char == "/" then
+    if cur_char == path_sep then
       local my_data = path:sub(last_index + 1, i - 1)
       table.insert(data, my_data)
       last_index = i
@@ -106,7 +116,7 @@ function M.get_relative_path(base_path, my_path)
   end
   local data = ""
   for i = cur + 1, my_len do
-    data = data .. my_data[i] .. "/"
+    data = data .. my_data[i] .. path_sep
   end
   data = data .. M.get_base(my_path)
   return data

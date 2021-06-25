@@ -8,9 +8,13 @@ local lerr = require"navigator.util".error
 local trace = require"navigator.util".trace
 local symbol_kind = require"navigator.lspclient.lspkind".symbol_kind
 local cwd = vim.fn.getcwd(0)
+
+local path_sep = require"navigator.util".path_sep()
+local path_cur = require"navigator.util".path_cur()
 cwd = gutil.add_pec(cwd)
 ts_nodes = {}
 ts_nodes_time = {}
+
 local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
 
 local TS_analysis_enabled = require"navigator".config_values().treesitter_analysis
@@ -81,7 +85,7 @@ function M.symbols_to_items(result)
       end
       item.filename = vim.uri_to_fname(item.uri)
 
-      item.display_filename = item.filename:gsub(cwd .. "/", "./", 1)
+      item.display_filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
       if item.range == nil or item.range.start == nil then
         log("range not set", result[i], item)
       end
@@ -287,7 +291,7 @@ function M.locations_to_items(locations)
     end
 
     item.filename = assert(vim.uri_to_fname(item.uri))
-    local filename = item.filename:gsub(cwd .. "/", "./", 1)
+    local filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
     item.display_filename = filename or item.filename
     item.call_by = find_ts_func_by_range(funcs, item.range)
     item.rpath = util.get_relative_path(cwd, item.filename)
@@ -324,7 +328,7 @@ function M.symbol_to_items(locations)
     item.uri = locations[i].uri
     item.range = locations[i].range
     item.filename = assert(vim.uri_to_fname(item.uri))
-    local filename = item.filename:gsub(cwd .. "/", "./", 1)
+    local filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
     item.display_filename = filename or item.filename
 
     item.rpath = util.get_relative_path(cwd, item.filename)

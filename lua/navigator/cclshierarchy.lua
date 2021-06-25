@@ -4,6 +4,9 @@ local log = util.log
 local partial = util.partial
 local lsphelper = require "navigator.lspwrapper"
 local cwd = vim.fn.getcwd(0)
+
+local path_sep = require"navigator.util".path_sep()
+local path_cur = require"navigator.util".path_cur()
 local M = {}
 
 local function call_hierarchy_handler(direction, err, api, result, _, _, error_message)
@@ -23,7 +26,8 @@ local function call_hierarchy_handler(direction, err, api, result, _, _, error_m
     local kind = ' '
     range = call_hierarchy.range
     local filename = assert(vim.uri_to_fname(call_hierarchy.uri))
-    local display_filename = filename:gsub(cwd .. "/", "./", 1)
+
+    local display_filename = filename:gsub(cwd .. path_sep, path_cur, 1)
 
     local bufnr = vim.uri_to_bufnr(call_hierarchy.uri)
     local row = range.start.line
@@ -35,7 +39,6 @@ local function call_hierarchy_handler(direction, err, api, result, _, _, error_m
     table.insert(items, {
       uri = call_hierarchy.uri,
       filename = filename,
-      -- display_filename = filename:gsub(cwd .. "/", "./", 1),
       display_filename = display_filename,
       text = kind .. fn,
       range = range,

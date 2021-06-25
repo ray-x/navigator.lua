@@ -247,7 +247,9 @@ local function get_all_nodes(bufnr, filter, summary)
     uri = vim.uri_from_bufnr(bufnr)
     fname = vim.uri_to_fname(uri)
   end
-  local display_filename = fname:gsub(cwd .. "/", "./", 1)
+  path_sep = require"navigator.util".path_sep()
+  path_cur = require"navigator.util".path_cur()
+  local display_filename = fname:gsub(cwd .. path_sep, path_cur, 1)
 
   local all_nodes = {}
   -- Support completion-nvim customized label map
