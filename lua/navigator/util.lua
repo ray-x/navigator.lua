@@ -2,7 +2,6 @@
 -- and line to highlight
 -- Some of function copied from https://github.com/RishabhRD/nvim-lsputils
 local M = {log_path = vim.lsp.get_log_path()}
-local path_sep = vim.loop.os_uname().sysname == "Windows" and "\\" or "/"
 -- local is_windows = uv.os_uname().version:match("Windows")
 M.path_sep = function()
   local is_win = vim.loop.os_uname().sysname:find("Windows")
@@ -12,6 +11,8 @@ M.path_sep = function()
     return "/"
   end
 end
+
+local path_sep = M.path_sep()
 
 M.path_cur = function()
   local is_win = vim.loop.os_uname().sysname:find("Windows")
