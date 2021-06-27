@@ -127,6 +127,7 @@ function M.new_list_view(opts)
   if opts.rawdata then
     data = items
   else
+    log(items)
     data = require"navigator.render".prepare_for_render(items, opts)
   end
 
@@ -175,7 +176,7 @@ function M.new_list_view(opts)
         if pos == 0 then
           pos = 1
         end
-        local l = idx(data, pos) -- bug it not work with fzy filter
+        local l = idx(data, pos)
         if l.filename ~= nil then
           log("openfile ", l.filename, l.lnum, l.col)
           util.open_file_at(l.filename, l.lnum, l.col)

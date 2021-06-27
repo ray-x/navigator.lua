@@ -38,6 +38,9 @@ local function get_pads(win_width, text, postfix)
 
   end
 
+  if i > 3 then
+    i = i - 3
+  end
   space = string.rep(' ', i)
   trace(text, i, postfix, win_width)
   return space, trim
@@ -86,6 +89,7 @@ function M.prepare_for_render(items, opts)
       trace(items[1], lspapi_display, display_items[last_summary_idx])
     end
 
+    display_items[last_summary_idx].filename_only = true
     -- trace(items[i], items[i].filename, last_summary_idx, display_items[last_summary_idx].filename)
     -- TODO refact display_filename generate part
     if items[i].filename == fn then
@@ -190,6 +194,7 @@ function M.prepare_for_render(items, opts)
     end
   end
 
+  display_items[last_summary_idx].filename_only = true
   -- display_items[last_summary_idx].text=string.format("%s [%i]", display_items[last_summary_idx].filename,
   -- total_ref_in_file)
   return display_items
