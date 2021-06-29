@@ -12,29 +12,38 @@ local event_hdlrs = {
 
 local double = {"╔", "═", "╗", "║", "╝", "═", "╚", "║"}
 local single = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
+-- LuaFormatter off
 local key_maps = {
-  {key = "gr", func = "references()"}, {mode = "i", key = "<M-k>", func = "signature_help()"},
-  {key = "gs", func = "signature_help()"}, {key = "g0", func = "document_symbol()"},
-  {key = "gW", func = "workspace_symbol()"}, {key = "<c-]>", func = "definition()"},
+  {key = "gr", func = "references()"},
+  {mode = "i", key = "<M-k>", func = "signature_help()"},
+  {key = "gs", func = "signature_help()"},
+  {key = "g0", func = "document_symbol()"},
+  {key = "gW", func = "workspace_symbol()"},
+  {key = "<c-]>", func = "definition()"},
   {key = "gD", func = "declaration({ popup_opts = { border = 'single' }})"},
   {key = "gp", func = "require('navigator.definition').definition_preview()"},
   {key = "gT", func = "require('navigator.treesitter').buf_ts()"},
   {key = "GT", func = "require('navigator.treesitter').bufs_ts()"},
   {key = "K", func = "hover({ popup_opts = { border = single }})"},
   {key = "ga", mode = "n", func = "code_action()"},
-  {key = "ga", mode = "v", func = "range_code_action()"}, {key = "<Leader>re", func = "rename()"},
+  {key = "ga", mode = "v", func = "range_code_action()"},
+  {key = "<Leader>re", func = "rename()"},
   {key = "<Space>re", func = "require('navigator.rename').rename()"},
-  {key = "<Leader>gi", func = "incoming_calls()"}, {key = "<Leader>go", func = "outgoing_calls()"},
-  {key = "gi", func = "implementation()"}, {key = "gt", func = "type_definition()"},
+  {key = "<Leader>gi", func = "incoming_calls()"},
+  {key = "<Leader>go", func = "outgoing_calls()"},
+  {key = "gi", func = "implementation()"},
+  {key = "gt", func = "type_definition()"},
   {key = "gL", func = "diagnostic.show_line_diagnostics({ popup_opts = { border = single }})"},
   {key = "gG", func = "require('navigator.diagnostics').show_diagnostic()"},
   {key = "]d", func = "diagnostic.goto_next({ popup_opts = { border = single }})"},
   {key = "[d", func = "diagnostic.goto_next({ popup_opts = { border = single }})"},
   {key = "]r", func = "require('navigator.treesitter').goto_next_usage()"},
   {key = "[r", func = "require('navigator.treesitter').goto_previous_usage()"},
-  {key = "<C-LeftMouse>", func = "definition()"}, {key = "g<LeftMouse>", func = "implementation()"},
+  {key = "<C-LeftMouse>", func = "definition()"},
+  {key = "g<LeftMouse>", func = "implementation()"},
   {key = "<Leader>k", func = "require('navigator.dochighlight').hi_symbol()"}
 }
+-- LuaFormatter on
 
 local ccls_mappings = {
   {key = "<Leader>gi", func = "require('navigator.cclshierarchy').incoming_calls()"},
