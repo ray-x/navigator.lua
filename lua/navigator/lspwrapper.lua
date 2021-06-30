@@ -9,6 +9,8 @@ local trace = require"navigator.util".trace
 local symbol_kind = require"navigator.lspclient.lspkind".symbol_kind
 local cwd = vim.fn.getcwd(0)
 
+local is_win = vim.loop.os_uname().sysname:find("Windows")
+
 local path_sep = require"navigator.util".path_sep()
 local path_cur = require"navigator.util".path_cur()
 cwd = gutil.add_pec(cwd)
@@ -258,13 +260,18 @@ function M.locations_to_items(locations)
     end
   end)
   local uri_def = {}
+
   for i, loc in ipairs(locations) do
     local funcs = nil
     local item = lsp.util.locations_to_items({loc})[1]
     item.uri = locations[i].uri
 
     item.range = locations[i].range
-    local proj_file = item.uri:find(cwd)
+    if is_win then
+      log(item.uri)
+      log(cwd)
+    end
+    local proj_file = item.uri:find(cwd) or is_win
     if TS_analysis_enabled and proj_file then
       funcs = ts_functions(item.uri)
 

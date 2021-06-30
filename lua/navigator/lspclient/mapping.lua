@@ -41,7 +41,7 @@ local key_maps = {
   {key = "[r", func = "require('navigator.treesitter').goto_previous_usage()"},
   {key = "<C-LeftMouse>", func = "definition()"},
   {key = "g<LeftMouse>", func = "implementation()"},
-  {key = "<Leader>k", func = "require('navigator.dochighlight').hi_symbol()"}
+  {key = "<Leader>k", func = "require('navigator.dochighlight').hi_symbol()"},
 }
 -- LuaFormatter on
 
