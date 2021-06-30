@@ -15,8 +15,6 @@ cwd = gutil.add_pec(cwd)
 ts_nodes = {}
 ts_nodes_time = {}
 
-local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
-
 local TS_analysis_enabled = require"navigator".config_values().treesitter_analysis
 
 -- extract symbol from range
@@ -158,6 +156,7 @@ function M.call_async(method, params, handler)
 end
 
 local function ts_functions(uri)
+  local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
   if not ts_enabled or not TS_analysis_enabled then
     lerr("ts not enabled")
     return nil
@@ -196,6 +195,7 @@ local function ts_functions(uri)
 end
 
 local function ts_defination(uri, range)
+  local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
   if not ts_enabled or not TS_analysis_enabled then
     lerr("ts not enabled")
     return nil
@@ -259,13 +259,15 @@ function M.locations_to_items(locations)
   end)
   local uri_def = {}
   for i, loc in ipairs(locations) do
+    local funcs = nil
     local item = lsp.util.locations_to_items({loc})[1]
     item.uri = locations[i].uri
-    local funcs = ts_functions(item.uri)
 
     item.range = locations[i].range
+    local proj_file = item.uri:find(cwd)
+    if TS_analysis_enabled and proj_file then
+      funcs = ts_functions(item.uri)
 
-    if TS_analysis_enabled then
       if uri_def[item.uri] == nil or uri_def[item.uri] == {} then
         -- find def in file
         local def = ts_defination(item.uri, item.range)
