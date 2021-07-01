@@ -101,6 +101,8 @@ local setups = {
       "-remote.debug=:0"
       -- "-rpc.trace",
     },
+
+    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
     settings = {
       gopls = {
         -- flags = {allow_incremental_sync = true, debounce_text_changes = 500},
