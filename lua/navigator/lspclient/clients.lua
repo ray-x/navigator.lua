@@ -288,49 +288,47 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-  for _ = 1, 2 do
-    for _, client in ipairs(clients) do
-      if client ~= nil then
-        table.insert(loaded, client.name)
-      end
+  for _, client in ipairs(clients) do
+    if client ~= nil then
+      table.insert(loaded, client.name)
     end
-    for _, lspclient in ipairs(servers) do
-      if lsp_opts[lspclient] ~= nil and lsp_opts[lspclient].filetypes ~= nil then
-        if not vim.tbl_contains(lsp_opts[lspclient].filetypes, ft) then
-          trace("ft", ft, "disabled for", lspclient)
-          goto continue
-        end
-      end
-      local cfg = setups[lspclient] or default_cfg
-      -- if user provides override values
-
-      cfg.capabilities = capabilities
-      if lsp_opts[lspclient] ~= nil then
-        -- log(lsp_opts[lspclient], cfg)
-        cfg = vim.tbl_deep_extend("force", cfg, lsp_opts[lspclient])
-      end
-
-      load_cfg(ft, lspclient, cfg, loaded)
-      ::continue::
-    end
-    if not retry or ft == nil then
-      return
-    end
-    --
-    local timer = vim.loop.new_timer()
-    local i = 0
-    vim.wait(1000, function()
-      clients = vim.lsp.get_active_clients() or {}
-      i = i + 1
-      if i > 5 or #clients > 0 then
-        timer:close() -- Always close handles to avoid leaks.
-        log("active", #clients, i)
-        _Loading = false
-        return true
-      end
-      _Loading = false
-    end, 300)
   end
+  for _, lspclient in ipairs(servers) do
+    if lsp_opts[lspclient] ~= nil and lsp_opts[lspclient].filetypes ~= nil then
+      if not vim.tbl_contains(lsp_opts[lspclient].filetypes, ft) then
+        trace("ft", ft, "disabled for", lspclient)
+        goto continue
+      end
+    end
+    local cfg = setups[lspclient] or default_cfg
+    -- if user provides override values
+
+    cfg.capabilities = capabilities
+    if lsp_opts[lspclient] ~= nil then
+      -- log(lsp_opts[lspclient], cfg)
+      cfg = vim.tbl_deep_extend("force", cfg, lsp_opts[lspclient])
+    end
+
+    load_cfg(ft, lspclient, cfg, loaded)
+    ::continue::
+  end
+  if not retry or ft == nil then
+    return
+  end
+  --
+  local timer = vim.loop.new_timer()
+  local i = 0
+  timer:start(1000, 200, function()
+    clients = vim.lsp.get_active_clients() or {}
+    i = i + 1
+    if i > 5 or #clients > 0 then
+      timer:close() -- Always close handles to avoid leaks.
+      log("active", #clients, i)
+      _Loading = false
+      return true
+    end
+    _Loading = false
+  end)
 end
 
 local function setup(user_opts)

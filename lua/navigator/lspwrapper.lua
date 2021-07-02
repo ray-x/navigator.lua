@@ -268,7 +268,7 @@ function M.locations_to_items(locations)
 
     item.range = locations[i].range
     if is_win then
-      log(item.uri)
+      log(item.uri) -- file:///C:/path/to/file
       log(cwd)
     end
     local proj_file = item.uri:find(cwd) or is_win

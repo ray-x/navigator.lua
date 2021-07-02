@@ -115,12 +115,11 @@ local function set_mapping(user_opts)
   end
 
   if ccls then
-    log("override ccls", ccls_mappings)
+    -- log("override ccls", ccls_mappings)
     for _, value in pairs(ccls_mappings) do
       f = "<Cmd>lua " .. value.func .. "<CR>"
       local k = value.key
       local m = value.mode or "n"
-      log(f, k, m)
       set_keymap(m, k, f, opts)
     end
   end
