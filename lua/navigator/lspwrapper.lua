@@ -271,7 +271,8 @@ function M.locations_to_items(locations)
       log(item.uri) -- file:///C:/path/to/file
       log(cwd)
     end
-    local proj_file = item.uri:find(cwd) or is_win
+    -- only load top 30 file.
+    local proj_file = item.uri:find(cwd) or is_win or i < 30
     if TS_analysis_enabled and proj_file then
       funcs = ts_functions(item.uri)
 
