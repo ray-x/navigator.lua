@@ -283,7 +283,7 @@ local function load_cfg(ft, client, cfg, loaded)
       -- I dont know why but 1st time setup may fail..
       vim.defer_fn(function()
         lspconfig[client].setup(cfg)
-      end, 200)
+      end, 20)
       log(client, "loading for", ft)
     end
   end
