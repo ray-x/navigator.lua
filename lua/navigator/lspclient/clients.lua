@@ -274,7 +274,16 @@ local function load_cfg(ft, client, cfg, loaded)
           return
         end
       end
+
+      if lspconfig[client] == nil then
+        error("client " .. client .. " not supported")
+      end
+
       lspconfig[client].setup(cfg)
+      -- I dont know why but 1st time setup may fail..
+      vim.defer_fn(function()
+        lspconfig[client].setup(cfg)
+      end, 200)
       log(client, "loading for", ft)
     end
   end
@@ -327,7 +336,8 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
       _Loading = false
       return true
     end
-    _Loading = false
+    -- giveup
+    -- _Loading = false
   end)
 end
 
@@ -394,7 +404,9 @@ local function setup(user_opts)
       end
     end
   end
+
   wait_lsp_startup(ft, retry, lsp_opts)
+
   _LoadedClients[ft] = true
   _Loading = false
 
