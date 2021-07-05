@@ -13,7 +13,6 @@ end
 local M = {}
 
 M.on_attach = function(client, bufnr)
-  log("on_attach")
   local uri = vim.uri_from_bufnr(bufnr)
   if uri == "file://" or uri == "file:///" or #uri < 11 then
     log("skip for float buffer", uri)
@@ -43,11 +42,11 @@ M.on_attach = function(client, bufnr)
   local config = require"navigator".config_values()
   trace(client.name, "navigator on attach")
   if config.on_attach ~= nil then
-    trace(client.name, "general attach")
+    log(client.name, "customized attach for all clients")
     config.on_attach(client, bufnr)
   end
   if config.lsp and config.lsp[client.name] and config.lsp[client.name].on_attach ~= nil then
-    trace(client.name, "custom attach")
+    log("lsp client specific attach for", client.name)
     config.lsp[client.name].on_attach(client, bufnr)
   end
 

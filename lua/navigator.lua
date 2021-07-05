@@ -5,6 +5,7 @@ _NgConfigValues = {
   preview_height = 0.35,
   height = 0.35,
   default_mapping = true,
+  combined_attach = "both", -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
   on_attach = nil,
   -- function(client, bufnr)
   --   -- your on_attach will be called at end of navigator on_attach

@@ -316,6 +316,19 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
     if lsp_opts[lspclient] ~= nil then
       -- log(lsp_opts[lspclient], cfg)
       cfg = vim.tbl_deep_extend("force", cfg, lsp_opts[lspclient])
+      if _NgConfigValues.combined_attach == "both" or _NgConfigValues.combined_attach == nil then
+        cfg.on_attach = on_attach
+      elseif _NgConfigValues == "mine" then
+        cfg.on_attach = function(client, bufnr)
+          if _NgConfigValues.on_attach then
+            _NgConfigValues.on_attach(client, bufnr)
+          end
+          if setups[lspclient] and setups[lspclient].on_attach then
+            setups[lspclient].on_attach(client, bufnr)
+          end
+
+        end
+      end
     end
 
     load_cfg(ft, lspclient, cfg, loaded)
