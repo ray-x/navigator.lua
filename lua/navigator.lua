@@ -5,11 +5,13 @@ _NgConfigValues = {
   preview_height = 0.35,
   height = 0.35,
   default_mapping = true,
+  keymaps = {{key = "GR", func = "references()"}}, -- e.g keymaps={{key = "gr", func = "references()"}, }
   combined_attach = "both", -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
   on_attach = nil,
   -- function(client, bufnr)
   --   -- your on_attach will be called at end of navigator on_attach
   -- end,
+
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
   lsp = {

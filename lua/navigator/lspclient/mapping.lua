@@ -76,6 +76,7 @@ local function set_mapping(user_opts)
       table.insert(key_maps, v)
     end
   end
+  -- log(key_maps)
 
   -- local key_opts = {vim.tbl_deep_extend("force", key_maps, unpack(result))}
   for _, value in pairs(key_maps) do

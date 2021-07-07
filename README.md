@@ -199,6 +199,8 @@ require.'navigator'.setup({
 
   default_mapping = true,  -- set to false if you will remap every key
   keymaps = {{key = "gK", func = "declaration()"}}, -- a list of key maps
+  -- this kepmap gK will override "gD" mapping function declaration()  in default kepmap
+  -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   icons = {
