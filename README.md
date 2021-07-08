@@ -266,14 +266,14 @@ require.'navigator'.setup({
 |  n 	|  gT 	| treesitter document symbol	|
 |  n 	|  GT 	| treesitter symbol for all open buffers	|
 |  n 	|  K 	|  hover doc 	|
-|  n 	|  ga 	|  code action (when you see 💡 ) 	|
-|  v 	|  ga 	|  range code action (when you see 💡 ) 	|
+|  n 	|  \<Space\>ca 	|  code action (when you see 💡 ) 	|
+|  v 	|  \<Space\>cA 	|  range code action (when you see 💡 ) 	|
+|  n 	|  \<Space\>rn 	| rename with floating window|
 |  n 	|  \<Leader\>re 	| rename (lsp default)|
-|  n 	|  \<Space\>re 	| rename with floating window|
 |  n 	|  \<Leader\>gi 	| incoming calls|
 |  n 	|  \<Leader\>go 	| outgoing calls|
 |  n 	|  gi 	|  implementation 	|
-|  n 	|  gt 	|  type definition 	|
+|  n 	|  \<Leader\> gt 	|  type definition 	|
 |  n 	|  gL 	|  show line diagnostic 	|
 |  n 	|  gG 	|  show diagnostic for all buffers 	|
 |  n 	|  ]d 	|  next diagnostic|
