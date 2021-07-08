@@ -273,13 +273,16 @@ require.'navigator'.setup({
 |  n 	|  \<Leader\>gi 	| incoming calls|
 |  n 	|  \<Leader\>go 	| outgoing calls|
 |  n 	|  gi 	|  implementation 	|
-|  n 	|  \<Leader\> gt 	|  type definition 	|
+|  n 	|  \<Sapce\> D 	|  type definition 	|
 |  n 	|  gL 	|  show line diagnostic 	|
 |  n 	|  gG 	|  show diagnostic for all buffers 	|
 |  n 	|  ]d 	|  next diagnostic|
 |  n 	|  [d 	|  previous diagnostic|
 |  n 	|  ]r 	|  next treesitter reference/usage|
 |  n 	|  [r 	|  previous treesitter reference/usage|
+|  n 	|  \<Sapce\> wa 	|  add workspace folder|
+|  n 	|  \<Sapce\> wr 	|  remove workspace folder|
+|  n 	|  \<Sapce\> wl 	|  print workspace folder|
 |  n 	|  \<Leader\>k 	| toggle reference highlight |
 |  i/n	|  \<C-p\> 	| previous item in list|
 |  i/n	|  \<C-n\> 	| next item in list|
@@ -290,6 +293,8 @@ require.'navigator'.setup({
 |  i/n	|  \<C-b\> 	| previous page in listview|
 |  i/n	|  \<C-f\> 	| next page in listview|
 |  i/n	|  \<C-s\> 	| save the modification to preview window to file|
+
+
 
 ### Colors/Highlight:
 

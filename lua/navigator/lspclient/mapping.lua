@@ -42,6 +42,9 @@ local key_maps = {
   {key = "<C-LeftMouse>", func = "definition()"},
   {key = "g<LeftMouse>", func = "implementation()"},
   {key = "<Leader>k", func = "require('navigator.dochighlight').hi_symbol()"},
+  {key = '<Space>wa', func = '<cmd>lua vim.lsp.buf.add_workspace_folder()'},
+  {key = '<Space>wr', func = '<cmd>lua vim.lsp.buf.remove_workspace_folder()'},
+  {key = '<Space>wl', func = '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))'},
 }
 -- LuaFormatter on
 
