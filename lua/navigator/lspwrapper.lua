@@ -261,12 +261,14 @@ function M.locations_to_items(locations)
   end)
   local uri_def = {}
 
+  log(locations)
   for i, loc in ipairs(locations) do
     local funcs = nil
     local item = lsp.util.locations_to_items({loc})[1]
-    item.uri = locations[i].uri
+    -- log(item)
+    item.range = locations[i].range or locations[i].targetRange
+    item.uri = locations[i].uri or locations[i].targetUri
 
-    item.range = locations[i].range
     if is_win then
       log(item.uri) -- file:///C:/path/to/file
       log(cwd)
@@ -282,9 +284,9 @@ function M.locations_to_items(locations)
         if def and def.start then
           uri_def[item.uri] = def
           if def.start then -- find for the 1st time
-            for i = 1, #items do
-              if items[i].uri == item.uri and items[i].range.start.line == def.start.line then
-                items[i].definition = true
+            for j = 1, #items do
+              if items[j].uri == item.uri and items[j].range.start.line == def.start.line then
+                items[j].definition = true
               end
             end
           end
