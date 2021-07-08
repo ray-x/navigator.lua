@@ -329,6 +329,11 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
       end
     end
 
+    efm_cfg = lsp_opts['efm']
+    if efm_cfg then
+      lspconfig.efm.setup(efm_cfg)
+    end
+
     load_cfg(ft, lspclient, cfg, loaded)
     ::continue::
   end
