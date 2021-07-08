@@ -5,7 +5,7 @@ _NgConfigValues = {
   preview_height = 0.35,
   height = 0.35,
   default_mapping = true,
-  keymaps = {{key = "GR", func = "references()"}}, -- e.g keymaps={{key = "gr", func = "references()"}, }
+  keymaps = {}, -- e.g keymaps={{key = "GR", func = "references()"}, } this replace gr default mapping
   combined_attach = "both", -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
   on_attach = nil,
   -- function(client, bufnr)
