@@ -180,7 +180,7 @@ Nondefault configuration example:
 
 ```lua
 
-require.'navigator'.setup({
+require'navigator'.setup({
   debug = false, -- log output
   code_action_icon = " ",
   width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
@@ -244,7 +244,7 @@ together. If you have multiple similar LSP installed and have trouble with the p
 To disable a LSP server, set `filetypes` to {} e.g.
 ```lua
 
-require.'navigator'.setup({
+require'navigator'.setup({
  pyls={filetype={}}
 })
 
