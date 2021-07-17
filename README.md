@@ -9,7 +9,9 @@ Here are some examples
 #### Example: Javascript closure
 
 The following screenshot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming & outgoing calls from LSP. It is designed for the symbol analysis.
-![js_closure_call_tree](https://user-images.githubusercontent.com/1681295/119120589-cee23700-ba6f-11eb-95c5-b9ac8d445c31.jpg)
+
+![navigator](https://user-images.githubusercontent.com/1681295/126022657-57c0062e-a0df-476b-8dc7-8969380069b3.jpg)
+
 
 Explanation:
 - The first line of floating windows shows there are 3 references for the symbol <span style="color:red"> *browser* </span> in closure.js
