@@ -242,7 +242,9 @@ require'navigator'.setup({
 The plugin can work with multiple LSP, e.g  sqls+gopls+efm.  But there are cases you may need to disable some of the
 servers.  (Prevent loading multiple LSP for same source code.)  e.g. I saw strange behaviours when I use pyls+pyright+pyls_ms
 together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
-To disable a LSP server, set `filetypes` to {} e.g.
+
+### Disable a lsp client loading from navigator
+To disable a specific LSP, set `filetypes` to {} e.g.
 ```lua
 
 require'navigator'.setup({

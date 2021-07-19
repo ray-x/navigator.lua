@@ -172,37 +172,27 @@ function M.new_list_view(opts)
       -- data = display_data,
       data = data,
       border = border,
-      on_confirm = opts.on_confirm or function(pos)
-        if pos == 0 then
-          pos = 1
-        end
-        local l = idx(data, pos)
-        if l.filename ~= nil then
-          log("openfile ", l.filename, l.lnum, l.col)
-          util.open_file_at(l.filename, l.lnum, l.col)
+      on_confirm = opts.on_confirm or function(item)
+        if item.filename ~= nil then
+          log("openfile ", item.filename, item.lnum, item.col)
+          util.open_file_at(item.filename, item.lnum, item.col)
         end
       end,
-      on_move = opts.on_move or function(pos)
-        if pos == 0 then
-          pos = 1
-        end
-
-        local l = idx(data, pos) -- bug it not work with fzy filter
-        trace(data)
-        trace("on move", pos, l)
-        trace("on move", pos, l.text or l, l.uri, l.filename)
+      on_move = opts.on_move or function(item)
+        trace("on move", pos, item)
+        trace("on move", pos, item.text or item, item.uri, item.filename)
         -- todo fix
-        if l.uri == nil then
-          l.uri = "file:///" .. l.filename
+        if item.uri == nil then
+          item.uri = "file:///" .. item.filename
         end
         return M.preview_uri({
-          uri = l.uri,
+          uri = item.uri,
           width = width,
           height = lheight, -- this is to cal offset
           preview_height = pheight,
-          lnum = l.lnum,
-          col = l.col,
-          range = l.range,
+          lnum = item.lnum,
+          col = item.col,
+          range = item.range,
           offset_x = 0,
           offset_y = offset_y,
           border = border,
