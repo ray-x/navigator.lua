@@ -6,7 +6,7 @@ local gui = require "navigator.gui"
 local config = require("navigator").config_values()
 local api = vim.api
 function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customSelectionHandler)
-  log(cid, bufnr)
+  log(cid, bufnr, actions)
   if actions == nil or vim.tbl_isempty(actions) then
     print("No code actions available")
     return
@@ -17,6 +17,7 @@ function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customS
     title = title:gsub("\n", "\\n")
     title = string.format("[%d] %s", i, title)
     table.insert(data, title)
+    actions[i].display_title = title
   end
   local width = 0
   for _, str in ipairs(data) do
@@ -25,8 +26,17 @@ function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customS
     end
   end
 
-  local function apply_action(idx)
-    local action_chosen = actions[idx - 1]
+  local function apply_action(action)
+    local action_chosen = nil
+    for key, value in pairs(actions) do
+      if value.display_title == action then
+        action_chosen = value
+      end
+    end
+    if action_chosen == nil then
+      log("no match for ", action, actions)
+      return
+    end
     local switch = string.format("silent b %d", bufnr)
     if action_chosen.edit or type(action_chosen.command) == "table" then
       if action_chosen.edit then
@@ -53,17 +63,12 @@ function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customS
     rawdata = true,
     data = data,
     on_confirm = function(pos)
-      if pos < 2 then
-        pos = 2
-      end
+      log(pos)
       apply_action(pos)
     end,
     on_move = function(pos)
-      if pos < 2 then
-        pos = 2
-      end
-      local l = data[pos]
-      return l
+      log(pos)
+      return pos
     end
   }
 end
@@ -82,7 +87,8 @@ end
 local sign_name = "NavigatorLightBulb"
 
 if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
-  vim.fn.sign_define(sign_name, {text = config.icons.code_action_icon, texthl = "LspDiagnosticsSignHint"})
+  vim.fn.sign_define(sign_name,
+                     {text = config.icons.code_action_icon, texthl = "LspDiagnosticsSignHint"})
 end
 
 local function _update_virtual_text(line)
@@ -92,18 +98,11 @@ local function _update_virtual_text(line)
   if line then
     local icon_with_indent = "  " .. config.icons.code_action_icon
 
-    pcall(
-      api.nvim_buf_set_extmark,
-      0,
-      namespace,
-      line,
-      -1,
-      {
-        virt_text = {{icon_with_indent, "LspDiagnosticsSignHint"}},
-        virt_text_pos = "overlay",
-        hl_mode = "combine"
-      }
-    )
+    pcall(api.nvim_buf_set_extmark, 0, namespace, line, -1, {
+      virt_text = {{icon_with_indent, "LspDiagnosticsSignHint"}},
+      virt_text_pos = "overlay",
+      hl_mode = "combine"
+    })
   end
 end
 
@@ -117,22 +116,14 @@ local function _update_sign(line)
   end
 
   if line then
-    --log("updatasign", line, sign_group, sign_name)
-    vim.fn.sign_place(
-      line,
-      sign_group,
-      sign_name,
-      "%",
-      {lnum = line + 1, priority = config.code_action_prompt.sign_priority}
-    )
+    -- log("updatasign", line, sign_group, sign_name)
+    vim.fn.sign_place(line, sign_group, sign_name, "%",
+                      {lnum = line + 1, priority = config.code_action_prompt.sign_priority})
     code_action[winid].lightbulb_line = line
   end
 end
 
-local need_check_diagnostic = {
-  ["go"] = true,
-  ["python"] = true
-}
+local need_check_diagnostic = {["go"] = true, ["python"] = true}
 
 function code_action:render_action_virtual_text(line, diagnostics)
   return function(_, _, actions)
