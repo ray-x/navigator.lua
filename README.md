@@ -361,6 +361,12 @@ That is where you saw the current symbol been highlighted.
 You can override the above highlight to fit your current colorscheme
 
 
+## commands
+|  command 	|    function 	|
+|---	|---	|
+|  LspToggleFmt 	|   toggle lsp auto format  	|
+
+
 ## Screenshots
 
 colorscheme: [aurora](https://github.com/ray-x/aurora)
