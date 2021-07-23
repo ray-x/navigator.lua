@@ -47,6 +47,7 @@ local key_maps = {
   {key = '<Space>wl', func = '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))'},
 }
 -- LuaFormatter on
+local M = {}
 
 local ccls_mappings = {
   {key = "<Leader>gi", func = "require('navigator.cclshierarchy').incoming_calls()"},
@@ -130,14 +131,12 @@ local function set_mapping(user_opts)
   -- if user_opts.cap.document_formatting then
   if doc_fmt then
     buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-    if _NgConfigValues.lsp.format_on_save then
-      vim.cmd([[
+    vim.cmd([[
       aug NavigatorAuFormat
         au!
         autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()
       aug END
-      ]])
-    end
+     ]])
   end
   -- if user_opts.cap.document_range_formatting then
   if range_fmt then
@@ -177,7 +176,25 @@ local function set_event_handler(user_opts)
   vim.api.nvim_command([[augroup END]])
 end
 
-local M = {}
+M.toggle_lspformat = function(on)
+  if on == nil then
+    _NgConfigValues.lsp.format_on_save = not _NgConfigValues.lsp.format_on_save
+  else
+    _NgConfigValues.lsp.format_on_save = on
+  end
+  if _NgConfigValues.lsp.format_on_save then
+    if on == nil then
+      print("format on save true")
+    end
+    vim.cmd([[set eventignore=""]])
+  else
+    if on == nil then
+      print("format on save false")
+    end
+    vim.cmd([[set eventignore=BufWritePre]])
+  end
+
+end
 
 function M.setup(user_opts)
   user_opts = user_opts or _NgConfigValues
@@ -218,7 +235,11 @@ function M.setup(user_opts)
   -- TODO: when active signature merge to neovim, remove this setup:
   local hassig, sig = pcall(require, "lsp_signature")
   if not hassig then
-    vim.lsp.handlers["textDocument/signatureHelp"] = require"navigator.signature".signature_handler
+    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
+                                                         require"navigator.signature".signature_handler,
+                                                         {
+          border = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
+        })
   end
 
   vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})

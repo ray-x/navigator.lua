@@ -48,6 +48,10 @@ end
 
 local function signature_handler(err, method, result, _, bufnr, config)
   -- log(result)
+  if config == nil then
+    log("config nil")
+  end
+  config = config or nil
   if not (result and result.signatures and result.signatures[1]) then
     return
   end
