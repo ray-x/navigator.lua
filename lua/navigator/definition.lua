@@ -13,7 +13,7 @@ local function definition_hdlr(err, _, locations, _, bufnr)
   end
   if type(locations) == "number" then
     log(locations)
-    err("unable to handle request")
+    log("unable to handle request")
   end
   if locations == nil or vim.tbl_isempty(locations) then
     print "Definition not found"

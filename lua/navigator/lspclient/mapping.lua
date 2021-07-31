@@ -4,7 +4,7 @@ local function set_keymap(...)
 end
 
 local event_hdlrs = {
-  {ev = "BufWritePre", func = "diagnostic.set_loclist({open_loclist = false})"},
+  {ev = "BufWritePre", func = "diagnostic.set_loclist({open = false})"},
   {ev = "CursorHold", func = "document_highlight()"},
   {ev = "CursorHoldI", func = "document_highlight()"},
   {ev = "CursorMoved", func = "clear_references()"}
