@@ -9,9 +9,9 @@ local path_sep = require"navigator.util".path_sep()
 local path_cur = require"navigator.util".path_cur()
 diagnostic_list[vim.bo.filetype] = {}
 
-local diag_hdlr = function(err, method, result, client_id, br, config)
+local diag_hdlr = function(err, method, result, client_id, bufnr, config)
   -- log(result)
-  vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, br, config)
+  vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, bufnr, config)
   if err ~= nil then
     log(err, config)
   end
@@ -43,9 +43,9 @@ local diag_hdlr = function(err, method, result, client_id, br, config)
       if v.severity > 2 then
         head = _NgConfigValues.icons.diagnostic_head_severity_3
       end
-      local bufnr = vim.uri_to_bufnr(uri)
-      if not vim.api.nvim_buf_is_loaded(bufnr) then
-        vim.fn.bufload(bufnr)
+      local bufnr1 = vim.uri_to_bufnr(uri)
+      if not vim.api.nvim_buf_is_loaded(bufnr1) then
+        vim.fn.bufload(bufnr1)
       end
       local pos = v.range.start
       local row = pos.line
@@ -106,6 +106,15 @@ M.show_diagnostic = function()
             .. " Diagnostic ",
         enable_preview_edit = true
       })
+    end
+  end
+end
+
+M.set_diag_loclist = function()
+  if not vim.tbl_isempty(vim.lsp.buf_get_clients(0)) then
+    local err_cnt = vim.lsp.diagnostic.get_count(0, [[Error]])
+    if err_cnt > 0 then
+      vim.lsp.diagnostic.set_loclist()
     end
   end
 end

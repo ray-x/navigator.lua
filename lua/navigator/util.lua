@@ -273,6 +273,7 @@ end
 
 M.open_file_at = function(filename, line, col)
   vim.api.nvim_command(string.format("e! +%s %s", line, filename))
+  -- vim.api.nvim_command(string.format("e! %s", filename))
   col = col or 1
   vim.fn.cursor(line, col)
 end

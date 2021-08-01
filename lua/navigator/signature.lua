@@ -47,7 +47,6 @@ local match_parameter = function(result)
 end
 
 local function signature_handler(err, method, result, _, bufnr, config)
-  -- log(result)
   if config == nil then
     log("config nil")
   end

@@ -4,7 +4,7 @@ local function set_keymap(...)
 end
 
 local event_hdlrs = {
-  {ev = "BufWritePre", func = "diagnostic.set_loclist({open = false})"},
+  {ev = "BufWritePre", func = [[require "navigator.diagnostics".set_diag_loclist()]]},
   {ev = "CursorHold", func = "document_highlight()"},
   {ev = "CursorHoldI", func = "document_highlight()"},
   {ev = "CursorMoved", func = "clear_references()"}
@@ -164,8 +164,8 @@ local function set_event_handler(user_opts)
 
   for _, value in pairs(event_hdlrs) do
     local f = ""
-    if string.find(value.func, "diagnostic") then
-      f = "lua vim.lsp." .. value.func
+    if string.find(value.func, "require") ~= nil then
+      f = "lua " .. value.func
     else
       f = "lua vim.lsp.buf." .. value.func
     end
@@ -244,6 +244,7 @@ function M.setup(user_opts)
 
   vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})
   vim.lsp.handlers["textDocument/formatting"] = require"navigator.formatting".format_hdl
+
 end
 
 return M
