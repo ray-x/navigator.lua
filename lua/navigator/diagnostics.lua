@@ -115,6 +115,8 @@ M.set_diag_loclist = function()
     local err_cnt = vim.lsp.diagnostic.get_count(0, [[Error]])
     if err_cnt > 0 then
       vim.lsp.diagnostic.set_loclist()
+    else
+      vim.cmd("lclose")
     end
   end
 end
