@@ -2,22 +2,15 @@
 local log = require"navigator.util".log
 local trace = require"navigator.util".trace
 local uv = vim.loop
-_Loading = false
+_NG_Loading = false
 
 _LoadedClients = {}
+local loader = nil
+packer_plugins = packer_plugins or nil -- suppress warnings
+
 -- packer only
-if packer_plugins ~= nil then
-  -- packer installed
-  local loader = require"packer".loader
-  if not packer_plugins["neovim/nvim-lspconfig"]
-      or not packer_plugins["neovim/nvim-lspconfig"].loaded then
-    loader("nvim-lspconfig")
-  end
-  if not packer_plugins["ray-x/guihua.lua"] or not packer_plugins["guihua.lua"].loaded then
-    loader("guihua.lua")
-    -- if lazyloading
-  end
-end
+
+local highlight = require "navigator.lspclient.highlight"
 
 local has_lsp, lspconfig = pcall(require, "lspconfig")
 if not has_lsp then
@@ -27,7 +20,6 @@ if not has_lsp then
     end
   }
 end
-local highlight = require "navigator.lspclient.highlight"
 
 local util = lspconfig.util
 local config = require"navigator".config_values()
@@ -248,6 +240,17 @@ local servers = {
   "r_language_server", "rust_analyzer", "terraformls"
 }
 
+if _NgConfigValues.lspinstall == true then
+  local has_lspinst, lspinst = pcall(require, "lspinstall")
+  if has_lspinst then
+    local srvs = lspinst.installed_servers()
+    log('lspinstalled servers', srvs)
+    if #srvs > 0 then
+      servers = srvs
+    end
+  end
+end
+
 local default_cfg = {
   on_attach = on_attach,
   flags = {allow_incremental_sync = true, debounce_text_changes = 500}
@@ -352,11 +355,11 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
     if i > 5 or #clients > 0 then
       timer:close() -- Always close handles to avoid leaks.
       log("active", #clients, i)
-      _Loading = false
+      _NG_Loading = false
       return true
     end
     -- giveup
-    -- _Loading = false
+    -- _NG_Loading = false
   end)
 end
 
@@ -372,7 +375,7 @@ local function setup(user_opts)
   trace(debug.traceback())
   user_opts = user_opts or _NgConfigValues -- incase setup was triggered from autocmd
 
-  if _Loading == true then
+  if _NG_Loading == true then
     return
   end
   if ft == nil then
@@ -409,7 +412,7 @@ local function setup(user_opts)
   highlight.add_highlight()
   local lsp_opts = user_opts.lsp
 
-  _Loading = true
+  _NG_Loading = true
 
   if vim.bo.filetype == 'lua' then
     local slua = lsp_opts.sumneko_lua
@@ -427,7 +430,9 @@ local function setup(user_opts)
   wait_lsp_startup(ft, retry, lsp_opts)
 
   _LoadedClients[ft] = true
-  _Loading = false
+  -- _LoadedClients[ft] = vim.tbl_extend("keep", _LoadedClients[ft] or {}, {ft})
+
+  _NG_Loading = false
 
   -- if not _NgConfigValues.loaded then
   --   vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?

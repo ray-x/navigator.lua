@@ -25,7 +25,6 @@ local diag_hdlr = function(err, method, result, client_id, bufnr, config)
   local uri = result.uri
   if result and result.diagnostics then
     local item_list = {}
-
     for _, v in ipairs(result.diagnostics) do
       local item = v
       item.filename = assert(vim.uri_to_fname(uri))
@@ -49,12 +48,12 @@ local diag_hdlr = function(err, method, result, client_id, bufnr, config)
       end
       local pos = v.range.start
       local row = pos.line
-      local line = (vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false) or {""})[1]
+      local line = (vim.api.nvim_buf_get_lines(bufnr1, row, row + 1, false) or {""})[1]
       if line ~= nil then
         item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description .. v.message
         table.insert(item_list, item)
       else
-        error("diagnostic result empty line", v, item)
+        error("diagnostic result empty line", v, row, bufnr1)
       end
     end
     -- local old_items = vim.fn.getqflist()

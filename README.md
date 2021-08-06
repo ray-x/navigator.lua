@@ -212,6 +212,8 @@ require'navigator'.setup({
     diagnostic_head_severity_1 = "🈲",
     -- refer to lua/navigator.lua for more icons setups
   },
+  lspinstall = false, -- set to true if you would like use the lsp installed by lspinstall
+
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     tsserver = {

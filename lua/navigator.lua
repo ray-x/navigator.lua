@@ -26,6 +26,7 @@ _NgConfigValues = {
       -- cmd = {'lua-language-server'}
     }
   },
+  lspinstall = false, -- set to true if you would like use the lsp installed by lspinstall
   icons = {
     -- Code action
     code_action_icon = " ",
@@ -93,6 +94,7 @@ M.setup = function(cfg)
   -- log(debug.traceback())
   -- log(cfg, _NgConfigValues)
   -- print("loading navigator")
+  require('navigator.lazyloader')
   require('navigator.lspclient.clients').setup(_NgConfigValues)
   require("navigator.lspclient.mapping").setup(_NgConfigValues)
   require("navigator.reference")
