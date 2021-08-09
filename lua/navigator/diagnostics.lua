@@ -48,6 +48,9 @@ local function error_marker(result, client_id)
   local wwidth = vim.fn.winwidth(winid)
   local wheight = vim.fn.winheight(winid)
 
+  if total_num <= wheight then
+    first_line = 0
+  end
   local pos = {}
   -- pos of virtual text
   for _, diag in pairs(result.diagnostics) do
@@ -76,7 +79,11 @@ local function error_marker(result, client_id)
     if s.severity > 1 then
       hl = 'WarningMsg'
     end
-    vim.api.nvim_buf_set_extmark(bufnr, _NG_VT_NS, s.line + first_line, -1,
+    local l = s.line + first_line
+    if l > total_num then
+      l = total_num
+    end
+    vim.api.nvim_buf_set_extmark(bufnr, _NG_VT_NS, l, -1,
                                  {virt_text = {{s.sign, hl}}, virt_text_pos = 'right_align'})
   end
 end
