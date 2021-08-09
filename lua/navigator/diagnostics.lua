@@ -12,7 +12,7 @@ local path_cur = require"navigator.util".path_cur()
 diagnostic_list[vim.bo.filetype] = {}
 
 local function error_marker(result, client_id)
-  if _NgConfigValues.diag_scroll_bar_sign == nil then
+  if _NgConfigValues.diag_scroll_bar_sign == nil then -- not enabled or already shown
     return
   end
   local first_line = vim.fn.line('w0')
@@ -33,6 +33,10 @@ local function error_marker(result, client_id)
       vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
     end
     return
+  end
+
+  if _NG_VT_NS == nil then
+    _NG_VT_NS = vim.api.nvim_create_namespace("navigator_lua")
   end
 
   vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
@@ -133,6 +137,7 @@ local diag_hdlr = function(err, method, result, client_id, bufnr, config)
     error_marker(result, client_id)
   else
     vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
+    _NG_VT_NS = nil
   end
 
 end

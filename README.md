@@ -406,6 +406,10 @@ Jump between symbols with treesitter (with `]r` and `[r`)
 
 ### Diagnostic
 
+Visual studio code style show errors minimap in scroll bar area
+![diagnostic_scroll_bar](https://user-images.githubusercontent.com/1681295/128736430-e365523d-810c-4c16-a3b4-c74969f45f0b.jpg)
+
+
 Diagnostic in single bufer
 
 ![diagnostic](https://github.com/ray-x/files/blob/master/img/navigator/diag.jpg?raw=true)
