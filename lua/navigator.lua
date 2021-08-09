@@ -27,6 +27,7 @@ _NgConfigValues = {
     }
   },
   lspinstall = false, -- set to true if you would like use the lsp installed by lspinstall
+  diag_scroll_bar_sign = nil, -- set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
   icons = {
     -- Code action
     code_action_icon = " ",

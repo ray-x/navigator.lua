@@ -23,6 +23,10 @@ M.path_cur = function()
   end
 end
 
+M.round = function(x)
+  return math.floor(x + 0.5)
+end
+
 function M.get_data_from_file(filename, startLine)
   local displayLine
   if startLine < 3 then

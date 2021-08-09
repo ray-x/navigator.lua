@@ -204,6 +204,7 @@ require'navigator'.setup({
   -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+  diag_scroll_bar_sign = nil, -- experimental: set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
   icons = {
     -- Code action
     code_action_icon = " ",
@@ -328,6 +329,15 @@ LspDiagnosticsXXX are used for diagnostic. Please check highlight.lua and dochig
 The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existance and load those plugins only if they existed.
 
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
+
+
+## Integration with lspinstall
+If you'd like to only use the lsp servers installed by lspinstall. Please set
+
+```lua
+lspinstall = false
+```
+In the config
 
 ## Usage
 
