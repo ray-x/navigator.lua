@@ -407,6 +407,8 @@ Jump between symbols with treesitter (with `]r` and `[r`)
 ### Diagnostic
 
 Visual studio code style show errors minimap in scroll bar area
+(Check setup for `diag_scroll_bar_sign`)
+
 ![diagnostic_scroll_bar](https://user-images.githubusercontent.com/1681295/128736430-e365523d-810c-4c16-a3b4-c74969f45f0b.jpg)
 
 

@@ -27,10 +27,10 @@ local function error_marker(result, client_id)
   log(result, bufnr)
 
   if result == nil or result.diagnostics == nil or #result.diagnostics == 0 then
-    local diag_cnt = vim.lsp.diagnostic.get_count(0, [[Error]])
-                         + vim.lsp.diagnostic.get_count(0, [[Warning]])
-    if diag_cnt == 0 then
-      vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
+    local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
+                         + vim.lsp.diagnostic.get_count(bufnr, [[Warning]])
+    if diag_cnt == 0 and _NG_VT_NS ~= nil then
+      vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_NS, 0, -1)
     end
     return
   end
@@ -208,8 +208,34 @@ M.set_diag_loclist = function()
   end
 end
 
-function M.clear_blame_VT() -- important for clearing out the text when our cursor moves
+function M.clear_blame_VT() -- important for clearing out when no more errors
   vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
+  _NG_VT_NS = nil
 end
+
+-- TODO: callback when scroll
+function M.update_err_marker()
+  if _NG_VT_NS == nil then
+    -- nothing to update
+    return
+  end
+  local bufnr = vim.fn.bufnr()
+
+  local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
+                       + vim.lsp.diagnostic.get_count(bufnr, [[Warning]])
+  if diag_cnt == 0 and _NG_VT_NS ~= nil then
+    vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_NS, 0, -1)
+    return
+  end
+
+  -- redraw
+  vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
+  local errors = vim.lsp.diagnostic.get(bufnr)
+  local result = {diagnostics = errors}
+  error_marker(result)
+end
+
+-- TODO: update the marker
+-- vim.cmd [[autocmd WinScrolled * lua require'navigator.diagnostics'.update_err_marker()]]
 
 return M

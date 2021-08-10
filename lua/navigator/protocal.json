@@ -5,7 +5,7 @@ parameter
     line = 13
   },
   textDocument = {
-  uri = "file:///Users/ray.xu/lsp_test/go/interface.go"
+  uri = "file:///Users/username/lsp_test/go/interface.go"
   }
 }
 
@@ -38,7 +38,7 @@ dir from result { {
           line = 39
         }
       },
-      uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+      uri = "file:///Users/username/lsp-test/go/interface.go"
     },
     fromRanges = { {
         end = {
@@ -75,7 +75,7 @@ dir from result { {
           line = 43
         }
       },
-      uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+      uri = "file:///Users/username/lsp-test/go/interface.go"
     },
     fromRanges = { {
         end = {
@@ -116,7 +116,7 @@ dir from result { {
         line = 26
       }
     },
-    uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+    uri = "file:///Users/username/lsp-test/go/interface.go"
   }, {
     range = {
       ["end"] = {
@@ -128,7 +128,7 @@ dir from result { {
         line = 35
       }
     },
-    uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+    uri = "file:///Users/username/lsp-test/go/interface.go"
   } }
 --]]
 
@@ -146,7 +146,7 @@ definition.lua:9: { {
         line = 33
       }
     },
-    uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+    uri = "file:///Users/username/lsp-test/go/interface.go"
   } }
 
 
@@ -165,7 +165,7 @@ definition.lua:9: { {
             line = 33
           }
         },
-        uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+        uri = "file:///Users/username/lsp-test/go/interface.go"
       } }
   }
 }
@@ -186,7 +186,7 @@ definition.lua:9: { {
           line = 7
         }
       },
-      uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+      uri = "file:///Users/username/lsp-test/go/interface.go"
     },
     name = "command-line-arguments.geometry"
   }, {
@@ -203,7 +203,7 @@ definition.lua:9: { {
           line = 12
         }
       },
-      uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+      uri = "file:///Users/username/lsp-test/go/interface.go"
     },
     name = "command-line-arguments.rect"
   }, {
@@ -220,7 +220,7 @@ definition.lua:9: { {
           line = 43
         }
       },
-      uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+      uri = "file:///Users/username/lsp-test/go/interface.go"
     },
     name = "command-line-arguments.main"
   }, {
@@ -237,7 +237,7 @@ definition.lua:9: { {
           line = 8
         }
       },
-      uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+      uri = "file:///Users/username/lsp-test/go/interface.go"
     },
     name = "command-line-arguments.geometry.area"
   }, {
@@ -254,7 +254,7 @@ definition.lua:9: { {
           line = 13
         }
       },
-      uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+      uri = "file:///Users/username/lsp-test/go/interface.go"
     },
     name = "command-line-arguments.rect.width"
   }}
@@ -298,7 +298,7 @@ definition.lua:9: { {
       severity = 1,
       source = "compiler"
     } },
-  uri = "file:///Users/ray.xu/lsp-test/go/interface.go"
+  uri = "file:///Users/username/lsp-test/go/interface.go"
 }
 
 
@@ -320,7 +320,7 @@ definition.lua:9: { {
               }
             } },
           textDocument = {
-            uri = "file:///Users/ray.xu/lsp_test/go/ref.go",
+            uri = "file:///Users/username/lsp_test/go/ref.go",
             version = 0
           }
         } }
@@ -341,7 +341,7 @@ definition.lua:9: { {
               line = 4
             }
           },
-          URI = "file:///Users/ray.xu/lsp_test/go/ref.go"
+          URI = "file:///Users/username/lsp_test/go/ref.go"
         } },
       command = "gopls.apply_fix",
       title = "undeclared name: rect"
@@ -383,7 +383,7 @@ definition.lua:9: { {
               line = 4
             }
           },
-          URI = "file:///Users/ray.xu/lsp_test/go/ref.go"
+          URI = "file:///Users/username/lsp_test/go/ref.go"
         } },
       command = "gopls.apply_fix",
       title = "Extract to function"
@@ -433,7 +433,7 @@ definition.lua:9: { {
               }
             } },
           textDocument = {
-            uri = "file:///Users/ray.xu/lsp_test/go/ref.go",
+            uri = "file:///Users/username/lsp_test/go/ref.go",
             version = 0
           }
         } }
@@ -457,7 +457,7 @@ definition.lua:9: { {
               }
             } },
           textDocument = {
-            uri = "file:///Users/ray.xu/lsp_test/go/ref.go",
+            uri = "file:///Users/username/lsp_test/go/ref.go",
             version = 0
           }
         } }
@@ -969,3 +969,59 @@ definition.lua:9: { {
         range = { 25, 32 }
       },
     }}
+
+
+
+
+-- get diagnostics response
+{ {
+    code = "UndeclaredName",
+    codeDescription = {
+      href = "https://pkg.go.dev/golang.org/x/tools/internal/typesinternal?utm_source=gopls#UndeclaredName"
+    },
+    col = 16,
+    display_filename = "./interface.go",
+    filename = "/Users/username/lsp_test/go/interface.go",
+    lnum = 38,
+    message = "undeclared name: geometry",
+    range = {
+      end = {
+        character = 23,
+        line = 37
+      },
+      start = {
+        character = 15,
+        line = 37
+      }
+    },
+    severity = 1,
+    source = "compiler",
+    tags = { 1 },
+    text = "🈲func measure(g geometry) int {📛undeclared name: geometry",
+    uri = "file:///Users/username/lsp_test/go/interface.go"
+  },{
+    code = "UndeclaredName",
+    codeDescription = {
+      href = "https://pkg.go.dev/golang.org/x/tools/internal/typesinternal?utm_source=gopls#UndeclaredName"
+    },
+    col = 9,
+    display_filename = "./interface.go",
+    filename = "/Users/username/lsp_test/go/interface.go",
+    lnum = 30,
+    message = "undeclared name: circle",
+    range = {
+      end = {
+        character = 14,
+        line = 29
+      },
+      start = {
+        character = 8,
+        line = 29
+      }
+    },
+    severity = 1,
+    source = "compiler",
+    tags = { 1 },
+    text = "🈲func (c circle) area() float64 {📛undeclared name: circle",
+    uri = "file:///Users/username/lsp_test/go/interface.go"
+  }  }

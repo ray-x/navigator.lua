@@ -214,7 +214,7 @@ return M
       call_by = { <table 1> },
       col = 40,
       display_filename = "./curry.js",
-      filename = "/Users/ray.xu/lsp_test/js/curry.js",
+      filename = "/Users/username/lsp_test/js/curry.js",
       lnum = 4,
       range = {
         end = {
@@ -228,7 +228,7 @@ return M
       },
       rpath = "js/curry.js",
       text = "      (sum, element, index) => (sum += element * vector2[index]),",
-      uri = "file:///Users/ray.xu/lsp_test/js/curry.js"
+      uri = "file:///Users/username/lsp_test/js/curry.js"
     }
   --]]
 
@@ -252,7 +252,7 @@ return M
     } },
   col = 22,
   display_filename = "./curry.js",
-  filename = "/Users/ray.xu/lsp_test/js/curry.js",
+  filename = "/Users/username/lsp_test/js/curry.js",
   lnum = 4,
   range = {
     end = {
@@ -266,6 +266,6 @@ return M
   },
   rpath = "js/curry.js",
   text = "    4:        (sum, element, index) => (sum += element * vector     curriedDot()",
-  uri = "file:///Users/ray.xu/lsp_test/js/curry.js"
+  uri = "file:///Users/username/lsp_test/js/curry.js"
 --
 ]]
