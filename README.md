@@ -204,7 +204,6 @@ require'navigator'.setup({
   -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
-  diag_scroll_bar_sign = nil, -- experimental: set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
   icons = {
     -- Code action
     code_action_icon = " ",
@@ -217,6 +216,10 @@ require'navigator'.setup({
 
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+    diag_scroll_bar_sign = nil, -- experimental: set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
+
+    disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you  want to
+    ignore it
     tsserver = {
       filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetypes

@@ -12,7 +12,7 @@ local path_cur = require"navigator.util".path_cur()
 diagnostic_list[vim.bo.filetype] = {}
 
 local function error_marker(result, client_id)
-  if _NgConfigValues.diag_scroll_bar_sign == nil then -- not enabled or already shown
+  if _NgConfigValues.lsp.diag_scroll_bar_sign == nil then -- not enabled or already shown
     return
   end
   local first_line = vim.fn.line('w0')
@@ -60,13 +60,13 @@ local function error_marker(result, client_id)
       if pos[#pos] and pos[#pos].line == p then
         pos[#pos] = {
           line = p,
-          sign = _NgConfigValues.diag_scroll_bar_sign[2],
+          sign = _NgConfigValues.lsp.diag_scroll_bar_sign[2],
           severity = diag.severity
         }
       else
         table.insert(pos, {
           line = p,
-          sign = _NgConfigValues.diag_scroll_bar_sign[1],
+          sign = _NgConfigValues.lsp.diag_scroll_bar_sign[1],
           severity = diag.severity
         })
       end
@@ -200,7 +200,7 @@ end
 M.set_diag_loclist = function()
   if not vim.tbl_isempty(vim.lsp.buf_get_clients(0)) then
     local err_cnt = vim.lsp.diagnostic.get_count(0, [[Error]])
-    if err_cnt > 0 then
+    if err_cnt > 0 and _NgConfigValues.lsp.disply_diagnostic_qf then
       vim.lsp.diagnostic.set_loclist()
     else
       vim.cmd("lclose")
@@ -231,11 +231,20 @@ function M.update_err_marker()
   -- redraw
   vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
   local errors = vim.lsp.diagnostic.get(bufnr)
-  local result = {diagnostics = errors}
+  if #errors == 0 then
+    return
+  end
+  local result = {diagnostics = errors, uri = errors[1].uri}
   error_marker(result)
 end
 
 -- TODO: update the marker
--- vim.cmd [[autocmd WinScrolled * lua require'navigator.diagnostics'.update_err_marker()]]
+if _NgConfigValues.diag_scroll_bar_sign then
+  print("config deprecated, set lsp.diag_scroll_bar_sign instead")
+end
+
+if _NgConfigValues.lsp.diag_scroll_bar_sign then
+  vim.cmd [[autocmd WinScrolled * lua require'navigator.diagnostics'.update_err_marker()]]
+end
 
 return M
