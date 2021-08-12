@@ -98,8 +98,10 @@ local function def_preview(timeout_ms)
     ft = filetype,
     width = width,
     data = definition,
-    enter = true
+    enter = true,
+    border = _NgConfigValues.border or "shadow"
   }
+
   TextView:new(opts)
   delta = delta + 1 -- header
   local cmd = "normal! " .. tostring(delta) .. "G"
