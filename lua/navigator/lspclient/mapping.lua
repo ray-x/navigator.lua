@@ -20,7 +20,7 @@ local key_maps = {
   {key = "g0", func = "document_symbol()"},
   {key = "gW", func = "workspace_symbol()"},
   {key = "<c-]>", func = "definition()"},
-  {key = "gD", func = "declaration( { border = 'single' })"},
+  {key = "gD", func = "declaration({ border = 'single' })"},
   {key = "gp", func = "require('navigator.definition').definition_preview()"},
   {key = "gT", func = "require('navigator.treesitter').buf_ts()"},
   {key = "GT", func = "require('navigator.treesitter').bufs_ts()"},
