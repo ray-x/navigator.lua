@@ -71,7 +71,7 @@ local function error_marker(result, client_id)
         })
       end
     end
-    log("pos", pos, diag.range.start)
+    trace("pos", pos, diag.range.start)
   end
 
   for i, s in pairs(pos) do

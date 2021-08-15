@@ -273,7 +273,7 @@ require'navigator'.setup({
 |  n 	|  \<C-LeftMouse\> 	|  definition|
 |  n 	|  g\<LeftMouse\> 	|  implementation|
 |  n 	|  gT 	| treesitter document symbol	|
-|  n 	|  GT 	| treesitter symbol for all open buffers	|
+|  n 	|  \<Leader\>gT 	| treesitter symbol for all open buffers	|
 |  n 	|  K 	|  hover doc 	|
 |  n 	|  \<Space\>ca 	|  code action (when you see 💡 ) 	|
 |  v 	|  \<Space\>cA 	|  range code action (when you see 💡 ) 	|
