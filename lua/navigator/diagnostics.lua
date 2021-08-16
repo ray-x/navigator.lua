@@ -24,7 +24,7 @@ local function error_marker(result, client_id)
     return
   end
 
-  log(result, bufnr)
+  trace(result, bufnr)
 
   if result == nil or result.diagnostics == nil or #result.diagnostics == 0 then
     local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
@@ -35,19 +35,20 @@ local function error_marker(result, client_id)
     return
   end
 
-  if _NG_VT_NS == nil then
-    _NG_VT_NS = vim.api.nvim_create_namespace("navigator_lua")
-  end
-
-  vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
-
   -- total line num of current buffer
   local winid = vim.fn.win_getid(vim.fn.winnr())
   local total_num = vim.fn.getbufinfo(vim.fn.winbufnr(winid))[1].linecount
   -- window size of current buffer
   local wwidth = vim.fn.winwidth(winid)
   local wheight = vim.fn.winheight(winid)
+  if total_num <= wheight then
+    return
+  end
+  if _NG_VT_NS == nil then
+    _NG_VT_NS = vim.api.nvim_create_namespace("navigator_lua")
+  end
 
+  vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
   if total_num <= wheight then
     first_line = 0
   end

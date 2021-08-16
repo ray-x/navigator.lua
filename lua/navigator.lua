@@ -19,7 +19,7 @@ _NgConfigValues = {
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
-    diag_scroll_bar_sign = nil, -- set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
+    diag_scroll_bar_sign = {'▃', '█'}, -- set to nil to disable, set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
     tsserver = {
       -- filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetype

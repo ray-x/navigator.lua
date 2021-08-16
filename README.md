@@ -216,7 +216,8 @@ require'navigator'.setup({
 
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
-    diag_scroll_bar_sign = nil, -- experimental: set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
+    diag_scroll_bar_sign = {'▃', '█'}, -- experimental:  diagnostic status in scroll bar area; set to nil to disable the diagnostic sign,
+    -- for other style, set to {'╍', 'ﮆ'} or {'-', '='}
 
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you  want to
     ignore it
