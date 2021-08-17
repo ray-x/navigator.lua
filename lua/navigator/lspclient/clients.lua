@@ -257,12 +257,12 @@ local default_cfg = {
 
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
-
   if lspconfig[client] == nil then
     log("not supported by nvim", client)
     return
   end
   local lspft = lspconfig[client].document_config.default_config.filetypes
+  local cmd = cfg.cmd
 
   local should_load = false
   if lspft ~= nil and #lspft > 0 then
@@ -271,24 +271,31 @@ local function load_cfg(ft, client, cfg, loaded)
         should_load = true
       end
     end
-    if should_load then
-      for _, c in pairs(loaded) do
-        if client == c then
-          -- loaded
-          trace(client, "already been loaded for", ft, loaded)
-          return
-        end
-      end
-
-      if lspconfig[client] == nil then
-        error("client " .. client .. " not supported")
-      end
-
-      lspconfig[client].setup(cfg)
-      -- dont know why but 1st lsp client setup may fail.. could be a upstream defect
-      lspconfig[client].setup(cfg)
-      log(client, "loading for", ft)
+    if should_load == false then
+      return
     end
+    if cmd == nil or #cmd == 0 or vim.fn.executable(cmd[1]) == 0 then
+      log('lsp not installed for client', client)
+      return
+    end
+
+    for _, c in pairs(loaded) do
+      if client == c then
+        -- loaded
+        trace(client, "already been loaded for", ft, loaded)
+        return
+      end
+    end
+
+    if lspconfig[client] == nil then
+      error("client " .. client .. " not supported")
+      return
+    end
+
+    lspconfig[client].setup(cfg)
+    -- dont know why but 1st lsp client setup may fail.. could be a upstream defect
+    lspconfig[client].setup(cfg)
+    log(client, "loading for", ft)
   end
   -- need to verify the lsp server is up
 end
@@ -312,35 +319,47 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
         goto continue
       end
     end
-    local cfg = setups[lspclient] or default_cfg
-    -- if user provides override values
 
+    local default_config = lspconfig[lspclient].document_config.default_config
+
+    default_config = vim.tbl_deep_extend("force", default_config, default_cfg)
+
+    local cfg = setups[lspclient] or default_config
+    -- if user provides override values
     cfg.capabilities = capabilities
     if lsp_opts[lspclient] ~= nil then
       -- log(lsp_opts[lspclient], cfg)
       cfg = vim.tbl_deep_extend("force", cfg, lsp_opts[lspclient])
-      if _NgConfigValues.combined_attach == "both" or _NgConfigValues.combined_attach == nil then
+      if _NgConfigValues.combined_attach == nil then
         cfg.on_attach = on_attach
-      elseif _NgConfigValues == "mine" then
+      end
+      if _NgConfigValues.combined_attach == "mine" then
+        if _NgConfigValues.on_attach == nil then
+          error("on attach not provided")
+        end
+        cfg.on_attach = _NgConfigValues.on_attach
+      end
+      if _NgConfigValues.combined_attach == "both" then
         cfg.on_attach = function(client, bufnr)
           if _NgConfigValues.on_attach then
             _NgConfigValues.on_attach(client, bufnr)
           end
           if setups[lspclient] and setups[lspclient].on_attach then
             setups[lspclient].on_attach(client, bufnr)
+          else
+            on_attach(client, bufnr)
           end
-
         end
       end
     end
 
-    efm_cfg = lsp_opts['efm']
-    if efm_cfg then
-      lspconfig.efm.setup(efm_cfg)
-    end
-
     load_cfg(ft, lspclient, cfg, loaded)
     ::continue::
+  end
+
+  local efm_cfg = lsp_opts['efm']
+  if efm_cfg then
+    lspconfig.efm.setup(efm_cfg)
   end
   if not retry or ft == nil then
     return
