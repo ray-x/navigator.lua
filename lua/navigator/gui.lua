@@ -159,7 +159,10 @@ function M.new_list_view(opts)
       offset_y = offset_y + 1 -- need to check this out
     end
     local idx = require"guihua.util".fzy_idx
-
+    local transparency = _NgConfigValues.transparency
+    if transparency == 100 then
+      transparency = nil
+    end
     return ListView:new({
       loc = loc,
       prompt = prompt,
@@ -178,6 +181,7 @@ function M.new_list_view(opts)
           util.open_file_at(item.filename, item.lnum, item.col)
         end
       end,
+      transparency = transparency,
       on_move = opts.on_move or function(item)
         trace("on move", pos, item)
         trace("on move", pos, item.text or item, item.uri, item.filename)

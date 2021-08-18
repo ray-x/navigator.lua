@@ -13,9 +13,10 @@ _NgConfigValues = {
   -- function(client, bufnr)
   --   -- your on_attach will be called at end of navigator on_attach
   -- end,
-
+  ts_fold = false,
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
+  transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
@@ -105,6 +106,9 @@ M.setup = function(cfg)
   require("navigator.definition")
   require("navigator.hierarchy")
   require("navigator.implementation")
+  if _NgConfigValues.ts_fold == true then
+    require('navigator.foldts').on_attach()
+  end
   -- log("navigator loader")
   if _NgConfigValues.code_action_prompt.enable then
     vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]

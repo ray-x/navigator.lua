@@ -203,6 +203,7 @@ require'navigator'.setup({
   -- this kepmap gK will override "gD" mapping function declaration()  in default kepmap
   -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
+  transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil or 100 to disable it
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   icons = {
     -- Code action
