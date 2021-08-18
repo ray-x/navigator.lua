@@ -182,7 +182,7 @@ Nondefault configuration example:
 ```lua
 
 require'navigator'.setup({
-  debug = false, -- log output
+  debug = false, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
   code_action_icon = " ",
   width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
   height = 0.3, -- max list window height, 0.3 by default
