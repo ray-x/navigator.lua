@@ -232,7 +232,7 @@ local setups = {
 }
 
 local servers = {
-  "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pyls", "pyright",
+  "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
   "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
   "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
   "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
@@ -324,6 +324,10 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
     end
 
     local default_config = {}
+    if lspconfig[lspclient] == nil then
+      print("lspclient", lspclient, "no longer support by lspconfig, please submit an issue")
+      goto continue
+    end
     if lspconfig[lspclient].document_config and lspconfig[lspclient].document_config.default_config then
       default_config = lspconfig[lspclient].document_config.default_config
     else
@@ -335,7 +339,13 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
 
     local cfg = setups[lspclient] or {}
     cfg = vim.tbl_deep_extend("keep", cfg, default_config)
-    trace("cfg", lspconfig[lspclient].cfg)
+    if not vim.tbl_contains(cfg.filetypes, ft) then
+      trace("ft", ft, "disabled for", lspclient)
+      goto continue
+    end
+
+    log("cfg", lspclient, cfg)
+
     -- if user provides override values
     cfg.capabilities = capabilities
     if lsp_opts[lspclient] ~= nil then
