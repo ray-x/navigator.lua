@@ -261,6 +261,7 @@ local function load_cfg(ft, client, cfg, loaded)
     log("not supported by nvim", client)
     return
   end
+
   local lspft = lspconfig[client].document_config.default_config.filetypes
   local cmd = cfg.cmd
 
@@ -274,8 +275,10 @@ local function load_cfg(ft, client, cfg, loaded)
     if should_load == false then
       return
     end
+
+    trace('lsp for client', client, cfg)
     if cmd == nil or #cmd == 0 or vim.fn.executable(cmd[1]) == 0 then
-      log('lsp not installed for client', client)
+      log('lsp not installed for client', client, cmd)
       return
     end
 
@@ -320,11 +323,19 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
       end
     end
 
-    local default_config = lspconfig[lspclient].document_config.default_config
+    local default_config = {}
+    if lspconfig[lspclient].document_config and lspconfig[lspclient].document_config.default_config then
+      default_config = lspconfig[lspclient].document_config.default_config
+    else
+      print("missing document config for client: ", lspclient)
+      goto continue
+    end
 
     default_config = vim.tbl_deep_extend("force", default_config, default_cfg)
 
-    local cfg = setups[lspclient] or default_config
+    local cfg = setups[lspclient] or {}
+    cfg = vim.tbl_deep_extend("keep", cfg, default_config)
+    trace("cfg", lspconfig[lspclient].cfg)
     -- if user provides override values
     cfg.capabilities = capabilities
     if lsp_opts[lspclient] ~= nil then
@@ -388,7 +399,7 @@ local function setup(user_opts)
     return
   end
   if user_opts ~= nil then
-    log(user_opts)
+    log("navigator setup", user_opts)
   end
   trace(debug.traceback())
   user_opts = user_opts or _NgConfigValues -- incase setup was triggered from autocmd
