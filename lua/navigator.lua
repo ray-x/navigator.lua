@@ -106,9 +106,7 @@ M.setup = function(cfg)
   require("navigator.definition")
   require("navigator.hierarchy")
   require("navigator.implementation")
-  if _NgConfigValues.ts_fold == true then
-    require('navigator.foldts').on_attach()
-  end
+
   -- log("navigator loader")
   if _NgConfigValues.code_action_prompt.enable then
     vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
@@ -117,6 +115,9 @@ M.setup = function(cfg)
   if not _NgConfigValues.loaded then
     vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
     _NgConfigValues.loaded = true
+  end
+  if _NgConfigValues.ts_fold == true then
+    require('navigator.foldts').on_attach()
   end
 end
 

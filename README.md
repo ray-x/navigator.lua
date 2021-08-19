@@ -71,12 +71,14 @@ of the case, it takes treesitter less than 4 ms to read and render all nodes for
 
 - The first plugin, IMO, allows you to search in all treesitter symbols in the workspace.
 
-- Nerdfont, emoji for LSP and Treesitter kind
+- Nerdfont, emoji for LSP and treesitter kind
 
 - Optimize display (remove trailing bracket/space), display the caller of reference, de-duplicate lsp results (e.g reference
 in the same line). Using treesitter for file preview highlighter etc
 
 - ccls call hierarchy (Non-standard `ccls/call` API) supports
+
+- Syntax folding based on treesitter folding algorithm
 
 # Why a new plugin
 
