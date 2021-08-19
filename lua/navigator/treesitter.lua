@@ -1,6 +1,7 @@
 --- Note: some of the functions/code coped from treesitter/refactor/navigation.lua and may be modified
 -- to fit in navigator.lua
 local gui = require "navigator.gui"
+local fn = vim.fn
 
 local ok, ts_locals = pcall(require, "nvim-treesitter.locals")
 
@@ -469,6 +470,45 @@ function M.bufs_ts()
       api = _NgConfigValues.icons.treesitter_defult
     })
   end
+end
+
+local function node_in_range(parser, range)
+  for _, child in pairs(parser._children) do
+    if child:contains(range) then
+      local result = node_in_range(child, range)
+      if not vim.tbl_contains({vim.bo.filetype}, result:lang()) then
+        log("not correct tree embedded or comment?", result:lang())
+        return parser
+      end
+      return result
+    end
+  end
+  return parser
+end
+
+function M.get_node_at_line(lnum)
+  if not parsers.has_parser() then
+    return
+  end
+
+  -- Get the position for the queried node
+  if lnum == nil then
+    local cursor = api.nvim_win_get_cursor(0)
+    lnum = cursor[1]
+  end
+  local first_non_whitespace_col = fn.match(fn.getline(lnum), '\\S')
+  local range = {lnum - 1, first_non_whitespace_col, lnum - 1, first_non_whitespace_col}
+
+  -- Get the language tree with nodes inside the given range
+  local root = parsers.get_parser()
+  local ts_tree = node_in_range(root, range)
+  log(ts_tree:trees())
+  local tree = ts_tree:trees()[1]
+
+  local node = tree:root():named_descendant_for_range(unpack(range))
+
+  log(node, node:type())
+  return node
 end
 
 return M
