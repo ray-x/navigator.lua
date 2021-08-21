@@ -303,7 +303,7 @@ local function load_cfg(ft, client, cfg, loaded)
   -- need to verify the lsp server is up
 end
 
-local function wait_lsp_startup(ft, retry, lsp_opts)
+local function wait_lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
   local loaded = {}
@@ -316,11 +316,16 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
     end
   end
   for _, lspclient in ipairs(servers) do
-    if lsp_opts[lspclient] ~= nil and lsp_opts[lspclient].filetypes ~= nil then
-      if not vim.tbl_contains(lsp_opts[lspclient].filetypes, ft) then
+    if user_lsp_opts[lspclient] ~= nil and user_lsp_opts[lspclient].filetypes ~= nil then
+      if not vim.tbl_contains(user_lsp_opts[lspclient].filetypes, ft) then
         trace("ft", ft, "disabled for", lspclient)
         goto continue
       end
+    end
+
+    if vim.tbl_contains(_NgConfigValues.lsp.disable_lsp or {}, lspclient) then
+      log("disable lsp", lspconfig)
+      goto continue
     end
 
     local default_config = {}
@@ -344,21 +349,36 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
       goto continue
     end
 
-    log("cfg", lspclient, cfg)
-
     -- if user provides override values
     cfg.capabilities = capabilities
-    if lsp_opts[lspclient] ~= nil then
+    if user_lsp_opts[lspclient] ~= nil then
       -- log(lsp_opts[lspclient], cfg)
-      cfg = vim.tbl_deep_extend("force", cfg, lsp_opts[lspclient])
+      local disable_fmt = false
+
+      log(lspclient, _NgConfigValues.lsp.disable_format_ft)
+      if vim.tbl_contains(_NgConfigValues.lsp.disable_format_ft or {}, lspclient) then
+        log("fileformat disabled for ", lspclient)
+        disable_fmt = true
+      end
+      cfg = vim.tbl_deep_extend("force", cfg, user_lsp_opts[lspclient])
       if _NgConfigValues.combined_attach == nil then
-        cfg.on_attach = on_attach
+        cfg.on_attach = function(client, bufnr)
+          on_attach(client, bufnr)
+          if disable_fmt then
+            client.resolved_capabilities.document_formatting = false
+          end
+        end
       end
       if _NgConfigValues.combined_attach == "mine" then
         if _NgConfigValues.on_attach == nil then
           error("on attach not provided")
         end
-        cfg.on_attach = _NgConfigValues.on_attach
+        cfg.on_attach = function(client, bufnr)
+          _NgConfigValues.on_attach(client, bufnr)
+          if disable_fmt then
+            client.resolved_capabilities.document_formatting = false
+          end
+        end
       end
       if _NgConfigValues.combined_attach == "both" then
         cfg.on_attach = function(client, bufnr)
@@ -370,6 +390,9 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
           else
             on_attach(client, bufnr)
           end
+          if disable_fmt then
+            client.resolved_capabilities.document_formatting = false
+          end
         end
       end
     end
@@ -378,7 +401,7 @@ local function wait_lsp_startup(ft, retry, lsp_opts)
     ::continue::
   end
 
-  local efm_cfg = lsp_opts['efm']
+  local efm_cfg = user_lsp_opts['efm']
   if efm_cfg then
     lspconfig.efm.setup(efm_cfg)
   end

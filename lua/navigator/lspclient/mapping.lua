@@ -45,6 +45,8 @@ local key_maps = {
   {key = '<Space>wa', func = 'vim.lsp.buf.add_workspace_folder()'},
   {key = '<Space>wr', func = 'vim.lsp.buf.remove_workspace_folder()'},
   {key = '<Space>wl', func = 'print(vim.inspect(vim.lsp.buf.list_workspace_folders()))'},
+
+  {key = "<Space>la", mode = "n", func = "require('navigator.codelens').run_action()"},
 }
 -- LuaFormatter on
 local M = {}
@@ -125,7 +127,7 @@ local function set_mapping(user_opts)
   if ccls then
     -- log("override ccls", ccls_mappings)
     for _, value in pairs(ccls_mappings) do
-      f = "<Cmd>lua " .. value.func .. "<CR>"
+      local f = "<Cmd>lua " .. value.func .. "<CR>"
       local k = value.key
       local m = value.mode or "n"
       set_keymap(m, k, f, opts)

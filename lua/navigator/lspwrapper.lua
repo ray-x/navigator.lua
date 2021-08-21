@@ -317,6 +317,31 @@ function M.locations_to_items(locations)
   return items, width + 24 -- TODO handle long line?
 end
 
+function M.apply_action(action_chosen)
+  assert(action_chosen ~= nil, "action must not be nil")
+  if action_chosen == nil then
+    log("no match for ", action, lenses)
+    return
+  end
+  local switch = string.format("silent b %d", bufnr)
+  if action_chosen.edit or type(action_chosen.command) == "table" then
+    if action_chosen.edit then
+      vim.lsp.util.apply_workspace_edit(action_chosen.edit)
+    end
+    if type(action_chosen.command) == "table" then
+      -- switch buff
+      vim.cmd(switch)
+      vim.lsp.buf.execute_command(action_chosen.command)
+    end
+  else
+    vim.cmd(switch)
+    vim.lsp.buf.execute_command(action_chosen)
+  end
+
+  log(action_chosen)
+
+end
+
 function M.symbol_to_items(locations)
   if not locations or vim.tbl_isempty(locations) then
     print("list not avalible")

@@ -15,10 +15,15 @@ _NgConfigValues = {
   -- end,
   ts_fold = false,
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+  code_lens_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+    disable_format_ft = {}, -- a list of lsp not enable auto-format (e.g. if you using efm or vim-codeformat etc), empty by default
+    disable_lsp = {}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
+    code_lens = false,
+    -- only want to enable one lsp server
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
     diag_scroll_bar_sign = {'▃', '█'}, -- set to nil to disable, set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
     tsserver = {
@@ -35,6 +40,8 @@ _NgConfigValues = {
   icons = {
     -- Code action
     code_action_icon = " ",
+    -- code lens
+    code_lens_action_icon = " ",
     -- Diagnostics
     diagnostic_head = '🐛',
     diagnostic_head_severity_1 = "🈲",
@@ -119,6 +126,12 @@ M.setup = function(cfg)
   if _NgConfigValues.ts_fold == true then
     require('navigator.foldts').on_attach()
   end
+
+  --- if code line enabled
+  if _NgConfigValues.lsp.code_lens then
+    require("navigator.codelens").setup()
+  end
+
 end
 
 return M

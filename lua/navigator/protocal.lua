@@ -1025,3 +1025,102 @@ definition.lua:9: { {
     text = "🈲func (c circle) area() float64 {📛undeclared name: circle",
     uri = "file:///Users/username/lsp_test/go/interface.go"
   }  }
+
+
+-- code lens
+{ {
+    command = {
+      arguments = { {
+          URIs = { "file:///Users/username/lsp_test/go/go.mod" }
+        } },
+      command = "gopls.tidy",
+      title = "Run go mod tidy"
+    },
+    range = {
+      end = {
+        character = 13,
+        line = 0
+      },
+      start = {
+        character = 0,
+        line = 0
+      }
+    }
+  }, {
+    command = {
+      arguments = { {
+          URI = "file:///Users/username/lsp_test/go/go.mod"
+        } },
+      command = "gopls.vendor",
+      title = "Create vendor directory"
+    },
+    range = {
+      end = {
+        character = 13,
+        line = 0
+      },
+      start = {
+        character = 0,
+        line = 0
+      }
+    }
+  }, {
+    command = {
+      arguments = { {
+          Modules = { "github.com/containerd/containerd", "github.com/docker/docker", "github.com/docker/go-connections", "github.com/fatih/gomodifytags", "github.com/google/go-cmp", "github.com/moby/term", "github.com/morikuni/aec", "github.com/sirupsen/logrus", "github.com/sourcegraph/jsonrpc2", "golang.org/x/net", "golang.org/x/sys", "golang.org/x/text", "golang.org/x/time", "golang.org/x/tools", "google.golang.org/grpc" },
+          URI = "file:///Users/username/lsp_test/go/go.mod"
+        } },
+      command = "gopls.check_upgrades",
+      title = "Check for upgrades"
+    },
+    range = {
+      end = {
+        character = 1,
+        line = 20
+      },
+      start = {
+        character = 0,
+        line = 4
+      }
+    }
+  }, {
+    command = {
+      arguments = { {
+          AddRequire = false,
+          GoCmdArgs = { "-d", "-u", "-t", "./..." },
+          URI = "file:///Users/username/lsp_test/go/go.mod"
+        } },
+      command = "gopls.upgrade_dependency",
+      title = "Upgrade transitive dependencies"
+    },
+    range = {
+      end = {
+        character = 1,
+        line = 20
+      },
+      start = {
+        character = 0,
+        line = 4
+      }
+    }
+  }, {
+    command = {
+      arguments = { {
+          AddRequire = false,
+          GoCmdArgs = { "-d", "github.com/containerd/containerd", "github.com/docker/docker", "github.com/docker/go-connections", "github.com/fatih/gomodifytags", "github.com/google/go-cmp", "github.com/moby/term", "github.com/morikuni/aec", "github.com/sirupsen/logrus", "github.com/sourcegraph/jsonrpc2", "golang.org/x/net", "golang.org/x/sys", "golang.org/x/text", "golang.org/x/time", "golang.org/x/tools", "google.golang.org/grpc" },
+          URI = "file:///Users/username/lsp_test/go/go.mod"
+        } },
+      command = "gopls.upgrade_dependency",
+      title = "Upgrade direct dependencies"
+    },
+    range = {
+      end = {
+        character = 1,
+        line = 20
+      },
+      start = {
+        character = 0,
+        line = 4
+      }
+    }
+  } }

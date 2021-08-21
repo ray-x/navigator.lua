@@ -502,12 +502,12 @@ function M.get_node_at_line(lnum)
   -- Get the language tree with nodes inside the given range
   local root = parsers.get_parser()
   local ts_tree = node_in_range(root, range)
-  log(ts_tree:trees())
+  -- log(ts_tree:trees())
   local tree = ts_tree:trees()[1]
 
   local node = tree:root():named_descendant_for_range(unpack(range))
 
-  log(node, node:type())
+  trace(node, node:type())
   return node
 end
 

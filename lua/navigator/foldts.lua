@@ -161,7 +161,7 @@ function M.get_fold_indic(lnum)
   local buf = api.nvim_get_current_buf()
   local levels = folds_levels(buf) or {}
 
-  log(lnum, levels[lnum])
+  -- log(lnum, levels[lnum]) -- TODO: comment it out in master
   return levels[lnum] or "0"
 end
 

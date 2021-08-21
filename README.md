@@ -23,9 +23,11 @@ and emoji is not shown.
 
 #### Example: C++ defination
 
-Another example for C++
+C++ example: search reference and defination
 ![cpp_ref](https://user-images.githubusercontent.com/1681295/119215215-8bd7a080-bb0f-11eb-82fc-8cdf1955e6e7.jpg)
-You may find that a 🦕 dinosaur(d) on the line of `Rectangle rect;`  which means there is a defination (d for def) of rect in this line
+You may find a 🦕 dinosaur(d) on the line of `Rectangle rect,`  which means there is a definition (d for def) of rect in this line.
+
+``<- f main()``  means the defination is inside function main().
 
 #### Golang struct type
 Struct type references in multiple Go ﳑ files
@@ -33,8 +35,8 @@ Struct type references in multiple Go ﳑ files
 ![go_reference](https://user-images.githubusercontent.com/1681295/119123823-54b3b180-ba73-11eb-8790-097601e10f6a.gif)
 
 This feature can provide you info in which function/class/method the variable was referenced. It is handy for a large
-project where class/function definition is too long to fit into the preview window. Also provides a birdview of where the
-variable is
+project where class/function definition is too long to fit into the preview window. Also provides a bird's eye view of where the
+variable is:
 - Referenced
 - Modified
 - Defined
@@ -78,7 +80,9 @@ in the same line). Using treesitter for file preview highlighter etc
 
 - ccls call hierarchy (Non-standard `ccls/call` API) supports
 
-- Syntax folding based on treesitter folding algorithm
+- Syntax folding based on treesitter folding algorithm. (It behaves similar to vs-code)
+
+- LSP Code Action, Code Lens, Code lens action
 
 # Why a new plugin
 
@@ -219,6 +223,9 @@ require'navigator'.setup({
 
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+    disable_format_ft = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp not enable auto-format (e.g. if you using efm or vim-codeformat etc), empty by default
+    disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
+    -- only want to enable one lsp server
     diag_scroll_bar_sign = {'▃', '█'}, -- experimental:  diagnostic status in scroll bar area; set to nil to disable the diagnostic sign,
     -- for other style, set to {'╍', 'ﮆ'} or {'-', '='}
 

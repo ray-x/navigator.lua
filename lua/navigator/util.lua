@@ -345,4 +345,8 @@ function M.clear_all_buf()
   bufs = {}
 end
 
+function M.get_current_winid()
+  return api.nvim_get_current_win()
+end
+
 return M

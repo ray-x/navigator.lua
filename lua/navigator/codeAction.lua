@@ -26,6 +26,7 @@ function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customS
     end
   end
 
+  local apply = require('navigator.lspwrapper').apply_action
   local function apply_action(action)
     local action_chosen = nil
     for key, value in pairs(actions) do
@@ -33,26 +34,12 @@ function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customS
         action_chosen = value
       end
     end
+
     if action_chosen == nil then
       log("no match for ", action, actions)
       return
     end
-    local switch = string.format("silent b %d", bufnr)
-    if action_chosen.edit or type(action_chosen.command) == "table" then
-      if action_chosen.edit then
-        vim.lsp.util.apply_workspace_edit(action_chosen.edit)
-      end
-      if type(action_chosen.command) == "table" then
-        -- switch buff
-        vim.cmd(switch)
-        vim.lsp.buf.execute_command(action_chosen.command)
-      end
-    else
-      vim.cmd(switch)
-      vim.lsp.buf.execute_command(action_chosen)
-    end
-
-    trace(action_chosen)
+    apply(action_chosen)
   end
 
   gui.new_list_view {
