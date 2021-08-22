@@ -132,7 +132,7 @@ function M.check_capabilities(feature, client_id)
     if #clients == 0 then
       print("LSP: no client attached")
     else
-      print("LSP: server does not support " .. feature)
+      log("LSP: server does not support " .. feature)
     end
     return false
   end
