@@ -97,15 +97,17 @@ function M.run_action()
   end
   local width = 40
 
-  local data = {"   Auto Fix  <C-o> Apply <C-e> Exit"}
+  local data = {"   CodeLens Action  <C-o> Apply <C-e> Exit"}
+  local idx = 1
   for i, lens in pairs(lenses) do
     if lens.range.start.line == (line - 1) then
       local title = lens.command.title:gsub("\r\n", "\\r\\n")
       title = title:gsub("\n", "\\n")
-      title = string.format("[%d] %s", i, title)
+      title = string.format("[%d] %s", idx, title)
       table.insert(data, title)
       lenses[i].display_title = title
       width = math.max(width, #lens.command.title)
+      idx = idx + 1
     end
   end
   local apply = require('navigator.lspwrapper').apply_action
@@ -122,24 +124,24 @@ function M.run_action()
     end
     apply(action_chosen)
   end
-
-  gui.new_list_view {
-    items = data,
-    width = width + 4,
-    loc = "top_center",
-    relative = "cursor",
-    rawdata = true,
-    data = data,
-    on_confirm = function(pos)
-      log(pos)
-      apply_action(pos)
-    end,
-    on_move = function(pos)
-      log(pos)
-      return pos
-    end
-  }
-
+  if #data > 0 then
+    gui.new_list_view {
+      items = data,
+      width = width + 4,
+      loc = "top_center",
+      relative = "cursor",
+      rawdata = true,
+      data = data,
+      on_confirm = function(pos)
+        log(pos)
+        apply_action(pos)
+      end,
+      on_move = function(pos)
+        log(pos)
+        return pos
+      end
+    }
+  end
 end
 
 return M

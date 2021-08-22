@@ -319,10 +319,7 @@ end
 
 function M.apply_action(action_chosen)
   assert(action_chosen ~= nil, "action must not be nil")
-  if action_chosen == nil then
-    log("no match for ", action, lenses)
-    return
-  end
+  local bufnr = api.nvim_get_current_buf()
   local switch = string.format("silent b %d", bufnr)
   if action_chosen.edit or type(action_chosen.command) == "table" then
     if action_chosen.edit then
