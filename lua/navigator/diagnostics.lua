@@ -5,6 +5,7 @@ _NG_VT_NS = vim.api.nvim_create_namespace("navigator_lua")
 local util = require "navigator.util"
 local log = util.log
 local trace = require"guihua.log".trace
+-- trace = log
 local error = util.error
 
 local path_sep = require"navigator.util".path_sep()
@@ -12,7 +13,7 @@ local path_cur = require"navigator.util".path_cur()
 diagnostic_list[vim.bo.filetype] = {}
 
 local function error_marker(result, client_id)
-  if _NgConfigValues.lsp.diag_scroll_bar_sign == nil then -- not enabled or already shown
+  if _NgConfigValues.lsp.diagnostic_scrollbar_sign == nil then -- not enabled or already shown
     return
   end
   local first_line = vim.fn.line('w0')
@@ -61,13 +62,13 @@ local function error_marker(result, client_id)
       if pos[#pos] and pos[#pos].line == p then
         pos[#pos] = {
           line = p,
-          sign = _NgConfigValues.lsp.diag_scroll_bar_sign[2],
+          sign = _NgConfigValues.lsp.diagnostic_scrollbar_sign[2],
           severity = diag.severity
         }
       else
         table.insert(pos, {
           line = p,
-          sign = _NgConfigValues.lsp.diag_scroll_bar_sign[1],
+          sign = _NgConfigValues.lsp.diagnostic_scrollbar_sign[1],
           severity = diag.severity
         })
       end
@@ -90,7 +91,7 @@ local function error_marker(result, client_id)
 end
 
 local diag_hdlr = function(err, method, result, client_id, bufnr, config)
-  -- log(result)
+  trace(result)
   if err ~= nil then
     log(err, config)
     return
@@ -151,8 +152,7 @@ local diag_hdlr = function(err, method, result, client_id, bufnr, config)
 end
 
 local M = {}
--- vim.lsp.handlers["textDocument/publishDiagnostics"] =
-M.diagnostic_handler = vim.lsp.with(diag_hdlr, {
+local diagnostic_cfg = {
   -- Enable underline, use default values
   underline = true,
   -- Enable virtual text, override spacing to 0
@@ -161,8 +161,14 @@ M.diagnostic_handler = vim.lsp.with(diag_hdlr, {
   -- and on, using buffer local variables
   signs = true,
   -- Disable a feature
-  update_in_insert = false
-})
+  update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false
+}
+
+if _NgConfigValues.lsp.diagnostic_virtual_text == false then
+  diagnostic_cfg.virtual_text = false
+end
+-- vim.lsp.handlers["textDocument/publishDiagnostics"] =
+M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
 
 M.show_diagnostic = function()
   vim.lsp.diagnostic.get_all()
@@ -209,7 +215,7 @@ M.set_diag_loclist = function()
   end
 end
 
-function M.clear_blame_VT() -- important for clearing out when no more errors
+local function clear_diag_VT() -- important for clearing out when no more errors
   vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
   _NG_VT_NS = nil
 end
@@ -240,11 +246,11 @@ function M.update_err_marker()
 end
 
 -- TODO: update the marker
-if _NgConfigValues.diag_scroll_bar_sign then
-  print("config deprecated, set lsp.diag_scroll_bar_sign instead")
+if _NgConfigValues.diagnostic_scrollbar_sign then
+  print("config deprecated, set lsp.diagnostic_scrollbar_sign instead")
 end
 
-if _NgConfigValues.lsp.diag_scroll_bar_sign then
+if _NgConfigValues.lsp.diagnostic_scrollbar_sign then
   vim.cmd [[autocmd WinScrolled * lua require'navigator.diagnostics'.update_err_marker()]]
 end
 

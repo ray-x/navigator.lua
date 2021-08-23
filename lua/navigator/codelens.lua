@@ -4,6 +4,7 @@
 local codelens = require('vim.lsp.codelens')
 
 local log = require"navigator.util".log
+local trace = require"navigator.util".trace
 
 local lsphelper = require "navigator.lspwrapper"
 local api = vim.api
@@ -42,11 +43,11 @@ local function _update_sign(line)
 end
 
 local function codelens_hdlr(err, _, result, client_id, bufnr)
-  if err then
-    warn("lsp code lens", vim.inspect(err))
+  if err or result == nil then
+    log("lsp code lens", vim.inspect(err))
     return
   end
-  log("codelenes result", result)
+  trace("codelenes result", result)
   for _, v in pairs(result) do
     _update_sign(v.range.start.line)
   end

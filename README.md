@@ -226,9 +226,10 @@ require'navigator'.setup({
     disable_format_ft = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp not enable auto-format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     -- only want to enable one lsp server
-    diag_scroll_bar_sign = {'▃', '█'}, -- experimental:  diagnostic status in scroll bar area; set to nil to disable the diagnostic sign,
+    diagnostic_scroll_bar_sign = {'▃', '█'}, -- experimental:  diagnostic status in scroll bar area; set to nil to disable the diagnostic sign,
     -- for other style, set to {'╍', 'ﮆ'} or {'-', '='}
-
+    diagnostic_virtual_text = true,  -- show virtual for diagnostic message
+    diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you  want to
     ignore it
     tsserver = {
@@ -421,7 +422,7 @@ Jump between symbols with treesitter (with `]r` and `[r`)
 ### Diagnostic
 
 Visual studio code style show errors minimap in scroll bar area
-(Check setup for `diag_scroll_bar_sign`)
+(Check setup for `diagnostic_scrollbar_sign`)
 
 ![diagnostic_scroll_bar](https://user-images.githubusercontent.com/1681295/128736430-e365523d-810c-4c16-a3b4-c74969f45f0b.jpg)
 
