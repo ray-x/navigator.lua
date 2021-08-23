@@ -73,7 +73,10 @@ end
 M.lsp_clients = {}
 
 function M.refresh()
-  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp code action")
+  if #vim.lsp.buf_get_clients() < 1 then
+    log("Must have a client running to use lsp code action")
+    return
+  end
   if not lsphelper.check_capabilities("code_lens") then
     return
   end
@@ -97,7 +100,9 @@ function M.run_action()
   end
   local width = 40
 
-  local data = {"   CodeLens Action  <C-o> Apply <C-e> Exit"}
+  local data = {
+    " " .. _NgConfigValues.icons.code_lens_action_icon .. " CodeLens Action  <C-o> Apply <C-e> Exit"
+  }
   local idx = 1
   for i, lens in pairs(lenses) do
     if lens.range.start.line == (line - 1) then
