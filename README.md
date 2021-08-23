@@ -280,7 +280,7 @@ require'navigator'.setup({
 |  n 	|  gD 	|  declaration 	|
 |  n 	|  g0 	|  document symbol 	|
 |  n 	|  \<C-]\> 	|  go to defination (if multiple show listview)	|
-|  n 	|  gp 	|  defination 	|
+|  n 	|  gp 	|  definition 	|
 |  n 	|  \<C-LeftMouse\> 	|  definition|
 |  n 	|  g\<LeftMouse\> 	|  implementation|
 |  n 	|  gT 	| treesitter document symbol	|
