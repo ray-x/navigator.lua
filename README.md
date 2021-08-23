@@ -21,13 +21,13 @@ will see ` displayName{} <-  makeFunc{}`
 - The third similar to the second, as var browser is on the right side of '=', the value not changed in this line
 and emoji is not shown.
 
-#### Example: C++ defination
+#### Example: C++ definition
 
-C++ example: search reference and defination
+C++ example: search reference and definition
 ![cpp_ref](https://user-images.githubusercontent.com/1681295/119215215-8bd7a080-bb0f-11eb-82fc-8cdf1955e6e7.jpg)
 You may find a 🦕 dinosaur(d) on the line of `Rectangle rect,`  which means there is a definition (d for def) of rect in this line.
 
-``<- f main()``  means the defination is inside function main().
+``<- f main()``  means the definition is inside function main().
 
 #### Golang struct type
 Struct type references in multiple Go ﳑ files
@@ -280,8 +280,8 @@ require'navigator'.setup({
 |  n 	|  gW 	|  workspace symbol 	|
 |  n 	|  gD 	|  declaration 	|
 |  n 	|  g0 	|  document symbol 	|
-|  n 	|  \<C-]\> 	|  go to defination (if multiple show listview)	|
-|  n 	|  gp 	|  defination 	|
+|  n 	|  \<C-]\> 	|  go to definition (if multiple show listview)	|
+|  n 	|  gp 	|  definition 	|
 |  n 	|  \<C-LeftMouse\> 	|  definition|
 |  n 	|  g\<LeftMouse\> 	|  implementation|
 |  n 	|  gT 	| treesitter document symbol	|
