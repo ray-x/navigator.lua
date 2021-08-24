@@ -34,6 +34,14 @@ describe("should run lsp reference", function()
     -- allow gopls start
     vim.wait(200, function()
     end)
+    local clients = vim.lsp.get_active_clients()
+    print(vim.inspect(clients))
+    vim.wait(200, function()
+    end)
+
+    clients = vim.lsp.get_active_clients()
+    print(vim.inspect(clients))
+
     vim.fn.setpos(".", {bufn, 15, 4, 0}) -- width
 
     vim.bo.filetype = "go"
