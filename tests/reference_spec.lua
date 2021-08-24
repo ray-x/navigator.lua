@@ -15,6 +15,7 @@ describe("should run lsp reference", function()
 
     local status = require("plenary.reload").reload_module("navigator")
     local status = require("plenary.reload").reload_module("guihua")
+    local status = require("plenary.reload").reload_module("lspconfig")
 
     vim.cmd([[packadd navigator.lua]])
     vim.cmd([[packadd guihua.lua]])
