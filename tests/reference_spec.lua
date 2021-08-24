@@ -31,7 +31,9 @@ describe("should run lsp reference", function()
       preview_height = 0.35, -- max height of preview windows
       border = 'none'
     })
-
+    -- allow gopls start
+    vim.wait(200, function()
+    end)
     vim.fn.setpos(".", {bufn, 15, 4, 0}) -- width
 
     vim.bo.filetype = "go"
@@ -62,6 +64,10 @@ describe("should run lsp reference", function()
       preview_height = 0.35, -- max height of preview windows
       border = 'none'
     })
+
+    -- allow gopls start
+    vim.wait(200, function()
+    end)
     local result = {
       {
         range = {['end'] = {character = 6, line = 14}, start = {character = 1, line = 14}},
