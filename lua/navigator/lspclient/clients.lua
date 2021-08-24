@@ -419,6 +419,7 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
     if i > 5 or #clients > 0 then
       timer:close() -- Always close handles to avoid leaks.
       log("active", #clients, i)
+      print("active", #clients, i)
       _NG_Loading = false
       return true
     end
@@ -472,6 +473,7 @@ local function setup(user_opts)
 
   trace('setup', user_opts)
   log("loading for ft ", ft, uri)
+  print("loading for ft ", ft, uri)
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
   local lsp_opts = user_opts.lsp

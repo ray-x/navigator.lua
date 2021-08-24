@@ -24,7 +24,7 @@ describe("should run lsp reference", function()
     vim.cmd(cmd)
     vim.cmd([[cd %:p:h]])
     local bufn = vim.fn.bufnr("")
-    require'lspconfig'.gopls.setup {}
+    -- require'lspconfig'.gopls.setup {}
     require'navigator'.setup({
       debug = false, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
       code_action_icon = "A ",
