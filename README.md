@@ -263,13 +263,22 @@ together. If you have multiple similar LSP installed and have trouble with the p
 
 ### Disable a lsp client loading from navigator
 To disable a specific LSP, set `filetypes` to {} e.g.
-```lua
 
+```lua
 require'navigator'.setup({
  pyls={filetype={}}
 })
 
 ```
+
+Or:
+
+```lua
+require'navigator'.setup({
+  disable_lsp = {'pyls', 'sqlls'},
+})
+```
+
 ### Default keymaps
 
 |  mode 	|  key 	|  function 	|

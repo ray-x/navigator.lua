@@ -11,8 +11,8 @@ local locations_to_items = lsphelper.locations_to_items
 
 local function ref_hdlr(err, api, locations, num, bufnr)
   local opts = {}
-  -- log("arg1", arg1)
-  -- log(api)
+  trace("arg1", err, api, locations, num, bufnr)
+  log(api)
   trace(locations)
   -- log("num", num)
   -- log("bfnr", bufnr)
@@ -38,13 +38,16 @@ local function ref_hdlr(err, api, locations, num, bufnr)
   local wwidth = vim.api.nvim_get_option("columns")
   local mwidth = _NgConfigValues.width
   width = math.min(width + 30, 120, math.floor(wwidth * mwidth))
-  return gui.new_list_view({
+  -- log(items)
+  -- log(width)
+  local listview = gui.new_list_view({
     items = items,
     ft = ft,
     width = width,
     api = "Reference",
     enable_preview_edit = true
   })
+  return listview, items, width
 end
 
 local async_reference_request = function()
