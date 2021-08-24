@@ -77,6 +77,17 @@ describe("should run lsp reference", function()
     })
 
     -- allow gopls start
+    for i = 1, 10 do
+      vim.wait(400, function()
+      end)
+      local clients = vim.lsp.get_active_clients()
+      print(vim.inspect(clients))
+      if #clients > 0 then
+        break
+      end
+    end
+
+    -- allow gopls start
     vim.wait(200, function()
     end)
     local result = {
