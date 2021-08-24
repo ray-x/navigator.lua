@@ -31,6 +31,16 @@ describe("should run lsp reference", function()
       preview_height = 0.35, -- max height of preview windows
       border = 'none'
     })
+    -- allow gopls start
+    vim.wait(400, function()
+    end)
+    local clients = vim.lsp.get_active_clients()
+    print(vim.inspect(clients))
+    vim.wait(400, function()
+    end)
+
+    clients = vim.lsp.get_active_clients()
+    print(vim.inspect(clients))
 
     vim.fn.setpos(".", {bufn, 15, 4, 0}) -- width
 
@@ -62,6 +72,10 @@ describe("should run lsp reference", function()
       preview_height = 0.35, -- max height of preview windows
       border = 'none'
     })
+
+    -- allow gopls start
+    vim.wait(200, function()
+    end)
     local result = {
       {
         range = {['end'] = {character = 6, line = 14}, start = {character = 1, line = 14}},

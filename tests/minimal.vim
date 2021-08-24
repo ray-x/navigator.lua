@@ -1,6 +1,7 @@
 set rtp +=.
 set rtp +=../plenary.nvim/
 set rtp +=../nvim-treesitter/
+set rtp +=../nvim-lspconfig/
 set rtp +=../guihua.lua/
 set rtp +=../navigator.lua/
 
@@ -8,6 +9,7 @@ runtime! plugin/plenary.vim
 runtime! plugin/nvim-treesitter.vim
 runtime! plugin/guihua.vim
 runtime! plugin/navigator.vim
+runtime! plugin/nvim-lspconfig.vim
 
 set noswapfile
 set nobackup
