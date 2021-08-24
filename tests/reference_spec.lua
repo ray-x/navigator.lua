@@ -23,6 +23,7 @@ describe("should run lsp reference", function()
     vim.cmd(cmd)
     vim.cmd([[cd %:p:h]])
     local bufn = vim.fn.bufnr("")
+    require'lspconfig'.gopls.setup {}
     require'navigator'.setup({
       debug = false, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
       code_action_icon = "A ",
@@ -31,12 +32,13 @@ describe("should run lsp reference", function()
       preview_height = 0.35, -- max height of preview windows
       border = 'none'
     })
+
     -- allow gopls start
-    vim.wait(400, function()
+    vim.wait(700, function()
     end)
     local clients = vim.lsp.get_active_clients()
     print(vim.inspect(clients))
-    vim.wait(400, function()
+    vim.wait(700, function()
     end)
 
     clients = vim.lsp.get_active_clients()

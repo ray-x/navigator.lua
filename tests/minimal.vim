@@ -32,6 +32,11 @@ require'nvim-treesitter.configs'.setup {
     enable = true,              -- false will disable the whole extension
   },
 }
+
+-- for testing load gopls ahead
+
+require'lspconfig'.gopls.setup{}
+
 require'navigator'.setup({
   debug = false, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
   code_action_icon = " ",
