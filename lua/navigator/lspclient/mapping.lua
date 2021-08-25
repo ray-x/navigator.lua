@@ -36,7 +36,7 @@ local key_maps = {
   {key = "gL", func = "diagnostic.show_line_diagnostics( { border = 'single' })"},
   {key = "gG", func = "require('navigator.diagnostics').show_diagnostic()"},
   {key = "]d", func = "diagnostic.goto_next({ border = 'single' })"},
-  {key = "[d", func = "diagnostic.goto_next({ border = 'single' })"},
+  {key = "[d", func = "diagnostic.goto_prev({ border = 'single' })"},
   {key = "]r", func = "require('navigator.treesitter').goto_next_usage()"},
   {key = "[r", func = "require('navigator.treesitter').goto_previous_usage()"},
   {key = "<C-LeftMouse>", func = "definition()"},
