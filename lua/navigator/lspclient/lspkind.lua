@@ -72,5 +72,7 @@ function lspkind.comp_kind(kind) return CompletionItemKind[kind] or "" end
 
 function lspkind.symbol_kind(kind) return SymbolItemKind[kind] or "" end
 
+function lspkind.cmp_kind(kind) return kind_symbols[kind] or "" end
+
 function lspkind.init() require('vim.lsp.protocol').CompletionItemKind = CompletionItemKind end
 return lspkind
