@@ -204,6 +204,7 @@ M.show_diagnostic = function()
   end
 end
 
+-- set quickfix win
 M.set_diag_loclist = function()
   if not vim.tbl_isempty(vim.lsp.buf_get_clients(0)) then
     local err_cnt = vim.lsp.diagnostic.get_count(0, [[Error]])
