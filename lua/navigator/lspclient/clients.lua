@@ -67,11 +67,11 @@ library[vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true
 local path_sep = require"navigator.util".path_sep()
 local strip_dir_pat = path_sep .. "([^" .. path_sep .. "]+)$"
 local strip_sep_pat = path_sep .. "$"
-local dirname = function(path)
-  if not path or #path == 0 then
+local dirname = function(pathname)
+  if not pathname or #pathname == 0 then
     return
   end
-  local result = path:gsub(strip_sep_pat, ""):gsub(strip_dir_pat, "")
+  local result = pathname:gsub(strip_sep_pat, ""):gsub(strip_dir_pat, "")
   if #result == 0 then
     return "/"
   end
@@ -241,7 +241,7 @@ local servers = {
   "r_language_server", "rust_analyzer", "terraformls"
 }
 
-if _NgConfigValues.lspinstall == true then
+if config.lspinstall == true then
   local has_lspinst, lspinst = pcall(require, "lspinstall")
   if has_lspinst then
     local srvs = lspinst.installed_servers()
@@ -250,6 +250,10 @@ if _NgConfigValues.lspinstall == true then
       servers = srvs
     end
   end
+end
+
+if config.lsp.disable_lsp == 'all' then
+  config.lsp.disable_lsp = servers
 end
 
 local default_cfg = {
@@ -297,6 +301,7 @@ local function load_cfg(ft, client, cfg, loaded)
       return
     end
 
+    log("load cfg", cfg)
     lspconfig[client].setup(cfg)
     -- dont know why but 1st lsp client setup may fail.. could be a upstream defect
     lspconfig[client].setup(cfg)
@@ -333,8 +338,7 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
         goto continue
       end
     end
-
-    if vim.tbl_contains(_NgConfigValues.lsp.disable_lsp or {}, lspclient) then
+    if vim.tbl_contains(config.lsp.disable_lsp or {}, lspclient) then
       log("disable lsp", lspconfig)
       goto continue
     end
@@ -352,10 +356,9 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
     end
 
     default_config = vim.tbl_deep_extend("force", default_config, default_cfg)
-
     local cfg = setups[lspclient] or {}
     cfg = vim.tbl_deep_extend("keep", cfg, default_config)
-    if not vim.tbl_contains(cfg.filetypes, ft) then
+    if not vim.tbl_contains(cfg.filetypes or {}, ft) then
       trace("ft", ft, "disabled for", lspclient)
       goto continue
     end
@@ -366,13 +369,13 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
       -- log(lsp_opts[lspclient], cfg)
       local disable_fmt = false
 
-      log(lspclient, _NgConfigValues.lsp.disable_format_ft)
-      if vim.tbl_contains(_NgConfigValues.lsp.disable_format_ft or {}, lspclient) then
+      log(lspclient, config.lsp.disable_format_ft)
+      if vim.tbl_contains(config.lsp.disable_format_ft or {}, lspclient) then
         log("fileformat disabled for ", lspclient)
         disable_fmt = true
       end
       cfg = vim.tbl_deep_extend("force", cfg, user_lsp_opts[lspclient])
-      if _NgConfigValues.combined_attach == nil then
+      if config.combined_attach == nil then
         cfg.on_attach = function(client, bufnr)
           on_attach(client, bufnr)
           if disable_fmt then
@@ -380,21 +383,21 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
           end
         end
       end
-      if _NgConfigValues.combined_attach == "mine" then
-        if _NgConfigValues.on_attach == nil then
+      if config.combined_attach == "mine" then
+        if config.on_attach == nil then
           error("on attach not provided")
         end
         cfg.on_attach = function(client, bufnr)
-          _NgConfigValues.on_attach(client, bufnr)
+          config.on_attach(client, bufnr)
           if disable_fmt then
             client.resolved_capabilities.document_formatting = false
           end
         end
       end
-      if _NgConfigValues.combined_attach == "both" then
+      if config.combined_attach == "both" then
         cfg.on_attach = function(client, bufnr)
-          if _NgConfigValues.on_attach then
-            _NgConfigValues.on_attach(client, bufnr)
+          if config.on_attach then
+            config.on_attach(client, bufnr)
           end
           if setups[lspclient] and setups[lspclient].on_attach then
             setups[lspclient].on_attach(client, bufnr)
@@ -409,6 +412,7 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
     end
 
     load_cfg(ft, lspclient, cfg, loaded)
+    -- load_cfg(ft, lspclient, {}, loaded)
     ::continue::
   end
 
@@ -439,14 +443,14 @@ end
 local function setup(user_opts)
   local ft = vim.bo.filetype
   if _LoadedClients[ft] then
-    log("navigator is loaded for ft", ft)
+    -- log("navigator is loaded for ft", ft)
     return
   end
   if user_opts ~= nil then
     log("navigator setup", user_opts)
   end
   trace(debug.traceback())
-  user_opts = user_opts or _NgConfigValues -- incase setup was triggered from autocmd
+  user_opts = user_opts or config -- incase setup was triggered from autocmd
 
   if _NG_Loading == true then
     return
@@ -507,9 +511,5 @@ local function setup(user_opts)
 
   _NG_Loading = false
 
-  -- if not _NgConfigValues.loaded then
-  --   vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
-  --   _NgConfigValues.loaded = true
-  -- end
 end
 return {setup = setup}

@@ -477,7 +477,7 @@ local function node_in_range(parser, range)
     if child:contains(range) then
       local result = node_in_range(child, range)
       if not vim.tbl_contains({vim.bo.filetype}, result:lang()) then
-        log("not correct tree embedded or comment?", result:lang())
+        -- log("not correct tree embedded or comment?", result:lang())
         return parser
       end
       return result

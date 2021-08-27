@@ -24,6 +24,8 @@ if packer_plugins ~= nil then -- packer install
 
   if _NgConfigValues.lspinstall == true then
     local has_lspinst, lspinst = pcall(require, "lspinstall")
-    lspinst.setup()
+    if has_lspinst then
+      lspinst.setup()
+    end
   end
 end
