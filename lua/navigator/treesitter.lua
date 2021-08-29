@@ -2,6 +2,7 @@
 -- to fit in navigator.lua
 local gui = require "navigator.gui"
 local fn = vim.fn
+local lru = require('navigator.lru').new(500, 1024 * 1024)
 
 local ok, ts_locals = pcall(require, "nvim-treesitter.locals")
 
@@ -235,19 +236,41 @@ function M.goto_previous_usage(bufnr)
   return M.goto_adjacent_usage(bufnr, -1)
 end
 
+local function key(fname, filter)
+  return fname .. vim.inspect(filter)
+end
+
 local function get_all_nodes(bufnr, filter, summary)
-  trace(bufnr, filter, summary)
-  bufnr = bufnr or 0
-  summary = summary or false
-  if not parsers.has_parser() then
-    print("ts not loaded")
-  end
   local fname = vim.fn.expand("%:p:f")
   local uri = vim.uri_from_fname(fname)
   if bufnr ~= 0 then
     uri = vim.uri_from_bufnr(bufnr)
     fname = vim.uri_to_fname(uri)
   end
+
+  local ftime = vim.fn.getftime(fname)
+
+  local hash = key(fname, filter)
+
+  local result = lru:get(hash)
+  if result ~= nil and result.ftime == ftime then
+    log("get data from cache")
+    return result.nodes, result.length
+  end
+
+  if result ~= nil and result.ftime ~= ftime then
+    lru:delete(hash)
+  end
+
+  trace(bufnr, filter, summary)
+  if not bufnr then
+    print("get_all_node invalide bufnr")
+  end
+  summary = summary or false
+  if not parsers.has_parser() then
+    print("ts not loaded")
+  end
+
   path_sep = require"navigator.util".path_sep()
   path_cur = require"navigator.util".path_cur()
   local display_filename = fname:gsub(cwd .. path_sep, path_cur, 1)
@@ -366,6 +389,8 @@ local function get_all_nodes(bufnr, filter, summary)
     end
   end
   trace(all_nodes)
+  local nd = {nodes = all_nodes, ftime = vim.fn.getftime(fname), length = length}
+  lru:set(hash, nd)
   return all_nodes, length
 end
 

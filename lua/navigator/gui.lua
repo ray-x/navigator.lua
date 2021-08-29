@@ -127,7 +127,7 @@ function M.new_list_view(opts)
   if opts.rawdata then
     data = items
   else
-    log(items)
+    trace(items)
     data = require"navigator.render".prepare_for_render(items, opts)
   end
 

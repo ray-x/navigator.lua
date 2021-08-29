@@ -1,4 +1,5 @@
 local M = {}
+
 local util = require "navigator.util"
 local gutil = require "guihua.util"
 local lsp = require "vim.lsp"
@@ -14,9 +15,8 @@ local is_win = vim.loop.os_uname().sysname:find("Windows")
 local path_sep = require"navigator.util".path_sep()
 local path_cur = require"navigator.util".path_cur()
 cwd = gutil.add_pec(cwd)
-ts_nodes = {}
-ts_nodes_time = {}
-
+local ts_nodes = require('navigator.lru').new(1000, 1024 * 1024)
+local ts_nodes_time = require('navigator.lru').new(1000)
 local TS_analysis_enabled = require"navigator".config_values().treesitter_analysis
 
 -- extract symbol from range
@@ -167,13 +167,18 @@ local function ts_functions(uri)
   local bufnr = vim.uri_to_bufnr(uri)
   local x = os.clock()
   trace(ts_nodes)
-  if ts_nodes[uri] ~= nil then
-    local t = ts_nodes_time[uri]
+  local tsnodes = ts_nodes:get(uri)
+  if tsnodes ~= nil then
+    log("get data from cache")
+    local t = ts_nodes_time:get(uri) or 0
     local fname = vim.uri_to_fname(uri)
     local modified = vim.fn.getftime(fname)
     if modified <= t then
       trace(t, modified)
-      return ts_nodes[uri]
+      return tsnodes
+    else
+      ts_nodes:delete(uri)
+      ts_nodes_time:delete(uri)
     end
   end
   local unload = false
@@ -189,9 +194,9 @@ local function ts_functions(uri)
     trace(cmd)
     -- vim.cmd(cmd)  -- todo: not sure if it is needed
   end
-  ts_nodes[uri] = funcs
-  ts_nodes_time[uri] = os.time()
-  trace(funcs, ts_nodes)
+  ts_nodes:set(uri, funcs)
+  ts_nodes_time:set(uri, os.time())
+  trace(funcs, ts_nodes:get(uri))
   trace(string.format("elapsed time: %.4f\n", os.clock() - x)) -- how long it tooks
   return funcs
 end
@@ -261,7 +266,7 @@ function M.locations_to_items(locations)
   end)
   local uri_def = {}
 
-  log(locations)
+  trace(locations)
   for i, loc in ipairs(locations) do
     local funcs = nil
     local item = lsp.util.locations_to_items({loc})[1]

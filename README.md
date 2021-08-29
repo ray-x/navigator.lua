@@ -84,6 +84,8 @@ in the same line). Using treesitter for file preview highlighter etc
 
 - LSP Code Action, Code Lens, Code lens action
 
+- LRU cache for treesitter nodes
+
 # Why a new plugin
 
 I'd like to go beyond what the system is providing.
