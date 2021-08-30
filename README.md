@@ -301,6 +301,7 @@ require'navigator'.setup({
 |  n 	|  \<Leader\>gT 	| treesitter symbol for all open buffers	|
 |  n 	|  K 	|  hover doc 	|
 |  n 	|  \<Space\>ca 	|  code action (when you see 💡 ) 	|
+|  n 	|  \<Space\>la 	|  code lens action (when you see codelens indicator) 	|
 |  v 	|  \<Space\>cA 	|  range code action (when you see 💡 ) 	|
 |  n 	|  \<Space\>rn 	| rename with floating window|
 |  n 	|  \<Leader\>re 	| rename (lsp default)|
