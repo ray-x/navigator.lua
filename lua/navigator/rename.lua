@@ -21,10 +21,11 @@ M.rename = function()
     border = "single"
   })
   vim.api.nvim_win_set_option(winnr, "winhl", "Normal:Floating")
+  vim.api.nvim_buf_set_option(bufnr, "filetype", "guihua")
   util.map("n", "<ESC>", "<cmd>bd!<CR>", {silent = true, buffer = true})
   util.map({"n", "i"}, "<CR>", "<cmd>lua require('navigator.rename').callback()<CR>",
            {silent = true, buffer = true})
-  util.map("i", "<BS>", "<ESC>xi", {silent = true, buffer = true})
+  util.map({"n", "i"}, "<BS>", [[<ESC>"_cl]], {silent = true, buffer = true})
   vim.cmd(string.format("normal i%s", current_name))
 end
 
