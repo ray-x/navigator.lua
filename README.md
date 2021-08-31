@@ -321,6 +321,7 @@ require'navigator'.setup({
 |  n 	|  \<Leader\>k 	| toggle reference highlight |
 |  i/n	|  \<C-p\> 	| previous item in list|
 |  i/n	|  \<C-n\> 	| next item in list|
+|  i/n	|  number 1~9 	| move to ith row/item in the list|
 |  i/n	|  \<Up\> 	| previous item in list|
 |  i/n	|  \<Down\> 	| next item in list|
 |  i/n	|  \<C-o\> 	| open preview file in nvim/Apply action|
