@@ -174,7 +174,6 @@ local code_action_req = function(_call_back_fn, diagnostics)
   local line = params.range.start.line
   local callback = _call_back_fn(line, diagnostics)
   vim.lsp.buf_request(0, "textDocument/codeAction", params, callback)
-  print("fetching code actions ... ")
 end
 
 -- code_action.code_action = function()
