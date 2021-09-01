@@ -111,7 +111,6 @@ M.config_values = function()
 end
 
 M.setup = function(cfg)
-  print(vim.inspect(cfg))
   extend_config(cfg)
   -- local log = require"navigator.util".log
   -- log(debug.traceback())
