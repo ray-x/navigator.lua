@@ -62,7 +62,7 @@ implementation.
 
 - FZY search with Lua-JIT
 
-- LSP multiple symbol highlight and jump between references
+- LSP multiple symbol highlight/marker and hop between document references
 
 - Better navigation for diagnostic errors, Navigate through all files/buffers that contain errors/warnings
 
@@ -85,6 +85,8 @@ in the same line). Using treesitter for file preview highlighter etc
 - LSP Code Action, Code Lens, Code lens action
 
 - LRU cache for treesitter nodes
+
+- Lazy loader friendly
 
 # Why a new plugin
 
@@ -324,6 +326,8 @@ require'navigator'.setup({
 |  i/n	|  number 1~9 	| move to ith row/item in the list|
 |  i/n	|  \<Up\> 	| previous item in list|
 |  i/n	|  \<Down\> 	| next item in list|
+|  n	|  \<Ctrl-w\>j 	| move cursor to preview (windows move to bottom view point)|
+|  n	|  \<Ctrl-w\>k 	| move cursor to list (windows move to up view point)|
 |  i/n	|  \<C-o\> 	| open preview file in nvim/Apply action|
 |  n	|  \<Enter\> 	| open preview file in nvim/Apply action|
 |  i/n	|  \<C-b\> 	| previous page in listview|

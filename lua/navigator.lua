@@ -88,7 +88,14 @@ local extend_config = function(opts)
     -- end
     if type(_NgConfigValues[key]) == "table" then
       for k, v in pairs(value) do
-        _NgConfigValues[key][k] = v
+        -- level 3
+        if type(_NgConfigValues[key][k]) == "table" then
+          for k2, v2 in pairs(v) do
+            _NgConfigValues[key][k][k2] = v2
+          end
+        else
+          _NgConfigValues[key][k] = v
+        end
       end
     else
       _NgConfigValues[key] = value
@@ -104,6 +111,7 @@ M.config_values = function()
 end
 
 M.setup = function(cfg)
+  print(vim.inspect(cfg))
   extend_config(cfg)
   -- local log = require"navigator.util".log
   -- log(debug.traceback())
@@ -119,7 +127,7 @@ M.setup = function(cfg)
 
   -- log("navigator loader")
   if _NgConfigValues.code_action_prompt.enable then
-    vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
+    vim.cmd [[autocmd CursorHold * lua require'navigator.codeAction'.code_action_prompt()]]
   end
   -- vim.cmd("autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4")
   if not _NgConfigValues.loaded then
