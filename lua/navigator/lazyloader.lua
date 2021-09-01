@@ -10,7 +10,7 @@ if packer_plugins ~= nil then -- packer install
     ["guihua.lua"] = "ray-x/guihua.lua"
   }
   if _NgConfigValues.lspinstall == true then
-    lazy_plugins["lspinstall"] = "kabouzeid/nvim-lspinstall"
+    lazy_plugins["nvim-lspinstall"] = "kabouzeid/nvim-lspinstall"
   end
 
   -- packer installed
