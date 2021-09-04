@@ -75,6 +75,7 @@ function M.prepare_for_render(items, opts)
       call_by_presented = true
     end
   end
+  -- log(items[1])
 
   for i = 1, #items do
     local space

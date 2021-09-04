@@ -3,6 +3,7 @@ _NgConfigValues = {
   debug = false, -- log output not implemented
   width = 0.6, -- valeu of cols TODO allow float e.g. 0.6
   preview_height = 0.35,
+  preview_lines = 40,
   height = 0.35,
   default_mapping = true,
   keymaps = {}, -- e.g keymaps={{key = "GR", func = "references()"}, } this replace gr default mapping
