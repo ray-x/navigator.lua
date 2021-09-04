@@ -17,7 +17,8 @@ local function ref_hdlr(err, api, locations, num, bufnr)
   -- log("num", num)
   -- log("bfnr", bufnr)
   if err ~= nil then
-    print('ref callback error, lsp may not ready', err)
+    print('lsp ref callback error', err, api, vim.inspect(locations))
+    log('ref callback error, lsp may not ready', err, api, vim.inspect(locations))
     return
   end
   if type(locations) ~= 'table' then
