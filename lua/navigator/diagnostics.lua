@@ -9,6 +9,7 @@ local trace = require"guihua.log".trace
 local error = util.error
 
 local path_sep = require"navigator.util".path_sep()
+local mk_handler = require"navigator.util".mk_handler
 local path_cur = require"navigator.util".path_cur()
 diagnostic_list[vim.bo.filetype] = {}
 
@@ -90,7 +91,7 @@ local function error_marker(result, client_id)
   end
 end
 
-local diag_hdlr = function(err, method, result, client_id, bufnr, config)
+local diag_hdlr = mk_handler(function(err, method, result, client_id, bufnr, config)
   trace(result)
   if err ~= nil then
     log(err, config)
@@ -103,8 +104,12 @@ local diag_hdlr = function(err, method, result, client_id, bufnr, config)
   end
   -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
 
-  vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, bufnr, config)
+  vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   local uri = result.uri
+  if err then
+    log("diag", err, result)
+    return
+  end
 
   -- log("diag: ", result, client_id)
   if result and result.diagnostics then
@@ -149,7 +154,7 @@ local diag_hdlr = function(err, method, result, client_id, bufnr, config)
     _NG_VT_NS = nil
   end
 
-end
+end)
 
 local M = {}
 local diagnostic_cfg = {

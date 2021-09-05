@@ -3,6 +3,9 @@
 -- Some of function copied from https://github.com/RishabhRD/nvim-lsputils
 local M = {log_path = vim.lsp.get_log_path()}
 -- local is_windows = uv.os_uname().version:match("Windows")
+
+local nvim_0_6
+
 M.path_sep = function()
   local is_win = vim.loop.os_uname().sysname:find("Windows")
   if is_win then
@@ -290,12 +293,6 @@ function M.exists(var)
   end
 end
 
-function M.partial(func, arg)
-  return (function(...)
-    return func(arg, ...)
-  end)
-end
-
 local exclude_ft = {"scrollbar", "help", "NvimTree"}
 function M.exclude(fname)
   for i = 1, #exclude_ft do
@@ -347,6 +344,42 @@ end
 
 function M.get_current_winid()
   return api.nvim_get_current_win()
+end
+
+function M.nvim_0_6()
+  if nvim_0_6 ~= nil then
+    return nvim_0_6
+  end
+  if debug.getinfo(vim.lsp.handlers.signature_help).nparams == 4 then
+    nvim_0_6 = true
+  else
+    nvim_0_6 = false
+  end
+  return nvim_0_6
+end
+
+function M.mk_handler(fn)
+  return function(...)
+    local config_or_client_id = select(4, ...)
+    local is_new = M.nvim_0_6()
+    if is_new then
+      fn(...)
+    else
+      local err = select(1, ...)
+      local method = select(2, ...)
+      local result = select(3, ...)
+      local client_id = select(4, ...)
+      local bufnr = select(5, ...)
+      local config = select(6, ...)
+      fn(err, result, {method = method, client_id = client_id, bufnr = bufnr}, config)
+    end
+  end
+end
+
+function M.partial(func, arg)
+  return (M.mk_handler(function(...)
+    return func(arg, ...)
+  end))
 end
 
 return M

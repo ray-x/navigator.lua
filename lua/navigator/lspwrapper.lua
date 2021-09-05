@@ -1,6 +1,8 @@
 local M = {}
 
 local util = require "navigator.util"
+local nvim_0_6 = util.nvim_0_6()
+
 local gutil = require "guihua.util"
 local lsp = require "vim.lsp"
 local api = vim.api
@@ -144,7 +146,11 @@ function M.call_sync(method, params, opts, handler)
   local results_lsp, err = lsp.buf_request_sync(0, method, params,
                                                 opts.timeout or vim.g.navtator_timeout or 1000)
 
-  handler(err, method, extract_result(results_lsp), nil, nil)
+  if nvim_0_6() then
+    handler(err, extract_result(results_lsp), {method = method}, nil)
+  else
+    handler(err, method, extract_result(results_lsp), nil, nil)
+  end
 end
 
 function M.call_async(method, params, handler)

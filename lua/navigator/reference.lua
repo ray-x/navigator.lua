@@ -1,4 +1,5 @@
 local util = require "navigator.util"
+local mk_handler = util.mk_handler
 local log = util.log
 local lsphelper = require "navigator.lspwrapper"
 local gui = require "navigator.gui"
@@ -9,23 +10,21 @@ local trace = require"navigator.util".trace
 -- local lsphelper = require "navigator.lspwrapper"
 local locations_to_items = lsphelper.locations_to_items
 
-local function ref_hdlr(err, api, locations, num, bufnr)
+local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
   local opts = {}
-  trace("arg1", err, api, locations, num, bufnr)
+  trace("arg1", err, ctx, locations)
   log(api)
   trace(locations)
   -- log("num", num)
   -- log("bfnr", bufnr)
   if err ~= nil then
-    print('lsp ref callback error', err, api, vim.inspect(locations))
-    log('ref callback error, lsp may not ready', err, api, vim.inspect(locations))
+    print('lsp ref callback error', err, ctx, vim.inspect(locations))
+    log('ref callback error, lsp may not ready', err, ctx, vim.inspect(locations))
     return
   end
   if type(locations) ~= 'table' then
-    log(api)
     log(locations)
-    log("num", num)
-    log("bfnr", bufnr)
+    log("ctx", ctx)
     error(locations)
   end
   if locations == nil or vim.tbl_isempty(locations) then
@@ -34,7 +33,7 @@ local function ref_hdlr(err, api, locations, num, bufnr)
   end
   local items, width = locations_to_items(locations)
 
-  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
+  local ft = vim.api.nvim_buf_get_option(ctx.bufnr, "ft")
 
   local wwidth = vim.api.nvim_get_option("columns")
   local mwidth = _NgConfigValues.width
@@ -49,7 +48,7 @@ local function ref_hdlr(err, api, locations, num, bufnr)
     enable_preview_edit = true
   })
   return listview, items, width
-end
+end)
 
 local async_reference_request = function()
   local ref_params = vim.lsp.util.make_position_params()

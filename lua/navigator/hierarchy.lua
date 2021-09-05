@@ -9,11 +9,11 @@ local path_cur = require"navigator.util".path_cur()
 local cwd = vim.fn.getcwd(0)
 local M = {}
 
-local function call_hierarchy_handler(direction, err, _, result, _, _, error_message)
+local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_message)
   log('call_hierarchy')
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
   if err ~= nil then
-    log("dir", direction, "result", result, "err", err)
+    log("dir", direction, "result", result, "err", err, ctx)
     print("ERROR: " .. error_message)
     return
   end
@@ -46,20 +46,18 @@ end
 local call_hierarchy_handler_from = partial(call_hierarchy_handler, "from")
 local call_hierarchy_handler_to = partial(call_hierarchy_handler, "to")
 
-local function incoming_calls_handler(bang, err, method, result, client_id, bufnr)
+local function incoming_calls_handler(bang, err, result, ctx, cfg)
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
-  local results = call_hierarchy_handler_from(err, method, result, client_id, bufnr,
-                                              "Incoming calls not found")
+  local results = call_hierarchy_handler_from(err, result, ctx, cfg, "Incoming calls not found")
 
-  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
+  local ft = vim.api.nvim_buf_get_option(ctx.bufnr, "ft")
   gui.new_list_view({items = results, ft = ft, api = ' '})
 end
 
-local function outgoing_calls_handler(bang, err, method, result, client_id, bufnr)
-  local results = call_hierarchy_handler_to(err, method, result, client_id, bufnr,
-                                            "Outgoing calls not found")
+local function outgoing_calls_handler(bang, err, result, ctx, cfg)
+  local results = call_hierarchy_handler_to(err, result, ctx, cfg, "Outgoing calls not found")
 
-  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
+  local ft = vim.api.nvim_buf_get_option(ctx.bufnr, "ft")
   gui.new_list_view({items = results, ft = ft, api = ' '})
   -- fzf_locations(bang, "", "Outgoing Calls", results, false)
 end

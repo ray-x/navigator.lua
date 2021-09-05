@@ -1,4 +1,5 @@
 local log = require"navigator.util".log
+local mk_handler = require"navigator.util".mk_handler
 
 local lsp = vim.lsp
 local api = vim.api
@@ -88,18 +89,18 @@ function M.debug_folds()
   end
 end
 
-function M.fold_handler(err, method, result, client, bufnr)
+M.fold_handler = mk_handler(function(err, result, ctx, config)
   -- params: err, method, result, client_id, bufnr
   -- XXX: handle err?
   if err or result == nil or #result == 0 then
-    print(err, method, client)
+    print(err, ctx.method, ctx.client_id)
     return
   end
   M.debug_folds()
   local current_bufnr = api.nvim_get_current_buf()
   -- Discard the folding result if buffer focus has changed since the request was
   -- done.
-  if current_bufnr == bufnr then
+  if current_bufnr == ctx.bufnr then
     for _, fold in ipairs(result) do
       fold['startLine'] = M.adjust_foldstart(fold['startLine'])
       fold['endLine'] = M.adjust_foldend(fold['endLine'])
@@ -112,7 +113,7 @@ function M.fold_handler(err, method, result, client, bufnr)
     api.nvim_win_set_option(current_window, 'foldmethod', 'expr')
     api.nvim_win_set_option(current_window, 'foldexpr', 'foldlsp#foldexpr()')
   end
-end
+end)
 
 function M.adjust_foldstart(line_no)
   return line_no + 1

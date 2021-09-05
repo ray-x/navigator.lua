@@ -1,11 +1,13 @@
 local gui = require "navigator.gui"
 local util = require "navigator.util"
+local mk_handler = util.mk_handler
 local log = util.log
 local partial = util.partial
 local lsphelper = require "navigator.lspwrapper"
 local cwd = vim.fn.getcwd(0)
 local M = {}
 
+---  navigator signature
 local match_parameter = function(result)
   local signatures = result.signatures
   if #signatures < 1 then
@@ -46,7 +48,7 @@ local match_parameter = function(result)
   end
 end
 
-local function signature_handler(err, method, result, _, bufnr, config)
+local signature_handler = mk_handler(function(err, result, ctx, config)
   if config == nil then
     log("config nil")
   end
@@ -61,8 +63,7 @@ local function signature_handler(err, method, result, _, bufnr, config)
   end
 
   local syntax = vim.lsp.util.try_trim_markdown_code_blocks(lines)
-  config.focus_id = method .. "lsp_signature"
+  config.focus_id = ctx.bufnr .. "lsp_signature"
   vim.lsp.util.open_floating_preview(lines, syntax, config)
-
-end
+end)
 return {signature_handler = signature_handler}
