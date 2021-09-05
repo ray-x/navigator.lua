@@ -147,8 +147,12 @@ elseif _NgConfigValues.debug == "trace" then
   level = "trace"
 end
 
-local default_config = {plugin = "navigator", use_console = false, use_file = true, level = level}
-M._log = require("guihua.log").new({level = default_config.level}, true)
+local default_config = {use_console = false, use_file = true, level = level}
+if _NgConfigValues.debug_console_output then
+  default_config.use_console = true
+  default_config.use_file = false
+end
+M._log = require("guihua.log").new(default_config, true)
 
 -- add log to you lsp.log
 M.log = M._log.info
@@ -363,7 +367,7 @@ function M.mk_handler(fn)
     local config_or_client_id = select(4, ...)
     local is_new = M.nvim_0_6()
     if is_new then
-      fn(...)
+      return fn(...)
     else
       local err = select(1, ...)
       local method = select(2, ...)
@@ -371,7 +375,7 @@ function M.mk_handler(fn)
       local client_id = select(4, ...)
       local bufnr = select(5, ...)
       local config = select(6, ...)
-      fn(err, result, {method = method, client_id = client_id, bufnr = bufnr}, config)
+      return fn(err, result, {method = method, client_id = client_id, bufnr = bufnr}, config)
     end
   end
 end
