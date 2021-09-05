@@ -5,10 +5,10 @@ local gui = require "navigator.gui"
 local log = util.log
 local TextView = require("guihua.textview")
 -- callback for lsp definition, implementation and declaration handler
-local function definition_hdlr(err, _, locations, _, bufnr)
+local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
   -- log(locations)
   if err ~= nil then
-    print(err)
+    print(err, ctx)
     return
   end
   if type(locations) == "number" then
@@ -29,7 +29,7 @@ local function definition_hdlr(err, _, locations, _, bufnr)
   else
     vim.lsp.util.jump_to_location(locations)
   end
-end
+end)
 
 local function get_symbol()
   local currentWord = vim.fn.expand('<cword>')

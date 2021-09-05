@@ -9,6 +9,7 @@ local trace = require"guihua.log".trace
 local error = util.error
 
 local path_sep = require"navigator.util".path_sep()
+local mk_handler = require"navigator.util".mk_handler
 local path_cur = require"navigator.util".path_cur()
 diagnostic_list[vim.bo.filetype] = {}
 
@@ -90,7 +91,7 @@ local function error_marker(result, client_id)
   end
 end
 
-local diag_hdlr = function(err, method, result, client_id, bufnr, config)
+local diag_hdlr = mk_handler(function(err, result, ctx, config)
   trace(result)
   if err ~= nil then
     log(err, config)
@@ -103,8 +104,16 @@ local diag_hdlr = function(err, method, result, client_id, bufnr, config)
   end
   -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
 
-  vim.lsp.diagnostic.on_publish_diagnostics(err, method, result, client_id, bufnr, config)
+  if util.nvim_0_6() then
+    vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+  else
+    vim.lsp.diagnostic.on_publish_diagnostics(err, _, result, ctx.client_id, _, config)
+  end
   local uri = result.uri
+  if err then
+    log("diag", err, result)
+    return
+  end
 
   -- log("diag: ", result, client_id)
   if result and result.diagnostics then
@@ -143,13 +152,13 @@ local diag_hdlr = function(err, method, result, client_id, bufnr, config)
     -- local old_items = vim.fn.getqflist()
     diagnostic_list[ft][uri] = item_list
 
-    error_marker(result, client_id)
+    error_marker(result, ctx.client_id)
   else
     vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
     _NG_VT_NS = nil
   end
 
-end
+end)
 
 local M = {}
 local diagnostic_cfg = {
@@ -167,8 +176,15 @@ local diagnostic_cfg = {
 if _NgConfigValues.lsp.diagnostic_virtual_text == false then
   diagnostic_cfg.virtual_text = false
 end
--- vim.lsp.handlers["textDocument/publishDiagnostics"] =
+-- vim.lsp.handlers["textDocument/publishDiagnostics"]
 M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
+
+M.hide_diagnostic = function()
+  if _NG_VT_NS then
+    vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
+    _NG_VT_NS = nil
+  end
+end
 
 M.show_diagnostic = function()
   vim.lsp.diagnostic.get_all()

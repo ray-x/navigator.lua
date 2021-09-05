@@ -9,8 +9,10 @@ local cur_dir = vim.fn.expand("%:p:h")
 -- local ulog = require('go.utils').log
 describe("should run lsp reference", function()
   -- vim.fn.readfile('minimal.vim')
-  -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  -- status = require("plenary.reload").reload_module("go.nvim")
+  local nvim_6 = true
+  if debug.getinfo(vim.lsp.handlers.signature_help).nparams > 4 then
+    nvim_6 = false
+  end
   it("should show references", function()
 
     local status = require("plenary.reload").reload_module("navigator")
@@ -26,7 +28,7 @@ describe("should run lsp reference", function()
     local bufn = vim.fn.bufnr("")
     -- require'lspconfig'.gopls.setup {}
     require'navigator'.setup({
-      debug = false, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
+      debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
       code_action_icon = "A ",
       width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
       height = 0.3, -- max list window height, 0.3 by default
@@ -39,7 +41,7 @@ describe("should run lsp reference", function()
       vim.wait(400, function()
       end)
       local clients = vim.lsp.get_active_clients()
-      print(vim.inspect(clients))
+      print("lsp clients: ", #clients)
       if #clients > 0 then
         break
       end
@@ -68,20 +70,24 @@ describe("should run lsp reference", function()
 
     vim.bo.filetype = "go"
     require'navigator'.setup({
-      debug = false, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
+      debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
       code_action_icon = "A ",
       width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
       height = 0.3, -- max list window height, 0.3 by default
       preview_height = 0.35, -- max height of preview windows
+      debug_console_output = true,
       border = 'none'
     })
 
+    _NgConfigValues.debug_console_output = true
+
+    vim.bo.filetype = "go"
     -- allow gopls start
     for i = 1, 10 do
       vim.wait(400, function()
       end)
       local clients = vim.lsp.get_active_clients()
-      print(vim.inspect(clients))
+      print("clients ", #clients)
       if #clients > 0 then
         break
       end
@@ -115,12 +121,29 @@ describe("should run lsp reference", function()
         uri = "file://" .. cur_dir .. "/tests/fixtures/interface_test.go"
       }
     }
-    local win, items, width = require('navigator.reference').reference_handler(nil,
-                                                                               "textDocument/references",
-                                                                               result, 1, 1)
+
+    local win, items, width
+
+    if nvim_6 then
+      win, items, width = require('navigator.reference').reference_handler(nil, result, {
+        method = 'textDocument/references',
+        bufnr = 1,
+        client_id = 1
+      }, {})
+
+    else
+      win, items, width = require('navigator.reference').reference_handler(nil,
+                                                                           "textDocument/references",
+                                                                           result, 1, 1)
+
+    end
+
+    print("win", vim.inspect(win))
+    print("items", vim.inspect(items))
     eq(win.ctrl.data[1].display_filename, "./interface.go")
     eq(win.ctrl.data[2].range.start.line, 14)
     eq(items[1].display_filename, "./interface.go")
+
     -- eq(width, 60)
   end)
 end)

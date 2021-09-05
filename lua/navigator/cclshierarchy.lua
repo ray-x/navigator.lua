@@ -9,13 +9,13 @@ local path_sep = require"navigator.util".path_sep()
 local path_cur = require"navigator.util".path_cur()
 local M = {}
 
-local function call_hierarchy_handler(direction, err, api, result, _, _, error_message)
+local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_message)
   log('call_hierarchy')
   log('call_hierarchy', direction, err, result)
 
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
   if err ~= nil then
-    log(api, "dir", direction, "result", result, "err", err)
+    log("hierarchy error", ctx, "dir", direction, "result", result, "err", err)
     print("ERROR: " .. error_message)
     return
   end
@@ -24,7 +24,7 @@ local function call_hierarchy_handler(direction, err, api, result, _, _, error_m
   local items = {}
   for _, call_hierarchy in pairs(result) do
     local kind = ' '
-    range = call_hierarchy.range
+    local range = call_hierarchy.range
     local filename = assert(vim.uri_to_fname(call_hierarchy.uri))
 
     local display_filename = filename:gsub(cwd .. path_sep, path_cur, 1)
@@ -32,7 +32,7 @@ local function call_hierarchy_handler(direction, err, api, result, _, _, error_m
     local bufnr = vim.uri_to_bufnr(call_hierarchy.uri)
     local row = range.start.line
     local line = (vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false) or {""})[1]
-    fn = ""
+    local fn = ""
     if line ~= nil then
       fn = line:sub(range.start.character, range['end'].character + 1)
     end
@@ -52,18 +52,17 @@ end
 local call_hierarchy_handler_from = partial(call_hierarchy_handler, "from")
 local call_hierarchy_handler_to = partial(call_hierarchy_handler, "to")
 
-local function incoming_calls_handler(bang, err, method, result, client_id, bufnr)
+local function incoming_calls_handler(bang, err, result, ctx, cfg)
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
-  local results = call_hierarchy_handler_from(err, method, result, client_id, bufnr,
-                                              "Incoming calls not found")
+
+  local results = call_hierarchy_handler_from(err, result, ctx, cfg, "Incoming calls not found")
 
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
   gui.new_list_view({items = results, ft = ft, api = ' '})
 end
-
-local function outgoing_calls_handler(bang, err, method, result, client_id, bufnr)
-  local results = call_hierarchy_handler_to(err, method, result, client_id, bufnr,
-                                            "Outgoing calls not found")
+--  err, method, result, client_id, bufnr
+local function outgoing_calls_handler(bang, err, result, ctx, cfg)
+  local results = call_hierarchy_handler_to(err, result, ctx, cfg, "Outgoing calls not found")
 
   local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
   gui.new_list_view({items = results, ft = ft, api = ' '})

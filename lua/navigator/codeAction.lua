@@ -5,8 +5,8 @@ local code_action = {}
 local gui = require "navigator.gui"
 local config = require("navigator").config_values()
 local api = vim.api
-function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customSelectionHandler)
-  log(cid, bufnr, actions)
+code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cfg)
+  log(actions, ctx)
   if actions == nil or vim.tbl_isempty(actions) then
     print("No code actions available")
     return
@@ -58,7 +58,7 @@ function code_action.code_action_handler(err, _, actions, cid, bufnr, _, customS
       return pos
     end
   }
-end
+end)
 
 -- https://github.com/glepnir/lspsaga.nvim/blob/main/lua/lspsaga/codeaction.lua
 -- lspsaga has a clever design to inject code action indicator
@@ -163,7 +163,7 @@ local special_buffers = {
 --   return Action:action_callback()
 -- end
 
-local action_vritual_call_back = function(line, diagnostics)
+local action_virtual_call_back = function(line, diagnostics)
   return code_action:render_action_virtual_text(line, diagnostics)
 end
 
@@ -190,7 +190,7 @@ code_action.code_action_prompt = function()
   local winid = get_current_winid()
   code_action[winid] = code_action[winid] or {}
   code_action[winid].lightbulb_line = code_action[winid].lightbulb_line or 0
-  code_action_req(action_vritual_call_back, diagnostics)
+  code_action_req(action_virtual_call_back, diagnostics)
 end
 
 return code_action

@@ -1,6 +1,7 @@
 local util = require "navigator.util"
 local log = util.log
 local trace = util.trace
+local mk_handler = util.mk_handler
 local api = vim.api
 local references = {}
 _NG_hi_list = {}
@@ -137,20 +138,21 @@ local function before(r1, r2)
   return false
 end
 
-local function handle_document_highlight(_, _, result, _, bufnr, _)
-  if not bufnr then
+local handle_document_highlight = mk_handler(function(_, result, ctx)
+  if not ctx.bufnr then
+    log("ducment highlight error", result, ctx)
     return
   end
   if type(result) ~= "table" then
-    vim.lsp.util.buf_clear_references(bufnr)
+    vim.lsp.util.buf_clear_references(ctx.bufnr)
     return
   end
 
   table.sort(result, function(a, b)
     return before(a.range, b.range)
   end)
-  references[bufnr] = result
-end
+  references[ctx.bufnr] = result
+end)
 -- modify from vim-illuminate
 local function goto_adjent_reference(opt)
   trace(opt)
@@ -212,8 +214,9 @@ local function documentHighlight()
         autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
       augroup END
     ]], false)
-  vim.lsp.handlers["textDocument/documentHighlight"] =
-      function(err, _, result, _, bufnr)
+  vim.lsp.handlers["textDocument/documentHighlight"] = mk_handler(
+                                                           function(err, result, ctx)
+        local bufnr = ctx.bufnr
         if err then
           print(err)
           return
@@ -235,7 +238,7 @@ local function documentHighlight()
         end)
         references[bufnr] = result
         add_locs(bufnr, result)
-      end
+      end)
 end
 
 return {

@@ -1,6 +1,7 @@
 local gui = require "navigator.gui"
 local M = {}
 local log = require"navigator.util".log
+local mk_handler = require"navigator.util".mk_handler
 local lsphelper = require "navigator.lspwrapper"
 local locations_to_items = lsphelper.locations_to_items
 local clone = require"guihua.util".clone
@@ -74,13 +75,13 @@ function M.workspace_symbols(opts)
   end
 end
 
-function M.document_symbol_handler(err, _, result, _, bufnr)
+M.document_symbol_handler = mk_handler(function(err, result, ctx)
   if err then
-    print(bufnr, "failed to get document symbol")
+    print("failed to get document symbol", ctx)
   end
 
   if not result or vim.tbl_isempty(result) then
-    print(bufnr, "symbol not found for buf")
+    print("symbol not found for buf", ctx)
     return
   end
   -- log(result)
@@ -150,14 +151,14 @@ function M.document_symbol_handler(err, _, result, _, bufnr)
   --   item.text = nil
   -- end
   -- opts.data = data
-end
+end)
 
-function M.workspace_symbol_handler(err, _, result, _, bufnr)
+M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
   if err then
-    print(bufnr, "failed to get workspace symbol")
+    print("failed to get workspace symbol", ctx)
   end
   if not result or vim.tbl_isempty(result) then
-    print(bufnr, "symbol not found for buf")
+    print("symbol not found for buf", ctx)
     return
   end
   log(result[1])
@@ -177,7 +178,7 @@ function M.workspace_symbol_handler(err, _, result, _, bufnr)
   -- end
   -- local items = locations_to_items(locations)
 
-  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
+  local ft = vim.api.nvim_buf_get_option(ctx.bufnr, "ft")
   gui.new_list_view({items = items, prompt = true, ft = ft, rowdata = true, api = " "})
 
   -- if locations == nil or vim.tbl_isempty(locations) then
@@ -199,6 +200,6 @@ function M.workspace_symbol_handler(err, _, result, _, bufnr)
   --   item.text = nil
   -- end
   -- opts.data = data
-end
+end)
 
 return M
