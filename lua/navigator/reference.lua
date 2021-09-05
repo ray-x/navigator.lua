@@ -25,7 +25,8 @@ local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
   if type(locations) ~= 'table' then
     log(locations)
     log("ctx", ctx)
-    error(locations)
+    print("incorrect setup", location)
+    return
   end
   if locations == nil or vim.tbl_isempty(locations) then
     print "References not found"

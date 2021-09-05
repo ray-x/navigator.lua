@@ -9,8 +9,6 @@ local cur_dir = vim.fn.expand("%:p:h")
 -- local ulog = require('go.utils').log
 describe("should run lsp reference", function()
   -- vim.fn.readfile('minimal.vim')
-  -- vim.fn.writefile(vim.fn.readfile('fixtures/fmt/hello.go'), name)
-  -- status = require("plenary.reload").reload_module("go.nvim")
   it("should show references", function()
 
     local status = require("plenary.reload").reload_module("navigator")
@@ -39,7 +37,7 @@ describe("should run lsp reference", function()
       vim.wait(400, function()
       end)
       local clients = vim.lsp.get_active_clients()
-      print(vim.inspect(clients))
+      print("lsp clients: ", #clients)
       if #clients > 0 then
         break
       end
@@ -81,7 +79,7 @@ describe("should run lsp reference", function()
       vim.wait(400, function()
       end)
       local clients = vim.lsp.get_active_clients()
-      print(vim.inspect(clients))
+      print("clients ", #clients)
       if #clients > 0 then
         break
       end
@@ -115,12 +113,25 @@ describe("should run lsp reference", function()
         uri = "file://" .. cur_dir .. "/tests/fixtures/interface_test.go"
       }
     }
+
     local win, items, width = require('navigator.reference').reference_handler(nil,
                                                                                "textDocument/references",
                                                                                result, 1, 1)
+    if win == nil then
+      win, items, width = require('navigator.reference').reference_handler(nil, result, {
+        method = 'textDocument/references',
+        bufnr = 1,
+        client_id = 1
+      }, {})
+
+    end
+
+    print("win", vim.inspect(win))
+    print("items", vim.inspect(items))
     eq(win.ctrl.data[1].display_filename, "./interface.go")
     eq(win.ctrl.data[2].range.start.line, 14)
     eq(items[1].display_filename, "./interface.go")
+
     -- eq(width, 60)
   end)
 end)
