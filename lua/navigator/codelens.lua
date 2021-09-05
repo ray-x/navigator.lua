@@ -71,7 +71,7 @@ function M.setup()
                                                   function(err, result, ctx, cfg)
         log(err, result, ctx.client_id, ctx.bufnr, cfg)
         if nvim_0_6() then
-          on_codelens(err, _, result, ctx, cfg)
+          on_codelens(err, result, ctx, cfg)
           codelens_hdlr(err, result, ctx, cfg)
         else
           on_codelens(err, ctx.method, result, ctx.client_id, ctx.bufnr)
