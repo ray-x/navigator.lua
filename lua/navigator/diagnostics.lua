@@ -91,7 +91,7 @@ local function error_marker(result, client_id)
   end
 end
 
-local diag_hdlr = mk_handler(function(err, method, result, client_id, bufnr, config)
+local diag_hdlr = mk_handler(function(err, result, ctx, config)
   trace(result)
   if err ~= nil then
     log(err, config)
@@ -104,7 +104,11 @@ local diag_hdlr = mk_handler(function(err, method, result, client_id, bufnr, con
   end
   -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
 
-  vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+  if util.nvim_0_6() then
+    vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+  else
+    vim.lsp.diagnostic.on_publish_diagnostics(err, _, result, ctx.client_id, _, config)
+  end
   local uri = result.uri
   if err then
     log("diag", err, result)
@@ -148,7 +152,7 @@ local diag_hdlr = mk_handler(function(err, method, result, client_id, bufnr, con
     -- local old_items = vim.fn.getqflist()
     diagnostic_list[ft][uri] = item_list
 
-    error_marker(result, client_id)
+    error_marker(result, ctx.client_id)
   else
     vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
     _NG_VT_NS = nil
@@ -172,8 +176,15 @@ local diagnostic_cfg = {
 if _NgConfigValues.lsp.diagnostic_virtual_text == false then
   diagnostic_cfg.virtual_text = false
 end
--- vim.lsp.handlers["textDocument/publishDiagnostics"] =
+-- vim.lsp.handlers["textDocument/publishDiagnostics"]
 M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
+
+M.hide_diagnostic = function()
+  if _NG_VT_NS then
+    vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
+    _NG_VT_NS = nil
+  end
+end
 
 M.show_diagnostic = function()
   vim.lsp.diagnostic.get_all()
