@@ -291,7 +291,7 @@ require'navigator'.setup({
 |---	|---	|---	|
 |  n 	|  gr 	|  show reference and context 	|
 |  i 	|  \<m-k\> 	|  signature help 	|
-|  n 	|  gs 	|  signature  help 	|
+|  n 	|  \<c-k\> 	|  signature help 	|
 |  n 	|  gW 	|  workspace symbol 	|
 |  n 	|  gD 	|  declaration 	|
 |  n 	|  g0 	|  document symbol 	|

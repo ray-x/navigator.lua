@@ -16,7 +16,7 @@ local single = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
 local key_maps = {
   {key = "gr", func = "references()"},
   {mode = "i", key = "<M-k>", func = "signature_help()"},
-  {key = "gs", func = "signature_help()"},
+  {key = "<c-k>", func = "signature_help()"},
   {key = "g0", func = "document_symbol()"},
   {key = "gW", func = "workspace_symbol()"},
   {key = "<c-]>", func = "definition()"},
