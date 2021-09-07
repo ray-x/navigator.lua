@@ -271,8 +271,8 @@ local function get_all_nodes(bufnr, filter, summary)
     print("ts not loaded")
   end
 
-  path_sep = require"navigator.util".path_sep()
-  path_cur = require"navigator.util".path_cur()
+  local path_sep = require"navigator.util".path_sep()
+  local path_cur = require"navigator.util".path_cur()
   local display_filename = fname:gsub(cwd .. path_sep, path_cur, 1)
 
   local all_nodes = {}

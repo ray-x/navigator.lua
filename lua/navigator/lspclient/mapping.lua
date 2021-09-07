@@ -98,7 +98,7 @@ local function set_mapping(user_opts)
   local rsv, range_fmt, doc_fmt, ccls = check_cap()
 
   if ccls then
-    vim.list_entend(key_maps, ccls_mappings)
+    vim.list_extend(key_maps, ccls_mappings)
   end
 
   for _, v in pairs(user_key) do
