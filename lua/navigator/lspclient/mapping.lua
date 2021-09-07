@@ -42,8 +42,8 @@ local key_maps = {
   {key = "<Leader>k", func = "require('navigator.dochighlight').hi_symbol()"},
   {key = '<Space>wa', func = 'add_workspace_folder()'},
   {key = '<Space>wr', func = 'remove_workspace_folder()'},
-  {key = 'ff', func = 'formatting()'},
-  {key = 'ff', func = 'range_formatting()', mode='v'},
+  {key = '<Space>ff', func = 'formatting()', mode='n'},
+  {key = '<Space>ff', func = 'range_formatting()', mode='v'},
   {key = '<Space>wl', func = 'print(vim.inspect(vim.lsp.buf.list_workspace_folders()))'},
   {key = "<Space>la", mode = "n", func = "require('navigator.codelens').run_action()"},
 
@@ -95,7 +95,7 @@ local function set_mapping(user_opts)
   -- local function buf_set_option(...)
   --   vim.api.nvim_buf_set_option(bufnr, ...)
   -- end
-  local rsv, range_fmt, doc_fmt, ccls = check_cap()
+  local rsv, doc_fmt, range_fmt, ccls = check_cap()
 
   if ccls then
     vim.list_extend(key_maps, ccls_mappings)
