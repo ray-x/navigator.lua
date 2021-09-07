@@ -91,7 +91,9 @@ end
 
 function M.preview_uri(opts) -- uri, width, line, col, offset_x, offset_y
   local line_beg = opts.lnum - 1
-  if line_beg >= 2 then
+  if line_beg >= _NgConfigValues.preview_lines_before then
+    line_beg = line_beg - _NgConfigValues.preview_lines_before
+  elseif line_beg >= 2 then
     line_beg = line_beg - 2
   end
   local loc = {uri = opts.uri, range = {start = {line = line_beg}}}

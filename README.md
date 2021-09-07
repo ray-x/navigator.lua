@@ -90,7 +90,7 @@ in the same line). Using treesitter for file preview highlighter etc
 
 # Why a new plugin
 
-I'd like to go beyond what the system is providing.
+I'd like to go beyond what the system is offering.
 
 # Similar projects / special mentions:
 

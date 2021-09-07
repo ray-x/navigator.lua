@@ -313,6 +313,7 @@ end
 local function wait_lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
+
   local loaded = {}
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true

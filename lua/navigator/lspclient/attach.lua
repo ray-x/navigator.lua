@@ -50,8 +50,6 @@ M.on_attach = function(client, bufnr)
     config.lsp[client.name].on_attach(client, bufnr)
   end
 
-  require("navigator.lspclient.mapping").setup(_NgConfigValues)
-
 end
 
 -- M.setup = function(cfg)

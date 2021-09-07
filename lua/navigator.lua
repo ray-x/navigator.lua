@@ -1,10 +1,11 @@
 local M = {}
 _NgConfigValues = {
   debug = false, -- log output not implemented
-  width = 0.6, -- valeu of cols TODO allow float e.g. 0.6
-  preview_height = 0.35,
-  preview_lines = 40,
-  height = 0.35,
+  width = 0.62, -- valeu of cols
+  height = 0.38, -- listview height
+  preview_height = 0.38,
+  preview_lines = 40, -- total lines in preview screen
+  preview_lines_before = 5, -- lines before the highlight line
   default_mapping = true,
   keymaps = {}, -- e.g keymaps={{key = "GR", func = "references()"}, } this replace gr default mapping
 
@@ -119,7 +120,7 @@ M.setup = function(cfg)
   -- print("loading navigator")
   require('navigator.lazyloader')
   require('navigator.lspclient.clients').setup(_NgConfigValues)
-  require("navigator.lspclient.mapping").setup(_NgConfigValues)
+  -- require("navigator.lspclient.mapping").setup(_NgConfigValues)
   require("navigator.reference")
   require("navigator.definition")
   require("navigator.hierarchy")

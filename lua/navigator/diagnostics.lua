@@ -21,7 +21,7 @@ local function error_marker(result, client_id)
   local ft = vim.fn.expand('%:h:t') -- get the current file extension
 
   local bufnr = vim.uri_to_bufnr(result.uri)
-  if bufnr ~= vim.fn.bufnr() then
+  if bufnr ~= vim.api.nvim_get_current_buf() then
     -- log("not same buf", client_id, result.uri, bufnr, vim.fn.bufnr())
     return
   end
@@ -38,11 +38,20 @@ local function error_marker(result, client_id)
   end
 
   -- total line num of current buffer
-  local winid = vim.fn.win_getid(vim.fn.winnr())
-  local total_num = vim.fn.getbufinfo(vim.fn.winbufnr(winid))[1].linecount
+
+  -- local winid = vim.fn.win_getid(vim.fn.winnr())
+  -- local winid = vim.api.nvim_get_current_win()
+  bufnr = vim.api.nvim_get_current_buf()
+  local total_num = vim.fn.getbufinfo(bufnr)[1].linecount
+  -- local total_num = vim.fn.getbufinfo(vim.fn.winbufnr(winid))[1].linecount
   -- window size of current buffer
-  local wwidth = vim.fn.winwidth(winid)
-  local wheight = vim.fn.winheight(winid)
+
+  local stats = vim.api.nvim_list_uis()[1]
+  local wwidth = stats.width;
+  local wheight = stats.height;
+
+  -- local wwidth = vim.fn.winwidth(winid)
+  -- local wheight = vim.fn.winheight(winid)
   if total_num <= wheight then
     return
   end

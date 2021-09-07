@@ -1,7 +1,5 @@
 local log = require"navigator.util".log
-local function set_keymap(...)
-  vim.api.nvim_set_keymap(...)
-end
+local trace = require"navigator.util".trace
 
 local event_hdlrs = {
   {ev = "BufWritePre", func = [[require "navigator.diagnostics".set_diag_loclist()]]},
@@ -42,11 +40,13 @@ local key_maps = {
   {key = "<C-LeftMouse>", func = "definition()"},
   {key = "g<LeftMouse>", func = "implementation()"},
   {key = "<Leader>k", func = "require('navigator.dochighlight').hi_symbol()"},
-  {key = '<Space>wa', func = 'vim.lsp.buf.add_workspace_folder()'},
-  {key = '<Space>wr', func = 'vim.lsp.buf.remove_workspace_folder()'},
+  {key = '<Space>wa', func = 'add_workspace_folder()'},
+  {key = '<Space>wr', func = 'remove_workspace_folder()'},
+  {key = 'ff', func = 'formatting()'},
+  {key = 'ff', func = 'range_formatting()', mode='v'},
   {key = '<Space>wl', func = 'print(vim.inspect(vim.lsp.buf.list_workspace_folders()))'},
-
   {key = "<Space>la", mode = "n", func = "require('navigator.codelens').run_action()"},
+
 }
 -- LuaFormatter on
 local M = {}
@@ -56,20 +56,51 @@ local ccls_mappings = {
   {key = "<Leader>go", func = "require('navigator.cclshierarchy').outgoing_calls()"}
 }
 
+local check_cap = function()
+  -- log(vim.lsp.buf_get_clients(0))
+  local rsv, fmt, rfmt, ccls
+  for _, value in pairs(vim.lsp.buf_get_clients(0)) do
+    if value == nil or value.resolved_capabilities == nil then
+      return
+    end
+    if value.resolved_capabilities.document_formatting then
+      fmt = true
+    end
+    if value.resolved_capabilities.document_range_formatting then
+      rfmt = true
+    end
+
+    -- log("override ccls", value.config)
+    if value.config.name == "ccls" then
+      ccls = true
+    end
+  end
+  return rsv, fmt, rfmt, ccls
+end
+
 local function set_mapping(user_opts)
   local opts = {noremap = true, silent = true}
   user_opts = user_opts or {}
 
-  local user_key = user_opts.keymaps or {}
+  local user_key = _NgConfigValues.keymaps or {}
   local bufnr = user_opts.bufnr or 0
 
-  local function buf_set_keymap(...)
-    vim.api.nvim_buf_set_keymap(bufnr, ...)
+  local function del_keymap(...)
+    vim.api.nvim_buf_del_keymap(bufnr, ...)
   end
 
+  local function set_keymap(...)
+    vim.api.nvim_buf_set_keymap(bufnr, ...)
+  end
   -- local function buf_set_option(...)
   --   vim.api.nvim_buf_set_option(bufnr, ...)
   -- end
+  local rsv, range_fmt, doc_fmt, ccls = check_cap()
+
+  if ccls then
+    vim.list_entend(key_maps, ccls_mappings)
+  end
+
   for _, v in pairs(user_key) do
     local exists = false
     for _, default in pairs(key_maps) do
@@ -82,9 +113,7 @@ local function set_mapping(user_opts)
       table.insert(key_maps, v)
     end
   end
-  -- log(key_maps)
-
-  -- local key_opts = {vim.tbl_deep_extend("force", key_maps, unpack(result))}
+  local fmtkey, rfmtkey
   for _, value in pairs(key_maps) do
     local f = "<Cmd>lua vim.lsp.buf." .. value.func .. "<CR>"
     if string.find(value.func, "require") then
@@ -96,57 +125,31 @@ local function set_mapping(user_opts)
     end
     local k = value.key
     local m = value.mode or "n"
-    -- log("binding", k, f)
+    if string.find(value.func, "range_formatting") then
+      rfmtkey = value.key
+    elseif string.find(value.func, "formatting") then
+      fmtkey = value.key
+    end
+    trace("binding", k, f)
     set_keymap(m, k, f, opts)
   end
 
-  -- format setup
-
-  local range_fmt = false
-  local doc_fmt = false
-  local ccls = false
-  -- log(vim.lsp.buf_get_clients(0))
-  for _, value in pairs(vim.lsp.buf_get_clients(0)) do
-    if value == nil or value.resolved_capabilities == nil then
-      return
-    end
-    if value.resolved_capabilities.document_formatting then
-      doc_fmt = true
-    end
-    if value.resolved_capabilities.document_range_formatting then
-      range_fmt = true
-    end
-
-    -- log("override ccls", value.config)
-    if value.config.name == "ccls" then
-
-      ccls = true
-    end
-  end
-
-  if ccls then
-    -- log("override ccls", ccls_mappings)
-    for _, value in pairs(ccls_mappings) do
-      local f = "<Cmd>lua " .. value.func .. "<CR>"
-      local k = value.key
-      local m = value.mode or "n"
-      set_keymap(m, k, f, opts)
-    end
-  end
   -- if user_opts.cap.document_formatting then
   if doc_fmt then
-    buf_set_keymap("n", "<space>ff", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
     vim.cmd([[
       aug NavigatorAuFormat
         au!
         autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()
       aug END
      ]])
+  else
+    del_keymap('n', fmtkey)
   end
   -- if user_opts.cap.document_range_formatting then
-  if range_fmt then
-    buf_set_keymap("v", "<space>ff", "<cmd>lua vim.lsp.buf.range_formatting()<CR>", opts)
+  if not range_fmt then
+    del_keymap("v", rfmtkey)
   end
+
   log("enable format ", doc_fmt, range_fmt)
 end
 
@@ -162,7 +165,7 @@ end
 local function set_event_handler(user_opts)
   user_opts = user_opts or {}
   local file_types =
-      "c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,yaml,kotlin,php,dart,nim,terraform"
+      "c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,yaml,kotlin,php,dart,nim,terraform,java"
   -- local format_files = "c,cpp,h,go,python,vim,javascript,typescript" --html,css,
   vim.api.nvim_command [[augroup nvim_lsp_autos]]
   vim.api.nvim_command [[autocmd!]]
