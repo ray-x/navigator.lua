@@ -178,10 +178,12 @@ function M.new_list_view(opts)
       -- data = display_data,
       data = data,
       border = border,
-      on_confirm = opts.on_confirm or function(item)
+      on_confirm = opts.on_confirm or function(item, split_opts)
+        log(split_opts)
+        split_opts = split_opts or {}
         if item.filename ~= nil then
           log("openfile ", item.filename, item.lnum, item.col)
-          util.open_file_at(item.filename, item.lnum, item.col)
+          util.open_file_at(item.filename, item.lnum, item.col, split_opts.split)
         end
       end,
       transparency = transparency,

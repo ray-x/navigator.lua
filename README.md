@@ -329,6 +329,8 @@ require'navigator'.setup({
 |  n	|  \<Ctrl-w\>j 	| move cursor to preview (windows move to bottom view point)|
 |  n	|  \<Ctrl-w\>k 	| move cursor to list (windows move to up view point)|
 |  i/n	|  \<C-o\> 	| open preview file in nvim/Apply action|
+|  n	|  \<C-v\> 	| open preview file in nvim with vsplit|
+|  n	|  \<C-s\> 	| open preview file in nvim with split|
 |  n	|  \<Enter\> 	| open preview file in nvim/Apply action|
 |  i/n	|  \<C-b\> 	| previous page in listview|
 |  i/n	|  \<C-f\> 	| next page in listview|

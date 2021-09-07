@@ -282,8 +282,15 @@ M.open_file = function(filename)
   vim.api.nvim_command(string.format("e! %s", filename))
 end
 
-M.open_file_at = function(filename, line, col)
-  vim.api.nvim_command(string.format("e! +%s %s", line, filename))
+M.open_file_at = function(filename, line, col, split)
+  if split == nil then
+    -- code
+    vim.api.nvim_command(string.format("e! +%s %s", line, filename))
+  elseif split == 'v' then
+    vim.api.nvim_command(string.format("vsp! +%s %s", line, filename))
+  elseif split == 's' then
+    vim.api.nvim_command(string.format("sp! +%s %s", line, filename))
+  end
   -- vim.api.nvim_command(string.format("e! %s", filename))
   col = col or 1
   vim.fn.cursor(line, col)
