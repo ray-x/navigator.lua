@@ -82,7 +82,7 @@ in the same line). Using treesitter for file preview highlighter etc
 
 - Syntax folding based on treesitter folding algorithm. (It behaves similar to vs-code)
 
-- LSP Code Action, Code Lens, Code lens action
+- Fully support LSP CodeAction, CodeLens, CodeLens action. Help you improve code quality.
 
 - LRU cache for treesitter nodes
 
@@ -505,6 +505,19 @@ Improved signature help with current parameter highlighted
 ### Light bulb if codeAction available
 
 ![lightbulb](https://github.com/ray-x/files/blob/master/img/navigator/lightbulb.jpg?raw=true)
+
+### Codelens
+
+Codelens for gopls/golang. Garbage collection analyse:
+
+![codelens](https://user-images.githubusercontent.com/1681295/132428956-7835bf30-2ed5-4871-b2d7-7fbad22f63e8.jpg)
+
+Codelens for C++/ccls. Symbol reference
+
+![codelens_cpp_ccls](https://user-images.githubusercontent.com/1681295/132429134-abc6547e-79cc-44a4-b7a9-23550b895e51.jpg)
+
+
+
 
 ### Predefined LSP symbol nerdfont/emoji
 
