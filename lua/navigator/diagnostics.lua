@@ -106,7 +106,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     log(err, config)
     return
   end
-  local cwd = vim.fn.getcwd(0)
+  local cwd = vim.loop.cwd()
   local ft = vim.bo.filetype
   if diagnostic_list[ft] == nil then
     diagnostic_list[vim.bo.filetype] = {}

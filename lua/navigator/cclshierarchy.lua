@@ -3,7 +3,7 @@ local util = require "navigator.util"
 local log = util.log
 local partial = util.partial
 local lsphelper = require "navigator.lspwrapper"
-local cwd = vim.fn.getcwd(0)
+local cwd = vim.loop.cwd()
 
 local path_sep = require"navigator.util".path_sep()
 local path_cur = require"navigator.util".path_cur()

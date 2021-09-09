@@ -144,7 +144,7 @@ M.document_symbol_handler = mk_handler(function(err, result, ctx)
   -- for i, item in pairs(action.items) do
   --   data[i] = item.text
   --   if filename ~= item.filename then
-  --     local cwd = vim.fn.getcwd(0) .. "/"
+  --     local cwd = vim.loop.cwd() .. "/"
   --     local add = util.get_relative_path(cwd, item.filename)
   --     data[i] = data[i] .. " - " .. add
   --   end
@@ -193,7 +193,7 @@ M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
   -- for i, item in pairs(action.items) do
   --   data[i] = item.text
   --   if filename ~= item.filename then
-  --     local cwd = vim.fn.getcwd(0) .. "/"
+  --     local cwd = vim.loop.cwd() .. "/"
   --     local add = util.get_relative_path(cwd, item.filename)
   --     data[i] = data[i] .. " - " .. add
   --   end

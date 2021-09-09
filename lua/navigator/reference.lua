@@ -6,14 +6,14 @@ local gui = require "navigator.gui"
 local lsp = require "navigator.lspwrapper"
 local trace = require"navigator.util".trace
 -- local partial = util.partial
--- local cwd = vim.fn.getcwd(0)
+-- local cwd = vim.loop.cwd()
 -- local lsphelper = require "navigator.lspwrapper"
 local locations_to_items = lsphelper.locations_to_items
 
-local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
+local ref_view = function(err, locations, ctx, cfg)
   local opts = {}
   trace("arg1", err, ctx, locations)
-  log(api)
+  log(ctx.api)
   trace(locations)
   -- log("num", num)
   -- log("bfnr", bufnr)
@@ -49,8 +49,18 @@ local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
     enable_preview_edit = true
   })
   return listview, items, width
-end)
+end
+local M = {}
+local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
 
+  trace(err, locations, ctx, cfg)
+  M.async_hdlr = vim.loop.new_async(vim.schedule_wrap(function()
+    ref_view(err, locations, ctx, cfg)
+
+    M.async_hdlr:close()
+  end))
+  M.async_hdlr:send()
+end)
 local async_reference_request = function()
   local ref_params = vim.lsp.util.make_position_params()
   ref_params.context = {includeDeclaration = true}
@@ -58,4 +68,4 @@ local async_reference_request = function()
   lsp.call_async("textDocument/definition", ref_params, ref_hdlr) -- return asyncresult, canceller
 end
 
-return {reference_handler = ref_hdlr, show_reference = async_reference_request}
+return {reference_handler = ref_hdlr, show_reference = async_reference_request, ref_view = ref_view}

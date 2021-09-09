@@ -90,6 +90,7 @@ function M._preview_location(opts) -- location, width, pos_x, pos_y
 end
 
 function M.preview_uri(opts) -- uri, width, line, col, offset_x, offset_y
+  -- local handle = vim.loop.new_async(vim.schedule_wrap(function()
   local line_beg = opts.lnum - 1
   if line_beg >= _NgConfigValues.preview_lines_before then
     line_beg = line_beg - _NgConfigValues.preview_lines_before
@@ -104,6 +105,9 @@ function M.preview_uri(opts) -- uri, width, line, col, offset_x, offset_y
 
   trace("uri", opts.uri, opts.lnum, opts.location.range.start.line, opts.location.range['end'].line)
   return M._preview_location(opts)
+  -- handle:close()
+  -- end))
+  -- handle:send()
 end
 
 function M.new_list_view(opts)

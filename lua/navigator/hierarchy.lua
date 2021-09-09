@@ -6,7 +6,7 @@ local lsphelper = require "navigator.lspwrapper"
 
 local path_sep = require"navigator.util".path_sep()
 local path_cur = require"navigator.util".path_cur()
-local cwd = vim.fn.getcwd(0)
+local cwd = vim.loop.cwd()
 local M = {}
 
 local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_message)

@@ -54,6 +54,8 @@ included for LSP clients.
 all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
 implementation.
 
+- Luv async job
+
 - Edit your code in preview window
 
 - Async request with lsp.buf_request for reference search

@@ -10,7 +10,7 @@ local log = require"navigator.util".log
 local lerr = require"navigator.util".error
 local trace = require"navigator.util".trace
 local symbol_kind = require"navigator.lspclient.lspkind".symbol_kind
-local cwd = vim.fn.getcwd(0)
+local cwd = vim.loop.cwd()
 
 local is_win = vim.loop.os_uname().sysname:find("Windows")
 

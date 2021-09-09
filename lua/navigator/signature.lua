@@ -4,7 +4,7 @@ local mk_handler = util.mk_handler
 local log = util.log
 local partial = util.partial
 local lsphelper = require "navigator.lspwrapper"
-local cwd = vim.fn.getcwd(0)
+local cwd = vim.loop.cwd()
 local M = {}
 
 ---  navigator signature

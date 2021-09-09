@@ -18,7 +18,7 @@ local api = vim.api
 local util = require "navigator.util"
 local M = {}
 
-local cwd = vim.fn.getcwd(0)
+local cwd = vim.loop.cwd()
 local log = require"navigator.util".log
 local lerr = require"navigator.util".error
 local trace = require"navigator.util".trace

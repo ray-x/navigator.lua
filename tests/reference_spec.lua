@@ -50,7 +50,7 @@ describe("should run lsp reference", function()
     vim.fn.setpos(".", {bufn, 15, 4, 0}) -- width
 
     vim.bo.filetype = "go"
-    vim.lsp.buf.references()
+    -- vim.lsp.buf.references()
     eq(1, 1)
   end)
   it("reference handler should return items", function()
@@ -63,7 +63,7 @@ describe("should run lsp reference", function()
     print(path)
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
-    vim.cmd([[cd %:p:h]])
+    -- vim.cmd([[cd %:p:h]])
     local bufn = vim.fn.bufnr("")
 
     vim.fn.setpos(".", {bufn, 15, 4, 0}) -- width
@@ -125,7 +125,7 @@ describe("should run lsp reference", function()
     local win, items, width
 
     if nvim_6 then
-      win, items, width = require('navigator.reference').reference_handler(nil, result, {
+      win, items, width = require('navigator.reference').ref_view(nil, result, {
         method = 'textDocument/references',
         bufnr = 1,
         client_id = 1
