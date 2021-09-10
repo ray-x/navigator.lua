@@ -320,7 +320,7 @@ function M.locations_to_items(locations, max_items)
       if unload then
         table.insert(unload_bufnrs, unload)
       end
-      if uri_def[item.uri] == nil or uri_def[item.uri] == {} then
+      if uri_def[item.uri] == nil then
         -- find def in file
         local def, unload = ts_defination(item.uri, item.range)
         if def and def.start then
@@ -332,6 +332,8 @@ function M.locations_to_items(locations, max_items)
               end
             end
           end
+        else
+          uri_def[item.uri] = {} -- no def in file
         end
         if unload then
           table.insert(unload_bufnrs, unload)
