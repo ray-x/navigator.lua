@@ -62,7 +62,7 @@ implementation.
 
 - Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?)
 
-- FZY search with Lua-JIT
+- FZY search with either native C (if gcc installed) or Lua-JIT
 
 - LSP multiple symbol highlight/marker and hop between document references
 

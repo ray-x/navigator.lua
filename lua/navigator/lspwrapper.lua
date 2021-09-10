@@ -127,7 +127,6 @@ function M.check_capabilities(feature, client_id)
     end
   end
 
-  ::continue::
   if supported_client then
     return true
   else
