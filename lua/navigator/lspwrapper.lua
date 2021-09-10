@@ -172,11 +172,27 @@ local function ts_functions(uri)
   end
   local ts_func = require"navigator.treesitter".buf_func
   local bufnr = vim.uri_to_bufnr(uri)
-
+  local x = os.clock()
+  trace(ts_nodes)
+  local tsnodes = ts_nodes:get(uri)
+  if tsnodes ~= nil then
+    trace("get data from cache")
+    local t = ts_nodes_time:get(uri) or 0
+    local fname = vim.uri_to_fname(uri)
+    local modified = vim.fn.getftime(fname)
+    if modified <= t then
+      trace(t, modified)
+      return tsnodes
+    else
+      ts_nodes:delete(uri)
+      ts_nodes_time:delete(uri)
+    end
+  end
   local unload = false
   if not api.nvim_buf_is_loaded(bufnr) then
     trace("! load buf !", uri, bufnr)
     vim.fn.bufload(bufnr)
+    -- vim.api.nvim_buf_detach(bufnr) -- if user opens the buffer later, it prevents user attach event
     unload = true
   end
 
@@ -184,18 +200,31 @@ local function ts_functions(uri)
   if unload then
     unload_bufnr = bufnr
   end
-  -- if unload then
-  --   vim.api.nvim_buf_delete(bufnr, {unload = true})
-  -- end
+  ts_nodes:set(uri, funcs)
+  ts_nodes_time:set(uri, os.time())
+  trace(funcs, ts_nodes:get(uri))
+  trace(string.format("elapsed time: %.4f\n", os.clock() - x)) -- how long it tooks
   return funcs, unload_bufnr
 end
 
-local function ts_defination(uri, range)
+local function ts_definition(uri, range)
   local unload_bufnr
   local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
   if not ts_enabled or not TS_analysis_enabled then
     lerr("ts not enabled")
     return nil
+  end
+
+  local key = string.format('%s_%d_%d_%d', uri, range.start.line, range.start.character,
+                            range['end'].line)
+  local tsnode = ts_nodes:get(key)
+  local ftime = ts_nodes_time:get(key)
+
+  local fname = vim.uri_to_fname(uri)
+  local modified = vim.fn.getftime(fname)
+  if tsnodes and modified <= ftime then
+    log('ts def from cache')
+    return tsnode
   end
   local ts_def = require"navigator.treesitter".find_definition
   local bufnr = vim.uri_to_bufnr(uri)
@@ -208,11 +237,13 @@ local function ts_defination(uri, range)
     unload = true
   end
 
-  local def_range = ts_def(range, bufnr)
+  local def_range = ts_def(range, bufnr) or {}
   if unload then
     unload_bufnr = bufnr
   end
   trace(string.format(" ts def elapsed time: %.4f\n", os.clock() - x), def_range) -- how long it takes
+  ts_nodes:set(key, def_range)
+  ts_nodes_time:set(key, x)
   return def_range, unload_bufnr
 end
 
@@ -314,15 +345,16 @@ function M.locations_to_items(locations, max_items)
     end
     -- only load top 30 file.
     local proj_file = item.uri:find(cwd) or is_win or i < 30
+    local unload, def
     if TS_analysis_enabled and proj_file then
       funcs, unload = ts_functions(item.uri)
 
       if unload then
         table.insert(unload_bufnrs, unload)
       end
-      if uri_def[item.uri] == nil then
+      if not uri_def[item.uri] then
         -- find def in file
-        local def, unload = ts_defination(item.uri, item.range)
+        def, unload = ts_definition(item.uri, item.range)
         if def and def.start then
           uri_def[item.uri] = def
           if def.start then -- find for the 1st time
@@ -333,7 +365,12 @@ function M.locations_to_items(locations, max_items)
             end
           end
         else
-          uri_def[item.uri] = {} -- no def in file
+          if uri_def[item.uri] == false then
+            uri_def[item.uri] = {} -- no def in file, TODO: it is tricky the definition is in another file and it is the
+            -- only occurrence
+          else
+            uri_def[item.uri] = false -- no def in file
+          end
         end
         if unload then
           table.insert(unload_bufnrs, unload)
@@ -365,12 +402,12 @@ function M.locations_to_items(locations, max_items)
   -- defer release new open buffer
   if #unload_bufnrs > 10 then -- load too many?
     vim.defer_fn(function()
-      for _, bufnr_unload in ipairs(unload_bufnrs) do
-        if api.nvim_buf_is_loaded(bufnr_unload) then
+      for i, bufnr_unload in ipairs(unload_bufnrs) do
+        if api.nvim_buf_is_loaded(bufnr_unload) and i > 10 then
           api.nvim_buf_delete(bufnr_unload, {unload = true})
         end
       end
-    end, 1)
+    end, 100)
   end
 
   return items, width + 24, second_part -- TODO handle long line?

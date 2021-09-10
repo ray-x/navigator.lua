@@ -46,7 +46,7 @@ local ref_view = function(err, locations, ctx, cfg)
   width = math.min(width + 30, 120, math.floor(wwidth * mwidth))
   -- log(items)
   -- log(width)
-  local opts = {
+  opts = {
     total = #locations,
     items = items,
     ft = ft,
@@ -59,6 +59,7 @@ local ref_view = function(err, locations, ctx, cfg)
   trace("update items", listview.ctrl.class)
   local nv_ref_async
   nv_ref_async = vim.loop.new_async(vim.schedule_wrap(function()
+    log('$$$$$$$$ seperate thread... $$$$$$$$')
     if vim.tbl_isempty(second_part) then
       return
     end
@@ -75,15 +76,17 @@ local ref_view = function(err, locations, ctx, cfg)
     end
   end))
 
-  vim.loop.new_thread(function(asy)
-    asy:send()
-  end, nv_ref_async)
+  vim.defer_fn(function()
+    vim.loop.new_thread(function(asy)
+      asy:send()
+    end, nv_ref_async)
+
+  end, 100)
 
   return listview, items, width
 end
 
 local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
-
   trace(err, locations, ctx, cfg)
   M.async_hdlr = vim.loop.new_async(vim.schedule_wrap(function()
     ref_view(err, locations, ctx, cfg)

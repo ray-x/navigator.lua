@@ -47,6 +47,30 @@ function M.goto_definition(bufnr)
   end
 end
 
+local function node_is_definination(node)
+  if node:parent() == nil then
+    return false
+  end
+  local nd_type = node:parent():type()
+  local decl = {'short_var_declaration', 'short_var_declaration', 'declaration'}
+
+  if vim.tbl_contains(decl, nd_type) then
+    return true
+  end
+
+  if node:parent():parent() == nil then
+    return false
+  end
+
+  nd_type = node:parent():parent():type()
+  if vim.tbl_contains(decl, nd_type) then
+    return true
+  end
+
+  return false
+
+end
+
 -- use lsp range to find def
 function M.find_definition(range, bufnr)
   if not range or not range.start then
@@ -68,13 +92,19 @@ function M.find_definition(range, bufnr)
   end
 
   local definition = locals.find_definition(node_at_point, bufnr)
-
-  if definition ~= node_at_point then
-    trace("err: def found:", definition:range(), definition:type())
+  if definition ~= node_at_point then -- NOTE: it may not worksfor some of languages. if def not found, ts
+    -- returns current node. if your node is def, then it also return self... then I have no idea weather it is
+    -- def or not
+    trace("info: def found:", definition:range(), definition:type())
+    local r, c = definition:range()
+    return {start = {line = r, character = c}}
+  elseif node_is_definination(node_at_point) then
+    trace("declaraction here ", definition:type())
     local r, c = definition:range()
     return {start = {line = r, character = c}}
   else
-    trace("err: def not found in ", bufnr)
+    trace("error: def not found in ", bufnr, definition:range(), definition:type(),
+          definition:parent():type())
   end
 end
 
@@ -283,6 +313,7 @@ local function get_all_nodes(bufnr, filter, summary)
   -- instead of neighbors of the next nodes.
   local containers = {
     ["function"] = true,
+    ["local_function"] = true,
     ["arrow_function"] = true,
     ["type"] = true,
     ["class"] = true,
@@ -545,7 +576,7 @@ function M.get_node_at_line(lnum)
 
   local node = tree:root():named_descendant_for_range(unpack(range))
 
-  trace(node, node:type())
+  -- trace(node, node:type()) -- log all lines and all nodes
   return node
 end
 

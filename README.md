@@ -54,7 +54,7 @@ included for LSP clients.
 all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
 implementation.
 
-- Luv async job
+- Luv async thread and tasks
 
 - Edit your code in preview window
 
