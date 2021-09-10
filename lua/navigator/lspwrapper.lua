@@ -187,7 +187,7 @@ local function ts_functions(uri)
   -- if unload then
   --   vim.api.nvim_buf_delete(bufnr, {unload = true})
   -- end
-  return funcs, bufnr
+  return funcs, unload_bufnr
 end
 
 local function ts_defination(uri, range)
