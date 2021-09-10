@@ -364,8 +364,8 @@ function M.locations_to_items(locations, max_items)
   if #unload_bufnrs > 10 then -- load too many?
     vim.defer_fn(function()
       for _, bufnr_unload in ipairs(unload_bufnrs) do
-        if vim.api.nvim_buf_is_loaded(bufnr_unload) then
-          vim.api.nvim_buf_delete(bufnr_unload, {unload = true})
+        if api.nvim_buf_is_loaded(bufnr_unload) then
+          api.nvim_buf_delete(bufnr_unload, {unload = true})
         end
       end
     end, 1)

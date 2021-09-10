@@ -56,6 +56,7 @@ function M.prepare_for_render(items, opts)
   local display_items = {item}
   local last_summary_idx = 1
   local total_ref_in_file = 1
+  local total = opts.total
   local icon = " "
   local lspapi = opts.api or "∑"
 
@@ -87,6 +88,7 @@ function M.prepare_for_render(items, opts)
     local dfn = items[i].display_filename
     if last_summary_idx == 1 then
       lspapi_display = items[i].symbol_name .. ' ' .. lspapi_display
+
       trace(items[1], lspapi_display, display_items[last_summary_idx])
     end
 
@@ -94,7 +96,7 @@ function M.prepare_for_render(items, opts)
     -- trace(items[i], items[i].filename, last_summary_idx, display_items[last_summary_idx].filename)
     -- TODO refact display_filename generate part
     if items[i].filename == fn then
-      space, trim = get_pads(opts.width, icon .. ' ' .. dfn, lspapi_display .. ' 12')
+      space, trim = get_pads(opts.width, icon .. ' ' .. dfn, lspapi_display .. ' 14')
       if trim and opts.width > 50 and #dfn > opts.width - 20 then
         local fn1 = string.sub(dfn, 1, opts.width - 50)
         local fn2 = string.sub(dfn, #dfn - 10, #dfn)
@@ -102,10 +104,15 @@ function M.prepare_for_render(items, opts)
         space = '  '
         -- log("trim", fn1, fn2)
       end
-      display_items[last_summary_idx].text = string.format("%s  %s%s%s %i", icon,
-                                                           display_items[last_summary_idx]
-                                                               .display_filename, space,
-                                                           lspapi_display, total_ref_in_file)
+      local api_disp = string.format("%s  %s%s%s %i", icon,
+                                     display_items[last_summary_idx].display_filename, space,
+                                     lspapi_display, total_ref_in_file)
+
+      if total then
+        api_disp = api_disp .. ' of: ' .. tostring(total)
+      end
+
+      display_items[last_summary_idx].text = api_disp
       total_ref_in_file = total_ref_in_file + 1
     else
 
