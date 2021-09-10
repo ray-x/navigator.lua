@@ -288,6 +288,15 @@ local function get_all_nodes(bufnr, filter, summary)
     ["class"] = true,
     ["method"] = true
   }
+
+  -- check and load buff
+
+  local should_unload = false
+  if not vim.api.nvim_buf_is_loaded(bufnr) then
+    should_unload = true
+    vim.fn.bufload(bufnr)
+  end
+
   -- Step 2 find correct completions
   local length = 10
   local parents = {} -- stack of nodes a clever algorithm from treesiter refactor @Santos Gallegos
@@ -391,6 +400,9 @@ local function get_all_nodes(bufnr, filter, summary)
   trace(all_nodes)
   local nd = {nodes = all_nodes, ftime = vim.fn.getftime(fname), length = length}
   lru:set(hash, nd)
+  if should_unload then
+    vim.api.nvim_buf_delete(bufnr, {unload = true})
+  end
   return all_nodes, length
 end
 
@@ -401,6 +413,7 @@ function M.buf_func(bufnr)
   end
 
   bufnr = bufnr or api.nvim_get_current_buf()
+
   local all_nodes, width = get_all_nodes(bufnr, {
     ["function"] = true,
     ["var"] = true,

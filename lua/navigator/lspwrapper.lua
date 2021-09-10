@@ -123,7 +123,7 @@ function M.check_capabilities(feature, client_id)
   for _, client in pairs(clients) do
     supported_client = client.resolved_capabilities[feature]
     if supported_client then
-      goto continue
+      break
     end
   end
 
@@ -132,9 +132,9 @@ function M.check_capabilities(feature, client_id)
     return true
   else
     if #clients == 0 then
-      print("LSP: no client attached")
+      log("LSP: no client attached")
     else
-      log("LSP: server does not support " .. feature)
+      trace("LSP: server does not support " .. feature)
     end
     return false
   end
@@ -164,6 +164,7 @@ function M.call_async(method, params, handler)
 end
 
 local function ts_functions(uri)
+  local unload_bufnr
   local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
   if not ts_enabled or not TS_analysis_enabled then
     lerr("ts not enabled")
@@ -171,22 +172,7 @@ local function ts_functions(uri)
   end
   local ts_func = require"navigator.treesitter".buf_func
   local bufnr = vim.uri_to_bufnr(uri)
-  local x = os.clock()
-  trace(ts_nodes)
-  local tsnodes = ts_nodes:get(uri)
-  if tsnodes ~= nil then
-    log("get data from cache")
-    local t = ts_nodes_time:get(uri) or 0
-    local fname = vim.uri_to_fname(uri)
-    local modified = vim.fn.getftime(fname)
-    if modified <= t then
-      trace(t, modified)
-      return tsnodes
-    else
-      ts_nodes:delete(uri)
-      ts_nodes_time:delete(uri)
-    end
-  end
+
   local unload = false
   if not api.nvim_buf_is_loaded(bufnr) then
     trace("! load buf !", uri, bufnr)
@@ -196,18 +182,16 @@ local function ts_functions(uri)
 
   local funcs = ts_func(bufnr)
   if unload then
-    local cmd = string.format("bd %d", bufnr)
-    trace(cmd)
-    -- vim.cmd(cmd)  -- todo: not sure if it is needed
+    unload_bufnr = bufnr
   end
-  ts_nodes:set(uri, funcs)
-  ts_nodes_time:set(uri, os.time())
-  trace(funcs, ts_nodes:get(uri))
-  trace(string.format("elapsed time: %.4f\n", os.clock() - x)) -- how long it tooks
-  return funcs
+  -- if unload then
+  --   vim.api.nvim_buf_delete(bufnr, {unload = true})
+  -- end
+  return funcs, bufnr
 end
 
 local function ts_defination(uri, range)
+  local unload_bufnr
   local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
   if not ts_enabled or not TS_analysis_enabled then
     lerr("ts not enabled")
@@ -226,12 +210,10 @@ local function ts_defination(uri, range)
 
   local def_range = ts_def(range, bufnr)
   if unload then
-    local cmd = string.format("bd %d", bufnr)
-    log(cmd)
-    -- vim.cmd(cmd)  -- todo: not sure if it is needed
+    unload_bufnr = bufnr
   end
   trace(string.format(" ts def elapsed time: %.4f\n", os.clock() - x), def_range) -- how long it takes
-  return def_range
+  return def_range, unload_bufnr
 end
 
 local function find_ts_func_by_range(funcs, range)
@@ -251,15 +233,7 @@ local function find_ts_func_by_range(funcs, range)
   return result
 end
 
-function M.locations_to_items(locations)
-  if not locations or vim.tbl_isempty(locations) then
-    print("list not avalible")
-    return
-  end
-  local width = 4
-
-  local items = {} -- lsp.util.locations_to_items(locations)
-  -- items and locations may not matching
+local function order_locations(locations)
   table.sort(locations, function(i, j)
     if i.uri == j.uri then
       if i.range and i.range.start then
@@ -270,9 +244,63 @@ function M.locations_to_items(locations)
       return i.uri < j.uri
     end
   end)
+  return locations
+end
+
+local function slice_locations(locations, max_items)
+  local cut = -1
+  if #locations > max_items then
+    local uri = locations[max_items]
+    for i = max_items + 1, #locations do
+      if uri ~= locations[i] and not brk then
+        cut = i
+        break
+      end
+    end
+  end
+  local first_part, second_part = locations, {}
+  if cut > 1 and cut < #locations then
+    first_part = vim.list_slice(locations, 1, cut)
+    second_part = vim.list_slice(locations, cut + 1, #locations)
+  end
+  return first_part, second_part
+
+end
+
+local function test_locations()
+  local locations = {
+    {uri = '1', range = {start = {line = 1}}}, {uri = '2', range = {start = {line = 2}}},
+    {uri = '2', range = {start = {line = 3}}}, {uri = '1', range = {start = {line = 3}}},
+    {uri = '1', range = {start = {line = 4}}}, {uri = '3', range = {start = {line = 4}}},
+    {uri = '3', range = {start = {line = 4}}}
+  }
+  local second_part
+  order_locations(locations)
+  local locations, second_part = slice_locations(locations, 3)
+  log(locations, second_part)
+end
+
+function M.locations_to_items(locations, max_items)
+  max_items = max_items or 100000 --
+  if not locations or vim.tbl_isempty(locations) then
+    print("list not avalible")
+    return
+  end
+  local width = 4
+
+  local items = {} -- lsp.util.locations_to_items(locations)
+  -- items and locations may not matching
+
   local uri_def = {}
 
+  order_locations(locations)
+  local second_part
+  locations, second_part = slice_locations(locations, max_items)
   trace(locations)
+
+  local cut = -1
+
+  local unload_bufnrs = {}
   for i, loc in ipairs(locations) do
     local funcs = nil
     local item = lsp.util.locations_to_items({loc})[1]
@@ -287,11 +315,14 @@ function M.locations_to_items(locations)
     -- only load top 30 file.
     local proj_file = item.uri:find(cwd) or is_win or i < 30
     if TS_analysis_enabled and proj_file then
-      funcs = ts_functions(item.uri)
+      funcs, unload = ts_functions(item.uri)
 
+      if unload then
+        table.insert(unload_bufnrs, unload)
+      end
       if uri_def[item.uri] == nil or uri_def[item.uri] == {} then
         -- find def in file
-        local def = ts_defination(item.uri, item.range)
+        local def, unload = ts_defination(item.uri, item.range)
         if def and def.start then
           uri_def[item.uri] = def
           if def.start then -- find for the 1st time
@@ -301,6 +332,9 @@ function M.locations_to_items(locations)
               end
             end
           end
+        end
+        if unload then
+          table.insert(unload_bufnrs, unload)
         end
       end
       trace(uri_def[item.uri], item.range) -- set to log if need to get all in rnge
@@ -325,7 +359,19 @@ function M.locations_to_items(locations)
     table.insert(items, item)
   end
   trace(uri_def)
-  return items, width + 24 -- TODO handle long line?
+
+  -- defer release new open buffer
+  if #unload_bufnrs > 10 then -- load too many?
+    vim.defer_fn(function()
+      for _, bufnr_unload in ipairs(unload_bufnrs) do
+        if vim.api.nvim_buf_is_loaded(bufnr_unload) then
+          vim.api.nvim_buf_delete(bufnr_unload, {unload = true})
+        end
+      end
+    end, 1)
+  end
+
+  return items, width + 24, second_part -- TODO handle long line?
 end
 
 function M.apply_action(action_chosen)

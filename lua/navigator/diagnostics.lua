@@ -18,7 +18,7 @@ local function error_marker(result, client_id)
     return
   end
   local first_line = vim.fn.line('w0')
-  local ft = vim.fn.expand('%:h:t') -- get the current file extension
+  -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
 
   local bufnr = vim.uri_to_bufnr(result.uri)
   if bufnr ~= vim.api.nvim_get_current_buf() then
