@@ -265,6 +265,37 @@ require'navigator'.setup({
 
 ```
 
+### LSP clients
+
+Built clients:
+```lua
+local servers = {
+  "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
+  "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
+  "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
+  "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
+  "r_language_server", "rust_analyzer", "terraformls"
+}
+
+```
+
+Navigator will try to load avalible lsp server/client based on filetype. The clients has none default on_attach.
+incremental sync and debounce is enabled by navigator. And the lsp
+snippet will be enabled. So you could use COQ and nvim-cmp snippet expand.
+
+
+Other than above setup, additional none default setup are used for following lsp:
+
+* gopls
+* clangd
+* rust_analyzer
+* sqls
+* sumneko_lua
+* pyright
+* ccls
+
+Please check [client setup](https://github.com/ray-x/navigator.lua/blob/26012cf9c172aa788a2e53018d94b32c5c75af75/lua/navigator/lspclient/clients.lua#L98-L234)
+
 The plugin can work with multiple LSP, e.g  sqls+gopls+efm.  But there are cases you may need to disable some of the
 servers.  (Prevent loading multiple LSP for same source code.)  e.g. I saw strange behaviours when I use pyls+pyright+pyls_ms
 together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
