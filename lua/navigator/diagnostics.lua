@@ -107,7 +107,10 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     log(err, config)
     return
   end
-
+  if vim.fn.mode() ~= 'n' and config.update_in_insert == false then
+    log("skip in insert mode")
+    return
+  end
   local cwd = vim.loop.cwd()
   local ft = vim.bo.filetype
   if diagnostic_list[ft] == nil then

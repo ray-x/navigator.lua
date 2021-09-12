@@ -94,7 +94,7 @@ local setups = {
       -- "-rpc.trace",
     },
 
-    flags = {allow_incremental_sync = true, debounce_text_changes = 500},
+    flags = {allow_incremental_sync = true, debounce_text_changes = 1000},
     settings = {
       gopls = {
         -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
@@ -112,7 +112,7 @@ local setups = {
         staticcheck = true,
         matcher = "fuzzy",
         diagnosticsDelay = "500ms",
-        experimentalWatchedFileDelay = "100ms",
+        experimentalWatchedFileDelay = "1000ms",
         symbolMatcher = "fuzzy",
         gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
         buildFlags = {"-tags", "integration"}
@@ -258,7 +258,7 @@ end
 
 local default_cfg = {
   on_attach = on_attach,
-  flags = {allow_incremental_sync = true, debounce_text_changes = 500}
+  flags = {allow_incremental_sync = true, debounce_text_changes = 1000}
 }
 
 -- check and load based on file type
