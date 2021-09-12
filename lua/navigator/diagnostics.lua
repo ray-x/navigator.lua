@@ -19,6 +19,7 @@ local function error_marker(result, client_id)
   end
   local first_line = vim.fn.line('w0')
   -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
+  log(result)
 
   local bufnr = vim.uri_to_bufnr(result.uri)
   if bufnr ~= vim.api.nvim_get_current_buf() then
@@ -164,6 +165,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     end
     -- local old_items = vim.fn.getqflist()
     diagnostic_list[ft][uri] = item_list
+    result.uir = uri
 
     error_marker(result, ctx.client_id)
   else
@@ -257,7 +259,7 @@ function M.update_err_marker()
     -- nothing to update
     return
   end
-  local bufnr = vim.fn.bufnr()
+  local bufnr = vim.api.nvim_get_current_buf()
 
   local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
                        + vim.lsp.diagnostic.get_count(bufnr, [[Warning]])
