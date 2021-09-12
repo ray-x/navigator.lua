@@ -160,7 +160,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     end
     -- local old_items = vim.fn.getqflist()
     diagnostic_list[ft][uri] = item_list
-
+    result.uri = uri
     error_marker(result, ctx.client_id)
   else
     vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
