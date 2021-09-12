@@ -19,7 +19,7 @@ local function error_marker(result, client_id)
   end
   local first_line = vim.fn.line('w0')
   -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
-  log(result)
+  trace(result)
 
   local bufnr = vim.uri_to_bufnr(result.uri)
   if bufnr ~= vim.api.nvim_get_current_buf() then
@@ -129,7 +129,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     log("skip in insert mode")
     return
   end
-  log("diag: ", vim.fn.mode(), result, ctx, config)
+  trace("diag: ", vim.fn.mode(), result, ctx, config)
   if result and result.diagnostics then
     local item_list = {}
     for _, v in ipairs(result.diagnostics) do
@@ -165,7 +165,9 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     end
     -- local old_items = vim.fn.getqflist()
     diagnostic_list[ft][uri] = item_list
-    result.uir = uri
+    if not result.uri then
+      result.uri = uri
+    end
 
     error_marker(result, ctx.client_id)
   else
