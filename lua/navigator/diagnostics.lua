@@ -106,16 +106,17 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     log(err, config)
     return
   end
+
   local cwd = vim.loop.cwd()
   local ft = vim.bo.filetype
   if diagnostic_list[ft] == nil then
     diagnostic_list[vim.bo.filetype] = {}
   end
   -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
-
   if util.nvim_0_6() then
     vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   else
+    log("old version of lsp nvim 050")
     vim.lsp.diagnostic.on_publish_diagnostics(err, _, result, ctx.client_id, _, config)
   end
   local uri = result.uri
@@ -123,8 +124,11 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     log("diag", err, result)
     return
   end
-
-  -- log("diag: ", result, client_id)
+  if vim.fn.mode() ~= 'n' and config.update_in_insert == false then
+    log("skip in insert mode")
+    return
+  end
+  log("diag: ", vim.fn.mode(), result, ctx, config)
   if result and result.diagnostics then
     local item_list = {}
     for _, v in ipairs(result.diagnostics) do
@@ -185,6 +189,7 @@ local diagnostic_cfg = {
 if _NgConfigValues.lsp.diagnostic_virtual_text == false then
   diagnostic_cfg.virtual_text = false
 end
+
 -- vim.lsp.handlers["textDocument/publishDiagnostics"]
 M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
 
