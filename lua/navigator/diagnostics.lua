@@ -18,7 +18,8 @@ local function error_marker(result, client_id)
     return
   end
   local first_line = vim.fn.line('w0')
-  local ft = vim.fn.expand('%:h:t') -- get the current file extension
+  -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
+  trace(result)
 
   local bufnr = vim.uri_to_bufnr(result.uri)
   if bufnr ~= vim.api.nvim_get_current_buf() then
@@ -106,16 +107,20 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     log(err, config)
     return
   end
+  if vim.fn.mode() ~= 'n' and config.update_in_insert == false then
+    log("skip in insert mode")
+    return
+  end
   local cwd = vim.loop.cwd()
   local ft = vim.bo.filetype
   if diagnostic_list[ft] == nil then
     diagnostic_list[vim.bo.filetype] = {}
   end
   -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
-
   if util.nvim_0_6() then
     vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   else
+    log("old version of lsp nvim 050")
     vim.lsp.diagnostic.on_publish_diagnostics(err, _, result, ctx.client_id, _, config)
   end
   local uri = result.uri
@@ -123,8 +128,11 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     log("diag", err, result)
     return
   end
-
-  -- log("diag: ", result, client_id)
+  if vim.fn.mode() ~= 'n' and config.update_in_insert == false then
+    log("skip in insert mode")
+    return
+  end
+  trace("diag: ", vim.fn.mode(), result, ctx, config)
   if result and result.diagnostics then
     local item_list = {}
     for _, v in ipairs(result.diagnostics) do
@@ -146,21 +154,30 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
       end
       local bufnr1 = vim.uri_to_bufnr(uri)
       if not vim.api.nvim_buf_is_loaded(bufnr1) then
-        vim.fn.bufload(bufnr1)
-      end
-      local pos = v.range.start
-      local row = pos.line
-      local line = (vim.api.nvim_buf_get_lines(bufnr1, row, row + 1, false) or {""})[1]
-      if line ~= nil then
-        item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description .. v.message
-        table.insert(item_list, item)
-      else
-        error("diagnostic result empty line", v, row, bufnr1)
+        if _NgConfigValues.diagnostic_load_files then
+          vim.fn.bufload(bufnr1) -- this may slow down the neovim
+          local pos = v.range.start
+          local row = pos.line
+          local line = (vim.api.nvim_buf_get_lines(bufnr1, row, row + 1, false) or {""})[1]
+          if line ~= nil then
+            item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description
+                            .. v.message
+            table.insert(item_list, item)
+          else
+            error("diagnostic result empty line", v, row, bufnr1)
+          end
+        else
+          item.text = head .. _NgConfigValues.icons.diagnostic_head_description .. v.message
+          table.insert(item_list, item)
+        end
       end
     end
     -- local old_items = vim.fn.getqflist()
     diagnostic_list[ft][uri] = item_list
-    result.uri = uri
+    if not result.uri then
+      result.uri = uri
+    end
+
     error_marker(result, ctx.client_id)
   else
     vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
@@ -173,18 +190,21 @@ local M = {}
 local diagnostic_cfg = {
   -- Enable underline, use default values
   underline = true,
-  -- Enable virtual text, override spacing to 0
-  virtual_text = {spacing = 0, prefix = _NgConfigValues.icons.diagnostic_virtual_text},
+  -- Enable virtual text, override spacing to 3  (prevent overlap)
+  virtual_text = {spacing = 3, prefix = _NgConfigValues.icons.diagnostic_virtual_text},
   -- Use a function to dynamically turn signs off
   -- and on, using buffer local variables
   signs = true,
-  -- Disable a feature
-  update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false
+  update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false,
+  severity_sort = function(a, b)
+    return a.severity < b.severity
+  end
 }
 
 if _NgConfigValues.lsp.diagnostic_virtual_text == false then
   diagnostic_cfg.virtual_text = false
 end
+
 -- vim.lsp.handlers["textDocument/publishDiagnostics"]
 M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
 
@@ -252,7 +272,7 @@ function M.update_err_marker()
     -- nothing to update
     return
   end
-  local bufnr = vim.fn.bufnr()
+  local bufnr = vim.api.nvim_get_current_buf()
 
   local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
                        + vim.lsp.diagnostic.get_count(bufnr, [[Warning]])

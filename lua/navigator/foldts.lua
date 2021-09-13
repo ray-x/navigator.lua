@@ -159,6 +159,17 @@ end)
 
 function M.get_fold_indic(lnum)
   local buf = api.nvim_get_current_buf()
+  local shown = false
+  for i = 1, vim.fn.tabpagenr('$') do
+    for key, value in pairs(vim.fn.tabpagebuflist(i)) do
+      if value == buf then
+        shown = true
+      end
+    end
+  end
+  if not shown then
+    return "0"
+  end
   local levels = folds_levels(buf) or {}
 
   -- log(lnum, levels[lnum]) -- TODO: comment it out in master

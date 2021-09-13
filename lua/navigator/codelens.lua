@@ -69,7 +69,7 @@ function M.setup()
   local on_codelens = vim.lsp.handlers["textDocument/codeLens"]
   vim.lsp.handlers["textDocument/codeLens"] = mk_handler(
                                                   function(err, result, ctx, cfg)
-        log(err, result, ctx.client_id, ctx.bufnr, cfg)
+        trace(err, result, ctx.client_id, ctx.bufnr, cfg)
         if nvim_0_6() then
           on_codelens(err, result, ctx, cfg)
           codelens_hdlr(err, result, ctx, cfg)
