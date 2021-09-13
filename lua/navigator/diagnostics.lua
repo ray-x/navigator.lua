@@ -102,7 +102,7 @@ local function error_marker(result, client_id)
 end
 
 local diag_hdlr = mk_handler(function(err, result, ctx, config)
-  log(result)
+  trace(result)
   if err ~= nil then
     log(err, config)
     return
@@ -154,16 +154,22 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
       end
       local bufnr1 = vim.uri_to_bufnr(uri)
       if not vim.api.nvim_buf_is_loaded(bufnr1) then
-        vim.fn.bufload(bufnr1)
-      end
-      local pos = v.range.start
-      local row = pos.line
-      local line = (vim.api.nvim_buf_get_lines(bufnr1, row, row + 1, false) or {""})[1]
-      if line ~= nil then
-        item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description .. v.message
-        table.insert(item_list, item)
-      else
-        error("diagnostic result empty line", v, row, bufnr1)
+        if _NgConfigValues.diagnostic_load_files then
+          vim.fn.bufload(bufnr1) -- this may slow down the neovim
+          local pos = v.range.start
+          local row = pos.line
+          local line = (vim.api.nvim_buf_get_lines(bufnr1, row, row + 1, false) or {""})[1]
+          if line ~= nil then
+            item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description
+                            .. v.message
+            table.insert(item_list, item)
+          else
+            error("diagnostic result empty line", v, row, bufnr1)
+          end
+        else
+          item.text = head .. _NgConfigValues.icons.diagnostic_head_description .. v.message
+          table.insert(item_list, item)
+        end
       end
     end
     -- local old_items = vim.fn.getqflist()
@@ -184,12 +190,11 @@ local M = {}
 local diagnostic_cfg = {
   -- Enable underline, use default values
   underline = true,
-  -- Enable virtual text, override spacing to 0
-  virtual_text = {spacing = 0, prefix = _NgConfigValues.icons.diagnostic_virtual_text},
+  -- Enable virtual text, override spacing to 3  (prevent overlap)
+  virtual_text = {spacing = 3, prefix = _NgConfigValues.icons.diagnostic_virtual_text},
   -- Use a function to dynamically turn signs off
   -- and on, using buffer local variables
   signs = true,
-  -- Disable a feature
   update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false,
   severity_sort = function(a, b)
     return a.severity < b.severity

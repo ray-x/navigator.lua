@@ -196,8 +196,8 @@ function M.new_list_view(opts)
     end,
     transparency = transparency,
     on_move = opts.on_move or function(item)
-      trace("on move", pos, item)
-      trace("on move", pos, item.text or item, item.uri, item.filename)
+      trace("on move", item)
+      trace("on move", item.text or item, item.uri, item.filename)
       -- todo fix
       if item.uri == nil then
         item.uri = "file:///" .. item.filename

@@ -27,7 +27,8 @@ _NgConfigValues = {
     code_lens = false,
     -- only want to enable one lsp server
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
-
+    diagnostic_load_files = false, -- lsp diagnostic errors list may contains uri that not opened yet set to true
+    -- to load those files
     diagnostic_virtual_text = true, -- show virtual for diagnostic message
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
     diagnostic_scrollbar_sign = {'▃', '█'}, -- set to nil to disable, set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
