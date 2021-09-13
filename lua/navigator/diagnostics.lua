@@ -102,7 +102,7 @@ local function error_marker(result, client_id)
 end
 
 local diag_hdlr = mk_handler(function(err, result, ctx, config)
-  trace(result)
+  log(result)
   if err ~= nil then
     log(err, config)
     return
@@ -190,7 +190,10 @@ local diagnostic_cfg = {
   -- and on, using buffer local variables
   signs = true,
   -- Disable a feature
-  update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false
+  update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false,
+  severity_sort = function(a, b)
+    return a.severity < b.severity
+  end
 }
 
 if _NgConfigValues.lsp.diagnostic_virtual_text == false then
