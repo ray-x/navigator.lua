@@ -8,6 +8,7 @@ _NgConfigValues = {
   preview_lines_before = 5, -- lines before the highlight line
   default_mapping = true,
   keymaps = {}, -- e.g keymaps={{key = "GR", func = "references()"}, } this replace gr default mapping
+  external = nil, -- true: enable for goneovim multigrid otherwise false
 
   border = "single", -- border style, can be one of 'none', 'single', 'double', "shadow"
   combined_attach = "both", -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
