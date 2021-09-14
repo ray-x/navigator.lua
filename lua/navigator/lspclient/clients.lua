@@ -230,6 +230,11 @@ local setups = {
       clang = {excludeArgs = {"-frounding-math"}}
     },
     flags = {allow_incremental_sync = true}
+  },
+  jdtls = {
+    settings = {
+      java = {signatureHelp = {enabled = true}, contentProvider = {preferred = 'fernflower'}}
+    }
   }
 }
 
@@ -326,6 +331,7 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
   capabilities.textDocument.completion.completionItem.resolveSupport = {
     properties = {'documentation', 'detail', 'additionalTextEdits'}
   }
+  capabilities.workspace.configuration = true
 
   for _, client in ipairs(clients) do
     if client ~= nil then
@@ -408,6 +414,11 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
           if disable_fmt then
             client.resolved_capabilities.document_formatting = false
           end
+        end
+      end
+      cfg.on_init = function(client)
+        if client and client.config and client.config.settings then
+          client.notify('workspace/didChangeConfiguration', {settings = client.config.settings})
         end
       end
     end

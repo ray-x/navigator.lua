@@ -20,6 +20,8 @@ _NgConfigValues = {
   code_lens_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
+  signature_help_cfg = nil, -- if you would like to init lsp_signature plugin in navigator, pass in signature help
+  -- setup here. if it is nil, navigator will not init signature help
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_ft = {}, -- a list of lsp not enable auto-format (e.g. if you using efm or vim-codeformat etc), empty by default

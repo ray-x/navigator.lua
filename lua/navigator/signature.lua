@@ -52,7 +52,14 @@ local signature_handler = mk_handler(function(err, result, ctx, config)
   if config == nil then
     log("config nil")
   end
-  config = config or nil
+  if err then
+    print("signature help error: ", err, vim.inspect(result), ctx, config)
+  end
+  config = config or {}
+  if config.border == nil then
+    config.border = _NgConfigValues.border
+  end
+
   if not (result and result.signatures and result.signatures[1]) then
     return
   end
