@@ -1,7 +1,7 @@
 local gui = require "navigator.gui"
 local diagnostic_list = {}
 
-_NG_VT_NS = vim.api.nvim_create_namespace("navigator_lua")
+_NG_VT_DIAG_NS = vim.api.nvim_create_namespace("navigator_lua_diag")
 local util = require "navigator.util"
 local log = util.log
 local trace = require"guihua.log".trace
@@ -14,125 +14,128 @@ local path_cur = require"navigator.util".path_cur()
 diagnostic_list[vim.bo.filetype] = {}
 
 local function error_marker(result, client_id)
-  if _NgConfigValues.lsp.diagnostic_scrollbar_sign == nil then -- not enabled or already shown
-    return
-  end
-  local first_line = vim.fn.line('w0')
-  -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
-  trace(result)
-
-  local bufnr = vim.uri_to_bufnr(result.uri)
-  if bufnr ~= vim.api.nvim_get_current_buf() then
-    -- log("not same buf", client_id, result.uri, bufnr, vim.fn.bufnr())
-    return
-  end
-
-  trace(result, bufnr)
-
-  if result == nil or result.diagnostics == nil or #result.diagnostics == 0 then
-    local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
-                         + vim.lsp.diagnostic.get_count(bufnr, [[Warning]])
-    if diag_cnt == 0 and _NG_VT_NS ~= nil then
-      vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_NS, 0, -1)
+  vim.defer_fn(function()
+    if vim.tbl_isempty(result.diagnostics) then
+      return
     end
-    return
-  end
+    trace('schedule callback', result)
+    if _NgConfigValues.lsp.diagnostic_scrollbar_sign == nil then -- not enabled or already shown
+      return
+    end
+    local first_line = vim.fn.line('w0')
+    -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
+    local bufnr = vim.api.nvim_get_current_buf()
+    local fname = vim.api.nvim_buf_get_name(bufnr)
+    local uri = vim.uri_from_fname(fname)
+    if uri ~= result.uri then
+      -- log("not same buf", client_id, result.uri, bufnr, vim.fn.bufnr())
+      return
+    end
 
-  -- total line num of current buffer
+    trace(result, bufnr)
 
-  -- local winid = vim.fn.win_getid(vim.fn.winnr())
-  -- local winid = vim.api.nvim_get_current_win()
-  bufnr = vim.api.nvim_get_current_buf()
-  local total_num = vim.fn.getbufinfo(bufnr)[1].linecount
-  -- local total_num = vim.fn.getbufinfo(vim.fn.winbufnr(winid))[1].linecount
-  -- window size of current buffer
-
-  local stats = vim.api.nvim_list_uis()[1]
-  local wwidth = stats.width;
-  local wheight = stats.height;
-
-  -- local wwidth = vim.fn.winwidth(winid)
-  -- local wheight = vim.fn.winheight(winid)
-  if total_num <= wheight then
-    return
-  end
-  if _NG_VT_NS == nil then
-    _NG_VT_NS = vim.api.nvim_create_namespace("navigator_lua")
-  end
-
-  vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
-  if total_num <= wheight then
-    first_line = 0
-  end
-  local pos = {}
-  -- pos of virtual text
-  for _, diag in pairs(result.diagnostics) do
-    if diag.range and diag.range.start and diag.range.start.line then
-      local p = diag.range.start.line
-      p = util.round(p * wheight / math.max(wheight, total_num))
-      if pos[#pos] and pos[#pos].line == p then
-        pos[#pos] = {
-          line = p,
-          sign = _NgConfigValues.lsp.diagnostic_scrollbar_sign[2],
-          severity = diag.severity
-        }
-      else
-        table.insert(pos, {
-          line = p,
-          sign = _NgConfigValues.lsp.diagnostic_scrollbar_sign[1],
-          severity = diag.severity
-        })
+    if result == nil or result.diagnostics == nil or #result.diagnostics == 0 then
+      local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
+                           + vim.lsp.diagnostic.get_count(bufnr, [[Warning]])
+      if diag_cnt == 0 and _NG_VT_DIAG_NS ~= nil then
+        vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
       end
+      return
     end
-    trace("pos", pos, diag.range.start)
-  end
 
-  for i, s in pairs(pos) do
-    local hl = 'ErrorMsg'
-    if s.severity > 1 then
-      hl = 'WarningMsg'
+    -- total line num of current buffer
+
+    -- local winid = vim.fn.win_getid(vim.fn.winnr())
+    -- local winid = vim.api.nvim_get_current_win()
+    local total_num = vim.api.nvim_buf_line_count(bufnr)
+    -- local total_num = vim.fn.getbufinfo(vim.fn.winbufnr(winid))[1].linecount
+    -- window size of current buffer
+
+    local stats = vim.api.nvim_list_uis()[1]
+    local wwidth = stats.width;
+    local wheight = stats.height;
+
+    -- local wwidth = vim.fn.winwidth(winid)
+    -- local wheight = vim.fn.winheight(winid)
+    if total_num <= wheight then
+      return
     end
-    local l = s.line + first_line
-    if l > total_num then
-      l = total_num
+    if _NG_VT_DIAG_NS == nil then
+      _NG_VT_DIAG_NS = vim.api.nvim_create_namespace("navigator_lua_diag")
     end
-    vim.api.nvim_buf_set_extmark(bufnr, _NG_VT_NS, l, -1,
-                                 {virt_text = {{s.sign, hl}}, virt_text_pos = 'right_align'})
-  end
+
+    vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
+    local pos = {}
+    -- pos of virtual text
+    for _, diag in pairs(result.diagnostics) do
+      if diag.range and diag.range.start and diag.range.start.line then
+        local p = diag.range.start.line
+        p = util.round(p * wheight / math.max(wheight, total_num))
+        if pos[#pos] and pos[#pos].line == p then
+          pos[#pos] = {
+            line = p,
+            sign = _NgConfigValues.lsp.diagnostic_scrollbar_sign[2],
+            severity = diag.severity
+          }
+        else
+          table.insert(pos, {
+            line = p,
+            sign = _NgConfigValues.lsp.diagnostic_scrollbar_sign[1],
+            severity = diag.severity
+          })
+        end
+      end
+      trace("pos, line:", p, diag.severity, diag.range.start.line)
+    end
+
+    for i, s in pairs(pos) do
+      local hl = 'ErrorMsg'
+      if s.severity > 1 then
+        hl = 'WarningMsg'
+      end
+      local l = s.line + first_line
+      if l > total_num then
+        l = total_num
+      end
+      vim.api.nvim_buf_set_extmark(bufnr, _NG_VT_DIAG_NS, l, -1,
+                                   {virt_text = {{s.sign, hl}}, virt_text_pos = 'right_align'})
+    end
+
+  end, 10) -- defer in 10ms
+end
+
+local update_err_marker_async = function()
+  local debounce = require'navigator.debounce'.debounce_trailing
+  return debounce(20, error_marker)
 end
 
 local diag_hdlr = mk_handler(function(err, result, ctx, config)
-  trace(result)
   if err ~= nil then
-    log(err, config)
+    log(err, config, result)
     return
   end
-  if vim.fn.mode() ~= 'n' and config.update_in_insert == false then
+
+  local mode = vim.api.nvim_get_mode().mode
+  if mode ~= 'n' and config.update_in_insert == false then
     log("skip in insert mode")
-    return
+    -- return
   end
   local cwd = vim.loop.cwd()
   local ft = vim.bo.filetype
   if diagnostic_list[ft] == nil then
     diagnostic_list[vim.bo.filetype] = {}
   end
-  -- vim.lsp.diagnostic.clear(vim.fn.bufnr(), client.id, nil, nil)
+  local clear = vim.lsp.diagnostic.clear
+  clear(ctx.bufnr, ctx.client_id)
   if util.nvim_0_6() then
+    trace(err, result, ctx, config)
     vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   else
     log("old version of lsp nvim 050")
     vim.lsp.diagnostic.on_publish_diagnostics(err, _, result, ctx.client_id, _, config)
   end
   local uri = result.uri
-  if err then
-    log("diag", err, result)
-    return
-  end
-  if vim.fn.mode() ~= 'n' and config.update_in_insert == false then
-    log("skip in insert mode")
-    return
-  end
-  trace("diag: ", vim.fn.mode(), result, ctx, config)
+  trace("diag: ", mode, result, ctx, config)
   if result and result.diagnostics then
     local item_list = {}
     for _, v in ipairs(result.diagnostics) do
@@ -178,10 +181,12 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
       result.uri = uri
     end
 
-    error_marker(result, ctx.client_id)
+    local marker = update_err_marker_async()
+    marker(result)
   else
-    vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
-    _NG_VT_NS = nil
+    trace("great, no diag errors")
+    vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
+    _NG_VT_DIAG_NS = nil
   end
 
 end)
@@ -209,9 +214,9 @@ end
 M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
 
 M.hide_diagnostic = function()
-  if _NG_VT_NS then
-    vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
-    _NG_VT_NS = nil
+  if _NG_VT_DIAG_NS then
+    vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
+    _NG_VT_DIAG_NS = nil
   end
 end
 
@@ -262,13 +267,13 @@ M.set_diag_loclist = function()
 end
 
 local function clear_diag_VT() -- important for clearing out when no more errors
-  vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
-  _NG_VT_NS = nil
+  vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
+  _NG_VT_DIAG_NS = nil
 end
 
 -- TODO: callback when scroll
 function M.update_err_marker()
-  if _NG_VT_NS == nil then
+  if _NG_VT_DIAG_NS == nil then
     -- nothing to update
     return
   end
@@ -276,19 +281,20 @@ function M.update_err_marker()
 
   local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
                        + vim.lsp.diagnostic.get_count(bufnr, [[Warning]])
-  if diag_cnt == 0 and _NG_VT_NS ~= nil then
-    vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_NS, 0, -1)
+  if diag_cnt == 0 and _NG_VT_DIAG_NS ~= nil then
+    vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
     return
   end
 
   -- redraw
-  vim.api.nvim_buf_clear_namespace(0, _NG_VT_NS, 0, -1)
+  vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
   local errors = vim.lsp.diagnostic.get(bufnr)
   if #errors == 0 then
     return
   end
   local result = {diagnostics = errors, uri = errors[1].uri}
-  error_marker(result)
+  local marker = update_err_marker_async()
+  marker(result)
 end
 
 -- TODO: update the marker

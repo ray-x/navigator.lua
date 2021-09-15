@@ -1124,3 +1124,173 @@ definition.lua:9: { {
       }
     }
   } }
+
+
+-- rust code lens
+
+
+{ {
+    result = { {
+        command = {
+          arguments = { {
+              args = {
+                cargoArgs = { "run", "--package", "hello", "--bin", "hello" },
+                cargoExtraArgs = {},
+                executableArgs = {},
+                workspaceRoot = "/Users/ray.xu/lsp_test/rust"
+              },
+              kind = "cargo",
+              label = "run hello",
+              location = {
+                targetRange = {
+                  end = {
+                    character = 1,
+                    line = 68
+                  },
+                  start = {
+                    character = 0,
+                    line = 45
+                  }
+                },
+                targetSelectionRange = {
+                  end = {
+                    character = 7,
+                    line = 45
+                  },
+                  start = {
+                    character = 3,
+                    line = 45
+                  }
+                },
+                targetUri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+              }
+            } },
+          command = "rust-analyzer.runSingle",
+          title = "▶︎ Run "
+        },
+        range = {
+          end = {
+            character = 7,
+            line = 45
+          },
+          start = {
+            character = 3,
+            line = 45
+          }
+        }
+      }, {
+        command = {
+          arguments = { {
+              args = {
+                cargoArgs = { "run", "--package", "hello", "--bin", "hello" },
+                cargoExtraArgs = {},
+                executableArgs = {},
+                workspaceRoot = "/Users/ray.xu/lsp_test/rust"
+              },
+              kind = "cargo",
+              label = "run hello",
+              location = {
+                targetRange = {
+                  end = {
+                    character = 1,
+                    line = 68
+                  },
+                  start = {
+                    character = 0,
+                    line = 45
+                  }
+                },
+                targetSelectionRange = {
+                  end = {
+                    character = 7,
+                    line = 45
+                  },
+                  start = {
+                    character = 3,
+                    line = 45
+                  }
+                },
+                targetUri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+              }
+            } },
+          command = "rust-analyzer.debugSingle",
+          title = "Debug"
+        },
+        range = {
+          end = {
+            character = 7,
+            line = 45
+          },
+          start = {
+            character = 3,
+            line = 45
+          }
+        }
+      }, {
+        data = {
+          impls = {
+            position = {
+              character = 6,
+              line = 2
+            },
+            textDocument = {
+              uri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+            }
+          }
+        },
+        range = {
+          end = {
+            character = 10,
+            line = 2
+          },
+          start = {
+            character = 6,
+            line = 2
+          }
+        }
+      }, {
+        data = {
+          impls = {
+            position = {
+              character = 7,
+              line = 28
+            },
+            textDocument = {
+              uri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+            }
+          }
+        },
+        range = {
+          end = {
+            character = 10,
+            line = 28
+          },
+          start = {
+            character = 7,
+            line = 28
+          }
+        }
+      }, {
+        data = {
+          impls = {
+            position = {
+              character = 7,
+              line = 31
+            },
+            textDocument = {
+              uri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+            }
+          }
+        },
+        range = {
+          end = {
+            character = 10,
+            line = 31
+          },
+          start = {
+            character = 7,
+            line = 31
+          }
+        }
+      } }
+  } }
