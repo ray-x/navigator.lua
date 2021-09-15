@@ -13,18 +13,32 @@ local mk_handler = require"navigator.util".mk_handler
 local path_cur = require"navigator.util".path_cur()
 diagnostic_list[vim.bo.filetype] = {}
 
-local function error_marker(result, client_id)
+local function clear_diag_VT(bufnr) -- important for clearing out when no more errors
+  log(bufnr, _NG_VT_DIAG_NS)
+  if bufnr == nil or _NG_VT_DIAG_NS == nil then
+    return
+  end
+
+  vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
+  _NG_VT_DIAG_NS = nil
+end
+
+local function error_marker(result, ctx, config)
   vim.defer_fn(function()
     if vim.tbl_isempty(result.diagnostics) then
       return
     end
-    trace('schedule callback', result)
+    trace('schedule callback', result, ctx, config)
     if _NgConfigValues.lsp.diagnostic_scrollbar_sign == nil then -- not enabled or already shown
       return
     end
     local first_line = vim.fn.line('w0')
     -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
-    local bufnr = vim.api.nvim_get_current_buf()
+
+    bufnr = ctx.bufnr
+    if bufnr == nil then
+      bufnr = vim.uri_to_bufnr(result.uri)
+    end
     local fname = vim.api.nvim_buf_get_name(bufnr)
     local uri = vim.uri_from_fname(fname)
     if uri ~= result.uri then
@@ -52,11 +66,9 @@ local function error_marker(result, client_id)
     -- window size of current buffer
 
     local stats = vim.api.nvim_list_uis()[1]
-    local wwidth = stats.width;
+    -- local wwidth = stats.width;
     local wheight = stats.height;
 
-    -- local wwidth = vim.fn.winwidth(winid)
-    -- local wheight = vim.fn.winheight(winid)
     if total_num <= wheight then
       return
     end
@@ -68,8 +80,9 @@ local function error_marker(result, client_id)
     local pos = {}
     -- pos of virtual text
     for _, diag in pairs(result.diagnostics) do
+      local p
       if diag.range and diag.range.start and diag.range.start.line then
-        local p = diag.range.start.line
+        p = diag.range.start.line
         p = util.round(p * wheight / math.max(wheight, total_num))
         if pos[#pos] and pos[#pos].line == p then
           pos[#pos] = {
@@ -118,15 +131,24 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
   local mode = vim.api.nvim_get_mode().mode
   if mode ~= 'n' and config.update_in_insert == false then
     log("skip in insert mode")
-    -- return
+    return
   end
   local cwd = vim.loop.cwd()
   local ft = vim.bo.filetype
   if diagnostic_list[ft] == nil then
     diagnostic_list[vim.bo.filetype] = {}
   end
-  local clear = vim.lsp.diagnostic.clear
-  clear(ctx.bufnr, ctx.client_id)
+
+  -- not sure if I should do this hack
+  if vim.tbl_isempty(result.diagnostics) then
+    local clear = vim.lsp.diagnostic.clear
+    if vim.api.nvim_buf_is_loaded(ctx.bufnr) then
+      clear(ctx.bufnr, ctx.client_id)
+      clear_diag_VT(ctx.bufnr)
+    end
+    return
+  end
+
   if util.nvim_0_6() then
     trace(err, result, ctx, config)
     vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
@@ -182,7 +204,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     end
 
     local marker = update_err_marker_async()
-    marker(result)
+    marker(result, ctx, config)
   else
     trace("great, no diag errors")
     vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
@@ -266,11 +288,6 @@ M.set_diag_loclist = function()
   end
 end
 
-local function clear_diag_VT() -- important for clearing out when no more errors
-  vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
-  _NG_VT_DIAG_NS = nil
-end
-
 -- TODO: callback when scroll
 function M.update_err_marker()
   if _NG_VT_DIAG_NS == nil then
@@ -294,7 +311,7 @@ function M.update_err_marker()
   end
   local result = {diagnostics = errors, uri = errors[1].uri}
   local marker = update_err_marker_async()
-  marker(result)
+  marker(result, {bufnr = bufnr, method = 'textDocument/publishDiagnostics'})
 end
 
 -- TODO: update the marker
