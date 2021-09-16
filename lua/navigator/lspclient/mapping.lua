@@ -241,9 +241,11 @@ function M.setup(user_opts)
       require"navigator.diagnostics".diagnostic_handler
 
   -- TODO: when active signature merge to neovim, remove this setup:
-  local hassig, sig = pcall(require, "lsp_signature")
-  if hassig then
-    if _NgConfigValues.signature_help_cfg then
+
+  if _NgConfigValues.signature_help_cfg then
+    log("setup signature from navigator")
+    local hassig, sig = pcall(require, "lsp_signature")
+    if hassig then
       sig.setup(_NgConfigValues.signature_help_cfg)
     end
   else
