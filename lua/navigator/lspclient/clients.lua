@@ -518,6 +518,11 @@ local function setup(user_opts)
 
   wait_lsp_startup(ft, retry, lsp_opts)
 
+  --- if code line enabled
+  if _NgConfigValues.lsp.code_lens then
+    require("navigator.codelens").setup()
+  end
+
   _LoadedClients[ft] = true
   -- _LoadedClients[ft] = vim.tbl_extend("keep", _LoadedClients[ft] or {}, {ft})
 

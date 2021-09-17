@@ -5,6 +5,10 @@ local code_action = {}
 local gui = require "navigator.gui"
 local config = require("navigator").config_values()
 local api = vim.api
+
+local sign_name = "NavigatorLightBulb"
+
+local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cfg)
   log(actions, ctx)
   if actions == nil or vim.tbl_isempty(actions) then
@@ -71,13 +75,6 @@ local get_current_winid = function()
   return api.nvim_get_current_win()
 end
 
-local sign_name = "NavigatorLightBulb"
-
-if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
-  vim.fn.sign_define(sign_name,
-                     {text = config.icons.code_action_icon, texthl = "LspDiagnosticsSignHint"})
-end
-
 local function _update_virtual_text(line)
   local namespace = get_namespace()
   pcall(api.nvim_buf_clear_namespace, 0, namespace, 0, -1)
@@ -94,6 +91,11 @@ local function _update_virtual_text(line)
 end
 
 local function _update_sign(line)
+
+  if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
+    vim.fn.sign_define(sign_name,
+                       {text = config.icons.code_action_icon, texthl = "LspDiagnosticsSignHint"})
+  end
   local winid = get_current_winid()
   if code_action[winid] == nil then
     code_action[winid] = {}
@@ -186,7 +188,15 @@ code_action.code_action_prompt = function()
     return
   end
 
-  local diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
+  local diagnostics
+  if diagnostic.get_line_diagnostics then
+    -- old version
+    diagnostics = diagnostic.get_line_diagnostics()
+  else
+    local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
+    diagnostics = diagnostic.get(vim.api.nvim_get_current_buf(), {lnum = lnum})
+  end
+
   local winid = get_current_winid()
   code_action[winid] = code_action[winid] or {}
   code_action[winid].lightbulb_line = code_action[winid].lightbulb_line or 0

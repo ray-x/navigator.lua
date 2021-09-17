@@ -1,6 +1,7 @@
 local gui = require "navigator.gui"
 local diagnostic_list = {}
-
+local diagnostic = vim.diagnostic or vim.lsp.diagnostic
+-- local hide = diagnostic.hide or diagnostic.clear
 _NG_VT_DIAG_NS = vim.api.nvim_create_namespace("navigator_lua_diag")
 local util = require "navigator.util"
 local log = util.log
@@ -23,6 +24,19 @@ local function clear_diag_VT(bufnr) -- important for clearing out when no more e
   _NG_VT_DIAG_NS = nil
 end
 
+local function head_lsp_diagnostic()
+  return vim.diagnostic ~= nil
+end
+
+local function get_count(bufnr, level)
+  if head_lsp_diagnostic() then
+    return #diagnostic.get(bufnr, {severity = level})
+  else
+    return diagnostic.get_count(bufnr, level)
+  end
+
+end
+
 local function error_marker(result, ctx, config)
   vim.defer_fn(function()
     if vim.tbl_isempty(result.diagnostics) then
@@ -35,7 +49,7 @@ local function error_marker(result, ctx, config)
     local first_line = vim.fn.line('w0')
     -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
 
-    bufnr = ctx.bufnr
+    local bufnr = ctx.bufnr
     if bufnr == nil then
       bufnr = vim.uri_to_bufnr(result.uri)
     end
@@ -49,8 +63,7 @@ local function error_marker(result, ctx, config)
     trace(result, bufnr)
 
     if result == nil or result.diagnostics == nil or #result.diagnostics == 0 then
-      local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
-                           + vim.lsp.diagnostic.get_count(bufnr, [[Warning]])
+      local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
       if diag_cnt == 0 and _NG_VT_DIAG_NS ~= nil then
         vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
       end
@@ -139,11 +152,11 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     diagnostic_list[vim.bo.filetype] = {}
   end
 
+  local client_id = ctx.client_id
   -- not sure if I should do this hack
   if vim.tbl_isempty(result.diagnostics) then
-    local clear = vim.lsp.diagnostic.clear
     if vim.api.nvim_buf_is_loaded(ctx.bufnr) then
-      clear(ctx.bufnr, ctx.client_id)
+      -- diagnostic.reset(ctx.client_id)
       clear_diag_VT(ctx.bufnr)
     end
     return
@@ -224,7 +237,10 @@ local diagnostic_cfg = {
   signs = true,
   update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false,
   severity_sort = function(a, b)
-    return a.severity < b.severity
+    return true
+    -- log(debug.traceback())
+    -- log(a, b)
+    -- return a.severity < b.severity
   end
 }
 
@@ -243,17 +259,6 @@ M.hide_diagnostic = function()
 end
 
 M.show_diagnostic = function()
-  vim.lsp.diagnostic.get_all()
-
-  local bufs = vim.api.nvim_list_bufs()
-  for _, buf in ipairs(bufs) do
-    local bname = vim.fn.bufname(buf)
-    if #bname > 0 and not util.exclude(bname) then
-      if vim.api.nvim_buf_is_loaded(buf) then
-        vim.lsp.diagnostic.get(buf, nil)
-      end
-    end
-  end
   if diagnostic_list[vim.bo.filetype] ~= nil then
     -- log(diagnostic_list[vim.bo.filetype])
     -- vim.fn.setqflist({}, " ", {title = "LSP", items = diagnostic_list[vim.bo.filetype]})
@@ -276,12 +281,16 @@ M.show_diagnostic = function()
   end
 end
 
--- set quickfix win
+-- set loc list win
 M.set_diag_loclist = function()
   if not vim.tbl_isempty(vim.lsp.buf_get_clients(0)) then
-    local err_cnt = vim.lsp.diagnostic.get_count(0, [[Error]])
+    local err_cnt = get_count(0, [[Error]])
     if err_cnt > 0 and _NgConfigValues.lsp.disply_diagnostic_qf then
-      vim.lsp.diagnostic.set_loclist()
+      if diagnostic.set_loclist then
+        diagnostic.set_loclist()
+      else
+        diagnostic.setloclist()
+      end
     else
       vim.cmd("lclose")
     end
@@ -296,8 +305,7 @@ function M.update_err_marker()
   end
   local bufnr = vim.api.nvim_get_current_buf()
 
-  local diag_cnt = vim.lsp.diagnostic.get_count(bufnr, [[Error]])
-                       + vim.lsp.diagnostic.get_count(bufnr, [[Warning]])
+  local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
   if diag_cnt == 0 and _NG_VT_DIAG_NS ~= nil then
     vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
     return
@@ -305,7 +313,7 @@ function M.update_err_marker()
 
   -- redraw
   vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
-  local errors = vim.lsp.diagnostic.get(bufnr)
+  local errors = diagnostic.get(bufnr)
   if #errors == 0 then
     return
   end
@@ -321,6 +329,16 @@ end
 
 if _NgConfigValues.lsp.diagnostic_scrollbar_sign then
   vim.cmd [[autocmd WinScrolled * lua require'navigator.diagnostics'.update_err_marker()]]
+end
+
+function M.get_line_diagnostic()
+  local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
+  return diagnostic.get(vim.api.nvim_get_current_buf(), {lnum = lnum})
+end
+
+function M.show_line_diagnostics()
+  local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
+  diagnostic.show_line_diagnostics({border = 'single'}, vim.api.nvim_get_current_buf(), lnum)
 end
 
 return M

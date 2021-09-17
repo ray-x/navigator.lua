@@ -14,6 +14,7 @@ local M = {}
 
 M.on_attach = function(client, bufnr)
   local uri = vim.uri_from_bufnr(bufnr)
+
   if uri == "file://" or uri == "file:///" or #uri < 11 then
     log("skip for float buffer", uri)
     return {error = "invalid file", result = nil}
@@ -24,7 +25,7 @@ M.on_attach = function(client, bufnr)
   diagnostic_map(bufnr)
   -- add highlight for Lspxxx
   require"navigator.lspclient.highlight".add_highlight()
-
+  require"navigator.lspclient.highlight".diagnositc_config_sign()
   api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
 
   require("navigator.lspclient.mapping").setup({

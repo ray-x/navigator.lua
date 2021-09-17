@@ -31,7 +31,7 @@ local key_maps = {
   {key = "<Leader>go", func = "outgoing_calls()"},
   {key = "gi", func = "implementation()"},
   {key = "<Space>D", func = "type_definition()"},
-  {key = "gL", func = "diagnostic.show_line_diagnostics( { border = 'single' })"},
+  {key = "gL", func = "require('navigator.diagnostics').show_line_diagnostics()"},
   {key = "gG", func = "require('navigator.diagnostics').show_diagnostic()"},
   {key = "]d", func = "diagnostic.goto_next({ border = 'single' })"},
   {key = "[d", func = "diagnostic.goto_prev({ border = 'single' })"},
@@ -119,7 +119,11 @@ local function set_mapping(user_opts)
     if string.find(value.func, "require") then
       f = "<Cmd>lua " .. value.func .. "<CR>"
     elseif string.find(value.func, "diagnostic") then
-      f = "<Cmd>lua vim.lsp." .. value.func .. "<CR>"
+      local diagnostic = '<Cmd>lua vim.'
+      if vim.lsp.diagnostic ~= nil then
+        diagnostic = '<Cmd>lua vim.lsp.'
+      end
+      f = diagnostic .. value.func .. "<CR>"
     elseif string.find(value.func, "vim.") then
       f = "<Cmd>lua " .. value.func .. "<CR>"
     end

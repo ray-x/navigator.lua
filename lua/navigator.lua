@@ -47,12 +47,18 @@ _NgConfigValues = {
   },
   lspinstall = false, -- set to true if you would like use the lsp installed by lspinstall
   icons = {
+    icons = true, -- set to false if you using a terminal does not have nerd/icon
     -- Code action
     code_action_icon = " ",
     -- code lens
     code_lens_action_icon = " ",
     -- Diagnostics
     diagnostic_head = '🐛',
+    diagnostic_err = "📛",
+    diagnostic_warn = [[☣️]],
+    diagnostic_info = "👎",
+    diagnostic_hint = [[💁]],
+
     diagnostic_head_severity_1 = "🈲",
     diagnostic_head_severity_2 = "☣️",
     diagnostic_head_severity_3 = "👎",
@@ -142,12 +148,6 @@ M.setup = function(cfg)
   if _NgConfigValues.ts_fold == true then
     require('navigator.foldts').on_attach()
   end
-
-  --- if code line enabled
-  if _NgConfigValues.lsp.code_lens then
-    require("navigator.codelens").setup()
-  end
-
 end
 
 return M
