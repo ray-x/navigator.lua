@@ -40,7 +40,7 @@ local function check_lhs(text, symbol)
     return false
   end
   if s < eq and eq ~= eq2 then
-    log(symbol, "modified")
+    trace(symbol, "modified")
   end
   if eq == eq3 + 1 then
     return false

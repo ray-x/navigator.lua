@@ -34,7 +34,7 @@ _NgConfigValues = {
     -- to load those files
     diagnostic_virtual_text = true, -- show virtual for diagnostic message
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
-    diagnostic_scrollbar_sign = {'▃', '█'}, -- set to nil to disable, set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
+    diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- set to nil to disable, set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
     tsserver = {
       -- filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetype
@@ -55,14 +55,14 @@ _NgConfigValues = {
     -- Diagnostics
     diagnostic_head = '🐛',
     diagnostic_err = "📛",
-    diagnostic_warn = [[☣️]],
-    diagnostic_info = "👎",
+    diagnostic_warn = "👎",
+    diagnostic_info = [[👩]],
     diagnostic_hint = [[💁]],
 
     diagnostic_head_severity_1 = "🈲",
     diagnostic_head_severity_2 = "☣️",
     diagnostic_head_severity_3 = "👎",
-    diagnostic_head_description = "📛",
+    diagnostic_head_description = "👹",
     diagnostic_virtual_text = "🦊",
     diagnostic_file = "🚑",
     -- Values

@@ -1,4 +1,4 @@
-parameter
+-- [[  -- parameter
 {
   position = {
     character = 6,
@@ -7,8 +7,7 @@ parameter
   textDocument = {
   uri = "file:///Users/username/lsp_test/go/interface.go"
   }
-}
-
+} ]]
 
 --[[ -- incomming/outgoing
 
@@ -103,8 +102,8 @@ dir from result { {
 
 
 
-
--- [[ locations/reference from lsp
+-- locations/reference from lsp
+-- [[
 { {
     range = {
      ["end"] = {
@@ -130,7 +129,7 @@ dir from result { {
     },
     uri = "file:///Users/username/lsp-test/go/interface.go"
   } }
---]]
+]] --
 
 
 -- definition

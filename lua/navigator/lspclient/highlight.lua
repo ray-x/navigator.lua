@@ -1,43 +1,67 @@
 local M = {}
+
+local log = require"navigator.util".log
 local api = vim.api
 
 -- lsp sign            ﮻           ﯭ                ﳀ    
 function M.diagnositc_config_sign()
+  if M.configed then
+    return
+  end
   local icons = _NgConfigValues.icons
-  local e, w, i, h = icons.diagnostic_err, icons.diagnostic_warn, icons.diagnostic_info,
-                     icons.diagnostic_hint
-  if vim.diagnostic ~= nil then
-    vim.fn.sign_define('DiagnosticSignError',
-                       {text = e, texthl = 'DiagnosticError', linehl = '', numhl = ''})
-    vim.fn.sign_define('DiagnosticSignWarn',
-                       {text = w, texthl = 'DiagnosticWarn', linehl = '', numhl = ''})
-    vim.fn.sign_define('DiagnosticSignInfo',
-                       {text = i, texthl = 'DiagnosticInfo', linehl = '', numhl = ''})
-    vim.fn.sign_define('DiagnosticSignHint',
-                       {text = h, texthl = 'DiagnosticHint', linehl = '', numhl = ''})
-  else
-    local sign_name = "NavigatorLightBulb"
+
+  local sign_name = "NavigatorLightBulb"
+  if vim.fn.sign_getdefined(sign_name).text == nil then
+
     vim.fn
         .sign_define(sign_name, {text = icons.code_action_icon, texthl = "LspDiagnosticsSignHint"})
 
     sign_name = "NavigatorCodeLensLightBulb"
     vim.fn.sign_define(sign_name,
                        {text = icons.code_lens_action_icon, texthl = "LspDiagnosticsSignHint"})
-    vim.fn.sign_define('LspDiagnosticsSignError',
-                       {text = e, texthl = 'LspDiagnosticsSignError', linehl = '', numhl = ''})
-    vim.fn.sign_define('LspDiagnosticsSignWarning',
-                       {text = w, texthl = 'LspDiagnosticsSignWarning', linehl = '', numhl = ''})
-    vim.fn.sign_define('LspDiagnosticsSignInformation', {
-      text = i,
-      texthl = 'LspDiagnosticsSignInformation',
-      linehl = '',
-      numhl = ''
-    })
-    vim.fn.sign_define('LspDiagnosticsSignHint',
-                       {text = h, texthl = 'LspDiagnosticsSignHint', linehl = '', numhl = ''})
-
-    print("old sign ")
   end
+
+  local e, w, i, h = icons.diagnostic_err, icons.diagnostic_warn, icons.diagnostic_info,
+                     icons.diagnostic_hint
+  if vim.diagnostic ~= nil then
+    local t = vim.fn.sign_getdefined('DiagnosticSignWarn')
+    log('*** t ', t, "diagnostic add sign")
+    if vim.tbl_isempty(t) or t[1].text == "W " or true then
+
+      log('*** t ', t, "diagnostic add sign")
+      vim.fn.sign_define('DiagnosticSignError',
+                         {text = e, texthl = 'DiagnosticError', linehl = '', numhl = ''})
+      vim.fn.sign_define('DiagnosticSignWarn',
+                         {text = w, texthl = 'DiagnosticWarn', linehl = '', numhl = ''})
+      vim.fn.sign_define('DiagnosticSignInfo',
+                         {text = i, texthl = 'DiagnosticInfo', linehl = '', numhl = ''})
+      vim.fn.sign_define('DiagnosticSignHint',
+                         {text = h, texthl = 'DiagnosticHint', linehl = '', numhl = ''})
+
+      t = vim.fn.sign_getdefined('DiagnosticSignWarn')
+      log('*** t ', t, "diagnostic add sign")
+    end
+  else
+    local t = vim.fn.sign_getdefined('LspDiagnosticSignWarn')
+
+    log('*** t ', t, "diagnostic add sign")
+
+    if vim.tbl_isempty(t) or t[1].text == "W " then
+      vim.fn.sign_define('LspDiagnosticsSignError',
+                         {text = e, texthl = 'LspDiagnosticsSignError', linehl = '', numhl = ''})
+      vim.fn.sign_define('LspDiagnosticsSignWarning',
+                         {text = w, texthl = 'LspDiagnosticsSignWarning', linehl = '', numhl = ''})
+      vim.fn.sign_define('LspDiagnosticsSignInformation', {
+        text = i,
+        texthl = 'LspDiagnosticsSignInformation',
+        linehl = '',
+        numhl = ''
+      })
+      vim.fn.sign_define('LspDiagnosticsSignHint',
+                         {text = h, texthl = 'LspDiagnosticsSignHint', linehl = '', numhl = ''})
+    end
+  end
+  M.configed = true
 end
 
 function M.add_highlight()
