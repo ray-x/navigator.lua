@@ -47,7 +47,7 @@ _NgConfigValues = {
   },
   lspinstall = false, -- set to true if you would like use the lsp installed by lspinstall
   icons = {
-    icons = true, -- set to false if you using a terminal does not have nerd/icon
+    icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
     -- Code action
     code_action_icon = " ",
     -- code lens

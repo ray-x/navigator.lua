@@ -25,10 +25,8 @@ function M.diagnositc_config_sign()
                      icons.diagnostic_hint
   if vim.diagnostic ~= nil then
     local t = vim.fn.sign_getdefined('DiagnosticSignWarn')
-    log('*** t ', t, "diagnostic add sign")
-    if vim.tbl_isempty(t) or t[1].text == "W " or true then
+    if vim.tbl_isempty(t) or t[1].text == "W " and icons.icons == true then
 
-      log('*** t ', t, "diagnostic add sign")
       vim.fn.sign_define('DiagnosticSignError',
                          {text = e, texthl = 'DiagnosticError', linehl = '', numhl = ''})
       vim.fn.sign_define('DiagnosticSignWarn',
@@ -43,10 +41,7 @@ function M.diagnositc_config_sign()
     end
   else
     local t = vim.fn.sign_getdefined('LspDiagnosticSignWarn')
-
-    log('*** t ', t, "diagnostic add sign")
-
-    if vim.tbl_isempty(t) or t[1].text == "W " then
+    if vim.tbl_isempty(t) or t[1].text == "W " and icons.icons == true then
       vim.fn.sign_define('LspDiagnosticsSignError',
                          {text = e, texthl = 'LspDiagnosticsSignError', linehl = '', numhl = ''})
       vim.fn.sign_define('LspDiagnosticsSignWarning',
