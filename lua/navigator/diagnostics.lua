@@ -261,12 +261,7 @@ local diagnostic_cfg = {
   -- and on, using buffer local variables
   signs = true,
   update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false,
-  severity_sort = function(a, b)
-    return true
-    -- log(debug.traceback())
-    -- log(a, b)
-    -- return a.severity < b.severity
-  end
+  severity_sort = {reverse = true}
 }
 
 if _NgConfigValues.lsp.diagnostic_virtual_text == false then
