@@ -131,7 +131,7 @@ function M.new_list_view(opts)
   if config.width ~= nil and config.width > 0.3 and config.width < 0.99 then
     width = math.floor(wwidth * config.width)
   end
-  width = math.min(120, width)
+  width = math.min(120, width, opts.width or 120)
   local wheight = math.floor(1 + api.nvim_get_option("lines")
                                  * (_NgConfigValues.height + _NgConfigValues.preview_height))
   local pheight = math.max(_NgConfigValues.preview_lines, math.floor(

@@ -141,8 +141,12 @@ function M.run_action()
     end
     apply(action_chosen)
   end
+
+  local divider = string.rep('─', width + 2)
+
+  table.insert(data, 2, divider)
   if #data > 0 then
-    gui.new_list_view {
+    local lv = gui.new_list_view {
       items = data,
       width = width + 4,
       loc = "top_center",
@@ -158,6 +162,8 @@ function M.run_action()
         return pos
       end
     }
+
+    vim.api.nvim_buf_add_highlight(lv.bufnr, -1, 'Title', 0, 0, -1)
   end
 end
 

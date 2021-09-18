@@ -6,7 +6,6 @@ _NG_VT_DIAG_NS = vim.api.nvim_create_namespace("navigator_lua_diag")
 local util = require "navigator.util"
 local log = util.log
 local trace = require"guihua.log".trace
-trace = log
 local error = util.error
 
 local path_sep = require"navigator.util".path_sep()
@@ -297,12 +296,14 @@ M.show_diagnostic = function()
     end
     -- log(display_items)
     if #display_items > 0 then
-      gui.new_list_view({
+      local listview = gui.new_list_view({
         items = display_items,
         api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head
             .. " Diagnostic ",
         enable_preview_edit = true
       })
+      trace("new buffer", listview.bufnr)
+      vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
     end
   end
 end

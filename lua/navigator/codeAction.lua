@@ -11,7 +11,7 @@ local sign_name = "NavigatorLightBulb"
 local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cfg)
   log(actions, ctx)
-  if actions == nil or vim.tbl_isempty(actions) then
+  if actions == nil or vim.tbl_isempty(actions) or err then
     print("No code actions available")
     return
   end
@@ -23,13 +23,16 @@ code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cf
     table.insert(data, title)
     actions[i].display_title = title
   end
-  local width = 0
+  local width = 42
   for _, str in ipairs(data) do
     if #str > width then
       width = #str
     end
   end
 
+  local divider = string.rep('─', width + 2)
+
+  table.insert(data, 2, divider)
   local apply = require('navigator.lspwrapper').apply_action
   local function apply_action(action)
     local action_chosen = nil
@@ -46,7 +49,7 @@ code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cf
     apply(action_chosen)
   end
 
-  gui.new_list_view {
+  local listview = gui.new_list_view {
     items = data,
     width = width + 4,
     loc = "top_center",
@@ -62,6 +65,9 @@ code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cf
       return pos
     end
   }
+
+  log("new buffer", listview.bufnr)
+  vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
 end)
 
 -- https://github.com/glepnir/lspsaga.nvim/blob/main/lua/lspsaga/codeaction.lua
