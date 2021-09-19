@@ -69,7 +69,9 @@ function M.setup()
   local on_codelens = vim.lsp.handlers["textDocument/codeLens"]
   vim.lsp.handlers["textDocument/codeLens"] = mk_handler(
                                                   function(err, result, ctx, cfg)
-        trace(err, result, ctx.client_id, ctx.bufnr, cfg)
+        -- trace(err, result, ctx.client_id, ctx.bufnr, cfg or {})
+        cfg = cfg or {}
+        ctx = ctx or {bufnr = vim.api.nvim_get_current_buf()}
         if nvim_0_6() then
           on_codelens(err, result, ctx, cfg)
           codelens_hdlr(err, result, ctx, cfg)
@@ -139,8 +141,12 @@ function M.run_action()
     end
     apply(action_chosen)
   end
+
+  local divider = string.rep('─', width + 2)
+
+  table.insert(data, 2, divider)
   if #data > 0 then
-    gui.new_list_view {
+    local lv = gui.new_list_view {
       items = data,
       width = width + 4,
       loc = "top_center",
@@ -156,7 +162,70 @@ function M.run_action()
         return pos
       end
     }
+
+    vim.api.nvim_buf_add_highlight(lv.bufnr, -1, 'Title', 0, 0, -1)
   end
+end
+
+local virtual_types_ns = api.nvim_create_namespace("ng_virtual_types");
+
+function M.disable()
+  local bufnr = vim.api.nvim_get_current_buf()
+  vim.api.nvim_buf_clear_namespace(bufnr, virtual_types_ns, 0, -1)
+  is_enabled = false
+end
+
+M.inline = function()
+  local lsp = vim.lsp
+  if is_enabled == false then
+    return
+  end
+  if vim.fn.getcmdwintype() == ':' then
+    return
+  end
+  if #vim.lsp.buf_get_clients() == 0 then
+    return
+  end
+
+  local bufnr = api.nvim_get_current_buf()
+  local parameter = lsp.util.make_position_params()
+  local response = lsp.buf_request_sync(bufnr, "textDocument/codeLens", parameter)
+
+  -- Clear previous highlighting
+  api.nvim_buf_clear_namespace(bufnr, virtual_types_ns, 0, -1)
+
+  if response then
+    log(response)
+    for _, v in ipairs(response) do
+      if v == nil or v.result == nil then
+        return
+      end -- no response
+      for _, vv in pairs(v.result) do
+        local start_line = -1
+        for _, vvv in pairs(vv.range) do
+          start_line = tonumber(vvv.line)
+        end
+
+        local cmd = vv.command
+        local msg = _NgConfigValues.icons.code_action_icon .. ' '
+        if cmd then
+          local txt = cmd.title or ''
+          txt = txt .. ' ' .. (cmd.command or '') .. ' '
+          msg = msg .. txt .. ' '
+        end
+
+        log(msg)
+        api.nvim_buf_set_extmark(bufnr, virtual_types_ns, start_line, -1, {
+          virt_text = {{msg, "LspCodeLensText"}},
+          virt_text_pos = 'overlay',
+          hl_mode = 'combine'
+        })
+      end
+    end
+    -- else
+    --   api.nvim_command("echohl WarningMsg | echo 'VirtualTypes: No response' | echohl None")
+  end
+
 end
 
 return M

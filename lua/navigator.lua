@@ -8,6 +8,7 @@ _NgConfigValues = {
   preview_lines_before = 5, -- lines before the highlight line
   default_mapping = true,
   keymaps = {}, -- e.g keymaps={{key = "GR", func = "references()"}, } this replace gr default mapping
+  external = nil, -- true: enable for goneovim multigrid otherwise false
 
   border = "single", -- border style, can be one of 'none', 'single', 'double', "shadow"
   combined_attach = "both", -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
@@ -33,7 +34,7 @@ _NgConfigValues = {
     -- to load those files
     diagnostic_virtual_text = true, -- show virtual for diagnostic message
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
-    diagnostic_scrollbar_sign = {'▃', '█'}, -- set to nil to disable, set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
+    diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- set to nil to disable, set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
     tsserver = {
       -- filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetype
@@ -46,16 +47,22 @@ _NgConfigValues = {
   },
   lspinstall = false, -- set to true if you would like use the lsp installed by lspinstall
   icons = {
+    icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
     -- Code action
-    code_action_icon = " ",
+    code_action_icon = "🏏", -- "",
     -- code lens
     code_lens_action_icon = " ",
     -- Diagnostics
     diagnostic_head = '🐛',
+    diagnostic_err = "📛",
+    diagnostic_warn = "👎",
+    diagnostic_info = [[👩]],
+    diagnostic_hint = [[💁]],
+
     diagnostic_head_severity_1 = "🈲",
     diagnostic_head_severity_2 = "☣️",
     diagnostic_head_severity_3 = "👎",
-    diagnostic_head_description = "📛",
+    diagnostic_head_description = "👹",
     diagnostic_virtual_text = "🦊",
     diagnostic_file = "🚑",
     -- Values
@@ -131,7 +138,7 @@ M.setup = function(cfg)
 
   -- log("navigator loader")
   if _NgConfigValues.code_action_prompt.enable then
-    vim.cmd [[autocmd CursorHold * lua require'navigator.codeAction'.code_action_prompt()]]
+    vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
   end
   -- vim.cmd("autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4")
   if not _NgConfigValues.loaded then
@@ -141,12 +148,6 @@ M.setup = function(cfg)
   if _NgConfigValues.ts_fold == true then
     require('navigator.foldts').on_attach()
   end
-
-  --- if code line enabled
-  if _NgConfigValues.lsp.code_lens then
-    require("navigator.codelens").setup()
-  end
-
 end
 
 return M

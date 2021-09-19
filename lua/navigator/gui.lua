@@ -58,6 +58,11 @@ function M._preview_location(opts) -- location, width, pos_x, pos_y
     uri = uri,
     allow_edit = opts.enable_edit
   }
+
+  if _NgConfigValues.external then
+    win_opts.external = true
+    win_opts.relative = nil
+  end
   -- win_opts.items = contents
   win_opts.hl_line = opts.lnum - display_range.start.line
   if win_opts.hl_line < 0 then
@@ -84,7 +89,8 @@ function M._preview_location(opts) -- location, width, pos_x, pos_y
     border = opts.border,
     display_range = win_opts.display_range,
     hl_line = win_opts.hl_line,
-    allow_edit = win_opts.allow_edit
+    allow_edit = win_opts.allow_edit,
+    external = win_opts.external
   })
   return w
 end
@@ -125,7 +131,7 @@ function M.new_list_view(opts)
   if config.width ~= nil and config.width > 0.3 and config.width < 0.99 then
     width = math.floor(wwidth * config.width)
   end
-  width = math.min(120, width)
+  width = math.min(120, width, opts.width or 120)
   local wheight = math.floor(1 + api.nvim_get_option("lines")
                                  * (_NgConfigValues.height + _NgConfigValues.preview_height))
   local pheight = math.max(_NgConfigValues.preview_lines, math.floor(
@@ -173,6 +179,10 @@ function M.new_list_view(opts)
   if transparency == 100 then
     transparency = nil
   end
+  local ext = _NgConfigValues.external
+  if ext then
+    opts.relative = nil
+  end
   return ListView:new({
     loc = loc,
     prompt = prompt,
@@ -186,6 +196,7 @@ function M.new_list_view(opts)
     -- data = display_data,
     data = data,
     border = border,
+    external = ext,
     on_confirm = opts.on_confirm or function(item, split_opts)
       log(split_opts)
       split_opts = split_opts or {}
@@ -213,6 +224,7 @@ function M.new_list_view(opts)
         offset_x = 0,
         offset_y = offset_y,
         border = border,
+        external = ext,
         enable_edit = opts.enable_preview_edit or false
       })
     end

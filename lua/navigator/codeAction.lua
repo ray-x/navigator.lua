@@ -5,9 +5,13 @@ local code_action = {}
 local gui = require "navigator.gui"
 local config = require("navigator").config_values()
 local api = vim.api
+
+local sign_name = "NavigatorLightBulb"
+
+local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cfg)
   log(actions, ctx)
-  if actions == nil or vim.tbl_isempty(actions) then
+  if actions == nil or vim.tbl_isempty(actions) or err then
     print("No code actions available")
     return
   end
@@ -19,13 +23,16 @@ code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cf
     table.insert(data, title)
     actions[i].display_title = title
   end
-  local width = 0
+  local width = 42
   for _, str in ipairs(data) do
     if #str > width then
       width = #str
     end
   end
 
+  local divider = string.rep('─', width + 2)
+
+  table.insert(data, 2, divider)
   local apply = require('navigator.lspwrapper').apply_action
   local function apply_action(action)
     local action_chosen = nil
@@ -42,7 +49,7 @@ code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cf
     apply(action_chosen)
   end
 
-  gui.new_list_view {
+  local listview = gui.new_list_view {
     items = data,
     width = width + 4,
     loc = "top_center",
@@ -58,6 +65,9 @@ code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cf
       return pos
     end
   }
+
+  log("new buffer", listview.bufnr)
+  vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
 end)
 
 -- https://github.com/glepnir/lspsaga.nvim/blob/main/lua/lspsaga/codeaction.lua
@@ -71,22 +81,17 @@ local get_current_winid = function()
   return api.nvim_get_current_win()
 end
 
-local sign_name = "NavigatorLightBulb"
-
-if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
-  vim.fn.sign_define(sign_name,
-                     {text = config.icons.code_action_icon, texthl = "LspDiagnosticsSignHint"})
-end
-
-local function _update_virtual_text(line)
+local function _update_virtual_text(line, actions)
   local namespace = get_namespace()
   pcall(api.nvim_buf_clear_namespace, 0, namespace, 0, -1)
 
   if line then
+    log(line, actions)
     local icon_with_indent = "  " .. config.icons.code_action_icon
 
+    local title = actions[1].title
     pcall(api.nvim_buf_set_extmark, 0, namespace, line, -1, {
-      virt_text = {{icon_with_indent, "LspDiagnosticsSignHint"}},
+      virt_text = {{icon_with_indent .. title, "LspDiagnosticsSignHint"}},
       virt_text_pos = "overlay",
       hl_mode = "combine"
     })
@@ -94,6 +99,11 @@ local function _update_virtual_text(line)
 end
 
 local function _update_sign(line)
+
+  if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
+    vim.fn.sign_define(sign_name,
+                       {text = config.icons.code_action_icon, texthl = "LspDiagnosticsSignHint"})
+  end
   local winid = get_current_winid()
   if code_action[winid] == nil then
     code_action[winid] = {}
@@ -110,11 +120,14 @@ local function _update_sign(line)
   end
 end
 
-local need_check_diagnostic = {["go"] = true, ["python"] = true}
+-- local need_check_diagnostic = {["go"] = true, ["python"] = true}
+local need_check_diagnostic = {['python'] = true}
 
 function code_action:render_action_virtual_text(line, diagnostics)
-  return function(_, _, actions)
+  return function(err, actions, context)
+    log(err, line, diagnostics, actions, context)
     if actions == nil or type(actions) ~= "table" or vim.tbl_isempty(actions) then
+      -- no actions cleanup
       if config.code_action_prompt.virtual_text then
         _update_virtual_text(nil)
       end
@@ -127,6 +140,7 @@ function code_action:render_action_virtual_text(line, diagnostics)
           if next(diagnostics) == nil then
             _update_sign(nil)
           else
+            -- no diagnostic, no code action sign..
             _update_sign(line)
           end
         else
@@ -139,10 +153,10 @@ function code_action:render_action_virtual_text(line, diagnostics)
           if next(diagnostics) == nil then
             _update_virtual_text(nil)
           else
-            _update_virtual_text(line)
+            _update_virtual_text(line, actions)
           end
         else
-          _update_virtual_text(line)
+          _update_virtual_text(line, actions)
         end
       end
     end
@@ -186,7 +200,15 @@ code_action.code_action_prompt = function()
     return
   end
 
-  local diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
+  local diagnostics
+  if diagnostic.get_line_diagnostics then
+    -- old version
+    diagnostics = diagnostic.get_line_diagnostics()
+  else
+    local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
+    diagnostics = diagnostic.get(vim.api.nvim_get_current_buf(), {lnum = lnum})
+  end
+
   local winid = get_current_winid()
   code_action[winid] = code_action[winid] or {}
   code_action[winid].lightbulb_line = code_action[winid].lightbulb_line or 0

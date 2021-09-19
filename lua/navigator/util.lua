@@ -393,4 +393,18 @@ function M.partial(func, arg)
   end))
 end
 
+-- alternatively: use  vim.notify("namespace does not exist or is anonymous", vim.log.levels.ERROR)
+
+function M.warn(msg)
+  vim.api.nvim_echo({{"WRN: " .. msg, "WarningMsg"}}, true, {})
+end
+
+function M.error(msg)
+  vim.api.nvim_echo({{"ERR: " .. msg, "ErrorMsg"}}, true, {})
+end
+
+function M.info(msg)
+  vim.api.nvim_echo({{"Info: " .. msg}}, true, {})
+end
+
 return M

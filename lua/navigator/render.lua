@@ -3,6 +3,9 @@ local trace = require"guihua.log".trace
 local M = {}
 local clone = require'guihua.util'.clone
 local function filename(url)
+  if url == nil then
+    return ''
+  end
   return url:match("^.+/(.+)$") or url
 end
 

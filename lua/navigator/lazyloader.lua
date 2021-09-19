@@ -1,7 +1,7 @@
 local log = require"navigator.util".log
 _LoadedClients = {}
 local loader = nil
-packer_plugins = packer_plugins or nil -- suppress warnings
+local packer_plugins = packer_plugins or nil -- suppress warnings
 
 -- packer only
 if packer_plugins ~= nil then -- packer install
