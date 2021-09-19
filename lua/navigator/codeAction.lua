@@ -81,15 +81,17 @@ local get_current_winid = function()
   return api.nvim_get_current_win()
 end
 
-local function _update_virtual_text(line)
+local function _update_virtual_text(line, actions)
   local namespace = get_namespace()
   pcall(api.nvim_buf_clear_namespace, 0, namespace, 0, -1)
 
   if line then
+    log(line, actions)
     local icon_with_indent = "  " .. config.icons.code_action_icon
 
+    local title = actions[1].title
     pcall(api.nvim_buf_set_extmark, 0, namespace, line, -1, {
-      virt_text = {{icon_with_indent, "LspDiagnosticsSignHint"}},
+      virt_text = {{icon_with_indent .. title, "LspDiagnosticsSignHint"}},
       virt_text_pos = "overlay",
       hl_mode = "combine"
     })
@@ -118,11 +120,14 @@ local function _update_sign(line)
   end
 end
 
-local need_check_diagnostic = {["go"] = true, ["python"] = true}
+-- local need_check_diagnostic = {["go"] = true, ["python"] = true}
+local need_check_diagnostic = {['python'] = true}
 
 function code_action:render_action_virtual_text(line, diagnostics)
-  return function(_, _, actions)
+  return function(err, actions, context)
+    log(err, line, diagnostics, actions, context)
     if actions == nil or type(actions) ~= "table" or vim.tbl_isempty(actions) then
+      -- no actions cleanup
       if config.code_action_prompt.virtual_text then
         _update_virtual_text(nil)
       end
@@ -135,6 +140,7 @@ function code_action:render_action_virtual_text(line, diagnostics)
           if next(diagnostics) == nil then
             _update_sign(nil)
           else
+            -- no diagnostic, no code action sign..
             _update_sign(line)
           end
         else
@@ -147,10 +153,10 @@ function code_action:render_action_virtual_text(line, diagnostics)
           if next(diagnostics) == nil then
             _update_virtual_text(nil)
           else
-            _update_virtual_text(line)
+            _update_virtual_text(line, actions)
           end
         else
-          _update_virtual_text(line)
+          _update_virtual_text(line, actions)
         end
       end
     end

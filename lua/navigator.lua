@@ -49,7 +49,7 @@ _NgConfigValues = {
   icons = {
     icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
     -- Code action
-    code_action_icon = " ",
+    code_action_icon = "🏏", -- "",
     -- code lens
     code_lens_action_icon = " ",
     -- Diagnostics
@@ -138,7 +138,7 @@ M.setup = function(cfg)
 
   -- log("navigator loader")
   if _NgConfigValues.code_action_prompt.enable then
-    vim.cmd [[autocmd CursorHold * lua require'navigator.codeAction'.code_action_prompt()]]
+    vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
   end
   -- vim.cmd("autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4")
   if not _NgConfigValues.loaded then

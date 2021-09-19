@@ -13,23 +13,25 @@ The following screenshot shows javascript call tree 🌲 of variable `browser` i
 ![navigator](https://user-images.githubusercontent.com/1681295/126022829-291a7a2e-4d24-4fde-8293-5ae61562e67d.jpg)
 
 Explanation:
-- The first line of floating windows shows there are 3 references for the symbol <span style="color:red"> *browser* </span> in closure.js
-- The first reference of browser is an assignment, an emoji  📝 indicates the value is changed in this line. In many
-cases, we search for references to find out when the value changed.
+
+- The first line of floating windows shows there are 3 references for the symbol <span style="color:red"> _browser_ </span> in closure.js
+- The first reference of browser is an assignment, an emoji 📝 indicates the value is changed in this line. In many
+  cases, we search for references to find out when the value changed.
 - The second reference of `browser` is inside function `displayName` and `displayName` sit inside `makeFunc`, So you
-will see ` displayName{} <-  makeFunc{}`
+  will see ` displayName{} <- makeFunc{}`
 - The third similar to the second, as var browser is on the right side of '=', the value not changed in this line
-and emoji is not shown.
+  and emoji is not shown.
 
 #### Example: C++ definition
 
 C++ example: search reference and definition
 ![cpp_ref](https://user-images.githubusercontent.com/1681295/119215215-8bd7a080-bb0f-11eb-82fc-8cdf1955e6e7.jpg)
-You may find a 🦕 dinosaur(d) on the line of `Rectangle rect,`  which means there is a definition (d for def) of rect in this line.
+You may find a 🦕 dinosaur(d) on the line of `Rectangle rect,` which means there is a definition (d for def) of rect in this line.
 
-``<- f main()``  means the definition is inside function main().
+`<- f main()` means the definition is inside function main().
 
 #### Golang struct type
+
 Struct type references in multiple Go ﳑ files
 
 ![go_reference](https://user-images.githubusercontent.com/1681295/119123823-54b3b180-ba73-11eb-8790-097601e10f6a.gif)
@@ -37,6 +39,7 @@ Struct type references in multiple Go ﳑ files
 This feature can provide you info in which function/class/method the variable was referenced. It is handy for a large
 project where class/function definition is too long to fit into the preview window. Also provides a bird's eye view of where the
 variable is:
+
 - Referenced
 - Modified
 - Defined
@@ -45,14 +48,14 @@ variable is:
 # Features:
 
 - LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type. This
-also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better default setup is
-included for LSP clients.
+  also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better default setup is
+  included for LSP clients.
 
 - Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP & Treesitter powered IDE
 
 - Unorthodox UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc. It covers
-all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
-implementation.
+  all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
+  implementation.
 
 - Luv async thread and tasks
 
@@ -71,14 +74,14 @@ implementation.
 - Grouping references/implementation/incoming/outgoing based on file names.
 
 - Treesitter based variable/function context analysis. It is 10x times faster compared to purely rely on LSP. In most
-of the case, it takes treesitter less than 4 ms to read and render all nodes for a file of 1,000 LOC.
+  of the case, it takes treesitter less than 4 ms to read and render all nodes for a file of 1,000 LOC.
 
 - The first plugin, IMO, allows you to search in all treesitter symbols in the workspace.
 
 - Nerdfont, emoji for LSP and treesitter kind
 
 - Optimize display (remove trailing bracket/space), display the caller of reference, de-duplicate lsp results (e.g reference
-in the same line). Using treesitter for file preview highlighter etc
+  in the same line). Using treesitter for file preview highlighter etc
 
 - ccls call hierarchy (Non-standard `ccls/call` API) supports
 
@@ -186,9 +189,6 @@ EOF
 
 ```
 
-
-
-
 Nondefault configuration example:
 
 ```lua
@@ -219,7 +219,7 @@ require'navigator'.setup({
   code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   icons = {
     -- Code action
-    code_action_icon = " ",
+    code_action_icon = "🏏",
     -- Diagnostics
     diagnostic_head = '🐛',
     diagnostic_head_severity_1 = "🈲",
@@ -268,6 +268,7 @@ require'navigator'.setup({
 ### LSP clients
 
 Built clients:
+
 ```lua
 local servers = {
   "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
@@ -283,24 +284,24 @@ Navigator will try to load avalible lsp server/client based on filetype. The cli
 incremental sync and debounce is enabled by navigator. And the lsp
 snippet will be enabled. So you could use COQ and nvim-cmp snippet expand.
 
-
 Other than above setup, additional none default setup are used for following lsp:
 
-* gopls
-* clangd
-* rust_analyzer
-* sqls
-* sumneko_lua
-* pyright
-* ccls
+- gopls
+- clangd
+- rust_analyzer
+- sqls
+- sumneko_lua
+- pyright
+- ccls
 
 Please check [client setup](https://github.com/ray-x/navigator.lua/blob/26012cf9c172aa788a2e53018d94b32c5c75af75/lua/navigator/lspclient/clients.lua#L98-L234)
 
-The plugin can work with multiple LSP, e.g  sqls+gopls+efm.  But there are cases you may need to disable some of the
-servers.  (Prevent loading multiple LSP for same source code.)  e.g. I saw strange behaviours when I use pyls+pyright+pyls_ms
+The plugin can work with multiple LSP, e.g sqls+gopls+efm. But there are cases you may need to disable some of the
+servers. (Prevent loading multiple LSP for same source code.) e.g. I saw strange behaviours when I use pyls+pyright+pyls_ms
 together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
 
 ### Disable a lsp client loading from navigator
+
 To disable a specific LSP, set `filetypes` to {} e.g.
 
 ```lua
@@ -320,56 +321,54 @@ require'navigator'.setup({
 
 ### Default keymaps
 
-|  mode 	|  key 	|  function 	|
-|---	|---	|---	|
-|  n 	|  gr 	|  show reference and context 	|
-|  i 	|  \<m-k\> 	|  signature help 	|
-|  n 	|  \<c-k\> 	|  signature help 	|
-|  n 	|  gW 	|  workspace symbol 	|
-|  n 	|  gD 	|  declaration 	|
-|  n 	|  g0 	|  document symbol 	|
-|  n 	|  \<C-]\> 	|  go to definition (if multiple show listview)	|
-|  n 	|  gp 	|  definition 	|
-|  n 	|  \<C-LeftMouse\> 	|  definition|
-|  n 	|  g\<LeftMouse\> 	|  implementation|
-|  n 	|  gT 	| treesitter document symbol	|
-|  n 	|  \<Leader\>gT 	| treesitter symbol for all open buffers	|
-|  n 	|  K 	|  hover doc 	|
-|  n 	|  \<Space\>ca 	|  code action (when you see 💡 ) 	|
-|  n 	|  \<Space\>la 	|  code lens action (when you see a codelens indicator) 	|
-|  v 	|  \<Space\>cA 	|  range code action (when you see 💡 ) 	|
-|  n 	|  \<Space\>rn 	| rename with floating window|
-|  n 	|  \<Leader\>re 	| rename (lsp default)|
-|  n 	|  \<Leader\>gi 	| incoming calls|
-|  n 	|  \<Leader\>go 	| outgoing calls|
-|  n 	|  gi 	|  implementation 	|
-|  n 	|  \<Sapce\> D 	|  type definition 	|
-|  n 	|  gL 	|  show line diagnostic 	|
-|  n 	|  gG 	|  show diagnostic for all buffers 	|
-|  n 	|  ]d 	|  next diagnostic|
-|  n 	|  [d 	|  previous diagnostic|
-|  n 	|  ]r 	|  next treesitter reference/usage|
-|  n 	|  [r 	|  previous treesitter reference/usage|
-|  n 	|  \<Sapce\> wa 	|  add workspace folder|
-|  n 	|  \<Sapce\> wr 	|  remove workspace folder|
-|  n 	|  \<Sapce\> wl 	|  print workspace folder|
-|  n 	|  \<Leader\>k 	| toggle reference highlight |
-|  i/n	|  \<C-p\> 	| previous item in list|
-|  i/n	|  \<C-n\> 	| next item in list|
-|  i/n	|  number 1~9 	| move to ith row/item in the list|
-|  i/n	|  \<Up\> 	| previous item in list|
-|  i/n	|  \<Down\> 	| next item in list|
-|  n	|  \<Ctrl-w\>j 	| move cursor to preview (windows move to bottom view point)|
-|  n	|  \<Ctrl-w\>k 	| move cursor to list (windows move to up view point)|
-|  i/n	|  \<C-o\> 	| open preview file in nvim/Apply action|
-|  n	|  \<C-v\> 	| open preview file in nvim with vsplit|
-|  n	|  \<C-s\> 	| open preview file in nvim with split|
-|  n	|  \<Enter\> 	| open preview file in nvim/Apply action|
-|  i/n	|  \<C-b\> 	| previous page in listview|
-|  i/n	|  \<C-f\> 	| next page in listview|
-|  i/n	|  \<C-s\> 	| save the modification to preview window to file|
-
-
+| mode | key             | function                                                   |
+| ---- | --------------- | ---------------------------------------------------------- |
+| n    | gr              | show reference and context                                 |
+| i    | \<m-k\>         | signature help                                             |
+| n    | \<c-k\>         | signature help                                             |
+| n    | gW              | workspace symbol                                           |
+| n    | gD              | declaration                                                |
+| n    | g0              | document symbol                                            |
+| n    | \<C-]\>         | go to definition (if multiple show listview)               |
+| n    | gp              | definition                                                 |
+| n    | \<C-LeftMouse\> | definition                                                 |
+| n    | g\<LeftMouse\>  | implementation                                             |
+| n    | gT              | treesitter document symbol                                 |
+| n    | \<Leader\>gT    | treesitter symbol for all open buffers                     |
+| n    | K               | hover doc                                                  |
+| n    | \<Space\>ca     | code action (when you see 💡 )                             |
+| n    | \<Space\>la     | code lens action (when you see a codelens indicator)       |
+| v    | \<Space\>cA     | range code action (when you see 💡 )                       |
+| n    | \<Space\>rn     | rename with floating window                                |
+| n    | \<Leader\>re    | rename (lsp default)                                       |
+| n    | \<Leader\>gi    | incoming calls                                             |
+| n    | \<Leader\>go    | outgoing calls                                             |
+| n    | gi              | implementation                                             |
+| n    | \<Sapce\> D     | type definition                                            |
+| n    | gL              | show line diagnostic                                       |
+| n    | gG              | show diagnostic for all buffers                            |
+| n    | ]d              | next diagnostic                                            |
+| n    | [d              | previous diagnostic                                        |
+| n    | ]r              | next treesitter reference/usage                            |
+| n    | [r              | previous treesitter reference/usage                        |
+| n    | \<Sapce\> wa    | add workspace folder                                       |
+| n    | \<Sapce\> wr    | remove workspace folder                                    |
+| n    | \<Sapce\> wl    | print workspace folder                                     |
+| n    | \<Leader\>k     | toggle reference highlight                                 |
+| i/n  | \<C-p\>         | previous item in list                                      |
+| i/n  | \<C-n\>         | next item in list                                          |
+| i/n  | number 1~9      | move to ith row/item in the list                           |
+| i/n  | \<Up\>          | previous item in list                                      |
+| i/n  | \<Down\>        | next item in list                                          |
+| n    | \<Ctrl-w\>j     | move cursor to preview (windows move to bottom view point) |
+| n    | \<Ctrl-w\>k     | move cursor to list (windows move to up view point)        |
+| i/n  | \<C-o\>         | open preview file in nvim/Apply action                     |
+| n    | \<C-v\>         | open preview file in nvim with vsplit                      |
+| n    | \<C-s\>         | open preview file in nvim with split                       |
+| n    | \<Enter\>       | open preview file in nvim/Apply action                     |
+| i/n  | \<C-b\>         | previous page in listview                                  |
+| i/n  | \<C-f\>         | next page in listview                                      |
+| i/n  | \<C-s\>         | save the modification to preview window to file            |
 
 ### Colors/Highlight:
 
@@ -382,10 +381,8 @@ hi default GHTextViewDark guifg=#e0d8f4 guibg=#332e55
 hi default GHListDark guifg=#e0d8f4 guibg=#103234
 ```
 
-There are other Lsp highlight been used in  this plugin, e.g LspReferenceRead/Text/Write are used for document highlight,
+There are other Lsp highlight been used in this plugin, e.g LspReferenceRead/Text/Write are used for document highlight,
 LspDiagnosticsXXX are used for diagnostic. Please check highlight.lua and dochighlight.lua for more info.
-
-
 
 ## Dependency
 
@@ -399,13 +396,14 @@ The plugin can be loaded lazily (packer `opt = true` ), And it will check if opt
 
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
-
 ## Integration with lspinstall
+
 If you'd like to only use the lsp servers installed by lspinstall. Please set
 
 ```lua
 lspinstall = false
 ```
+
 In the config
 
 ## Usage
@@ -431,22 +429,21 @@ require'navigator'.setup({on_attach = function(client, bufnr) require 'illuminat
 
 Highlight I am using:
 
-* LspReferenceRead, LspReferenceText and LspReferenceWrite are used for `autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()`
-That is where you saw the current symbol been highlighted.
+- LspReferenceRead, LspReferenceText and LspReferenceWrite are used for `autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()`
+  That is where you saw the current symbol been highlighted.
 
-* GHListDark and GHTextViewDark is used for floating listvew and TextView. They are be based on current background
-(Normal) and PmenuSel
+- GHListDark and GHTextViewDark is used for floating listvew and TextView. They are be based on current background
+  (Normal) and PmenuSel
 
-* In future, I will use NormalFloat for floating view. But ATM, most of colorscheme does not define NormalFloat
+- In future, I will use NormalFloat for floating view. But ATM, most of colorscheme does not define NormalFloat
 
 You can override the above highlight to fit your current colorscheme
 
-
 ## commands
-|  command 	|    function 	|
-|---	|---	|
-|  LspToggleFmt 	|   toggle lsp auto format  	|
 
+| command      | function               |
+| ------------ | ---------------------- |
+| LspToggleFmt | toggle lsp auto format |
 
 ## Screenshots
 
@@ -465,6 +462,7 @@ Pls check the first part of README
 ![workspace symbol](https://github.com/ray-x/files/blob/master/img/navigator/workspace_symbol.gif?raw=true)
 
 ### highlight document symbol and jump between reference
+
 ![multiple_symbol_hi3](https://user-images.githubusercontent.com/1681295/120067627-f9f80680-c0bf-11eb-9216-18e5c8547f59.gif)
 
 # Current symbol highlight and jump backward/forward between symbols
@@ -480,7 +478,6 @@ Visual studio code style show errors minimap in scroll bar area
 
 ![diagnostic_scroll_bar](https://user-images.githubusercontent.com/1681295/128736430-e365523d-810c-4c16-a3b4-c74969f45f0b.jpg)
 
-
 Diagnostic in single bufer
 
 ![diagnostic](https://github.com/ray-x/files/blob/master/img/navigator/diag.jpg?raw=true)
@@ -494,7 +491,6 @@ Show diagnostic in all buffers
 You can in place edit your code in floating window
 
 https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9778-11d0f356b38d.mov
-
 
 (Note: This feature only avalible in `find reference` and `find diagnostic`, You can not add/remove lines in floating window)
 
@@ -549,14 +545,12 @@ Codelens for C++/ccls. Symbol reference
 
 ![codelens_cpp_ccls](https://user-images.githubusercontent.com/1681295/132429134-abc6547e-79cc-44a4-b7a9-23550b895e51.jpg)
 
-
-
-
 ### Predefined LSP symbol nerdfont/emoji
 
 ![nerdfont](https://github.com/ray-x/files/blob/master/img/navigator/icon_nerd.jpg?raw=true)
 
 # Break changes and known issues
+
 [known issues I am working on](https://github.com/ray-x/navigator.lua/issues/1)
 
 # Todo
