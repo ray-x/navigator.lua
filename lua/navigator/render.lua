@@ -99,7 +99,7 @@ function M.prepare_for_render(items, opts)
     -- trace(items[i], items[i].filename, last_summary_idx, display_items[last_summary_idx].filename)
     -- TODO refact display_filename generate part
     if items[i].filename == fn then
-      space, trim = get_pads(opts.width, icon .. ' ' .. dfn, lspapi_display .. ' 14')
+      space, trim = get_pads(opts.width, icon .. ' ' .. dfn, lspapi_display .. ' 14 of 33 ')
       if trim and opts.width > 50 and #dfn > opts.width - 20 then
         local fn1 = string.sub(dfn, 1, opts.width - 50)
         local fn2 = string.sub(dfn, #dfn - 10, #dfn)
@@ -123,7 +123,7 @@ function M.prepare_for_render(items, opts)
       item = clone(items[i])
 
       space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename,
-                             lspapi_display .. ' 12')
+                             lspapi_display .. ' 12 of 33')
       if trim and opts.width > 52 and #item.display_filename > opts.width - 20 then
         item.display_filename = string.sub(item.display_filename, 1, opts.width - 52) .. ""
                                     .. string.sub(item.display_filename,

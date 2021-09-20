@@ -175,7 +175,9 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
   end
 
   local client_id = ctx.client_id
-  log('diagnostic', #result.diagnostics, ctx, config)
+  if result.diagnostics ~= nil and result.diagnostics ~= {} then
+    log('diagnostic', result.diagnostics, ctx, config)
+  end
 
   if util.nvim_0_6() then
     trace(err, result, ctx, config)

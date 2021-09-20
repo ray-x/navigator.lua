@@ -10,11 +10,12 @@ local sign_name = "NavigatorLightBulb"
 
 local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cfg)
-  log(actions, ctx)
   if actions == nil or vim.tbl_isempty(actions) or err then
-    print("No code actions available")
+    log("No code actions available")
     return
   end
+
+  log(actions, ctx)
   local data = {"   Auto Fix  <C-o> Apply <C-e> Exit"}
   for i, action in ipairs(actions) do
     local title = action.title:gsub("\r\n", "\\r\\n")
@@ -57,11 +58,11 @@ code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cf
     rawdata = true,
     data = data,
     on_confirm = function(pos)
-      log(pos)
+      trace(pos)
       apply_action(pos)
     end,
     on_move = function(pos)
-      log(pos)
+      trace(pos)
       return pos
     end
   }
@@ -125,7 +126,6 @@ local need_check_diagnostic = {['python'] = true}
 
 function code_action:render_action_virtual_text(line, diagnostics)
   return function(err, actions, context)
-    log(err, line, diagnostics, actions, context)
     if actions == nil or type(actions) ~= "table" or vim.tbl_isempty(actions) then
       -- no actions cleanup
       if config.code_action_prompt.virtual_text then
@@ -135,6 +135,7 @@ function code_action:render_action_virtual_text(line, diagnostics)
         _update_sign(nil)
       end
     else
+      log(err, line, diagnostics, actions, context)
       if config.code_action_prompt.sign then
         if need_check_diagnostic[vim.bo.filetype] then
           if next(diagnostics) == nil then

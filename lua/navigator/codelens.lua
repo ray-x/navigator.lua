@@ -27,7 +27,7 @@ local get_current_winid = require('navigator.util').get_current_winid
 local code_lens_action = {}
 
 local function _update_sign(line)
-  log("update sign at line ", line)
+  trace("update sign at line ", line)
   local winid = get_current_winid()
   if code_lens_action[winid] == nil then
     code_lens_action[winid] = {}
@@ -46,7 +46,9 @@ end
 
 local codelens_hdlr = mk_handler(function(err, result, ctx, cfg)
   if err or result == nil then
-    log("lsp code lens", vim.inspect(err), ctx, cfg)
+    if err then
+      log("lsp code lens", vim.inspect(err), ctx, cfg)
+    end
     return
   end
   trace("codelenes result", result)
