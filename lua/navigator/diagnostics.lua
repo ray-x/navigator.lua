@@ -7,7 +7,6 @@ local util = require "navigator.util"
 local log = util.log
 local trace = require"guihua.log".trace
 local error = util.error
-
 local path_sep = require"navigator.util".path_sep()
 local mk_handler = require"navigator.util".mk_handler
 local path_cur = require"navigator.util".path_cur()
@@ -61,7 +60,7 @@ local function error_marker(result, ctx, config)
     end
 
     trace('schedule callback', result, ctx, config)
-    -- trace(result, bufnr)
+    log('total diag ', #result.diagnostics, bufnr)
 
     if result == nil or result.diagnostics == nil or #result.diagnostics == 0 then
       local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
@@ -167,8 +166,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
 
   local mode = vim.api.nvim_get_mode().mode
   if mode ~= 'n' and config.update_in_insert == false then
-    log("skip in insert mode")
-    return
+    log("skip sign update in insert mode")
   end
   local cwd = vim.loop.cwd()
   local ft = vim.bo.filetype
@@ -177,14 +175,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
   end
 
   local client_id = ctx.client_id
-  -- not sure if I should do this hack
-  if vim.tbl_isempty(result.diagnostics) then
-    if vim.api.nvim_buf_is_loaded(ctx.bufnr) then
-      -- diagnostic.reset(ctx.client_id)
-      -- clear_diag_VT(ctx.bufnr)
-    end
-    return
-  end
+  log('diagnostic', #result.diagnostics, ctx, config)
 
   if util.nvim_0_6() then
     trace(err, result, ctx, config)

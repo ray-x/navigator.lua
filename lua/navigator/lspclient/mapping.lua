@@ -18,11 +18,11 @@ local key_maps = {
   {key = "g0", func = "document_symbol()"},
   {key = "gW", func = "workspace_symbol()"},
   {key = "<c-]>", func = "definition()"},
-  {key = "gD", func = "declaration({ border = 'single' })"},
+  {key = "gD", func = "declaration({ border = 'rounded', max_width = 80 })"},
   {key = "gp", func = "require('navigator.definition').definition_preview()"},
   {key = "gT", func = "require('navigator.treesitter').buf_ts()"},
   {key = "<Leader>gT", func = "require('navigator.treesitter').bufs_ts()"},
-  {key = "K", func = "hover({ popup_opts = { border = single }})"},
+  {key = "K", func = "hover({ popup_opts = { border = single, max_width = 80 }})"},
   {key = "<Space>ca", mode = "n", func = "code_action()"},
   {key = "<Space>cA", mode = "v", func = "range_code_action()"},
   {key = "<Leader>re", func = "rename()"},
@@ -33,8 +33,8 @@ local key_maps = {
   {key = "<Space>D", func = "type_definition()"},
   {key = "gL", func = "require('navigator.diagnostics').show_line_diagnostics()"},
   {key = "gG", func = "require('navigator.diagnostics').show_diagnostic()"},
-  {key = "]d", func = "diagnostic.goto_next({ border = 'single' })"},
-  {key = "[d", func = "diagnostic.goto_prev({ border = 'single' })"},
+  {key = "]d", func = "diagnostic.goto_next({ border = 'rounded', max_width = 80})"},
+  {key = "[d", func = "diagnostic.goto_prev({ border = 'rounded', max_width = 80})"},
   {key = "]r", func = "require('navigator.treesitter').goto_next_usage()"},
   {key = "[r", func = "require('navigator.treesitter').goto_previous_usage()"},
   {key = "<C-LeftMouse>", func = "definition()"},
@@ -58,24 +58,23 @@ local ccls_mappings = {
 
 local check_cap = function()
   -- log(vim.lsp.buf_get_clients(0))
-  local rsv, fmt, rfmt, ccls
+  local fmt, rfmt, ccls
   for _, value in pairs(vim.lsp.buf_get_clients(0)) do
-    if value == nil or value.resolved_capabilities == nil then
-      return
-    end
-    if value.resolved_capabilities.document_formatting then
-      fmt = true
-    end
-    if value.resolved_capabilities.document_range_formatting then
-      rfmt = true
-    end
+    if value ~= nil and value.resolved_capabilities == nil then
+      if value.resolved_capabilities.document_formatting then
+        fmt = true
+      end
+      if value.resolved_capabilities.document_range_formatting then
+        rfmt = true
+      end
 
-    -- log("override ccls", value.config)
-    if value.config.name == "ccls" then
-      ccls = true
+      -- log("override ccls", value.config)
+      if value.config.name == "ccls" then
+        ccls = true
+      end
     end
   end
-  return rsv, fmt, rfmt, ccls
+  return fmt, rfmt, ccls
 end
 
 local function set_mapping(user_opts)
@@ -95,7 +94,7 @@ local function set_mapping(user_opts)
   -- local function buf_set_option(...)
   --   vim.api.nvim_buf_set_option(bufnr, ...)
   -- end
-  local rsv, doc_fmt, range_fmt, ccls = check_cap()
+  local doc_fmt, range_fmt, ccls = check_cap()
 
   if ccls then
     vim.list_extend(key_maps, ccls_mappings)
