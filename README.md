@@ -372,13 +372,14 @@ require'navigator'.setup({
 
 ### Colors/Highlight:
 
-You can override default highlight GHListDark (listview) and GHTextViewDark (code view)
+You can override default highlight GHListDark (listview) and GHTextViewDark (code view) and GHListHl (select item)
 
 e.g.
 
 ```vim
 hi default GHTextViewDark guifg=#e0d8f4 guibg=#332e55
 hi default GHListDark guifg=#e0d8f4 guibg=#103234
+hi default GHListHl guifg=#e0d8f4 guibg=#404254
 ```
 
 There are other Lsp highlight been used in this plugin, e.g LspReferenceRead/Text/Write are used for document highlight,
