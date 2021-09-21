@@ -26,7 +26,7 @@ _NgConfigValues = {
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_ft = {}, -- a list of lsp not enable auto-format (e.g. if you using efm or vim-codeformat etc), empty by default
-    disable_lsp = {}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
+    disable_lsp = nil, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     code_lens = false,
     -- only want to enable one lsp server
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
