@@ -25,7 +25,7 @@ _NgConfigValues = {
   -- setup here. if it is nil, navigator will not init signature help
   lsp = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
-    disable_format_ft = {}, -- a list of lsp not enable auto-format (e.g. if you using efm or vim-codeformat etc), empty by default
+    disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = nil, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     code_lens = false,
     -- only want to enable one lsp server
@@ -88,11 +88,19 @@ vim.cmd("command! -nargs=0 LspRestart lua require'navigator.lspclient.config'.re
 vim.cmd(
     "command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>")
 
+M.deprecated = function(cfg)
+  local warn = require'navigator.util'.warn
+  if cfg.lsp ~= nil and cfg.lsp.disable_format_ft ~= nil and cfg.lsp.disable_format_ft ~= {} then
+    warn('disable_format_ft renamed to disable_format_cap')
+  end
+end
+
 local extend_config = function(opts)
   opts = opts or {}
   if next(opts) == nil then
     return
   end
+  M.deprecated(opts)
   for key, value in pairs(opts) do
     -- if _NgConfigValues[key] == nil then
     --   error(string.format("[] Key %s not valid", key))

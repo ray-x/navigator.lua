@@ -377,8 +377,8 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
       -- log(lsp_opts[lspclient], cfg)
       local disable_fmt = false
 
-      log(lspclient, config.lsp.disable_format_ft)
-      if vim.tbl_contains(config.lsp.disable_format_ft or {}, lspclient) then
+      log(lspclient, config.lsp.disable_format_cap)
+      if vim.tbl_contains(config.lsp.disable_format_cap or {}, lspclient) then
         log("fileformat disabled for ", lspclient)
         disable_fmt = true
       end
