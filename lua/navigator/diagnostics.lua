@@ -112,9 +112,9 @@ local function error_marker(result, ctx, config)
         p = diag.range.start.line
         p = util.round(p * wheight / math.max(wheight, total_num))
         if pos[#pos] and pos[#pos].line == p then
-          local bar = '▆'
-          if pos[#pos] == _NgConfigValues.lsp.diagnostic_scrollbar_sign[2] then
-            bar = '█'
+          local bar = _NgConfigValues.lsp.diagnostic_scrollbar_sign[2]
+          if pos[#pos] == bar then
+            bar = _NgConfigValues.lsp.diagnostic_scrollbar_sign[3]
           end
           pos[#pos] = {line = p, sign = bar, severity = math.min(diag.severity, pos[#pos].severity)}
         else
