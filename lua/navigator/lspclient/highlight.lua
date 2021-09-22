@@ -37,7 +37,6 @@ function M.diagnositc_config_sign()
                          {text = h, texthl = 'DiagnosticHint', linehl = '', numhl = ''})
 
       t = vim.fn.sign_getdefined('DiagnosticSignWarn')
-      log('*** t ', t, "diagnostic add sign")
     end
   else
     local t = vim.fn.sign_getdefined('LspDiagnosticSignWarn')

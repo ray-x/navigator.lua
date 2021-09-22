@@ -142,11 +142,10 @@ end
 
 local level = "error"
 if _NgConfigValues.debug == true then
-  level = "debug"
+  level = "info"
 elseif _NgConfigValues.debug == "trace" then
   level = "trace"
 end
-
 local default_config = {use_console = false, use_file = true, level = level}
 if _NgConfigValues.debug_console_output then
   default_config.use_console = true

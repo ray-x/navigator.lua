@@ -217,6 +217,8 @@ function M.setup(user_opts)
   set_event_handler(user_opts)
 
   local cap = user_opts.cap or vim.lsp.protocol.make_client_capabilities()
+  log('lsp cap:', cap)
+
   if cap.call_hierarchy or cap.callHierarchy then
     vim.lsp.handlers["callHierarchy/incomingCalls"] =
         require"navigator.hierarchy".incoming_calls_handler
@@ -260,7 +262,10 @@ function M.setup(user_opts)
   end
 
   vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})
-  vim.lsp.handlers["textDocument/formatting"] = require"navigator.formatting".format_hdl
+  if cap.document_formatting then
+    log("formatting hdl")
+    vim.lsp.handlers["textDocument/formatting"] = require"navigator.formatting".format_hdl
+  end
 
 end
 

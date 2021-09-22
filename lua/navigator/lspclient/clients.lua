@@ -347,7 +347,7 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
       end
     end
     if vim.tbl_contains(config.lsp.disable_lsp or {}, lspclient) then
-      log("disable lsp", lspconfig)
+      log("disable lsp", lspclient)
       goto continue
     end
 

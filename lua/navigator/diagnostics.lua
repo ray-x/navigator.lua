@@ -60,7 +60,7 @@ local function error_marker(result, ctx, config)
     end
 
     trace('schedule callback', result, ctx, config)
-    log('total diag ', #result.diagnostics, bufnr)
+    trace('total diag ', #result.diagnostics, bufnr)
 
     if result == nil or result.diagnostics == nil or #result.diagnostics == 0 then
       local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
@@ -176,7 +176,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
 
   local client_id = ctx.client_id
   if result.diagnostics ~= nil and result.diagnostics ~= {} then
-    log('diagnostic', result.diagnostics, ctx, config)
+    trace('diagnostic', result.diagnostics, ctx, config)
   end
 
   if util.nvim_0_6() then

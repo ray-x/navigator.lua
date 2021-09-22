@@ -100,7 +100,6 @@ local extend_config = function(opts)
   if next(opts) == nil then
     return
   end
-  M.deprecated(opts)
   for key, value in pairs(opts) do
     -- if _NgConfigValues[key] == nil then
     --   error(string.format("[] Key %s not valid", key))
@@ -124,6 +123,8 @@ local extend_config = function(opts)
   if _NgConfigValues.sumneko_root_path or _NgConfigValues.sumneko_binary then
     vim.notify("Please put sumneko setup in lsp['sumneko_lua']", vim.log.levels.WARN)
   end
+
+  M.deprecated(opts)
 end
 
 M.config_values = function()
