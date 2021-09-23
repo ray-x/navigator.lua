@@ -1,5 +1,4 @@
 local log = require"navigator.util".log
-_LoadedClients = {}
 local loader = nil
 local packer_plugins = packer_plugins or nil -- suppress warnings
 
