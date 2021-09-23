@@ -52,10 +52,16 @@ local function def_preview(timeout_ms)
   -- result = {vim.tbl_deep_extend("force", {}, unpack(result))}
   -- log("def-preview", result)
   for key, value in pairs(result) do
-    if result[key] ~= nil then
+    if result[key] ~= nil and not vim.tbl_isempty(result[key]) then
       table.insert(data, value.result[1])
     end
   end
+
+  if vim.tbl_isempty(data) then
+    print("No result found: " .. method)
+    return nil
+  end
+
   local range = data[1].targetRange or data[1].range
 
   local row = range.start.line
