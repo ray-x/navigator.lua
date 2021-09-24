@@ -1,6 +1,7 @@
 local gui = require "navigator.gui"
 local util = require "navigator.util"
 local log = util.log
+local trace = util.trace
 local partial = util.partial
 local lsphelper = require "navigator.lspwrapper"
 
@@ -10,7 +11,7 @@ local cwd = vim.loop.cwd()
 local M = {}
 
 local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_message)
-  log('call_hierarchy')
+  trace('call_hierarchy', result)
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
   if err ~= nil then
     log("dir", direction, "result", result, "err", err, ctx)
@@ -29,11 +30,13 @@ local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_me
     for _, range in pairs(call_hierarchy_call.fromRanges) do
       local filename = assert(vim.uri_to_fname(call_hierarchy_item.uri))
       local display_filename = filename:gsub(cwd .. path_sep, path_cur, 1)
+      call_hierarchy_item.detail = call_hierarchy_item.detail:gsub("\n", " ↳ ")
+
       table.insert(items, {
         uri = call_hierarchy_item.uri,
         filename = filename,
-        display_filename = call_hierarchy_item.detail or display_filename,
-        text = kind .. call_hierarchy_item.name,
+        display_filename = display_filename,
+        text = kind .. call_hierarchy_item.name .. ' ﰲ ' .. call_hierarchy_item.detail,
         range = range,
         lnum = range.start.line,
         col = range.start.character
@@ -47,7 +50,7 @@ local call_hierarchy_handler_from = partial(call_hierarchy_handler, "from")
 local call_hierarchy_handler_to = partial(call_hierarchy_handler, "to")
 
 local function incoming_calls_handler(bang, err, result, ctx, cfg)
-  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp hierarchy")
   local results = call_hierarchy_handler_from(err, result, ctx, cfg, "Incoming calls not found")
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr, "ft")
@@ -63,7 +66,7 @@ local function outgoing_calls_handler(bang, err, result, ctx, cfg)
 end
 
 function M.incoming_calls(bang, opts)
-  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
+  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp hierarchy")
   if not lsphelper.check_capabilities("call_hierarchy") then
     return
   end

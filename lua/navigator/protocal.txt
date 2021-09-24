@@ -1136,7 +1136,7 @@ definition.lua:9: { {
                 cargoArgs = { "run", "--package", "hello", "--bin", "hello" },
                 cargoExtraArgs = {},
                 executableArgs = {},
-                workspaceRoot = "/Users/ray.xu/lsp_test/rust"
+                workspaceRoot = "/Users/glsp_test/rust"
               },
               kind = "cargo",
               label = "run hello",
@@ -1161,7 +1161,7 @@ definition.lua:9: { {
                     line = 45
                   }
                 },
-                targetUri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+                targetUri = "file:///Users/glsp_test/rust/src/main.rs"
               }
             } },
           command = "rust-analyzer.runSingle",
@@ -1184,7 +1184,7 @@ definition.lua:9: { {
                 cargoArgs = { "run", "--package", "hello", "--bin", "hello" },
                 cargoExtraArgs = {},
                 executableArgs = {},
-                workspaceRoot = "/Users/ray.xu/lsp_test/rust"
+                workspaceRoot = "/Users/glsp_test/rust"
               },
               kind = "cargo",
               label = "run hello",
@@ -1209,7 +1209,7 @@ definition.lua:9: { {
                     line = 45
                   }
                 },
-                targetUri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+                targetUri = "file:///Users/glsp_test/rust/src/main.rs"
               }
             } },
           command = "rust-analyzer.debugSingle",
@@ -1233,7 +1233,7 @@ definition.lua:9: { {
               line = 2
             },
             textDocument = {
-              uri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+              uri = "file:///Users/glsp_test/rust/src/main.rs"
             }
           }
         },
@@ -1255,7 +1255,7 @@ definition.lua:9: { {
               line = 28
             },
             textDocument = {
-              uri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+              uri = "file:///Users/glsp_test/rust/src/main.rs"
             }
           }
         },
@@ -1277,7 +1277,7 @@ definition.lua:9: { {
               line = 31
             },
             textDocument = {
-              uri = "file:///Users/ray.xu/lsp_test/rust/src/main.rs"
+              uri = "file:///Users/glsp_test/rust/src/main.rs"
             }
           }
         },
@@ -1290,6 +1290,181 @@ definition.lua:9: { {
             character = 7,
             line = 31
           }
+        }
+      } }
+  } }
+
+
+
+
+type_definition = true,
+  workspace_folder_properties = {
+    changeNotifications = false,
+    supported = false
+  },
+  workspace_symbol = true
+}
+
+
+
+...ack/packer/opt/navigator.lua/lua/navigator/hierarchy.lua:13: call_hierarchy { {
+    fromRanges = { {
+        end = {
+          character = 68,
+          line = 53
+        },
+        start = {
+          character = 54,
+          line = 53
+        }
+      } },
+    to = {
+      detail = "pub fn unwrap_or_else<F>(self, f: F) -> T\nwhere\n    F: FnOnce<(), Output = T>,",
+      kind = 12,
+      name = "unwrap_or_else",
+      range = {
+        end = {
+          character = 5,
+          line = 764
+        },
+        start = {
+          character = 4,
+          line = 748
+        }
+      },
+      selectionRange = {
+        end = {
+          character = 25,
+          line = 759
+        },
+        start = {
+          character = 11,
+          line = 759
+        }
+      },
+      uri = "file:///Users/g.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/library/core/src/option.rs"
+    }
+  }, {
+    fromRanges = { {
+        end = {
+          character = 33,
+          line = 54
+        },
+        start = {
+          character = 27,
+          line = 54
+        }
+      }, {
+        end = {
+          character = 28,
+          line = 55
+        },
+        start = {
+          character = 22,
+          line = 55
+        }
+      } },
+    to = {
+      detail = "pub const fn unwrap(self) -> T",
+      kind = 12,
+      name = "unwrap",
+      range = {
+        end = {
+          character = 5,
+          line = 723
+        },
+        start = {
+          character = 4,
+          line = 688
+        }
+      },
+      selectionRange = {
+        end = {
+          character = 23,
+          line = 718
+        },
+        start = {
+          character = 17,
+          line = 718
+        }
+      },
+      uri = "file:///Users/g.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/library/core/src/option.rs"
+    }
+  } }
+
+
+  call_hierarchy { {
+    from = {
+      detail = "fn test2()",
+      kind = 12,
+      name = "test2",
+      range = {
+        end = {
+          character = 20,
+          line = 43
+        },
+        start = {
+          character = 0,
+          line = 43
+        }
+      },
+      selectionRange = {
+        end = {
+          character = 8,
+          line = 43
+        },
+        start = {
+          character = 3,
+          line = 43
+        }
+      },
+      uri = "file:///Users/glsp_test/rust/src/main.rs"
+    },
+    fromRanges = { {
+        end = {
+          character = 16,
+          line = 43
+        },
+        start = {
+          character = 12,
+          line = 43
+        }
+      } }
+  }, {
+    from = {
+      detail = "fn test3()",
+      kind = 12,
+      name = "test3",
+      range = {
+        end = {
+          character = 29,
+          line = 44
+        },
+        start = {
+          character = 0,
+          line = 44
+        }
+      },
+      selectionRange = {
+        end = {
+          character = 8,
+          line = 44
+        },
+        start = {
+          character = 3,
+          line = 44
+        }
+      },
+      uri = "file:///Users/glsp_test/rust/src/main.rs"
+    },
+    fromRanges = { {
+        end = {
+          character = 16,
+          line = 44
+        },
+        start = {
+          character = 12,
+          line = 44
         }
       } }
   } }

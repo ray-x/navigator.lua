@@ -485,7 +485,7 @@ local function setup(user_opts)
   if user_opts ~= nil then
     log("navigator user setup", user_opts)
   end
-  log(debug.traceback())
+  trace(debug.traceback())
   user_opts = user_opts or config -- incase setup was triggered from autocmd
 
   if ft == nil then
