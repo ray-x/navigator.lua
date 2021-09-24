@@ -87,7 +87,7 @@ local function _update_virtual_text(line, actions)
   pcall(api.nvim_buf_clear_namespace, 0, namespace, 0, -1)
 
   if line then
-    log(line, actions)
+    trace(line, actions)
     local icon_with_indent = "  " .. config.icons.code_action_icon
 
     local title = actions[1].title
@@ -135,7 +135,7 @@ function code_action:render_action_virtual_text(line, diagnostics)
         _update_sign(nil)
       end
     else
-      log(err, line, diagnostics, actions, context)
+      trace(err, line, diagnostics, actions, context)
       if config.code_action_prompt.sign then
         if need_check_diagnostic[vim.bo.filetype] then
           if next(diagnostics) == nil then

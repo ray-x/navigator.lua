@@ -262,13 +262,18 @@ if config.lsp.disable_lsp == 'all' then
   config.lsp.disable_lsp = servers
 end
 
-local default_cfg = {
+local ng_default_cfg = {
   on_attach = on_attach,
   flags = {allow_incremental_sync = true, debounce_text_changes = 1000}
 }
 
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
+  -- if _NG_LSPCfgSetup ~= true then
+  -- log(lspconfig_setup)
+  -- lspconfig_setup(cfg)
+  -- _NG_LSPCfgSetup = true
+  -- end
   log(ft, client, loaded)
   if lspconfig[client] == nil then
     log("not supported by nvim", client)
@@ -308,16 +313,21 @@ local function load_cfg(ft, client, cfg, loaded)
       return
     end
 
-    log("load cfg", cfg)
+    trace("load cfg", cfg)
+    log('lspconfig setup')
+    -- log(lspconfig.available_servers())
+    -- force reload with config
     lspconfig[client].setup(cfg)
-    -- dont know why but 1st lsp client setup may fail.. could be a upstream defect
-    -- lspconfig[client].setup(cfg)
+    vim.defer_fn(function()
+
+      vim.cmd([[doautocmd FileType ]] .. ft)
+    end, 100)
     log(client, "loading for", ft)
   end
   -- need to verify the lsp server is up
 end
 
-local function wait_lsp_startup(ft, retry, user_lsp_opts)
+local function lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
 
@@ -371,7 +381,7 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
       goto continue
     end
 
-    default_config = vim.tbl_deep_extend("force", default_config, default_cfg)
+    default_config = vim.tbl_deep_extend("force", default_config, ng_default_cfg)
     local cfg = setups[lspclient] or {}
     cfg = vim.tbl_deep_extend("keep", cfg, default_config)
     -- filetype disabled
@@ -433,8 +443,11 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
       end
     end
 
+    log('loading', lspclient, 'name', lspconfig[lspclient].name)
     -- start up lsp
     load_cfg(ft, lspclient, cfg, loaded)
+
+    _NG_Loaded[lspclient] = true
     -- load_cfg(ft, lspclient, {}, loaded)
     ::continue::
   end
@@ -443,29 +456,24 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
     local efm_cfg = user_lsp_opts['efm']
     if efm_cfg then
       lspconfig.efm.setup(efm_cfg)
+      log('efm loading')
+      _NG_Loaded['efm'] = true
     end
   end
   if not retry or ft == nil then
     return
   end
-  --
-  local timer = vim.loop.new_timer()
-  local i = 0
-  -- jdtls can be very slow
-  timer:start(1000, 200, function()
-    clients = vim.lsp.get_active_clients() or {}
-    i = i + 1
-    if i > 20 or #clients > 0 then
-      timer:close() -- Always close handles to avoid leaks.
-      log("active", #clients, i)
-      for _, client in pairs(clients) do
-        _NG_Loaded[client] = true
-      end
-      -- return true
-    end
-    -- giveup
-    -- _NG_Loaded = false
-  end)
+end
+
+local function get_cfg(client)
+  local ng_cfg = ng_default_cfg
+  if setups[client] ~= nil then
+    local ng_setup = vim.deepcopy(setups[client])
+    ng_setup.cmd = nil
+    return ng_setup
+  else
+    return ng_cfg
+  end
 end
 
 local function setup(user_opts)
@@ -477,7 +485,7 @@ local function setup(user_opts)
   if user_opts ~= nil then
     log("navigator user setup", user_opts)
   end
-  trace(debug.traceback())
+  log(debug.traceback())
   user_opts = user_opts or config -- incase setup was triggered from autocmd
 
   if ft == nil then
@@ -485,7 +493,11 @@ local function setup(user_opts)
   end
 
   if ft == nil or ft == "" then
-    log("nil filetype")
+    vim.defer_fn(function()
+      setup(user_opts)
+    end, 100)
+
+    log("nil filetype, callback")
     return
   end
   local retry = true
@@ -527,7 +539,7 @@ local function setup(user_opts)
     end
   end
 
-  wait_lsp_startup(ft, retry, lsp_opts)
+  lsp_startup(ft, retry, lsp_opts)
 
   --- if code line enabled
   if _NgConfigValues.lsp.code_lens then
@@ -538,4 +550,4 @@ local function setup(user_opts)
   -- _LoadedFiletypes[ft] = vim.tbl_extend("keep", _LoadedFiletypes[ft] or {}, {ft})
 
 end
-return {setup = setup}
+return {setup = setup, get_cfg = get_cfg}

@@ -133,11 +133,13 @@ end
 
 M.setup = function(cfg)
   extend_config(cfg)
+
+  vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
   -- local log = require"navigator.util".log
   -- log(debug.traceback())
   -- log(cfg, _NgConfigValues)
   -- print("loading navigator")
-  require('navigator.lazyloader')
+  require('navigator.lazyloader').init()
   require('navigator.lspclient.clients').setup(_NgConfigValues)
   -- require("navigator.lspclient.mapping").setup(_NgConfigValues)
   require("navigator.reference")
@@ -149,14 +151,16 @@ M.setup = function(cfg)
   if _NgConfigValues.code_action_prompt.enable then
     vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
   end
+
   -- vim.cmd("autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4")
   if not _NgConfigValues.loaded then
-    vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
     _NgConfigValues.loaded = true
   end
+
   if _NgConfigValues.ts_fold == true then
     require('navigator.foldts').on_attach()
   end
+
 end
 
 return M

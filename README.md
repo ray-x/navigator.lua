@@ -405,7 +405,20 @@ If you'd like to only use the lsp servers installed by lspinstall. Please set
 lspinstall = false
 ```
 
-In the config
+In the config.
+
+If you need to use the setup from navigator instead of default setup in lspinstall. Please setup
+
+```lua
+lspinstall = false
+
+require'navigator'.setup({
+  lsp = {
+    tsserver = { cmd = {'your tsserver installed by lspinstall'} }
+  }
+})
+
+```
 
 ## Usage
 
