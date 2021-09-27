@@ -366,6 +366,8 @@ require'navigator'.setup({
 | n    | \<C-v\>         | open preview file in nvim with vsplit                      |
 | n    | \<C-s\>         | open preview file in nvim with split                       |
 | n    | \<Enter\>       | open preview file in nvim/Apply action                     |
+| n    | \<ESC\>         | close listview of floating window                          |
+| i/n  | \<C-e\>         | close listview of floating window                          |
 | i/n  | \<C-b\>         | previous page in listview                                  |
 | i/n  | \<C-f\>         | next page in listview                                      |
 | i/n  | \<C-s\>         | save the modification to preview window to file            |
