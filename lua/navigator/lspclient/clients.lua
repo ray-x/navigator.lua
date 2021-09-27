@@ -31,6 +31,24 @@ local on_attach = require("navigator.lspclient.attach").on_attach
 -- lua setup
 local library = {}
 
+local luadevcfg = {
+  library = {
+    vimruntime = true, -- runtime path
+    types = true, -- full signature, docs and completion of vim.api, vim.treesitter, vim.lsp and others
+    plugins = {"nvim-treesitter", "plenary.nvim"}
+  },
+  lspconfig = {
+    -- cmd = {sumneko_binary},
+    on_attach = on_attach
+  }
+}
+
+local luadev = {}
+local ok, l = pcall(require, "lua-dev")
+if ok and l then
+  luadev = l.setup(luadevcfg)
+end
+
 local path = vim.split(package.path, ";")
 
 table.insert(path, "lua/?.lua")
@@ -238,6 +256,8 @@ local setups = {
     }
   }
 }
+
+setups.sumneko_lua = vim.tbl_deep_extend('force', luadev, setups.sumneko_lua)
 
 local servers = {
   "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",

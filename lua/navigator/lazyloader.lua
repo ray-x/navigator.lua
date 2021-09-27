@@ -7,8 +7,10 @@ return {
     if packer_plugins ~= nil then -- packer install
       local lazy_plugins = {
         ["nvim-lspconfig"] = "neovim/nvim-lspconfig",
-        ["guihua.lua"] = "ray-x/guihua.lua"
+        ["guihua.lua"] = "ray-x/guihua.lua",
+        ["lua-dev.nvim"] = "folke/lua-dev.nvim"
       }
+
       if _NgConfigValues.lspinstall == true then
         lazy_plugins["nvim-lspinstall"] = "kabouzeid/nvim-lspinstall"
       end
@@ -36,7 +38,7 @@ return {
           local lsp_inst_cfg = configs[server]
           if lsp_inst_cfg and lsp_inst_cfg.document_config.default_config then
             lsp_inst_cfg = lsp_inst_cfg.document_config.default_config
-            vim.tbl_deep_extend('keep', lsp_inst_cfg, cfg)
+            lsp_inst_cfg = vim.tbl_deep_extend('keep', lsp_inst_cfg, cfg)
             require'lspconfig'[server].setup(lsp_inst_cfg)
           end
         end
