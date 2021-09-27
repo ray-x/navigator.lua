@@ -10,14 +10,14 @@ local log = util.log
 -- dataformat should be same as reference
 local function location_handler(err, locations, ctx, cfg, msg)
   if err ~= nil then
-    print("ERROR: " .. tostring(err) .. msg)
+    print("ERROR: " .. tostring(err) .. " " .. msg)
     return
   end
   return locations_to_items(locations)
 end
 
 local function implementation_handler(bang, err, result, ctx, cfg)
-  local results = location_handler(err, result, ctx, "Implementation not found")
+  local results = location_handler(err, result, ctx, cfg, "Implementation not found")
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr, "ft")
   gui.new_list_view({items = results, ft = ft, api = 'Implementation'})
 end
