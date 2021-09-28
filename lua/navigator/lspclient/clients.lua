@@ -515,7 +515,7 @@ local function setup(user_opts)
   if ft == nil or ft == "" then
     vim.defer_fn(function()
       setup(user_opts)
-    end, 100)
+    end, 500)
 
     log("nil filetype, callback")
     return
