@@ -109,6 +109,7 @@ function M.run_action()
   local bufnr = api.nvim_get_current_buf()
 
   local lenses = codelens.get(bufnr)
+  log(lenses)
   if lenses == nil or #lenses == 0 then
     return
   end
@@ -147,7 +148,7 @@ function M.run_action()
   local divider = string.rep('─', width + 2)
 
   table.insert(data, 2, divider)
-  if #data > 0 then
+  if #data > 2 then
     local lv = gui.new_list_view {
       items = data,
       width = width + 4,
@@ -166,6 +167,9 @@ function M.run_action()
     }
 
     vim.api.nvim_buf_add_highlight(lv.bufnr, -1, 'Title', 0, 0, -1)
+  else
+    print('no codelense in current line')
+
   end
 end
 
