@@ -13,7 +13,6 @@ local sign_name = "NavigatorLightBulb"
 -- from neovim buf.lua, change vim.ui.select to gui
 local function on_code_action_results(results, ctx)
   local action_tuples = {}
-  log(results)
   for client_id, result in pairs(results) do
     for _, action in pairs(result.result or {}) do
       table.insert(action_tuples, {client_id, action})
@@ -24,18 +23,56 @@ local function on_code_action_results(results, ctx)
     return
   end
 
-  log(action_tuples, ctx)
+  trace(action_tuples, ctx)
   local data = {"   Auto Fix  <C-o> Apply <C-e> Exit"}
   for i, act in pairs(action_tuples) do
     local title = 'apply action'
     local action = act[2]
-
+    trace(action)
     if action.edit and action.edit.title then
-      title = action.edit.title:gsub("\r\n", "\\r\\n")
+      local edit = action.edit
+      title = edit.title:gsub("\n", " ↳ ")
     elseif action.title then
-      title = action.title:gsub("\r\n", "\\r\\n")
+      title = action.title:gsub("\n", " ↳ ")
     elseif action.command and action.command.title then
-      title = action.command.title:gsub("\r\n", "\\r\\n")
+      title = action.command.title:gsub("\n", " ↳ ")
+    end
+
+    local edit = action.edit or {}
+    -- trace(edit.documentChanges)
+    if edit.documentChanges or edit.changes then
+      local changes = edit.documentChanges or edit.changes
+      -- trace(action.edit.documentChanges)
+      for _, change in pairs(changes or {}) do
+        -- trace(change)
+        if change.edits then
+          title = title .. " [newText:]"
+          for _, ed in pairs(change.edits) do
+            -- trace(ed)
+            if ed.newText then
+              ed.newText = ed.newText:gsub("\n\t", " ↳ ")
+              ed.newText = ed.newText:gsub("\n", "↳")
+              title = title .. " (" .. ed.newText
+              if ed.range then
+                title = title .. " line: " .. tostring(ed.range.start.line) .. ")"
+              else
+                title = title .. ")"
+              end
+            end
+          end
+        elseif change.newText then
+
+          change.newText = change.newText:gsub("\"\n\t\"", " ↳  ")
+          change.newText = change.newText:gsub("\n", "↳")
+          title = title .. " (newText: " .. change.newText
+          if change.range then
+            title = title .. " line: " .. tostring(change.range.start.line) .. ")"
+          else
+            title = title .. ")"
+          end
+        end
+
+      end
     end
 
     title = title:gsub("\n", "\\n")
