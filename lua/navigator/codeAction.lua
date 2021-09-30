@@ -34,7 +34,10 @@ local function on_code_action_results(results, ctx)
       title = action.edit.title:gsub("\r\n", "\\r\\n")
     elseif action.title then
       title = action.title:gsub("\r\n", "\\r\\n")
+    elseif action.command and action.command.title then
+      title = action.command.title:gsub("\r\n", "\\r\\n")
     end
+
     title = title:gsub("\n", "\\n")
     title = string.format("[%d] %s", i, title)
     table.insert(data, title)
@@ -52,21 +55,6 @@ local function on_code_action_results(results, ctx)
   local divider = string.rep('─', width + 2)
 
   table.insert(data, 2, divider)
-  -- local apply = require('navigator.lspwrapper').apply_action
-  -- local function apply_action(action)
-  --   local action_chosen = nil
-  --   for key, value in pairs(actions) do
-  --     if value.display_title == action then
-  --       action_chosen = value
-  --     end
-  --   end
-  --
-  --   if action_chosen == nil then
-  --     log("no match for ", action, actions)
-  --     return
-  --   end
-  --   apply(action_chosen)
-  -- end
 
   local listview = gui.new_list_view {
     items = data,

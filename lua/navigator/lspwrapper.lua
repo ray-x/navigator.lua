@@ -447,7 +447,7 @@ local function apply_action(action, client, ctx)
       enriched_ctx.client_id = client.id
       fn(command, ctx)
     else
-      M.execute_command(command)
+      require('vim.lsp.buf').execute_command(command)
     end
   end
 end
