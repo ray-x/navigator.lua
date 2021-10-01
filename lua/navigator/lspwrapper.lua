@@ -434,6 +434,58 @@ function M.apply_action(action_chosen)
 
 end
 
+local function apply_action(action, client, ctx)
+  log(action, client)
+  if action.edit then
+    require('vim.lsp.util').apply_workspace_edit(action.edit)
+  end
+  if action.command then
+    local command = type(action.command) == 'table' and action.command or action
+    local fn = vim.lsp.commands[command.command]
+    if fn then
+      local enriched_ctx = vim.deepcopy(ctx)
+      enriched_ctx.client_id = client.id
+      fn(command, ctx)
+    else
+      require('vim.lsp.buf').execute_command(command)
+    end
+  end
+end
+
+function M.on_user_choice(action_tuple, ctx)
+  if not action_tuple then
+    return
+  end
+  log(action_tuple)
+  -- textDocument/codeAction can return either Command[] or CodeAction[]
+  --
+  -- CodeAction
+  --  ...
+  --  edit?: WorkspaceEdit    -- <- must be applied before command
+  --  command?: Command
+  --
+  -- Command:
+  --  title: string
+  --  command: string
+  --  arguments?: any[]
+  --
+  local client = vim.lsp.get_client_by_id(action_tuple[1])
+  local action = action_tuple[2]
+  if not action.edit and client and type(client.resolved_capabilities.code_action) == 'table'
+      and client.resolved_capabilities.code_action.resolveProvider then
+
+    client.request('codeAction/resolve', action, function(err, resolved_action)
+      if err then
+        vim.notify(err.code .. ': ' .. err.message, vim.log.levels.ERROR)
+        return
+      end
+      apply_action(resolved_action, client, ctx)
+    end)
+  else
+    apply_action(action, client, ctx)
+  end
+end
+
 function M.symbol_to_items(locations)
   if not locations or vim.tbl_isempty(locations) then
     print("list not avalible")

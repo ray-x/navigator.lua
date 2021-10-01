@@ -9,17 +9,23 @@ return {
 
     -- If the buffer hasn't been modified before the formatting has finished,
     -- update the buffer
-    if not vim.api.nvim_buf_get_option(ctx.bufnr, 'modified') then
-      local view = vim.fn.winsaveview()
-      vim.lsp.util.apply_text_edits(result, ctx.bufnr)
-      vim.fn.winrestview(view)
-      -- FIXME: commented out as a workaround
-      -- if bufnr == vim.api.nvim_get_current_buf() then
-      vim.api.nvim_command('noautocmd :update')
+    -- if not vim.api.nvim_buf_get_option(ctx.bufnr, 'modified') then
+    vim.defer_fn(function()
 
-      -- Trigger post-formatting autocommand which can be used to refresh gitgutter
-      -- vim.api.nvim_command('silent doautocmd <nomodeline> User FormatterPost')
-      -- end
-    end
+      if ctx.bufnr == vim.api.nvim_get_current_buf()
+          or not vim.api.nvim_buf_get_option(ctx.bufnr, 'modified') then
+
+        local view = vim.fn.winsaveview()
+        vim.lsp.util.apply_text_edits(result, ctx.bufnr)
+        vim.fn.winrestview(view)
+        -- FIXME: commented out as a workaround
+        -- if bufnr == vim.api.nvim_get_current_buf() then
+        vim.api.nvim_command('noautocmd :update')
+
+        -- Trigger post-formatting autocommand which can be used to refresh gitgutter
+        vim.api.nvim_command('silent doautocmd <nomodeline> User FormatterPost')
+        -- end
+      end
+    end, 20)
   end)
 }

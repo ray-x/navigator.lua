@@ -2,9 +2,9 @@
 local log = require"navigator.util".log
 local trace = require"navigator.util".trace
 local uv = vim.loop
-_NG_Loading = false
+_NG_Loaded = {}
 
-_LoadedClients = {}
+_LoadedFiletypes = {}
 local loader = nil
 packer_plugins = packer_plugins or nil -- suppress warnings
 
@@ -30,6 +30,24 @@ local on_attach = require("navigator.lspclient.attach").on_attach
 
 -- lua setup
 local library = {}
+
+local luadevcfg = {
+  library = {
+    vimruntime = true, -- runtime path
+    types = true, -- full signature, docs and completion of vim.api, vim.treesitter, vim.lsp and others
+    plugins = {"nvim-treesitter", "plenary.nvim"}
+  },
+  lspconfig = {
+    -- cmd = {sumneko_binary},
+    on_attach = on_attach
+  }
+}
+
+local luadev = {}
+local ok, l = pcall(require, "lua-dev")
+if ok and l then
+  luadev = l.setup(luadevcfg)
+end
 
 local path = vim.split(package.path, ";")
 
@@ -239,12 +257,14 @@ local setups = {
   }
 }
 
+setups.sumneko_lua = vim.tbl_deep_extend('force', luadev, setups.sumneko_lua)
+
 local servers = {
   "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
   "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
   "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
   "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
-  "r_language_server", "rust_analyzer", "terraformls"
+  "r_language_server", "rust_analyzer", "terraformls", "svelteserver"
 }
 
 if config.lspinstall == true then
@@ -262,13 +282,19 @@ if config.lsp.disable_lsp == 'all' then
   config.lsp.disable_lsp = servers
 end
 
-local default_cfg = {
+local ng_default_cfg = {
   on_attach = on_attach,
   flags = {allow_incremental_sync = true, debounce_text_changes = 1000}
 }
 
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
+  -- if _NG_LSPCfgSetup ~= true then
+  -- log(lspconfig_setup)
+  -- lspconfig_setup(cfg)
+  -- _NG_LSPCfgSetup = true
+  -- end
+  log(ft, client, loaded)
   if lspconfig[client] == nil then
     log("not supported by nvim", client)
     return
@@ -307,16 +333,21 @@ local function load_cfg(ft, client, cfg, loaded)
       return
     end
 
-    log("load cfg", cfg)
+    trace("load cfg", cfg)
+    log('lspconfig setup')
+    -- log(lspconfig.available_servers())
+    -- force reload with config
     lspconfig[client].setup(cfg)
-    -- dont know why but 1st lsp client setup may fail.. could be a upstream defect
-    lspconfig[client].setup(cfg)
+    vim.defer_fn(function()
+
+      vim.cmd([[doautocmd FileType ]] .. ft)
+    end, 100)
     log(client, "loading for", ft)
   end
   -- need to verify the lsp server is up
 end
 
-local function wait_lsp_startup(ft, retry, user_lsp_opts)
+local function lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
 
@@ -340,12 +371,18 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
     end
   end
   for _, lspclient in ipairs(servers) do
+    -- check should load lsp
     if user_lsp_opts[lspclient] ~= nil and user_lsp_opts[lspclient].filetypes ~= nil then
       if not vim.tbl_contains(user_lsp_opts[lspclient].filetypes, ft) then
         trace("ft", ft, "disabled for", lspclient)
         goto continue
       end
     end
+
+    if _NG_Loaded[lspclient] then
+      log('client loaded', lspclient)
+    end
+
     if vim.tbl_contains(config.lsp.disable_lsp or {}, lspclient) then
       log("disable lsp", lspclient)
       goto continue
@@ -356,6 +393,7 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
       print("lspclient", lspclient, "no longer support by lspconfig, please submit an issue")
       goto continue
     end
+
     if lspconfig[lspclient].document_config and lspconfig[lspclient].document_config.default_config then
       default_config = lspconfig[lspclient].document_config.default_config
     else
@@ -363,9 +401,10 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
       goto continue
     end
 
-    default_config = vim.tbl_deep_extend("force", default_config, default_cfg)
+    default_config = vim.tbl_deep_extend("force", default_config, ng_default_cfg)
     local cfg = setups[lspclient] or {}
     cfg = vim.tbl_deep_extend("keep", cfg, default_config)
+    -- filetype disabled
     if not vim.tbl_contains(cfg.filetypes or {}, ft) then
       trace("ft", ft, "disabled for", lspclient)
       goto continue
@@ -424,39 +463,43 @@ local function wait_lsp_startup(ft, retry, user_lsp_opts)
       end
     end
 
+    log('loading', lspclient, 'name', lspconfig[lspclient].name)
+    -- start up lsp
     load_cfg(ft, lspclient, cfg, loaded)
+
+    _NG_Loaded[lspclient] = true
     -- load_cfg(ft, lspclient, {}, loaded)
     ::continue::
   end
 
-  local efm_cfg = user_lsp_opts['efm']
-  if efm_cfg then
-    lspconfig.efm.setup(efm_cfg)
+  if not _NG_Loaded['efm'] then
+    local efm_cfg = user_lsp_opts['efm']
+    if efm_cfg then
+      lspconfig.efm.setup(efm_cfg)
+      log('efm loading')
+      _NG_Loaded['efm'] = true
+    end
   end
   if not retry or ft == nil then
     return
   end
-  --
-  local timer = vim.loop.new_timer()
-  local i = 0
-  timer:start(1000, 200, function()
-    clients = vim.lsp.get_active_clients() or {}
-    i = i + 1
-    if i > 5 or #clients > 0 then
-      timer:close() -- Always close handles to avoid leaks.
-      log("active", #clients, i)
-      _NG_Loading = false
-      return true
-    end
-    -- giveup
-    -- _NG_Loading = false
-  end)
+end
+
+local function get_cfg(client)
+  local ng_cfg = ng_default_cfg
+  if setups[client] ~= nil then
+    local ng_setup = vim.deepcopy(setups[client])
+    ng_setup.cmd = nil
+    return ng_setup
+  else
+    return ng_cfg
+  end
 end
 
 local function setup(user_opts)
   local ft = vim.bo.filetype
-  if _LoadedClients[ft] then
-    -- log("navigator is loaded for ft", ft)
+  if _LoadedFiletypes[ft] then
+    log("navigator was loaded for ft", ft)
     return
   end
   if user_opts ~= nil then
@@ -465,15 +508,16 @@ local function setup(user_opts)
   trace(debug.traceback())
   user_opts = user_opts or config -- incase setup was triggered from autocmd
 
-  if _NG_Loading == true then
-    return
-  end
   if ft == nil then
     ft = vim.api.nvim_buf_get_option(0, "filetype")
   end
 
   if ft == nil or ft == "" then
-    log("nil filetype")
+    vim.defer_fn(function()
+      setup(user_opts)
+    end, 500)
+
+    log("nil filetype, callback")
     return
   end
   local retry = true
@@ -482,7 +526,7 @@ local function setup(user_opts)
     "csv", "txt", "markdown", "defx"
   }
   for i = 1, #disable_ft do
-    if ft == disable_ft[i] or _LoadedClients[ft] then
+    if ft == disable_ft[i] or _LoadedFiletypes[ft] then
       trace("navigator disabled for ft or it is loaded", ft)
       return
     end
@@ -502,8 +546,6 @@ local function setup(user_opts)
   highlight.add_highlight()
   local lsp_opts = user_opts.lsp
 
-  _NG_Loading = true
-
   if vim.bo.filetype == 'lua' then
     local slua = lsp_opts.sumneko_lua
     if slua and not slua.cmd then
@@ -517,17 +559,15 @@ local function setup(user_opts)
     end
   end
 
-  wait_lsp_startup(ft, retry, lsp_opts)
+  lsp_startup(ft, retry, lsp_opts)
 
   --- if code line enabled
   if _NgConfigValues.lsp.code_lens then
     require("navigator.codelens").setup()
   end
 
-  _LoadedClients[ft] = true
-  -- _LoadedClients[ft] = vim.tbl_extend("keep", _LoadedClients[ft] or {}, {ft})
-
-  _NG_Loading = false
+  _LoadedFiletypes[ft] = true
+  -- _LoadedFiletypes[ft] = vim.tbl_extend("keep", _LoadedFiletypes[ft] or {}, {ft})
 
 end
-return {setup = setup}
+return {setup = setup, get_cfg = get_cfg}

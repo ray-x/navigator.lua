@@ -6,6 +6,7 @@ _NG_VT_DIAG_NS = vim.api.nvim_create_namespace("navigator_lua_diag")
 local util = require "navigator.util"
 local log = util.log
 local trace = require"guihua.log".trace
+-- trace = log
 local error = util.error
 local path_sep = require"navigator.util".path_sep()
 local mk_handler = require"navigator.util".mk_handler

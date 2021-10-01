@@ -297,7 +297,8 @@ Other than above setup, additional none default setup are used for following lsp
 Please check [client setup](https://github.com/ray-x/navigator.lua/blob/26012cf9c172aa788a2e53018d94b32c5c75af75/lua/navigator/lspclient/clients.lua#L98-L234)
 
 The plugin can work with multiple LSP, e.g sqls+gopls+efm. But there are cases you may need to disable some of the
-servers. (Prevent loading multiple LSP for same source code.) e.g. I saw strange behaviours when I use pyls+pyright+pyls_ms
+servers. (Prevent loading multiple LSP for same source code.) e.g. I saw strange behaviours when I use
+pylsp+pyright+jedi
 together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
 
 ### Disable a lsp client loading from navigator
@@ -306,7 +307,7 @@ To disable a specific LSP, set `filetypes` to {} e.g.
 
 ```lua
 require'navigator'.setup({
- pyls={filetype={}}
+ pylsd={filetype={}}
 })
 
 ```
@@ -315,7 +316,7 @@ Or:
 
 ```lua
 require'navigator'.setup({
-  disable_lsp = {'pyls', 'sqlls'},
+  disable_lsp = {'pylsd', 'sqlls'},
 })
 ```
 
@@ -366,6 +367,8 @@ require'navigator'.setup({
 | n    | \<C-v\>         | open preview file in nvim with vsplit                      |
 | n    | \<C-s\>         | open preview file in nvim with split                       |
 | n    | \<Enter\>       | open preview file in nvim/Apply action                     |
+| n    | \<ESC\>         | close listview of floating window                          |
+| i/n  | \<C-e\>         | close listview of floating window                          |
 | i/n  | \<C-b\>         | previous page in listview                                  |
 | i/n  | \<C-f\>         | next page in listview                                      |
 | i/n  | \<C-s\>         | save the modification to preview window to file            |
@@ -405,7 +408,20 @@ If you'd like to only use the lsp servers installed by lspinstall. Please set
 lspinstall = false
 ```
 
-In the config
+In the config.
+
+If you need to use the setup from navigator instead of default setup in lspinstall. Please setup
+
+```lua
+lspinstall = false
+
+require'navigator'.setup({
+  lsp = {
+    tsserver = { cmd = {'your tsserver installed by lspinstall'} }
+  }
+})
+
+```
 
 ## Usage
 

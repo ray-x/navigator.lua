@@ -23,7 +23,7 @@ local key_maps = {
   {key = "gT", func = "require('navigator.treesitter').buf_ts()"},
   {key = "<Leader>gT", func = "require('navigator.treesitter').bufs_ts()"},
   {key = "K", func = "hover({ popup_opts = { border = single, max_width = 80 }})"},
-  {key = "<Space>ca", mode = "n", func = "code_action()"},
+  {key = "<Space>ca", mode = "n", func = "require('navigator.codeAction').code_action()"},
   {key = "<Space>cA", mode = "v", func = "range_code_action()"},
   {key = "<Leader>re", func = "rename()"},
   {key = "<Space>rn", func = "require('navigator.rename').rename()"},

@@ -5,8 +5,126 @@ local code_action = {}
 local gui = require "navigator.gui"
 local config = require("navigator").config_values()
 local api = vim.api
+trace = log
 
 local sign_name = "NavigatorLightBulb"
+
+--- `codeAction/resolve`
+-- from neovim buf.lua, change vim.ui.select to gui
+local function on_code_action_results(results, ctx)
+  local action_tuples = {}
+  for client_id, result in pairs(results) do
+    for _, action in pairs(result.result or {}) do
+      table.insert(action_tuples, {client_id, action})
+    end
+  end
+  if #action_tuples == 0 then
+    vim.notify('No code actions available', vim.log.levels.INFO)
+    return
+  end
+
+  trace(action_tuples, ctx)
+  local data = {"   Auto Fix  <C-o> Apply <C-e> Exit"}
+  for i, act in pairs(action_tuples) do
+    local title = 'apply action'
+    local action = act[2]
+    trace(action)
+    if action.edit and action.edit.title then
+      local edit = action.edit
+      title = edit.title:gsub("\n", " ↳ ")
+    elseif action.title then
+      title = action.title:gsub("\n", " ↳ ")
+    elseif action.command and action.command.title then
+      title = action.command.title:gsub("\n", " ↳ ")
+    end
+
+    local edit = action.edit or {}
+    -- trace(edit.documentChanges)
+    if edit.documentChanges or edit.changes then
+      local changes = edit.documentChanges or edit.changes
+      -- trace(action.edit.documentChanges)
+      for _, change in pairs(changes or {}) do
+        -- trace(change)
+        if change.edits then
+          title = title .. " [newText:]"
+          for _, ed in pairs(change.edits) do
+            -- trace(ed)
+            if ed.newText then
+              ed.newText = ed.newText:gsub("\n\t", " ↳ ")
+              ed.newText = ed.newText:gsub("\n", "↳")
+              title = title .. " (" .. ed.newText
+              if ed.range then
+                title = title .. " line: " .. tostring(ed.range.start.line) .. ")"
+              else
+                title = title .. ")"
+              end
+            end
+          end
+        elseif change.newText then
+
+          change.newText = change.newText:gsub("\"\n\t\"", " ↳  ")
+          change.newText = change.newText:gsub("\n", "↳")
+          title = title .. " (newText: " .. change.newText
+          if change.range then
+            title = title .. " line: " .. tostring(change.range.start.line) .. ")"
+          else
+            title = title .. ")"
+          end
+        end
+
+      end
+    end
+
+    title = title:gsub("\n", "\\n")
+    title = string.format("[%d] %s", i, title)
+    table.insert(data, title)
+    action_tuples[i].display_title = title
+  end
+
+  log(action_tuples)
+  local width = 42
+  for _, str in ipairs(data) do
+    if #str > width then
+      width = #str
+    end
+  end
+
+  local divider = string.rep('─', width + 2)
+
+  table.insert(data, 2, divider)
+
+  local listview = gui.new_list_view {
+    items = data,
+    width = width + 4,
+    loc = "top_center",
+    relative = "cursor",
+    rawdata = true,
+    data = data,
+    on_confirm = function(item)
+      trace(item)
+      local action_chosen = nil
+      for key, value in pairs(action_tuples) do
+        if value.display_title == item then
+          action_chosen = value
+        end
+      end
+      if action_chosen == nil then
+        log("no match for ", item, action_tuples)
+        return
+      end
+      require('navigator.lspwrapper').on_user_choice(action_chosen, ctx)
+
+    end,
+    on_move = function(pos)
+      trace(pos)
+      return pos
+    end
+  }
+
+  log("new buffer", listview.bufnr)
+  vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
+
+end
 
 local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cfg)
@@ -87,7 +205,7 @@ local function _update_virtual_text(line, actions)
   pcall(api.nvim_buf_clear_namespace, 0, namespace, 0, -1)
 
   if line then
-    log(line, actions)
+    trace(line, actions)
     local icon_with_indent = "  " .. config.icons.code_action_icon
 
     local title = actions[1].title
@@ -135,7 +253,7 @@ function code_action:render_action_virtual_text(line, diagnostics)
         _update_sign(nil)
       end
     else
-      log(err, line, diagnostics, actions, context)
+      trace(err, line, diagnostics, actions, context)
       if config.code_action_prompt.sign then
         if need_check_diagnostic[vim.bo.filetype] then
           if next(diagnostics) == nil then
@@ -165,7 +283,6 @@ function code_action:render_action_virtual_text(line, diagnostics)
 end
 
 local special_buffers = {
-  ["LspSagaCodecode_action"] = true,
   ["lspsagafinder"] = true,
   ["NvimTree"] = true,
   ["vista"] = true,
@@ -191,13 +308,34 @@ local code_action_req = function(_call_back_fn, diagnostics)
   vim.lsp.buf_request(0, "textDocument/codeAction", params, callback)
 end
 
--- code_action.code_action = function()
---   local diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
---   code_action_req(action_call_back, diagnostics)
--- end
+local function code_action_request(params)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local method = 'textDocument/codeAction'
+  vim.lsp.buf_request_all(bufnr, method, params, function(results)
+    on_code_action_results(results, {bufnr = bufnr, method = method, params = params})
+  end)
+end
+
+code_action.code_action = function()
+  local diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
+  local context = {diagnostics = diagnostics}
+  local params = vim.lsp.util.make_range_params()
+  params.context = context
+  -- vim.lsp.buf_request(0, "textDocument/codeAction", params, code_action.code_action_handler)
+  code_action_request(params)
+end
+
+code_action.range_code_action = function(startpos, endpos)
+  local context = {}
+  context.diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
+  local params = util.make_given_range_params(startpos, endpos)
+  params.context = context
+  code_action_request(params)
+end
 
 code_action.code_action_prompt = function()
   if special_buffers[vim.bo.filetype] then
+    log('skip buffer', vim.bo.filetype)
     return
   end
 

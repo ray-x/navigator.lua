@@ -50,7 +50,7 @@ function M.workspace_symbols(opts)
   local results_lsp = vim.lsp.buf_request_sync(0, "workspace/symbol", params,
                                                lspopts.timeout or 15000)
   if not results_lsp or vim.tbl_isempty(results_lsp) then
-    print(bufnr, "symbol not found for buf")
+    print("symbol not found for buf")
     return
   end
   -- result_lsp
