@@ -44,6 +44,7 @@ local luadevcfg = {
 }
 
 local luadev = {}
+require'navigator.lazyloader'.load('lua-dev', 'folke/lua-dev.nvim')
 local ok, l = pcall(require, "lua-dev")
 if ok and l then
   luadev = l.setup(luadevcfg)

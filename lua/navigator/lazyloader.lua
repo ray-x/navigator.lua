@@ -7,8 +7,8 @@ return {
     if packer_plugins ~= nil then -- packer install
       local lazy_plugins = {
         ["nvim-lspconfig"] = "neovim/nvim-lspconfig",
-        ["guihua.lua"] = "ray-x/guihua.lua",
-        ["lua-dev.nvim"] = "folke/lua-dev.nvim"
+        ["guihua.lua"] = "ray-x/guihua.lua"
+        -- ["lua-dev.nvim"] = "folke/lua-dev.nvim"
       }
 
       if _NgConfigValues.lspinstall == true then
@@ -44,5 +44,23 @@ return {
         end
       end
     end
+  end,
+  load = function(plugin_name, path)
+    local loader = nil
+    local packer_plugins = packer_plugins or nil -- suppress warnings
+    local log = require'navigator.util'.log
+    -- packer only
+    if packer_plugins ~= nil then -- packer install
+      local lazy_plugins = {}
+      lazy_plugins[plugin_name] = path
+      loader = require"packer".loader
+      for plugin, url in pairs(lazy_plugins) do
+        if not packer_plugins[url] or not packer_plugins[url].loaded then
+          -- log("loading ", plugin)
+          loader(plugin)
+        end
+      end
+    end
+
   end
 }
