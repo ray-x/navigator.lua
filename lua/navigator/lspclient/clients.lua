@@ -474,12 +474,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
   end
 
   if not _NG_Loaded['efm'] then
-    local efm_cfg = user_lsp_opts['efm']
-    if efm_cfg then
-      lspconfig.efm.setup(efm_cfg)
+  local efm_cfg = user_lsp_opts['efm']
+  if efm_cfg then
+    lspconfig.efm.setup(efm_cfg)
       log('efm loading')
       _NG_Loaded['efm'] = true
-    end
+  end
   end
   if not retry or ft == nil then
     return
@@ -494,7 +494,7 @@ local function get_cfg(client)
     return ng_setup
   else
     return ng_cfg
-  end
+    end
 end
 
 local function setup(user_opts)
