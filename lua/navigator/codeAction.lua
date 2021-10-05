@@ -50,9 +50,9 @@ local function on_code_action_results(results, ctx)
           for _, ed in pairs(change.edits) do
             -- trace(ed)
             if ed.newText then
-              ed.newText = ed.newText:gsub("\n\t", " ↳ ")
-              ed.newText = ed.newText:gsub("\n", "↳")
-              title = title .. " (" .. ed.newText
+              local newText = ed.newText:gsub("\n\t", " ↳ ")
+              newText = newText:gsub("\n", "↳")
+              title = title .. " (" .. newText
               if ed.range then
                 title = title .. " line: " .. tostring(ed.range.start.line) .. ")"
               else
@@ -61,10 +61,9 @@ local function on_code_action_results(results, ctx)
             end
           end
         elseif change.newText then
-
-          change.newText = change.newText:gsub("\"\n\t\"", " ↳  ")
-          change.newText = change.newText:gsub("\n", "↳")
-          title = title .. " (newText: " .. change.newText
+          local newText = change.newText:gsub("\"\n\t\"", " ↳  ")
+          newText = newText:gsub("\n", "↳")
+          title = title .. " (newText: " .. newText
           if change.range then
             title = title .. " line: " .. tostring(change.range.start.line) .. ")"
           else
