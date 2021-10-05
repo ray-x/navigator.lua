@@ -265,7 +265,7 @@ local servers = {
   "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
   "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
   "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
-  "r_language_server", "rust_analyzer", "terraformls", "svelteserver"
+  "r_language_server", "rust_analyzer", "terraformls", "svelte"
 }
 
 if config.lspinstall == true then

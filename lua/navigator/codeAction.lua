@@ -49,7 +49,7 @@ local function on_code_action_results(results, ctx)
           title = title .. " [newText:]"
           for _, ed in pairs(change.edits) do
             -- trace(ed)
-            if ed.newText then
+            if ed.newText and ed.newText ~= "" then
               local newText = ed.newText:gsub("\n\t", " ↳ ")
               newText = newText:gsub("\n", "↳")
               title = title .. " (" .. newText
@@ -60,7 +60,7 @@ local function on_code_action_results(results, ctx)
               end
             end
           end
-        elseif change.newText then
+        elseif change.newText and change.newText ~= "" then
           local newText = change.newText:gsub("\"\n\t\"", " ↳  ")
           newText = newText:gsub("\n", "↳")
           title = title .. " (newText: " .. newText
