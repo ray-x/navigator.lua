@@ -51,7 +51,7 @@ _NgConfigValues = {
     -- Code action
     code_action_icon = "🏏", -- "",
     -- code lens
-    code_lens_action_icon = " ",
+    code_lens_action_icon = "👓",
     -- Diagnostics
     diagnostic_head = '🐛',
     diagnostic_err = "📛",
