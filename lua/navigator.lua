@@ -17,13 +17,16 @@ _NgConfigValues = {
   --   -- your on_attach will be called at end of navigator on_attach
   -- end,
   ts_fold = false,
-  code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
-  code_lens_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+  -- code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+  -- code_lens_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   signature_help_cfg = nil, -- if you would like to init lsp_signature plugin in navigator, pass in signature help
   -- setup here. if it is nil, navigator will not init signature help
   lsp = {
+
+    code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true, virtual_text_icon = true},
+    code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true, virtual_text_icon = true},
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = nil, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
@@ -90,6 +93,13 @@ vim.cmd(
 
 M.deprecated = function(cfg)
   local warn = require'navigator.util'.warn
+  if cfg.code_action_prompt then
+    warn("code_action_prompt moved to lsp.code_action")
+  end
+  if cfg.code_lens_action_prompt then
+    warn("code_lens_action_prompt moved to lsp.code_lens_action")
+  end
+
   if cfg.lsp ~= nil and cfg.lsp.disable_format_ft ~= nil and cfg.lsp.disable_format_ft ~= {} then
     warn('disable_format_ft renamed to disable_format_cap')
   end
@@ -148,7 +158,7 @@ M.setup = function(cfg)
   require("navigator.implementation")
 
   -- log("navigator loader")
-  if _NgConfigValues.code_action_prompt.enable then
+  if _NgConfigValues.lsp.code_action_prompt.enable then
     vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
   end
 

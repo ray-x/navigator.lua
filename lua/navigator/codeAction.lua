@@ -5,7 +5,7 @@ local code_action = {}
 local gui = require "navigator.gui"
 local config = require("navigator").config_values()
 local api = vim.api
-trace = log
+-- trace = log
 
 local sign_name = "NavigatorLightBulb"
 
@@ -233,7 +233,7 @@ local function _update_sign(line)
   if line then
     -- log("updatasign", line, sign_group, sign_name)
     vim.fn.sign_place(line, sign_group, sign_name, "%",
-                      {lnum = line + 1, priority = config.code_action_prompt.sign_priority})
+                      {lnum = line + 1, priority = config.lsp.code_action.sign_priority})
     code_action[winid].lightbulb_line = line
   end
 end
@@ -245,15 +245,15 @@ function code_action:render_action_virtual_text(line, diagnostics)
   return function(err, actions, context)
     if actions == nil or type(actions) ~= "table" or vim.tbl_isempty(actions) then
       -- no actions cleanup
-      if config.code_action_prompt.virtual_text then
+      if config.lsp.code_action.virtual_text then
         _update_virtual_text(nil)
       end
-      if config.code_action_prompt.sign then
+      if config.lsp.code_action.sign then
         _update_sign(nil)
       end
     else
       trace(err, line, diagnostics, actions, context)
-      if config.code_action_prompt.sign then
+      if config.lsp.code_action.sign then
         if need_check_diagnostic[vim.bo.filetype] then
           if next(diagnostics) == nil then
             _update_sign(nil)
@@ -266,7 +266,7 @@ function code_action:render_action_virtual_text(line, diagnostics)
         end
       end
 
-      if config.code_action_prompt.virtual_text then
+      if config.lsp.code_action.virtual_text then
         if need_check_diagnostic[vim.bo.filetype] then
           if next(diagnostics) == nil then
             _update_virtual_text(nil)

@@ -215,7 +215,6 @@ require'navigator'.setup({
   -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil or 100 to disable it
-  code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   icons = {
     -- Code action
     code_action_icon = "🏏",
@@ -225,8 +224,9 @@ require'navigator'.setup({
     -- refer to lua/navigator.lua for more icons setups
   },
   lspinstall = false, -- set to true if you would like use the lsp installed by lspinstall
-
   lsp = {
+    code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+    code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
     disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may

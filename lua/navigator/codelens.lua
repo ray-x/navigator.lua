@@ -39,7 +39,7 @@ local function _update_sign(line)
   if line then
     -- log("updatasign", line, sign_group, sign_name)
     vim.fn.sign_place(line, sign_group, sign_name, "%",
-                      {lnum = line + 1, priority = config.code_lens_action_prompt.sign_priority})
+                      {lnum = line + 1, priority = config.lsp.code_lens_action.sign_priority})
     code_lens_action[winid].lightbulb_line = line
   end
 end
