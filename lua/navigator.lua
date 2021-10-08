@@ -25,8 +25,20 @@ _NgConfigValues = {
   -- setup here. if it is nil, navigator will not init signature help
   lsp = {
 
-    code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true, virtual_text_icon = true},
-    code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true, virtual_text_icon = true},
+    code_action = {
+      enable = true,
+      sign = true,
+      sign_priority = 40,
+      virtual_text = true,
+      virtual_text_icon = true
+    },
+    code_lens_action = {
+      enable = true,
+      sign = true,
+      sign_priority = 40,
+      virtual_text = true,
+      virtual_text_icon = true
+    },
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = nil, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
@@ -158,7 +170,7 @@ M.setup = function(cfg)
   require("navigator.implementation")
 
   -- log("navigator loader")
-  if _NgConfigValues.lsp.code_action_prompt.enable then
+  if _NgConfigValues.lsp.code_action.enable then
     vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
   end
 
