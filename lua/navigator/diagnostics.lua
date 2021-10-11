@@ -23,13 +23,22 @@ local function clear_diag_VT(bufnr) -- important for clearing out when no more e
   _NG_VT_DIAG_NS = nil
 end
 
+local diag_map = {}
+if vim.diagnostic then
+  diag_map = {
+    Error = vim.diagnostic.severity.ERROR,
+    Warning = vim.diagnostic.severity.WARN,
+    Info = vim.diagnostic.severity.Info,
+    Hint = vim.diagnostic.severity.Hint
+  }
+end
+
 local function get_count(bufnr, level)
   if vim.diagnostic ~= nil then
-    return #diagnostic.get(bufnr, {severity = level})
+    return #diagnostic.get(bufnr, {severity = diag_map[level]})
   else
     return diagnostic.get_count(bufnr, level)
   end
-
 end
 
 local function error_marker(result, ctx, config)
@@ -55,7 +64,7 @@ local function error_marker(result, ctx, config)
     end
 
     if not vim.api.nvim_buf_is_loaded(bufnr) then
-      log("buf not loaded")
+      log("buf not loaded", bufnr)
       return
 
     end
@@ -134,10 +143,16 @@ local function error_marker(result, ctx, config)
     end
     for i, s in pairs(pos) do
       local hl = 'ErrorMsg'
-      if s.severity == 2 then
-        hl = 'WarningMsg'
-      else
-        hl = 'DiagnosticInfo'
+      if type(s.severity) == "number" then
+        if s.severity == 2 then
+          hl = 'WarningMsg'
+        elseif s.severity >= 3 then
+          hl = 'DiagnosticInfo'
+        end
+      elseif type(s.severity) == "string" then
+        if s.severity:lower() == "warn" then
+          hl = "WarningMsg"
+        end
       end
       local l = s.line + first_line
       if l > total_num then
@@ -351,13 +366,13 @@ function M.update_err_marker()
   vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
   local errors = diagnostic.get(bufnr)
   if #errors == 0 then
-    trace("errors", errors)
+    trace("no errors", errors)
     return
   end
   local uri = vim.uri_from_bufnr(bufnr)
   local result = {diagnostics = errors, uri = errors[1].uri or uri}
 
-  trace(result)
+  log(result)
   local marker = update_err_marker_async()
   marker(result, {bufnr = bufnr, method = 'textDocument/publishDiagnostics'})
 end
