@@ -49,6 +49,6 @@ jobs:
           ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
       - name: Run tests
         run: |
-          export PATH="${PWD}/_neovim/:${PATH}"
+          export PATH="${PWD}/_neovim/bin:${PATH}"
           nvim --headless -u tests/minimal.vim -c "TSInstallSync go" -c "q"
           make test
