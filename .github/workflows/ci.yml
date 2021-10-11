@@ -3,14 +3,26 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  appimage-ubuntu:
-    name: Appimage-ubuntu
-    runs-on: ubuntu-20.04
+  unit_tests:
+    name: unit tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+    matrix:
+      include:
+        - os: ubuntu-20.04
+          url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
+          manager: sudo apt-get
+          packages: -y fd-find
+        - os: ubuntu-20.04
+          url: https://github.com/neovim/neovim/releases/download/v0.5.1/nvim-linux64.tar.gz
+          manager: sudo apt-get
+          packages: -y fd-find
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '^1.15.1' # The Go version to download (if necessary) and use.
+          go-version: "^1.16.1" # The Go version to download (if necessary) and use.
       - run: date +%F > todays-date
       - name: Restore cache for today's nightly.
         uses: actions/cache@v2
@@ -21,12 +33,12 @@ jobs:
 
       - name: Prepare
         run: |
+          ${{ matrix.manager }} update
+          ${{ matrix.manager }} install ${{ matrix.packages }}
           sudo apt install fd-find
-          test -d build || {
-            mkdir -p build
-            wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
-            chmod +x nvim.appimage
-            mv nvim.appimage ./build/nvim
+          test -d _neovim || {
+            mkdir -p _neovim
+            curl -sL ${{ matrix.url }} | tar xzf - --strip-components=1 -C "${PWD}/_neovim"
           }
           GO111MODULE=on go get golang.org/x/tools/gopls@latest
 
@@ -39,6 +51,6 @@ jobs:
           ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
       - name: Run tests
         run: |
-            export PATH="${PWD}/build/:${PATH}"
-            nvim --headless -u tests/minimal.vim -c "TSInstallSync go" -c "q"
-            make test
+          export PATH="${PWD}/build/:${PATH}"
+          nvim --headless -u tests/minimal.vim -c "TSInstallSync go" -c "q"
+          make test
