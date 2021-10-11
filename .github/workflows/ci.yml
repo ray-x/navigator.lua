@@ -32,7 +32,6 @@ jobs:
 
       - name: Prepare
         run: |
-          ${{ matrix.manager }} update
           ${{ matrix.manager }} install ${{ matrix.packages }}
           # sudo apt install go
           test -d _neovim || {
