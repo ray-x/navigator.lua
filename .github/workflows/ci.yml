@@ -12,12 +12,12 @@ jobs:
         include:
           - os: ubuntu-20.04
             url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
-            manager: sudo apt-get
-            packages: -y go
+            manager: sudo snap install
+            packages: go
           - os: ubuntu-20.04
             url: https://github.com/neovim/neovim/releases/download/v0.5.1/nvim-linux64.tar.gz
-            manager: sudo apt-get
-            packages: -y go
+            manager: sudo snap install
+            packages: go
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
