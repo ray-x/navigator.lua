@@ -8,16 +8,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-    matrix:
-      include:
-        - os: ubuntu-20.04
-          url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
-          manager: sudo apt-get
-          packages: -y fd-find
-        - os: ubuntu-20.04
-          url: https://github.com/neovim/neovim/releases/download/v0.5.1/nvim-linux64.tar.gz
-          manager: sudo apt-get
-          packages: -y fd-find
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
+            manager: sudo apt-get
+            packages: -y go
+          - os: ubuntu-20.04
+            url: https://github.com/neovim/neovim/releases/download/v0.5.1/nvim-linux64.tar.gz
+            manager: sudo apt-get
+            packages: -y go
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -27,15 +27,14 @@ jobs:
       - name: Restore cache for today's nightly.
         uses: actions/cache@v2
         with:
-          path: |
-            build
-          key: ${{ runner.os }}-appimage-${{ hashFiles('todays-date') }}
+          path: _neovim
+          key: ${{ runner.os }}-${{ matrix.url }}-${{ hashFiles('todays-date') }}
 
       - name: Prepare
         run: |
           ${{ matrix.manager }} update
           ${{ matrix.manager }} install ${{ matrix.packages }}
-          sudo apt install fd-find
+          # sudo apt install go
           test -d _neovim || {
             mkdir -p _neovim
             curl -sL ${{ matrix.url }} | tar xzf - --strip-components=1 -C "${PWD}/_neovim"
