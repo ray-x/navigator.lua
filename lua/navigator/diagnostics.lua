@@ -372,7 +372,7 @@ function M.update_err_marker()
   local uri = vim.uri_from_bufnr(bufnr)
   local result = {diagnostics = errors, uri = errors[1].uri or uri}
 
-  log(result)
+  trace(result)
   local marker = update_err_marker_async()
   marker(result, {bufnr = bufnr, method = 'textDocument/publishDiagnostics'})
 end
