@@ -34,46 +34,47 @@ local symbols_to_items = lsphelper.symbols_to_items
 --   end
 -- end
 
-function M.workspace_symbols(opts)
+function M.workspace_symbols(query)
   opts = opts or {}
-  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running")
   local lspopts = {
     loc = "top_center",
     prompt = true,
     -- rawdata = true,
     api = " "
   }
+
+  query = query or pcall(vim.fn.input, "Query: ")
+  local bufnr = vim.api.nvim_get_current_buf()
+  vim.list_extend(lspopts, opts)
+  local params = {query=query}
+  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
+    if client.resolved_capabilities.workspace_symbol then
+      client.request("workspace/symbol", params, M.workspace_symbol_handler, _bufnr)
+    end
+  end)
+end
+
+function M.document_symbols(opts)
+  opts = opts or {}
+  local lspopts = {
+    loc = "top_center",
+    prompt = true,
+    -- rawdata = true,
+    api = " "
+  }
+
+  local bufnr = vim.api.nvim_get_current_buf()
   vim.list_extend(lspopts, opts)
   local params = vim.lsp.util.make_position_params()
   params.context = {includeDeclaration = true}
   params.query = opts.prompt or ""
-  local results_lsp = vim.lsp.buf_request_sync(0, "workspace/symbol", params,
-                                               lspopts.timeout or 15000)
-  if not results_lsp or vim.tbl_isempty(results_lsp) then
-    print("symbol not found for buf")
-    return
-  end
-  -- result_lsp
-  local result = {}
-  for i = 1, #results_lsp do
-    if results_lsp[i] ~= nil and results_lsp[i].result ~= nil and #results_lsp[i].result > 0 then
-      result = results_lsp[i].result
+  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
+    if client.resolved_capabilities.document_symbol then
+      client.request("textDocument/documentSymbol", params, M.document_symbol_handler, _bufnr)
     end
-  end
-
-  local items = symbols_to_items(result)
-  -- log(#items, items[1])
-
-  local ft = vim.api.nvim_buf_get_option(0, "ft")
-
-  if #items > 0 then
-    lspopts.items = items
-    lspopts.ft = ft
-    gui.new_list_view(lspopts)
-  else
-    print("symbols not found")
-  end
+  end)
 end
+
 
 M.document_symbol_handler = mk_handler(function(err, result, ctx)
   if err then
@@ -201,5 +202,6 @@ M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
   -- end
   -- opts.data = data
 end)
+
 
 return M

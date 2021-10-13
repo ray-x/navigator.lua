@@ -7,10 +7,14 @@ return {
       return
     end
 
+    local util = require "navigator.util"
+    local log = util.log
     -- If the buffer hasn't been modified before the formatting has finished,
     -- update the buffer
     -- if not vim.api.nvim_buf_get_option(ctx.bufnr, 'modified') then
     vim.defer_fn(function()
+
+      log('fmt callback')
 
       if ctx.bufnr == vim.api.nvim_get_current_buf()
           or not vim.api.nvim_buf_get_option(ctx.bufnr, 'modified') then
@@ -26,6 +30,7 @@ return {
         vim.api.nvim_command('silent doautocmd <nomodeline> User FormatterPost')
         -- end
       end
-    end, 20)
+
+    end, 100)
   end)
 }

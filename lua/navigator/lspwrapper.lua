@@ -64,8 +64,8 @@ function M.lines_from_locations(locations, include_filename)
 
   local lines = {}
   for _, loc in ipairs(locations) do
-    table.insert(lines, (fnamemodify(loc["filename"]) .. loc["lnum"] .. ":" .. loc["col"] .. ": "
-                     .. vim.trim(loc["text"])))
+    table.insert(lines,
+                 (fnamemodify(loc["filename"]) .. loc["lnum"] .. ":" .. loc["col"] .. ": " .. vim.trim(loc["text"])))
   end
 
   return lines
@@ -142,8 +142,7 @@ end
 function M.call_sync(method, params, opts, handler)
   params = params or {}
   opts = opts or {}
-  local results_lsp, err = lsp.buf_request_sync(0, method, params,
-                                                opts.timeout or vim.g.navtator_timeout or 1000)
+  local results_lsp, err = lsp.buf_request_sync(0, method, params, opts.timeout or vim.g.navtator_timeout or 1000)
 
   if nvim_0_6() then
     handler(err, extract_result(results_lsp), {method = method}, nil)
@@ -214,8 +213,7 @@ local function ts_definition(uri, range)
     return nil
   end
 
-  local key = string.format('%s_%d_%d_%d', uri, range.start.line, range.start.character,
-                            range['end'].line)
+  local key = string.format('%s_%d_%d_%d', uri, range.start.line, range.start.character, range['end'].line)
   local tsnode = ts_nodes:get(key)
   local ftime = ts_nodes_time:get(key)
 
@@ -255,8 +253,7 @@ local function find_ts_func_by_range(funcs, range)
   for _, value in pairs(funcs) do
     local func_range = value.node_scope
     -- note treesitter is C style
-    if func_range and func_range.start.line <= range.start.line and func_range['end'].line
-        >= range['end'].line then
+    if func_range and func_range.start.line <= range.start.line and func_range['end'].line >= range['end'].line then
       table.insert(result, value)
     end
   end
@@ -517,6 +514,15 @@ function M.symbol_to_items(locations)
   end
 
   return items
+end
+
+function M.request(method, hdlr) -- e.g  textDocument/reference
+  local bufnr = vim.api.nvim_get_current_buf()
+  local ref_params = vim.lsp.util.make_position_params()
+  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
+    client.request(method, ref_params, hdlr, bufnr)
+  end)
+
 end
 
 return M

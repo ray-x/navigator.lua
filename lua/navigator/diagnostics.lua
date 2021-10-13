@@ -128,7 +128,8 @@ local function error_marker(result, ctx, config)
           end
           pos[#pos] = {line = p, sign = bar, severity = math.min(diag.severity, pos[#pos].severity)}
         else
-          table.insert(pos, {
+          table.insert(pos,
+                       {
             line = p,
             sign = _NgConfigValues.lsp.diagnostic_scrollbar_sign[1],
             severity = diag.severity
@@ -232,8 +233,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
           local row = pos.line
           local line = (vim.api.nvim_buf_get_lines(bufnr1, row, row + 1, false) or {""})[1]
           if line ~= nil then
-            item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description
-                            .. v.message
+            item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description .. v.message
             table.insert(item_list, item)
           else
             error("diagnostic result empty line", v, row, bufnr1)
@@ -302,8 +302,7 @@ M.show_diagnostic = function()
     if #display_items > 0 then
       local listview = gui.new_list_view({
         items = display_items,
-        api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head
-            .. " Diagnostic ",
+        api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head .. " Diagnostic ",
         enable_preview_edit = true
       })
       trace("new buffer", listview.bufnr)
@@ -352,8 +351,8 @@ function M.update_err_marker()
   end
   local bufnr = vim.api.nvim_get_current_buf()
 
-  local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
-                       + get_count(bufnr, [[Info]]) + get_count(bufnr, [[Hint]])
+  local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]]) + get_count(bufnr, [[Info]])
+                       + get_count(bufnr, [[Hint]])
 
   -- redraw
   if diag_cnt == 0 and _NG_VT_DIAG_NS ~= nil then

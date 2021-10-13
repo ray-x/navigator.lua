@@ -20,7 +20,7 @@ M.on_attach = function(client, bufnr)
     return {error = "invalid file", result = nil}
   end
   log("attaching", bufnr, client.name, uri)
-  trace(client)
+  log(client)
 
   diagnostic_map(bufnr)
   -- add highlight for Lspxxx
@@ -51,6 +51,12 @@ M.on_attach = function(client, bufnr)
     config.lsp[client.name].on_attach(client, bufnr)
   end
 
+  if _NgConfigValues.lsp.code_action.enable then
+    if client.resolved_capabilities.code_action then
+      log('code action enabled for client', client.resolved_capabilities.code_action)
+      vim.cmd [[autocmd CursorHold,CursorHoldI <buffer> lua require'navigator.codeAction'.code_action_prompt()]]
+    end
+  end
 end
 
 -- M.setup = function(cfg)

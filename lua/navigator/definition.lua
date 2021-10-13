@@ -123,8 +123,23 @@ local function def_preview(timeout_ms)
   -- https://github.com/oblitum/goyo.vim/blob/master/autoload/goyo.vim#L108-L135
 end
 
+local def = function()
+  local bufnr = vim.api.nvim_get_current_buf()
+
+  local ref_params = vim.lsp.util.make_position_params()
+  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
+    if client.resolved_capabilities.goto_definition then
+      client.request("textDocument/definition", ref_params,  definition_hdlr , _bufnr)
+    end
+  end)
+
+end
+
+
+
 vim.lsp.handlers["textDocument/definition"] = definition_hdlr
 return {
+  definition = def,
   definition_handler = definition_hdlr,
   definition_preview = def_preview,
   declaration_handler = definition_hdlr,

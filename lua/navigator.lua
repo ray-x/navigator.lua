@@ -100,8 +100,7 @@ _NgConfigValues = {
 
 vim.cmd("command! -nargs=0 LspLog lua require'navigator.lspclient.config'.open_lsp_log()")
 vim.cmd("command! -nargs=0 LspRestart lua require'navigator.lspclient.config'.reload_lsp()")
-vim.cmd(
-    "command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>")
+vim.cmd("command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>")
 
 M.deprecated = function(cfg)
   local warn = require'navigator.util'.warn
@@ -170,9 +169,6 @@ M.setup = function(cfg)
   require("navigator.implementation")
 
   -- log("navigator loader")
-  if _NgConfigValues.lsp.code_action.enable then
-    vim.cmd [[autocmd CursorHold,CursorHoldI * lua require'navigator.codeAction'.code_action_prompt()]]
-  end
 
   -- vim.cmd("autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4")
   if not _NgConfigValues.loaded then

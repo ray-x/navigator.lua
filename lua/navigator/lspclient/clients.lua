@@ -476,7 +476,17 @@ local function lsp_startup(ft, retry, user_lsp_opts)
   if not _NG_Loaded['efm'] then
     local efm_cfg = user_lsp_opts['efm']
     if efm_cfg then
-      lspconfig.efm.setup(efm_cfg)
+
+      local cfg = {}
+      cfg = vim.tbl_deep_extend("keep", cfg, efm_cfg)
+      cfg.on_attach = function(client, bufnr)
+        if efm_cfg.on_attach then
+          efm_cfg.on_attach(client, bufnr)
+        end
+        on_attach(client, bufnr)
+      end
+
+      lspconfig.efm.setup(cfg)
       log('efm loading')
       _NG_Loaded['efm'] = true
     end

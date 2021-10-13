@@ -87,6 +87,7 @@ local ref_view = function(err, locations, ctx, cfg)
 end
 
 local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
+  _NgConfigValues.closer = nil
   trace(err, locations, ctx, cfg)
   M.async_hdlr = vim.loop.new_async(vim.schedule_wrap(function()
     ref_view(err, locations, ctx, cfg)
@@ -94,11 +95,41 @@ local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
   end))
   M.async_hdlr:send()
 end)
-local async_reference_request = function()
+
+-- local async_reference_request = function()
+--   local ref_params = vim.lsp.util.make_position_params()
+--   ref_params.context = {includeDeclaration = true}
+--   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
+--   lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
+-- end
+
+local ref_req = function()
+  if _NgConfigValues.closer ~= nil then
+    -- do not call it twice
+    _NgConfigValues.closer()
+  end
   local ref_params = vim.lsp.util.make_position_params()
   ref_params.context = {includeDeclaration = true}
   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
-  lsp.call_async("textDocument/definition", ref_params, ref_hdlr) -- return asyncresult, canceller
+  local bufnr = vim.api.nvim_get_current_buf()
+  log(bufnr)
+  local ids, closer = vim.lsp.buf_request(bufnr, "textDocument/references", ref_params, ref_hdlr)
+  log(ids)
+
+  _NgConfigValues.closer = closer
+  return ids, closer
 end
 
-return {reference_handler = ref_hdlr, show_reference = async_reference_request, ref_view = ref_view}
+local ref = function()
+  local bufnr = vim.api.nvim_get_current_buf()
+
+  local ref_params = vim.lsp.util.make_position_params()
+  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, bufnr)
+    if client.resolved_capabilities.find_references then
+      client.request("textDocument/references", ref_params, ref_hdlr, bufnr)
+    end
+  end)
+
+end
+
+return {reference_handler = ref_hdlr, reference = ref_req, ref_view = ref_view}

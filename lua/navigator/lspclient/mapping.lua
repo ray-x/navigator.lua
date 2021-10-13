@@ -12,12 +12,12 @@ local double = {"╔", "═", "╗", "║", "╝", "═", "╚", "║"}
 local single = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
 -- LuaFormatter off
 local key_maps = {
-  {key = "gr", func = "references()"},
+  {key = "gr", func = "require('navigator.reference').reference()"},
   {mode = "i", key = "<M-k>", func = "signature_help()"},
   {key = "<c-k>", func = "signature_help()"},
-  {key = "g0", func = "document_symbol()"},
+  {key = "g0", func = "require('navigator.symbols').document_symbols()"},
   {key = "gW", func = "workspace_symbol()"},
-  {key = "<c-]>", func = "definition()"},
+  {key = "<c-]>", func = "require('navigator.definition').definition()"},
   {key = "gD", func = "declaration({ border = 'rounded', max_width = 80 })"},
   {key = "gp", func = "require('navigator.definition').definition_preview()"},
   {key = "gT", func = "require('navigator.treesitter').buf_ts()"},
@@ -61,6 +61,7 @@ local check_cap = function()
   local fmt, rfmt, ccls
   for _, value in pairs(vim.lsp.buf_get_clients(0)) do
     if value ~= nil and value.resolved_capabilities == nil then
+      log(value)
       if value.resolved_capabilities.document_formatting then
         fmt = true
       end
@@ -78,6 +79,7 @@ local check_cap = function()
 end
 
 local function set_mapping(user_opts)
+  log('setup mapping')
   local opts = {noremap = true, silent = true}
   user_opts = user_opts or {}
 
@@ -138,6 +140,7 @@ local function set_mapping(user_opts)
   end
 
   -- if user_opts.cap.document_formatting then
+
   if doc_fmt then
     vim.cmd([[
       aug NavigatorAuFormat
@@ -180,8 +183,7 @@ local function set_event_handler(user_opts)
     else
       f = "lua vim.lsp.buf." .. value.func
     end
-    local cmd = "autocmd FileType " .. file_types .. " autocmd nvim_lsp_autos " .. value.ev
-                    .. " <buffer> silent! " .. f
+    local cmd = "autocmd FileType " .. file_types .. " autocmd nvim_lsp_autos " .. value.ev .. " <buffer> silent! " .. f
     vim.api.nvim_command(cmd)
   end
   vim.api.nvim_command([[augroup END]])
@@ -220,10 +222,8 @@ function M.setup(user_opts)
   log('lsp cap:', cap)
 
   if cap.call_hierarchy or cap.callHierarchy then
-    vim.lsp.handlers["callHierarchy/incomingCalls"] =
-        require"navigator.hierarchy".incoming_calls_handler
-    vim.lsp.handlers["callHierarchy/outgoingCalls"] =
-        require"navigator.hierarchy".outgoing_calls_handler
+    vim.lsp.handlers["callHierarchy/incomingCalls"] = require"navigator.hierarchy".incoming_calls_handler
+    vim.lsp.handlers["callHierarchy/outgoingCalls"] = require"navigator.hierarchy".outgoing_calls_handler
   end
 
   vim.lsp.handlers["textDocument/references"] = require"navigator.reference".reference_handler
@@ -234,16 +234,12 @@ function M.setup(user_opts)
     vim.lsp.handlers["textDocument/declaration"] = require"navigator.definition".declaration_handler
   end
 
-  vim.lsp.handlers["textDocument/typeDefinition"] =
-      require"navigator.definition".typeDefinition_handler
-  vim.lsp.handlers["textDocument/implementation"] =
-      require"navigator.implementation".implementation_handler
+  vim.lsp.handlers["textDocument/typeDefinition"] = require"navigator.definition".typeDefinition_handler
+  vim.lsp.handlers["textDocument/implementation"] = require"navigator.implementation".implementation_handler
 
-  vim.lsp.handlers["textDocument/documentSymbol"] =
-      require"navigator.symbols".document_symbol_handler
+  vim.lsp.handlers["textDocument/documentSymbol"] = require"navigator.symbols".document_symbol_handler
   vim.lsp.handlers["workspace/symbol"] = require"navigator.symbols".workspace_symbol_handler
-  vim.lsp.handlers["textDocument/publishDiagnostics"] =
-      require"navigator.diagnostics".diagnostic_handler
+  vim.lsp.handlers["textDocument/publishDiagnostics"] = require"navigator.diagnostics".diagnostic_handler
 
   -- TODO: when active signature merge to neovim, remove this setup:
 
@@ -254,11 +250,9 @@ function M.setup(user_opts)
       sig.setup(_NgConfigValues.signature_help_cfg)
     end
   else
-    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(
-                                                         require"navigator.signature".signature_handler,
-                                                         {
-          border = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
-        })
+    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(require"navigator.signature".signature_handler, {
+      border = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
+    })
   end
 
   vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})

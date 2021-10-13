@@ -19,8 +19,7 @@ local function add_locs(bufnr, result)
   if #result < 1 then
     return
   end
-  symbol = string.format("%s_%i_%i_%i", symbol, bufnr, result[1].range.start.line,
-                         result[1].range.start.character)
+  symbol = string.format("%s_%i_%i_%i", symbol, bufnr, result[1].range.start.line, result[1].range.start.character)
   if _NG_hi_list[symbol] == nil then
     _NG_hi_list[symbol] = {range = {}}
   end
@@ -201,6 +200,17 @@ local function cmd_nohl()
   end
 end
 
+_G.nav_doc_hl = function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local ref_params = vim.lsp.util.make_position_params()
+  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, bufnr)
+    if client.resolved_capabilities.document_highlight then
+      client.request("textDocument/documentHighlight", ref_params, handle_document_highlight, bufnr)
+    end
+  end)
+
+end
+
 local function documentHighlight()
   api.nvim_exec([[
       autocmd ColorScheme * |
@@ -210,35 +220,34 @@ local function documentHighlight()
 
       augroup lsp_document_highlight
         autocmd! * <buffer>
-        autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+        autocmd CursorHold <buffer> lua nav_doc_hl()
         autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
       augroup END
     ]], false)
-  vim.lsp.handlers["textDocument/documentHighlight"] = mk_handler(
-                                                           function(err, result, ctx)
-        local bufnr = ctx.bufnr
-        if err then
-          print(err)
-          return
-        end
-        if not result then
-          return
-        end
-        trace("dochl", result)
-        bufnr = api.nvim_get_current_buf()
-        vim.lsp.util.buf_clear_references(bufnr)
-        vim.lsp.util.buf_highlight_references(bufnr, result)
-        bufnr = bufnr or 0
-        if type(result) ~= "table" then
-          vim.lsp.util.buf_clear_references(bufnr)
-          return
-        end
-        table.sort(result, function(a, b)
-          return before(a.range, b.range)
-        end)
-        references[bufnr] = result
-        add_locs(bufnr, result)
-      end)
+  vim.lsp.handlers["textDocument/documentHighlight"] = mk_handler(function(err, result, ctx)
+    local bufnr = ctx.bufnr
+    if err then
+      print(err)
+      return
+    end
+    if not result then
+      return
+    end
+    trace("dochl", result)
+    bufnr = api.nvim_get_current_buf()
+    vim.lsp.util.buf_clear_references(bufnr)
+    vim.lsp.util.buf_highlight_references(bufnr, result)
+    bufnr = bufnr or 0
+    if type(result) ~= "table" then
+      vim.lsp.util.buf_clear_references(bufnr)
+      return
+    end
+    table.sort(result, function(a, b)
+      return before(a.range, b.range)
+    end)
+    references[bufnr] = result
+    add_locs(bufnr, result)
+  end)
 end
 
 return {
