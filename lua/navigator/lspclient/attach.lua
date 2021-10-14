@@ -19,8 +19,10 @@ M.on_attach = function(client, bufnr)
     log("skip for float buffer", uri)
     return {error = "invalid file", result = nil}
   end
-  log("attaching", bufnr, client.name, uri)
-  log(client)
+
+  log("attaching: ", bufnr, client.name, uri)
+
+  trace(client)
 
   diagnostic_map(bufnr)
   -- add highlight for Lspxxx

@@ -56,12 +56,18 @@ local ccls_mappings = {
   {key = "<Leader>go", func = "require('navigator.cclshierarchy').outgoing_calls()"}
 }
 
-local check_cap = function()
+local check_cap = function(cap)
   -- log(vim.lsp.buf_get_clients(0))
   local fmt, rfmt, ccls
+  if cap and cap.document_formatting then
+    fmt = true
+  end
+  if cap and cap.document_range_formatting then
+    rfmt = true
+  end
   for _, value in pairs(vim.lsp.buf_get_clients(0)) do
+    trace(value)
     if value ~= nil and value.resolved_capabilities == nil then
-      log(value)
       if value.resolved_capabilities.document_formatting then
         fmt = true
       end
@@ -69,7 +75,7 @@ local check_cap = function()
         rfmt = true
       end
 
-      -- log("override ccls", value.config)
+      log("override ccls", value.config)
       if value.config.name == "ccls" then
         ccls = true
       end
@@ -96,7 +102,7 @@ local function set_mapping(user_opts)
   -- local function buf_set_option(...)
   --   vim.api.nvim_buf_set_option(bufnr, ...)
   -- end
-  local doc_fmt, range_fmt, ccls = check_cap()
+  local doc_fmt, range_fmt, ccls = check_cap(user_opts.cap)
 
   if ccls then
     vim.list_extend(key_maps, ccls_mappings)
@@ -151,7 +157,9 @@ local function set_mapping(user_opts)
   else
     del_keymap('n', fmtkey)
   end
-  -- if user_opts.cap.document_range_formatting then
+  if user_opts.cap.document_range_formatting then
+    log(user_opts.cap)
+  end
   if not range_fmt then
     del_keymap("v", rfmtkey)
   end
@@ -257,7 +265,7 @@ function M.setup(user_opts)
 
   vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})
   if cap.document_formatting then
-    log("formatting hdl")
+    log("formatting enabled setup hdl")
     vim.lsp.handlers["textDocument/formatting"] = require"navigator.formatting".format_hdl
   end
 
