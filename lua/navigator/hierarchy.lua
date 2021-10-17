@@ -10,6 +10,10 @@ local path_cur = require"navigator.util".path_cur()
 local cwd = vim.loop.cwd()
 local M = {}
 local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_message)
+  if not result then
+    print("No call hierarchy items found")
+    return
+  end
   trace('call_hierarchy', result)
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
   if err ~= nil then
