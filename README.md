@@ -223,7 +223,7 @@ require'navigator'.setup({
     diagnostic_head_severity_1 = "🈲",
     -- refer to lua/navigator.lua for more icons setups
   },
-  lspinstall = false, -- set to true if you would like use the lsp installed by lspinstall
+  lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   lsp = {
     code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
@@ -400,24 +400,24 @@ The plugin can be loaded lazily (packer `opt = true` ), And it will check if opt
 
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
-## Integration with lspinstall
+## Integration with lsp_installer (williamboman/nvim-lsp-installer)
 
-If you'd like to only use the lsp servers installed by lspinstall. Please set
+If you'd like to only use the lsp servers installed by lsp_installer. Please set
 
 ```lua
-lspinstall = false
+lsp_installer = false
 ```
 
 In the config.
 
-If you need to use the setup from navigator instead of default setup in lspinstall. Please setup
+If you need to use the setup from navigator instead of default setup in lsp_installer. Please setup
 
 ```lua
-lspinstall = false
+-- lsp_installer = false -- default value is false
 
 require'navigator'.setup({
   lsp = {
-    tsserver = { cmd = {'your tsserver installed by lspinstall'} }
+    tsserver = { cmd = {'your tsserver installed by lsp_installer'} }
   }
 })
 

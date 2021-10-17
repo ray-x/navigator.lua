@@ -156,8 +156,7 @@ local setups = {
   },
   rust_analyzer = {
     root_dir = function(fname)
-      return util.root_pattern("Cargo.toml", "rust-project.json", ".git")(fname)
-                 or util.path.dirname(fname)
+      return util.root_pattern("Cargo.toml", "rust-project.json", ".git")(fname) or util.path.dirname(fname)
     end,
     filetypes = {"rust"},
     message_level = vim.lsp.protocol.MessageType.error,
@@ -268,11 +267,11 @@ local servers = {
   "r_language_server", "rust_analyzer", "terraformls", "svelte"
 }
 
-if config.lspinstall == true then
-  local has_lspinst, lspinst = pcall(require, "lspinstall")
+if config.lsp_installer == true then
+  local has_lspinst, lspinst = pcall(require, "nvim-lsp-installer")
   if has_lspinst then
-    local srvs = lspinst.installed_servers()
-    log('lspinstalled servers', srvs)
+    local srvs = require'nvim-lsp-installer.servers'.get_installed_servers()
+    log('lsp_installered servers', srvs)
     if #srvs > 0 then
       servers = srvs
     end
