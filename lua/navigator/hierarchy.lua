@@ -9,7 +9,6 @@ local path_sep = require"navigator.util".path_sep()
 local path_cur = require"navigator.util".path_cur()
 local cwd = vim.loop.cwd()
 local M = {}
-
 local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_message)
   trace('call_hierarchy', result)
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
@@ -27,21 +26,26 @@ local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_me
     if call_hierarchy_item.kind then
       kind = require'navigator.lspclient.lspkind'.symbol_kind(call_hierarchy_item.kind) .. ' '
     end
-    for _, range in pairs(call_hierarchy_call.fromRanges) do
-      local filename = assert(vim.uri_to_fname(call_hierarchy_item.uri))
-      local display_filename = filename:gsub(cwd .. path_sep, path_cur, 1)
-      call_hierarchy_item.detail = call_hierarchy_item.detail:gsub("\n", " ↳ ")
+    -- for _, range in pairs(call_hierarchy_call.fromRanges) do
+    range = call_hierarchy_item.range or call_hierarchy_item.selectionRange
+    local filename = assert(vim.uri_to_fname(call_hierarchy_item.uri))
+    local display_filename = filename:gsub(cwd .. path_sep, path_cur, 1)
+    call_hierarchy_item.detail = call_hierarchy_item.detail or ""
+    call_hierarchy_item.detail = call_hierarchy_item.detail:gsub("\n", " ↳ ")
+    trace(range, call_hierarchy_item)
 
-      table.insert(items, {
-        uri = call_hierarchy_item.uri,
-        filename = filename,
-        display_filename = display_filename,
-        text = kind .. call_hierarchy_item.name .. ' ﰲ ' .. call_hierarchy_item.detail,
-        range = range,
-        lnum = range.start.line,
-        col = range.start.character
-      })
-    end
+    local disp_item = {
+      uri = call_hierarchy_item.uri,
+      filename = filename,
+      display_filename = display_filename,
+      text = kind .. call_hierarchy_item.name .. ' ﰲ ' .. call_hierarchy_item.detail,
+      range = range,
+      lnum = range.start.line + 1,
+      col = range.start.character
+    }
+
+    table.insert(items, disp_item)
+    -- end
   end
   return items
 end
@@ -72,8 +76,7 @@ function M.incoming_calls(bang, opts)
   end
 
   local params = vim.lsp.util.make_position_params()
-  lsphelper.call_sync("callHierarchy/incomingCalls", params, opts,
-                      partial(incoming_calls_handler, bang))
+  lsphelper.call_sync("callHierarchy/incomingCalls", params, opts, partial(incoming_calls_handler, bang))
 end
 
 function M.outgoing_calls(bang, opts)
@@ -83,8 +86,7 @@ function M.outgoing_calls(bang, opts)
   end
 
   local params = vim.lsp.util.make_position_params()
-  lsphelper.call_sync("callHierarchy/outgoingCalls", params, opts,
-                      partial(outgoing_calls_handler, bang))
+  lsphelper.call_sync("callHierarchy/outgoingCalls", params, opts, partial(outgoing_calls_handler, bang))
 end
 
 M.incoming_calls_call = partial(M.incoming_calls, 0)

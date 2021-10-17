@@ -132,10 +132,10 @@ function M.new_list_view(opts)
     width = math.floor(wwidth * config.width)
   end
   width = math.min(120, width, opts.width or 120)
-  local wheight = math.floor(1 + api.nvim_get_option("lines")
-                                 * (_NgConfigValues.height + _NgConfigValues.preview_height))
-  local pheight = math.max(_NgConfigValues.preview_lines, math.floor(
-                               api.nvim_get_option("lines") * _NgConfigValues.preview_height))
+  local wheight = math.floor(
+                      1 + api.nvim_get_option("lines") * (_NgConfigValues.height + _NgConfigValues.preview_height))
+  local pheight = math.max(_NgConfigValues.preview_lines,
+                           math.floor(api.nvim_get_option("lines") * _NgConfigValues.preview_height))
   local prompt = opts.prompt or false
   if opts.rawdata then
     data = items

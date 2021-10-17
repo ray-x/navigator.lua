@@ -8,6 +8,7 @@ local ok, ts_locals = pcall(require, "nvim-treesitter.locals")
 
 if not ok then
   error("treesitter not installed")
+  return nil
 end
 
 local parsers = require "nvim-treesitter.parsers"
@@ -84,8 +85,7 @@ function M.find_definition(range, bufnr)
   if not root then
     return
   end
-  local node_at_point = root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1],
-                                                        symbolpos[2])
+  local node_at_point = root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1], symbolpos[2])
   if not node_at_point then
     lerr("no node at cursor")
     return
@@ -103,8 +103,7 @@ function M.find_definition(range, bufnr)
     local r, c = definition:range()
     return {start = {line = r, character = c}}
   else
-    trace("error: def not found in ", bufnr, definition:range(), definition:type(),
-          definition:parent():type())
+    trace("error: def not found in ", bufnr, definition:range(), definition:type(), definition:parent():type())
   end
 end
 
@@ -184,8 +183,7 @@ local function get_scope(type, source)
   end
 
   if type == "var" and next ~= nil then
-    if next:type() == "function" or next:type() == "arrow_function" or next:type()
-        == "function_definition" then
+    if next:type() == "function" or next:type() == "arrow_function" or next:type() == "function_definition" then
       trace(current:type(), current:range())
       return next, true
     elseif parent:type() == 'function_declaration' then
@@ -371,8 +369,7 @@ local function get_all_nodes(bufnr, filter, summary)
       if is_func then
         -- hack for lua and maybe other language aswell
         local parent = tsdata:parent()
-        if parent ~= nil and parent:type() == 'function_name' or parent:type()
-            == 'function_name_field' then
+        if parent ~= nil and parent:type() == 'function_name' or parent:type() == 'function_name_field' then
           item.node_text = ts_utils.get_node_text(parent, bufnr)[1]
           log(parent:type(), item.node_text)
         end
@@ -403,8 +400,7 @@ local function get_all_nodes(bufnr, filter, summary)
       if item.node_text == "_" then
         goto continue
       end
-      item.full_text = vim.trim(api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1,
-                                                       false)[1] or "")
+      item.full_text = vim.trim(api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1] or "")
 
       item.full_text = item.full_text:gsub('%s*[%[%(%{]*%s*$', '')
       item.uri = uri
@@ -419,8 +415,7 @@ local function get_all_nodes(bufnr, filter, summary)
         indent = string.rep("  ", #parents - 1) .. " "
       end
 
-      item.text = string.format(" %s %s%-10s\t %s", item.kind, indent, item.node_text,
-                                item.full_text)
+      item.text = string.format(" %s %s%-10s\t %s", item.kind, indent, item.node_text, item.full_text)
       if #item.text > length then
         length = #item.text
       end
@@ -578,6 +573,36 @@ function M.get_node_at_line(lnum)
 
   -- trace(node, node:type()) -- log all lines and all nodes
   return node
+end
+
+local usage_namespace = vim.api.nvim_create_namespace("nvim-treesitter-usages")
+
+function M.highlight_usages(bufnr)
+  M.clear_usage_highlights(bufnr)
+
+  local node_at_point = ts_utils.get_node_at_cursor()
+  local references = locals.get_references(bufnr)
+
+  if not node_at_point or not vim.tbl_contains(references, node_at_point) then
+    return
+  end
+
+  local def_node, scope = locals.find_definition(node_at_point, bufnr)
+  local usages = locals.find_usages(def_node, scope, bufnr)
+
+  for _, usage_node in ipairs(usages) do
+    if usage_node ~= node_at_point then
+      ts_utils.highlight_node(usage_node, bufnr, usage_namespace, "TSDefinitionUsage")
+    end
+  end
+
+  if def_node ~= node_at_point then
+    ts_utils.highlight_node(def_node, bufnr, usage_namespace, "TSDefinition")
+  end
+end
+
+function M.clear_usage_highlights(bufnr)
+  api.nvim_buf_clear_namespace(bufnr, usage_namespace, 0, -1)
 end
 
 return M

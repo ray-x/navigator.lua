@@ -158,8 +158,9 @@ local function set_mapping(user_opts)
     del_keymap('n', fmtkey)
   end
   if user_opts.cap.document_range_formatting then
-    log(user_opts.cap)
+    log("formatting enabled", user_opts.cap)
   end
+
   if not range_fmt then
     del_keymap("v", rfmtkey)
   end
