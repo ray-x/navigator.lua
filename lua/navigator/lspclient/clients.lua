@@ -269,8 +269,10 @@ local servers = {
   "r_language_server", "rust_analyzer", "terraformls", "svelte"
 }
 
+local has_lspinst = false
+
 if config.lsp_installer == true then
-  local has_lspinst, lspinst = pcall(require, "nvim-lsp-installer")
+  has_lspinst, _ = pcall(require, "nvim-lsp-installer")
   if has_lspinst then
     local srvs = require'nvim-lsp-installer.servers'.get_installed_servers()
     log('lsp_installered servers', srvs)
@@ -280,7 +282,6 @@ if config.lsp_installer == true then
   end
   log(servers)
 end
-
 if config.lsp.disable_lsp == 'all' then
   config.lsp.disable_lsp = servers
 end
@@ -290,6 +291,8 @@ local ng_default_cfg = {
   flags = {allow_incremental_sync = true, debounce_text_changes = 1000}
 }
 
+local configs = {}
+
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
   -- if _NG_LSPCfgSetup ~= true then
@@ -297,6 +300,7 @@ local function load_cfg(ft, client, cfg, loaded)
   -- lspconfig_setup(cfg)
   -- _NG_LSPCfgSetup = true
   -- end
+
   log(ft, client, loaded)
   if lspconfig[client] == nil then
     log("not supported by nvim", client)
@@ -476,8 +480,18 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
     end
 
-    log('loading', lspclient, 'name', lspconfig[lspclient].name)
+    log('loading', lspclient, 'name', lspconfig[lspclient].name, 'has lspinst', has_lspinst)
     -- start up lsp
+    if has_lspinst and _NgConfigValues.lsp_installer then
+      local installed, installer_cfg = require("nvim-lsp-installer.servers").get_server(lspconfig[lspclient].name)
+
+      log('lsp server', installer_cfg, lspconfig[lspclient].name)
+      if installed and installer_cfg then
+        cfg.cmd = installer_cfg:get_default_options().cmd
+        log(cfg)
+      end
+    end
+
     load_cfg(ft, lspclient, cfg, loaded)
 
     _NG_Loaded[lspclient] = true
@@ -501,8 +515,10 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       lspconfig.efm.setup(cfg)
       log('efm loading')
       _NG_Loaded['efm'] = true
+      configs['efm'] = cfg
     end
   end
+
   if not retry or ft == nil then
     return
   end

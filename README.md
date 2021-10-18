@@ -405,21 +405,32 @@ The terminal will need to be able to output nerdfont and emoji correctly. I am u
 If you'd like to only use the lsp servers installed by lsp_installer. Please set
 
 ```lua
-lsp_installer = false
+lsp_installer = true
+
 ```
 
 In the config.
 
-If you need to use the setup from navigator instead of default setup in lsp_installer. Please setup
+Navigator will startup the server installed by lsp-installer. Please do not call `server:setup{opts}` from lsp installer
+as it will override the navigator setup
+
+Also, could use following setups
 
 ```lua
--- lsp_installer = false -- default value is false
 
 require'navigator'.setup({
+  -- lsp_installer = false -- default value is false
   lsp = {
     tsserver = { cmd = {'your tsserver installed by lsp_installer'} }
   }
 })
+
+```
+
+example cmd setup (mac) for pyright :
+
+```
+cmd = { "/Users/username/.local/share/nvim/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio" }
 
 ```
 
