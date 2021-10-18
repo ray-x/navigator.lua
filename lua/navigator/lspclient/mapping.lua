@@ -108,17 +108,23 @@ local function set_mapping(user_opts)
     vim.list_extend(key_maps, ccls_mappings)
   end
 
-  for _, v in pairs(user_key) do
-    local exists = false
-    for _, default in pairs(key_maps) do
-      if v.func == default.func and (not default.override) then
-        default.key, default.override, exists = v.key, true, true
-        break
+  if _NgConfigValues.default_mapping ~= false then
+    for _, v in pairs(user_key) do
+      trace("binding", v)
+      local exists = false
+      for _, default in pairs(key_maps) do
+        if v.func == default.func and (not default.override) then
+          default.key, default.override, exists = v.key, true, true
+          break
+        end
+      end
+      if not exists then
+        table.insert(key_maps, v)
       end
     end
-    if not exists then
-      table.insert(key_maps, v)
-    end
+  else
+    key_maps = _NgConfigValues.keymaps or {}
+    log("setting maps to ", key_maps)
   end
   local fmtkey, rfmtkey
   for _, value in pairs(key_maps) do
@@ -141,7 +147,7 @@ local function set_mapping(user_opts)
     elseif string.find(value.func, "formatting") then
       fmtkey = value.key
     end
-    trace("binding", k, f)
+    log("binding", k, f)
     set_keymap(m, k, f, opts)
   end
 
@@ -154,14 +160,14 @@ local function set_mapping(user_opts)
         autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()
       aug END
      ]])
-  else
+  elseif fmtkey then
     del_keymap('n', fmtkey)
   end
   if user_opts.cap.document_range_formatting then
     log("formatting enabled", user_opts.cap)
   end
 
-  if not range_fmt then
+  if not range_fmt and rfmtkey then
     del_keymap("v", rfmtkey)
   end
 
@@ -220,9 +226,7 @@ end
 
 function M.setup(user_opts)
   user_opts = user_opts or _NgConfigValues
-  if _NgConfigValues.default_mapping == true then
-    set_mapping(user_opts)
-  end
+  set_mapping(user_opts)
 
   autocmd(user_opts)
   set_event_handler(user_opts)
