@@ -2,6 +2,8 @@
 local log = require"navigator.util".log
 local trace = require"navigator.util".trace
 local uv = vim.loop
+
+local warn = require'navigator.util'.warn
 _NG_Loaded = {}
 
 _LoadedFiletypes = {}
@@ -276,6 +278,7 @@ if config.lsp_installer == true then
       servers = srvs
     end
   end
+  log(servers)
 end
 
 if config.lsp.disable_lsp == 'all' then
@@ -372,6 +375,15 @@ local function lsp_startup(ft, retry, user_lsp_opts)
   end
   for _, lspclient in ipairs(servers) do
     -- check should load lsp
+
+    if type(lspclient) == 'table' then
+      if lspclient.name then
+        lspclient = lspclient.name
+      else
+        warn("incorrect set for lspclient", vim.inspect(lspclient))
+        goto continue
+      end
+    end
     if user_lsp_opts[lspclient] ~= nil and user_lsp_opts[lspclient].filetypes ~= nil then
       if not vim.tbl_contains(user_lsp_opts[lspclient].filetypes, ft) then
         trace("ft", ft, "disabled for", lspclient)
@@ -389,6 +401,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     local default_config = {}
+    log(lspclient)
     if lspconfig[lspclient] == nil then
       print("lspclient", lspclient, "no longer support by lspconfig, please submit an issue")
       goto continue

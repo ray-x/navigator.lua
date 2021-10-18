@@ -27,7 +27,7 @@ return {
 
     if _NgConfigValues.lsp_installer == true then
       local has_lspinst, lspinst = pcall(require, "lsp_installer")
-      log('lsp_installer', has_lspinst)
+      log('lsp_installer installed', has_lspinst)
       if has_lspinst then
         lspinst.setup()
         local configs = require "lspconfig/configs"
