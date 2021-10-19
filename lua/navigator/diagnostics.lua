@@ -287,7 +287,7 @@ M.hide_diagnostic = function()
   end
 end
 
-M.show_diagnostic = function()
+M.show_buf_diagnostics = function()
   if diagnostic_list[vim.bo.filetype] ~= nil then
     -- log(diagnostic_list[vim.bo.filetype])
     -- vim.fn.setqflist({}, " ", {title = "LSP", items = diagnostic_list[vim.bo.filetype]})
@@ -390,9 +390,21 @@ function M.get_line_diagnostic()
   return diagnostic.get(vim.api.nvim_get_current_buf(), {lnum = lnum})
 end
 
-function M.show_line_diagnostics()
+function M.show_diagnostics(pos)
+  local bufnr = vim.api.nvim_get_current_buf()
   local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
-  diagnostic.show_line_diagnostics({border = 'single'}, vim.api.nvim_get_current_buf(), lnum)
+  local opt = {border = 'single'}
+  if diagnostic.open_float and type(diagnostic.open_float) == "function" then
+    if pos == true then
+      opt.scope = "cursor"
+    else
+      opt.scope = "line"
+    end
+    diagnostic.open_float(bufnr, opt)
+  else
+    -- deprecated
+    diagnostic.show_line_diagnostics(opt, bufnr, lnum)
+  end
 end
 
 return M
