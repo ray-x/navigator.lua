@@ -153,7 +153,7 @@ local function set_mapping(user_opts)
 
   -- if user_opts.cap.document_formatting then
 
-  if doc_fmt then
+  if doc_fmt and _NgConfigValues.lsp.format_on_save then
     vim.cmd([[
       aug NavigatorAuFormat
         au!
