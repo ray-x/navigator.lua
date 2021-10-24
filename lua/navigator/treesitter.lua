@@ -235,7 +235,7 @@ function M.goto_adjacent_usage(bufnr, delta)
   local opt = {forward = true}
   -- log(delta)
   if delta < 0 then
-    opt = {forward = false}
+    opt.forward = false
   end
   bufnr = bufnr or api.nvim_get_current_buf()
   local node_at_point = ts_utils.get_node_at_cursor()

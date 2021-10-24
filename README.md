@@ -301,6 +301,8 @@ servers. (Prevent loading multiple LSP for same source code.) e.g. I saw strange
 pylsp+pyright+jedi
 together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
 
+Note: If you have multiple lsp installed for same language, please only enable one at a time by disable others with e.g. `disable_lsp={'denols', 'clangd'}`
+
 ### Disable a lsp client loading from navigator
 
 To disable a specific LSP, set `filetypes` to {} e.g.
