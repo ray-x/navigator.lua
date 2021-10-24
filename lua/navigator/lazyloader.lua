@@ -10,8 +10,8 @@ return {
         ["guihua.lua"] = "ray-x/guihua.lua"
       }
 
-      if _NgConfigValues.lspinstall == true then
-        lazy_plugins["nvim-lspinstall"] = "kabouzeid/nvim-lspinstall"
+      if _NgConfigValues.lsp_installer == true then
+        lazy_plugins["nvim-lsp-installer"] = "williamboman/nvim-lsp-installer"
       end
 
       -- packer installed
@@ -25,13 +25,13 @@ return {
 
     end
 
-    if _NgConfigValues.lspinstall == true then
-      local has_lspinst, lspinst = pcall(require, "lspinstall")
-      log('lspinstall', has_lspinst)
+    if _NgConfigValues.lsp_installer == true then
+      local has_lspinst, lspinst = pcall(require, "lsp_installer")
+      log('lsp_installer installed', has_lspinst)
       if has_lspinst then
         lspinst.setup()
         local configs = require "lspconfig/configs"
-        local servers = require'lspinstall'.installed_servers()
+        local servers = require'nvim-lsp-installer'.get_installed_servers()
         for _, server in pairs(servers) do
           local cfg = require'navigator.lspclient.clients'.get_cfg(server)
           local lsp_inst_cfg = configs[server]

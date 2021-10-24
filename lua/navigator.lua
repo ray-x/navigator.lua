@@ -60,7 +60,7 @@ _NgConfigValues = {
       -- cmd = {'lua-language-server'}
     }
   },
-  lspinstall = false, -- set to true if you would like use the lsp installed by lspinstall
+  lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   icons = {
     icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
     -- Code action
@@ -113,6 +113,10 @@ M.deprecated = function(cfg)
 
   if cfg.lsp ~= nil and cfg.lsp.disable_format_ft ~= nil and cfg.lsp.disable_format_ft ~= {} then
     warn('disable_format_ft renamed to disable_format_cap')
+  end
+
+  if cfg.lspinstall ~= nil then
+    warn('lspinstall deprecated, please use lsp-installer instead')
   end
 end
 
