@@ -116,7 +116,7 @@ M.deprecated = function(cfg)
   end
 
   if cfg.lspinstall ~= nil then
-    warn('lspinstall deprecated, please use lsp-installer instead')
+    warn('lspinstall deprecated, please use lsp-installer instead or use "lspinstall" branch')
   end
 end
 
