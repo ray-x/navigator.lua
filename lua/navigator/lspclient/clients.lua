@@ -537,7 +537,8 @@ end
 
 local function setup(user_opts)
   local ft = vim.bo.filetype
-  if _LoadedFiletypes[ft] then
+  local bufnr = tostring(vim.api.nvim_get_current_buf())
+  if _LoadedFiletypes[ft .. bufnr] then
     log("navigator was loaded for ft", ft)
     return
   end
