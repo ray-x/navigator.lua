@@ -93,6 +93,8 @@ variable is:
 
 - Lazy loader friendly
 
+- Multigrid support (different font and detach-able)
+
 # Why a new plugin
 
 I'd like to go beyond what the system is offering.
@@ -482,6 +484,12 @@ colorscheme: [aurora](https://github.com/ray-x/aurora)
 ### Reference
 
 Pls check the first part of README
+
+### GUI and multigrid support
+
+You can load a different font size for floating win
+
+![multigrid2](https://user-images.githubusercontent.com/1681295/139196378-bf69ade9-c916-42a9-a91f-cccb39b9c4eb.jpg)
 
 ### Document Symbol
 
