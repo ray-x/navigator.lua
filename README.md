@@ -93,7 +93,7 @@ variable is:
 
 - Lazy loader friendly
 
-- Multigrid support (different font and detach-able)
+- Multigrid support (different font and detachable)
 
 # Why a new plugin
 
