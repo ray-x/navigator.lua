@@ -563,7 +563,7 @@ local function setup(user_opts)
   local retry = true
   local disable_ft = {
     "NvimTree", "guihua", "clap_input", "clap_spinner", "vista", "vista_kind", "TelescopePrompt",
-    "csv", "txt", "markdown", "defx"
+    "csv", "txt", "defx"
   }
   for i = 1, #disable_ft do
     if ft == disable_ft[i] or _LoadedFiletypes[ft] then
