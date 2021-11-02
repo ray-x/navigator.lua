@@ -596,6 +596,32 @@ Codelens for C++/ccls. Symbol reference
 
 ![nerdfont](https://github.com/ray-x/files/blob/master/img/navigator/icon_nerd.jpg?raw=true)
 
+# Debug the plugin
+
+One simple way to gether debug info and understand what is wrong is output the debug logs
+
+```lua
+require'navigator'.setup({
+  debug = false, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
+  })
+```
+
+```lua
+-- output the logs
+
+local log = require"navigator.util".log
+
+-- output your log
+
+local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
+  log('this is a log for locations', locations, "and ctx", ctx)
+  if err ~= nil then
+    return
+  end
+end
+
+```
+
 # Break changes and known issues
 
 [known issues I am working on](https://github.com/ray-x/navigator.lua/issues/1)

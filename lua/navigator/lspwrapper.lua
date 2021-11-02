@@ -438,7 +438,7 @@ local function apply_action(action, client, ctx)
   end
   if action.command then
     local command = type(action.command) == 'table' and action.command or action
-    local fn = vim.lsp.commands[command.command]
+    local fn = vim.lsp.commands and vim.lsp.commands[command.command]
     if fn then
       local enriched_ctx = vim.deepcopy(ctx)
       enriched_ctx.client_id = client.id
