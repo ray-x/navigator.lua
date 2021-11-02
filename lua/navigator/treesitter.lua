@@ -315,6 +315,7 @@ local function get_all_nodes(bufnr, filter, summary)
     ["arrow_function"] = true,
     ["type"] = true,
     ["class"] = true,
+    ["struct"] = true,
     ["method"] = true
   }
 
@@ -500,6 +501,8 @@ function M.buf_ts()
   })
 end
 
+M.get_all_nodes = get_all_nodes
+
 function M.bufs_ts()
   if ts_locals == nil then
     error("treesitter not loaded")
@@ -603,6 +606,52 @@ end
 
 function M.clear_usage_highlights(bufnr)
   api.nvim_buf_clear_namespace(bufnr, usage_namespace, 0, -1)
+end
+
+function M.get_node_at_pos(pos, parser)
+  -- local cursor = api.nvim_win_get_cursor(winnr or 0)
+  local cursor_range = {pos[1], pos[2]}
+
+  log(cursor_range)
+  local root = ts_utils.get_root_for_position(unpack(cursor_range), parser)
+
+  if not root then
+    return
+  end
+
+  local node = root:named_descendant_for_range(cursor_range[1], cursor_range[2], cursor_range[1], cursor_range[2])
+  log(node, node:range())
+  return node
+end
+
+function M.get_node_scope(node)
+  -- local
+  local n = node
+  if n == nil then
+    return 0, 0, 0, 0
+  end
+  local sr, sc, er, ec = n:range()
+
+  log(n:range())
+  for _ = 1, 6 do
+    if n == nil then
+      return 0, 0, 0, 0
+    end
+
+    local nsr, nsc, ner, nec = n:range()
+
+    if nsr < sr then
+      log(sr, er)
+      break
+    end
+    sr, sc, er, ec = nsr, nsc, ner, nec
+    if n:parent() then
+      n = n:parent()
+    end
+  end
+
+  return sr, sc, er, ec
+
 end
 
 return M

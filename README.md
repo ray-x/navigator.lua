@@ -53,7 +53,7 @@ variable is:
 
 - Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP & Treesitter powered IDE
 
-- Unorthodox UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc. It covers
+- UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc. It covers
   all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
   implementation.
 
@@ -68,6 +68,8 @@ variable is:
 - FZY search with either native C (if gcc installed) or Lua-JIT
 
 - LSP multiple symbol highlight/marker and hop between document references
+
+- Preview definination/references
 
 - Better navigation for diagnostic errors, Navigate through all files/buffers that contain errors/warnings
 
@@ -333,9 +335,10 @@ require'navigator'.setup({
 | n    | \<c-k\>         | signature help                                             |
 | n    | gW              | workspace symbol                                           |
 | n    | gD              | declaration                                                |
+| n    | gd              | definition                                                 |
 | n    | g0              | document symbol                                            |
 | n    | \<C-]\>         | go to definition (if multiple show listview)               |
-| n    | gp              | definition                                                 |
+| n    | gp              | definition preview (Go to Preview)                         |
 | n    | \<C-LeftMouse\> | definition                                                 |
 | n    | g\<LeftMouse\>  | implementation                                             |
 | n    | gT              | treesitter document symbol                                 |
@@ -484,6 +487,12 @@ colorscheme: [aurora](https://github.com/ray-x/aurora)
 ### Reference
 
 Pls check the first part of README
+
+### Definition preview
+
+Using treesitter and LSP to view the symbol definition
+
+![image](https://user-images.githubusercontent.com/1681295/139771978-bbc970a5-be9f-42cf-8942-3477485bd89c.png)
 
 ### GUI and multigrid support
 

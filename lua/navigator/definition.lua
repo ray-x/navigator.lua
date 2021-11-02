@@ -62,7 +62,7 @@ local function def_preview(timeout_ms)
     return nil
   end
 
-  local range = data[1].targetRange or data[1].range
+  local range = data[1].targetRange or data[1].range or data[1].targetSelectionRange
 
   local row = range.start.line
   -- in case there are comments
@@ -76,8 +76,22 @@ local function def_preview(timeout_ms)
   if not vim.api.nvim_buf_is_loaded(bufnr) then
     vim.fn.bufload(bufnr)
   end
+
+  local ok, parsers = pcall(require, "nvim-treesitter.parsers")
+  local lines_num = 12
+  if ok then
+    local ts = require 'navigator.treesitter'
+    local root = parsers.get_parser(bufnr)
+    log(range)
+    local def_node = ts.get_node_at_pos({range['start'].line, range['start'].character}, root)
+
+    local sr, _, er, _ = ts.get_node_scope(def_node)
+    log(sr, er)
+    lines_num = math.max(lines_num, er - sr + 1)
+  end
+
   -- TODO: 12 should be an option
-  local definition = vim.api.nvim_buf_get_lines(bufnr, row, range["end"].line + 12, false)
+  local definition = vim.api.nvim_buf_get_lines(bufnr, row, range["end"].line + lines_num, false)
   local def_line = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range.start.line + 1, false)
   for _ = 1, math.min(3, #definition), 1 do
     if #definition[1] < 2 then
@@ -89,7 +103,7 @@ local function def_preview(timeout_ms)
   end
   local width = 40
   for key, value in pairs(definition) do
-    log(key, value, width)
+    -- log(key, value, width)
     width = math.max(width, #value)
     width = math.min(90, width)
 
@@ -129,13 +143,11 @@ local def = function()
   local ref_params = vim.lsp.util.make_position_params()
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
     if client.resolved_capabilities.goto_definition then
-      client.request("textDocument/definition", ref_params,  definition_hdlr , _bufnr)
+      client.request("textDocument/definition", ref_params, definition_hdlr, _bufnr)
     end
   end)
 
 end
-
-
 
 vim.lsp.handlers["textDocument/definition"] = definition_hdlr
 return {
