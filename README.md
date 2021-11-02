@@ -607,14 +607,14 @@ require'navigator'.setup({
 ```
 
 ```lua
--- output the logs
+
+-- a example of adding logs in the plugin
 
 local log = require"navigator.util".log
 
--- output your log
-
 local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
-  log('this is a log for locations', locations, "and ctx", ctx)
+  -- output your log
+  log('[definition] log for locations', locations, "and ctx", ctx)
   if err ~= nil then
     return
   end
