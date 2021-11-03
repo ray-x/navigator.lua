@@ -193,6 +193,26 @@ EOF
 
 ```
 
+## Work with nvim-cmp and nvim-autopairs
+
+The buffer type of navigator floating windows is `guihua`
+I would suggest disable `guihua` for autocomplete.
+e.g.
+
+```lua
+require('nvim-autopairs').setup{
+disable_filetype = { "TelescopePrompt" , "guihua", "clap_input" },
+
+if vim.o.ft ~= 'clap_input' and vim.o.ft ~= 'guihua' then
+  require'cmp'.setup.buffer { completion = {enable = false} }
+end
+...
+}
+
+```
+
+## All configure options
+
 Nondefault configuration example:
 
 ```lua
