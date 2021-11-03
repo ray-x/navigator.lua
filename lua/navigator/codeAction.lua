@@ -12,75 +12,76 @@ local sign_name = "NavigatorLightBulb"
 --- `codeAction/resolve`
 -- from neovim buf.lua, change vim.ui.select to gui
 local function on_code_action_results(results, ctx)
+  local trace = log
   local action_tuples = {}
+
+  local data = {"   Auto Fix  <C-o> Apply <C-e> Exit"}
+
   for client_id, result in pairs(results) do
-    for _, action in pairs(result.result or {}) do
-      table.insert(action_tuples, {client_id, action})
+    for i, action in pairs(result.result or {}) do
+      local title = 'apply action'
+      trace(action)
+      if action.edit and action.edit.title then
+        local edit = action.edit
+        title = edit.title:gsub("\r\n", " ↳ ")
+        title = title:gsub("\n", " ↳ ")
+      elseif action.title then
+        title = action.title:gsub("\r\n", " ↳ ")
+        title = title:gsub("\n", " ↳ ")
+      elseif action.command and action.command.title then
+        title = action.command.title:gsub("\n", " ↳ ")
+        title = title:gsub("\n", " ↳ ")
+      end
+
+      local edit = action.edit or {}
+      -- trace(edit.documentChanges)
+      if edit.documentChanges or edit.changes then
+        local changes = edit.documentChanges or edit.changes
+        -- trace(action.edit.documentChanges)
+        for _, change in pairs(changes or {}) do
+          -- trace(change)
+          if change.edits then
+            title = title .. " [newText:]"
+            for _, ed in pairs(change.edits) do
+              -- trace(ed)
+              if ed.newText and ed.newText ~= "" then
+                local newText = ed.newText:gsub("\n\t", " ↳ ")
+                newText = newText:gsub("\n", "↳")
+                title = title .. " (" .. newText
+                if ed.range then
+                  title = title .. " line: " .. tostring(ed.range.start.line) .. ")"
+                else
+                  title = title .. ")"
+                end
+              end
+            end
+          elseif change.newText and change.newText ~= "" then
+            local newText = change.newText:gsub("\"\n\t\"", " ↳  ")
+            newText = newText:gsub("\n", "↳")
+            title = title .. " (newText: " .. newText
+            if change.range then
+              title = title .. " line: " .. tostring(change.range.start.line) .. ")"
+            else
+              title = title .. ")"
+            end
+          end
+
+        end
+      end
+
+      title = string.format("[%d] %s", i, title)
+      table.insert(data, title)
+      table.insert(action_tuples, {client_id, action, title, i})
     end
   end
+
+  log(action_tuples)
+  log(data)
+
   if #action_tuples == 0 then
     vim.notify('No code actions available', vim.log.levels.INFO)
     return
   end
-
-  trace(action_tuples, ctx)
-  local data = {"   Auto Fix  <C-o> Apply <C-e> Exit"}
-  for i, act in pairs(action_tuples) do
-    local title = 'apply action'
-    local action = act[2]
-    trace(action)
-    if action.edit and action.edit.title then
-      local edit = action.edit
-      title = edit.title:gsub("\n", " ↳ ")
-    elseif action.title then
-      title = action.title:gsub("\n", " ↳ ")
-    elseif action.command and action.command.title then
-      title = action.command.title:gsub("\n", " ↳ ")
-    end
-
-    local edit = action.edit or {}
-    -- trace(edit.documentChanges)
-    if edit.documentChanges or edit.changes then
-      local changes = edit.documentChanges or edit.changes
-      -- trace(action.edit.documentChanges)
-      for _, change in pairs(changes or {}) do
-        -- trace(change)
-        if change.edits then
-          title = title .. " [newText:]"
-          for _, ed in pairs(change.edits) do
-            -- trace(ed)
-            if ed.newText and ed.newText ~= "" then
-              local newText = ed.newText:gsub("\n\t", " ↳ ")
-              newText = newText:gsub("\n", "↳")
-              title = title .. " (" .. newText
-              if ed.range then
-                title = title .. " line: " .. tostring(ed.range.start.line) .. ")"
-              else
-                title = title .. ")"
-              end
-            end
-          end
-        elseif change.newText and change.newText ~= "" then
-          local newText = change.newText:gsub("\"\n\t\"", " ↳  ")
-          newText = newText:gsub("\n", "↳")
-          title = title .. " (newText: " .. newText
-          if change.range then
-            title = title .. " line: " .. tostring(change.range.start.line) .. ")"
-          else
-            title = title .. ")"
-          end
-        end
-
-      end
-    end
-
-    title = title:gsub("\n", "\\n")
-    title = string.format("[%d] %s", i, title)
-    table.insert(data, title)
-    action_tuples[i].display_title = title
-  end
-
-  log(action_tuples)
   local width = 42
   for _, str in ipairs(data) do
     if #str > width then
@@ -102,17 +103,12 @@ local function on_code_action_results(results, ctx)
     on_confirm = function(item)
       trace(item)
       local action_chosen = nil
-      for key, value in pairs(action_tuples) do
-        if value.display_title == item then
+      for _, value in pairs(action_tuples) do
+        if value[3] == item then
           action_chosen = value
+          return require('navigator.lspwrapper').on_user_choice(action_chosen, ctx)
         end
       end
-      if action_chosen == nil then
-        log("no match for ", item, action_tuples)
-        return
-      end
-      require('navigator.lspwrapper').on_user_choice(action_chosen, ctx)
-
     end,
     on_move = function(pos)
       trace(pos)
@@ -126,66 +122,12 @@ local function on_code_action_results(results, ctx)
 end
 
 local diagnostic = vim.diagnostic or vim.lsp.diagnostic
-code_action.code_action_handler = util.mk_handler(function(err, actions, ctx, cfg)
-  if actions == nil or vim.tbl_isempty(actions) or err then
-    log("No code actions available")
+code_action.code_action_handler = util.mk_handler(function(err, results, ctx, cfg)
+  if err ~= nil then
+    log("code action err", err, results, ctx, cfg)
     return
   end
-
-  log(actions, ctx)
-  local data = {"   Auto Fix  <C-o> Apply <C-e> Exit"}
-  for i, action in ipairs(actions) do
-    local title = action.title:gsub("\r\n", "\\r\\n")
-    title = title:gsub("\n", "\\n")
-    title = string.format("[%d] %s", i, title)
-    table.insert(data, title)
-    actions[i].display_title = title
-  end
-  local width = 42
-  for _, str in ipairs(data) do
-    if #str > width then
-      width = #str
-    end
-  end
-
-  local divider = string.rep('─', width + 2)
-
-  table.insert(data, 2, divider)
-  local apply = require('navigator.lspwrapper').apply_action
-  local function apply_action(action)
-    local action_chosen = nil
-    for key, value in pairs(actions) do
-      if value.display_title == action then
-        action_chosen = value
-      end
-    end
-
-    if action_chosen == nil then
-      log("no match for ", action, actions)
-      return
-    end
-    apply(action_chosen)
-  end
-
-  local listview = gui.new_list_view {
-    items = data,
-    width = width + 4,
-    loc = "top_center",
-    relative = "cursor",
-    rawdata = true,
-    data = data,
-    on_confirm = function(pos)
-      trace(pos)
-      apply_action(pos)
-    end,
-    on_move = function(pos)
-      trace(pos)
-      return pos
-    end
-  }
-
-  log("new buffer", listview.bufnr)
-  vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
+  on_code_action_results(results, ctx)
 end)
 
 -- https://github.com/glepnir/lspsaga.nvim/blob/main/lua/lspsaga/codeaction.lua
@@ -219,8 +161,10 @@ end
 local function _update_sign(line)
 
   if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
-    vim.fn.sign_define(sign_name,
-                       {text = config.icons.code_action_icon, texthl = "LspDiagnosticsSignHint"})
+    vim.fn.sign_define(sign_name, {
+      text = config.icons.code_action_icon,
+      texthl = "LspDiagnosticsSignHint"
+    })
   end
   local winid = get_current_winid()
   if code_action[winid] == nil then
