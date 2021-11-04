@@ -377,6 +377,7 @@ require'navigator'.setup({
 | n    | gG              | show diagnostic for all buffers                            |
 | n    | ]d              | next diagnostic                                            |
 | n    | [d              | previous diagnostic                                        |
+| n    | \<Leader\> dt   | diagnostic toggle(enable/disable)                          |
 | n    | ]r              | next treesitter reference/usage                            |
 | n    | [r              | previous treesitter reference/usage                        |
 | n    | \<Sapce\> wa    | add workspace folder                                       |

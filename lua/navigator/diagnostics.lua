@@ -287,6 +287,15 @@ M.hide_diagnostic = function()
   end
 end
 
+M.toggle_diagnostics = function()
+  if M.diagnostic_enabled then
+    M.diagnostic_enabled = false
+    return vim.diagnostic.disable()
+  end
+  vim.diagnostic.enable()
+  M.diagnostic_enabled = true
+end
+
 M.show_buf_diagnostics = function()
   if diagnostic_list[vim.bo.filetype] ~= nil then
     -- log(diagnostic_list[vim.bo.filetype])

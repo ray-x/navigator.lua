@@ -409,25 +409,23 @@ function M.locations_to_items(locations, max_items)
   return items, width + 24, second_part -- TODO handle long line?
 end
 
-function M.apply_action(action_chosen)
-  assert(action_chosen ~= nil, "action must not be nil")
-  local bufnr = api.nvim_get_current_buf()
-  local switch = string.format("silent b %d", bufnr)
-  if action_chosen.edit or type(action_chosen.command) == "table" then
-    if action_chosen.edit then
-      vim.lsp.util.apply_workspace_edit(action_chosen.edit)
-    end
-    if type(action_chosen.command) == "table" then
-      -- switch buff
-      vim.cmd(switch)
-      vim.lsp.buf.execute_command(action_chosen.command)
-    end
-  else
-    vim.cmd(switch)
-    vim.lsp.buf.execute_command(action_chosen)
+function M.apply_action(action, ctx, client)
+  assert(action ~= nil, "action must not be nil")
+  if action.edit then
+    vim.lsp.util.apply_workspace_edit(action.edit)
   end
-
-  log(action_chosen)
+  if action.command then
+    local command = type(action.command) == 'table' and action.command or action
+    local fn = client.commands[command.command] or (vim.lsp.commands and vim.lsp.commands[command.command])
+    if fn then
+      local enriched_ctx = vim.deepcopy(ctx)
+      enriched_ctx.client_id = client.id
+      fn(command, enriched_ctx)
+    else
+      M.execute_command(command)
+    end
+  end
+  log(action)
 
 end
 

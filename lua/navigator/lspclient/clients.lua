@@ -546,6 +546,10 @@ local function setup(user_opts)
     log("navigator user setup", user_opts)
   end
   trace(debug.traceback())
+  if #vim.lsp.buf_get_clients() > 0 and user_opts == nil then
+    log("already setup")
+    return
+  end
   user_opts = user_opts or config -- incase setup was triggered from autocmd
 
   if ft == nil then

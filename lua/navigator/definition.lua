@@ -104,9 +104,8 @@ local function def_preview(timeout_ms)
   local width = 40
   for key, value in pairs(definition) do
     -- log(key, value, width)
-    width = math.max(width, #value)
-    width = math.min(90, width)
-
+    width = math.max(width, #value + 4)
+    width = math.min(120, width)
   end
   definition = vim.list_extend({"    [" .. get_symbol() .. "] Definition: "}, definition)
   local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
@@ -116,7 +115,7 @@ local function def_preview(timeout_ms)
     relative = "cursor",
     style = "minimal",
     ft = filetype,
-    width = width,
+    rect = {width = width, height = #definition + 2},
     data = definition,
     enter = true,
     border = _NgConfigValues.border or "shadow"
