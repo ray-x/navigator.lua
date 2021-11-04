@@ -159,7 +159,7 @@ end
 M.setup = function(cfg)
   extend_config(cfg)
 
-  vim.cmd([[autocmd FileType * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
+  vim.cmd([[autocmd FileType,BufEnter * lua require'navigator.lspclient.clients'.setup()]]) -- BufWinEnter BufNewFile,BufRead ?
   -- local log = require"navigator.util".log
   -- log(debug.traceback())
   -- log(cfg, _NgConfigValues)

@@ -33,6 +33,7 @@ local key_maps = {
   {key = "<Space>D", func = "type_definition()"},
   {key = "gL", func = "require('navigator.diagnostics').show_diagnostics()"},
   {key = "gG", func = "require('navigator.diagnostics').show_buf_diagnostics()"},
+  {key = "<Leader>dt", func = "require('navigator.diagnostics').toggle_diagnostics()"},
   {key = "]d", func = "diagnostic.goto_next({ border = 'rounded', max_width = 80})"},
   {key = "[d", func = "diagnostic.goto_prev({ border = 'rounded', max_width = 80})"},
   {key = "]r", func = "require('navigator.treesitter').goto_next_usage()"},
