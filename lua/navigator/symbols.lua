@@ -46,7 +46,7 @@ function M.workspace_symbols(query)
   query = query or pcall(vim.fn.input, "Query: ")
   local bufnr = vim.api.nvim_get_current_buf()
   vim.list_extend(lspopts, opts)
-  local params = {query=query}
+  local params = {query = query}
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
     if client.resolved_capabilities.workspace_symbol then
       client.request("workspace/symbol", params, M.workspace_symbol_handler, _bufnr)
@@ -75,7 +75,6 @@ function M.document_symbols(opts)
   end)
 end
 
-
 M.document_symbol_handler = mk_handler(function(err, result, ctx)
   if err then
     print("failed to get document symbol", ctx)
@@ -96,7 +95,7 @@ M.document_symbol_handler = mk_handler(function(err, result, ctx)
     item.kind = result[i].kind
     local kind = symbol_kind(item.kind)
     item.name = result[i].name
-    item.range = result[i].range
+    item.range = result[i].range or result[i].location.range
     item.uri = uri
     item.selectionRange = result[i].selectionRange
     item.detail = result[i].detail or ""
@@ -202,6 +201,5 @@ M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
   -- end
   -- opts.data = data
 end)
-
 
 return M
