@@ -119,6 +119,9 @@ local function on_code_action_results(results, ctx)
   log("new buffer", listview.bufnr)
   vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
 
+  -- let move down 2 pos
+  ListViewCtrl:on_next()
+  ListViewCtrl:on_next()
 end
 
 local diagnostic = vim.diagnostic or vim.lsp.diagnostic

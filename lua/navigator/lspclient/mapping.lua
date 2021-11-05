@@ -257,11 +257,11 @@ function M.setup(user_opts)
 
   -- TODO: when active signature merge to neovim, remove this setup:
 
-  if _NgConfigValues.signature_help_cfg then
+  if _NgConfigValues.signature_help_cfg or _NgConfigValues.lsp_signature_help then
     log("setup signature from navigator")
     local hassig, sig = pcall(require, "lsp_signature")
     if hassig then
-      sig.setup(_NgConfigValues.signature_help_cfg)
+      sig.setup(_NgConfigValues.signature_help_cfg or {})
     end
   else
     vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(require"navigator.signature".signature_handler, {
