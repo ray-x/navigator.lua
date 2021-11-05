@@ -21,7 +21,8 @@ _NgConfigValues = {
   -- code_lens_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
-  signature_help_cfg = nil, -- if you would like to init lsp_signature plugin in navigator, pass in signature help
+  signature_help_cfg = nil, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
+  lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
   lsp = {
 
