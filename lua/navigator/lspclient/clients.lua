@@ -542,6 +542,17 @@ local function setup(user_opts)
     log("navigator was loaded for ft", ft)
     return
   end
+  local disable_ft = {
+    "NvimTree", "guihua", "clap_input", "clap_spinner", "vista", "vista_kind", "TelescopePrompt",
+    "guihua_rust", "csv", "txt", "defx"
+  }
+  for i = 1, #disable_ft do
+    if ft == disable_ft[i] or _LoadedFiletypes[ft] then
+      trace("navigator disabled for ft or it is loaded", ft)
+      return
+    end
+  end
+
   if user_opts ~= nil then
     log("navigator user setup", user_opts)
   end
@@ -565,16 +576,6 @@ local function setup(user_opts)
     return
   end
   local retry = true
-  local disable_ft = {
-    "NvimTree", "guihua", "clap_input", "clap_spinner", "vista", "vista_kind", "TelescopePrompt",
-    "csv", "txt", "defx"
-  }
-  for i = 1, #disable_ft do
-    if ft == disable_ft[i] or _LoadedFiletypes[ft] then
-      trace("navigator disabled for ft or it is loaded", ft)
-      return
-    end
-  end
 
   local bufnr = vim.fn.bufnr()
   local uri = vim.uri_from_bufnr(bufnr)
