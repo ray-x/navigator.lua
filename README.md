@@ -579,6 +579,10 @@ https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9
 
 ![code actions](https://github.com/ray-x/files/blob/master/img/navigator/codeaction.jpg?raw=true)
 
+### Symbol rename
+
+![rename](https://user-images.githubusercontent.com/1681295/141081135-55f45c2d-28c6-4475-a083-e37dfabe9afd.jpg)
+
 #### Fill struct with gopls
 
 ![code actions fill struct](https://github.com/ray-x/files/blob/master/img/navigator/fill_struct.gif?raw=true)
