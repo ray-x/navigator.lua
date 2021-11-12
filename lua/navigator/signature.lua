@@ -40,8 +40,7 @@ local match_parameter = function(result)
     if type(nextParameter.label) == "string" then -- label = 'par1 int'
       local i, j = label:find(nextParameter.label, 1, true)
       if i ~= nil then
-        label = label:sub(1, i - 1) .. [[`]] .. label:sub(i, j) .. [[`]]
-                    .. label:sub(j + 1, #label + 1)
+        label = label:sub(1, i - 1) .. [[`]] .. label:sub(i, j) .. [[`]] .. label:sub(j + 1, #label + 1)
         signature.label = label
       end
     end

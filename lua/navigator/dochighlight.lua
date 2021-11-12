@@ -138,13 +138,13 @@ local function before(r1, r2)
 end
 
 local handle_document_highlight = mk_handler(function(_, result, ctx)
-  trace(result)
+  trace(result, ctx)
   if not ctx.bufnr then
     log("ducment highlight error", result, ctx)
     return
   end
   if type(result) ~= "table" then
-    log("clear up")
+    log("clear up", result)
     vim.lsp.util.buf_clear_references(ctx.bufnr)
     return
   end
@@ -153,7 +153,8 @@ local handle_document_highlight = mk_handler(function(_, result, ctx)
     return before(a.range, b.range)
   end)
   references[ctx.bufnr] = result
-  vim.lsp.util.buf_highlight_references(ctx.bufnr, result)
+
+  vim.lsp.util.buf_highlight_references(ctx.bufnr, result, ctx.client_id)
 end)
 -- modify from vim-illuminate
 local function goto_adjent_reference(opt)
