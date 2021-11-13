@@ -57,6 +57,8 @@ variable is:
   all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
   implementation.
 
+- Code Action GUI
+
 - Luv async thread and tasks
 
 - Edit your code in preview window
@@ -369,9 +371,9 @@ require'navigator'.setup({
 | n    | gT              | treesitter document symbol                                 |
 | n    | \<Leader\>gT    | treesitter symbol for all open buffers                     |
 | n    | K               | hover doc                                                  |
-| n    | \<Space\>ca     | code action (when you see 💡 )                             |
+| n    | \<Space\>ca     | code action (when you see 🏏 )                             |
 | n    | \<Space\>la     | code lens action (when you see a codelens indicator)       |
-| v    | \<Space\>cA     | range code action (when you see 💡 )                       |
+| v    | \<Space\>cA     | range code action (when you see 🏏 )                       |
 | n    | \<Space\>rn     | rename with floating window                                |
 | n    | \<Leader\>re    | rename (lsp default)                                       |
 | n    | \<Leader\>gi    | incoming calls                                             |
