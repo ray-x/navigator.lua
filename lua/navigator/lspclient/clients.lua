@@ -536,6 +536,7 @@ local function get_cfg(client)
 end
 
 local function setup(user_opts)
+  log(user_opts)
   local ft = vim.bo.filetype
   local bufnr = tostring(vim.api.nvim_get_current_buf())
   if _LoadedFiletypes[ft .. bufnr] then
@@ -544,7 +545,7 @@ local function setup(user_opts)
   end
   local disable_ft = {
     "NvimTree", "guihua", "clap_input", "clap_spinner", "vista", "vista_kind", "TelescopePrompt",
-    "guihua_rust", "csv", "txt", "defx"
+    "guihua_rust", "csv", "txt", "defx", "packer"
   }
   for i = 1, #disable_ft do
     if ft == disable_ft[i] or _LoadedFiletypes[ft] then
