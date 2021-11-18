@@ -376,8 +376,8 @@ require'navigator'.setup({
 | v    | \<Space\>cA     | range code action (when you see 🏏 )                       |
 | n    | \<Space\>rn     | rename with floating window                                |
 | n    | \<Leader\>re    | rename (lsp default)                                       |
-| n    | \<Leader\>gi    | incoming calls                                             |
-| n    | \<Leader\>go    | outgoing calls                                             |
+| n    | \<Leader\>gi    | hierarchy incoming calls                                   |
+| n    | \<Leader\>go    | hierarchy outgoing calls                                   |
 | n    | gi              | implementation                                             |
 | n    | \<Sapce\> D     | type definition                                            |
 | n    | gL              | show line diagnostic                                       |
@@ -606,9 +606,9 @@ Improved signature help with current parameter highlighted
 
 ![show_signature](https://github.com/ray-x/files/blob/master/img/navigator/show_signnature.gif?raw=true "show_signature")
 
-### Call hierarchy (incomming/outgoing)
+### Call hierarchy (incomming/outgoing calls)
 
-![incomming](https://github.com/ray-x/files/blob/master/img/navigator/incomming.jpg?raw=true)
+![incomming_calls](https://user-images.githubusercontent.com/1681295/142348079-49b71486-4f16-4f10-95c9-483aad11c262.jpg)
 
 ### Light bulb if codeAction available
 
