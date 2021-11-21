@@ -42,11 +42,13 @@ local function get_count(bufnr, level)
 end
 
 local function error_marker(result, ctx, config)
+  if _NgConfigValues.lsp.diagnostic_scrollbar_sign == nil or _NgConfigValues.lsp.diagnostic_scrollbar_sign == {}
+      or _NgConfigValues.lsp.diagnostic_scrollbar_sign == false then -- not enabled or already shown
+    return
+  end
+
   vim.defer_fn(function()
     if vim.tbl_isempty(result.diagnostics) then
-      return
-    end
-    if _NgConfigValues.lsp.diagnostic_scrollbar_sign == nil then -- not enabled or already shown
       return
     end
     local first_line = vim.fn.line('w0')
@@ -170,7 +172,7 @@ end
 
 local update_err_marker_async = function()
   local debounce = require'navigator.debounce'.debounce_trailing
-  return debounce(20, error_marker)
+  return debounce(200, error_marker)
 end
 
 local diag_hdlr = mk_handler(function(err, result, ctx, config)

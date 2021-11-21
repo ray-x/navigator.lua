@@ -135,8 +135,12 @@ local extend_config = function(opts)
       for k, v in pairs(value) do
         -- level 3
         if type(_NgConfigValues[key][k]) == "table" then
-          for k2, v2 in pairs(v) do
-            _NgConfigValues[key][k][k2] = v2
+          if type(v) == "table" then
+            for k2, v2 in pairs(v) do
+              _NgConfigValues[key][k][k2] = v2
+            end
+          else
+            _NgConfigValues[key][k] = v
           end
         else
           _NgConfigValues[key][k] = v
