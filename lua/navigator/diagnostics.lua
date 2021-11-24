@@ -216,6 +216,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
       item.lnum = v.range.start.line + 1
       item.col = v.range.start.character + 1
       item.uri = uri
+      trace(item)
       local head = _NgConfigValues.icons.diagnostic_head
       if v.severity == 1 then
         head = _NgConfigValues.icons.diagnostic_head_severity_1
@@ -227,27 +228,29 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
         head = _NgConfigValues.icons.diagnostic_head_severity_3
       end
       local bufnr1 = vim.uri_to_bufnr(uri)
-      if not vim.api.nvim_buf_is_loaded(bufnr1) then
-        if _NgConfigValues.diagnostic_load_files then
-          -- print('load buffers')
+      local loaded = vim.api.nvim_buf_is_loaded(bufnr1)
+      if _NgConfigValues.diagnostic_load_files then
+        -- print('load buffers')
+        if not loaded then
           vim.fn.bufload(bufnr1) -- this may slow down the neovim
-          local pos = v.range.start
-          local row = pos.line
-          local line = (vim.api.nvim_buf_get_lines(bufnr1, row, row + 1, false) or {""})[1]
-          if line ~= nil then
-            item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description .. v.message
-            table.insert(item_list, item)
-          else
-            error("diagnostic result empty line", v, row, bufnr1)
-          end
-        else
-          item.text = head .. _NgConfigValues.icons.diagnostic_head_description .. v.message
-          table.insert(item_list, item)
         end
+        local pos = v.range.start
+        local row = pos.line
+        local line = (vim.api.nvim_buf_get_lines(bufnr1, row, row + 1, false) or {""})[1]
+        if line ~= nil then
+          item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description .. v.message
+          table.insert(item_list, item)
+        else
+          error("diagnostic result empty line", v, row, bufnr1)
+        end
+      else
+        item.text = head .. _NgConfigValues.icons.diagnostic_head_description .. v.message
+        table.insert(item_list, item)
       end
     end
     -- local old_items = vim.fn.getqflist()
     diagnostic_list[ft][uri] = item_list
+    trace(uri, ft, item_list)
     if not result.uri then
       result.uri = uri
     end
