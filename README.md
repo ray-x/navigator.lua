@@ -340,7 +340,9 @@ To disable a specific LSP, set `filetypes` to {} e.g.
 
 ```lua
 require'navigator'.setup({
- pylsd={filetype={}}
+  lsp={
+   pylsd={filetype={}}
+  }
 })
 
 ```
@@ -349,7 +351,9 @@ Or:
 
 ```lua
 require'navigator'.setup({
-  disable_lsp = {'pylsd', 'sqlls'},
+  lsp={
+    disable_lsp = {'pylsd', 'sqlls'},
+  }
 })
 ```
 
