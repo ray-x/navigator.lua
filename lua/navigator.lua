@@ -139,11 +139,17 @@ local extend_config = function(opts)
   end
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then
-      error(string.format("[] Key %s not valid", key))
+      warn(string.format("[] Key %s not valid", key))
+      _NgConfigValues[key] = {}
       -- return
     end
     if type(_NgConfigValues[key]) == "table" then
       for k, v in pairs(value) do
+        if type(k) == "number" then
+          -- replace all item in array
+          _NgConfigValues[key] = value
+          break
+        end
         -- level 3
         if type(_NgConfigValues[key][k]) == "table" then
           if type(v) == "table" then
@@ -158,8 +164,10 @@ local extend_config = function(opts)
             if key == 'lsp' then
               local lsp = require('navigator.lspclient.clients').lsp
               if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' then
-                warn(string.format("[] LSP %s not valid", k))
+                info(string.format("[] extend LSP support for  %s ", k))
               end
+            elseif key == 'keymaps' then
+              -- skip key check and allow mapping to handle that
             else
               warn(string.format("[] Key %s %s not valid", key, k))
             end
