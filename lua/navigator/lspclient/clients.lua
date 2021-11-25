@@ -101,6 +101,13 @@ end
 -- TODO end
 
 local setups = {
+ clojure_lsp = {
+    on_attach = on_attach,
+    filetypes = {"clojure", "edn"},
+    message_level = vim.lsp.protocol.MessageType.error,
+    cmd = {"clojure-lsp"}
+  },
+
   gopls = {
     on_attach = on_attach,
     -- capabilities = cap,
@@ -267,7 +274,7 @@ local servers = {
   "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
   "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
   "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
-  "r_language_server", "rust_analyzer", "terraformls", "svelte", "texlab"
+  "r_language_server", "rust_analyzer", "terraformls", "svelte", "texlab", "clojure_lsp"
 }
 
 local has_lspinst = false
