@@ -1,6 +1,19 @@
 local M = {}
+
+local function warn(msg)
+  vim.api.nvim_echo({{"WRN: " .. msg, "WarningMsg"}}, true, {})
+end
+
+local function error(msg)
+  vim.api.nvim_echo({{"ERR: " .. msg, "ErrorMsg"}}, true, {})
+end
+
+local function info(msg)
+  vim.api.nvim_echo({{"Info: " .. msg}}, true, {})
+end
+
 _NgConfigValues = {
-  debug = false, -- log output not implemented
+  debug = false, -- log output
   width = 0.62, -- valeu of cols
   height = 0.38, -- listview height
   preview_height = 0.38,
@@ -12,10 +25,9 @@ _NgConfigValues = {
 
   border = "single", -- border style, can be one of 'none', 'single', 'double', "shadow"
   combined_attach = "both", -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
-  on_attach = nil,
-  -- function(client, bufnr)
-  --   -- your on_attach will be called at end of navigator on_attach
-  -- end,
+  on_attach = function(client, bufnr)
+    -- your on_attach will be called at end of navigator on_attach
+  end,
   ts_fold = false,
   -- code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   -- code_lens_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
@@ -25,7 +37,6 @@ _NgConfigValues = {
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
   lsp = {
-
     code_action = {
       enable = true,
       sign = true,
@@ -42,7 +53,7 @@ _NgConfigValues = {
     },
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
-    disable_lsp = nil, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
+    disable_lsp = {}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     code_lens = false,
     -- only want to enable one lsp server
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
@@ -127,10 +138,10 @@ local extend_config = function(opts)
     return
   end
   for key, value in pairs(opts) do
-    -- if _NgConfigValues[key] == nil then
-    --   error(string.format("[] Key %s not valid", key))
-    --   return
-    -- end
+    if _NgConfigValues[key] == nil then
+      error(string.format("[] Key %s not valid", key))
+      -- return
+    end
     if type(_NgConfigValues[key]) == "table" then
       for k, v in pairs(value) do
         -- level 3
@@ -143,6 +154,17 @@ local extend_config = function(opts)
             _NgConfigValues[key][k] = v
           end
         else
+          if _NgConfigValues[key][k] == nil then
+            if key == 'lsp' then
+              local lsp = require('navigator.lspclient.clients').lsp
+              if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' then
+                warn(string.format("[] LSP %s not valid", k))
+              end
+            else
+              warn(string.format("[] Key %s %s not valid", key, k))
+            end
+            -- return
+          end
           _NgConfigValues[key][k] = v
         end
       end

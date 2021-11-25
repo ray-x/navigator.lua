@@ -617,4 +617,4 @@ local function setup(user_opts)
   -- _LoadedFiletypes[ft] = vim.tbl_extend("keep", _LoadedFiletypes[ft] or {}, {ft})
 
 end
-return {setup = setup, get_cfg = get_cfg}
+return {setup = setup, get_cfg = get_cfg, lsp = servers}

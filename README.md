@@ -664,3 +664,11 @@ end
 - Async (some of the requests is slow on large codebases and might be good to use co-rountine)
 - More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Did not test other languages (e.g dart, swift etc)
 - Configuration options
+
+# Errors and Bug Reporting
+
+- Please double check your setup and check if minium setup works or not
+- It should works for 0.5.1, neovim 0.6.x prefered.
+- Check console output
+- Check `LspInfo` and treesitter status with `checkhealth`
+- Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log
