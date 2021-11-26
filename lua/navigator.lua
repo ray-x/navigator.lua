@@ -4,10 +4,6 @@ local function warn(msg)
   vim.api.nvim_echo({{"WRN: " .. msg, "WarningMsg"}}, true, {})
 end
 
-local function error(msg)
-  vim.api.nvim_echo({{"ERR: " .. msg, "ErrorMsg"}}, true, {})
-end
-
 local function info(msg)
   vim.api.nvim_echo({{"Info: " .. msg}}, true, {})
 end
@@ -139,45 +135,51 @@ local extend_config = function(opts)
   end
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then
-      warn(string.format("[] Key %s not valid", key))
-      _NgConfigValues[key] = {}
+      warn(string.format("[] Deprecated? Key %s is not in default setup, it could be incorrect to set to %s", key,
+                         vim.inspect(value)))
+      _NgConfigValues[key] = value
       -- return
-    end
-    if type(_NgConfigValues[key]) == "table" then
-      for k, v in pairs(value) do
-        if type(k) == "number" then
-          -- replace all item in array
-          _NgConfigValues[key] = value
-          break
+    else
+      if type(_NgConfigValues[key]) == "table" then
+        if type(value) ~= "table" then
+          info(string.format("[] Reset type: Key %s setup value %s type %s , from %s", key, vim.inspect(value),
+                             type(value), vim.inspect(_NgConfigValues[key])))
         end
-        -- level 3
-        if type(_NgConfigValues[key][k]) == "table" then
-          if type(v) == "table" then
-            for k2, v2 in pairs(v) do
-              _NgConfigValues[key][k][k2] = v2
+        for k, v in pairs(value) do
+          if type(k) == "number" then
+            -- replace all item in array
+            _NgConfigValues[key] = value
+            break
+          end
+          -- level 3
+          if type(_NgConfigValues[key][k]) == "table" then
+            if type(v) == "table" then
+              for k2, v2 in pairs(v) do
+                _NgConfigValues[key][k][k2] = v2
+              end
+            else
+              _NgConfigValues[key][k] = v
             end
           else
+            if _NgConfigValues[key][k] == nil then
+              if key == 'lsp' then
+                local lsp = require('navigator.lspclient.clients').lsp
+                if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' then
+                  info(string.format("[] extend LSP support for  %s ", k))
+                end
+              elseif key == 'keymaps' then
+                -- skip key check and allow mapping to handle that
+              else
+                warn(string.format("[] Key %s %s not valid", key, k))
+              end
+              -- return
+            end
             _NgConfigValues[key][k] = v
           end
-        else
-          if _NgConfigValues[key][k] == nil then
-            if key == 'lsp' then
-              local lsp = require('navigator.lspclient.clients').lsp
-              if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' then
-                info(string.format("[] extend LSP support for  %s ", k))
-              end
-            elseif key == 'keymaps' then
-              -- skip key check and allow mapping to handle that
-            else
-              warn(string.format("[] Key %s %s not valid", key, k))
-            end
-            -- return
-          end
-          _NgConfigValues[key][k] = v
         end
+      else
+        _NgConfigValues[key] = value
       end
-    else
-      _NgConfigValues[key] = value
     end
   end
   if _NgConfigValues.sumneko_root_path or _NgConfigValues.sumneko_binary then

@@ -55,7 +55,7 @@ describe("should run lsp reference", function()
     -- require'lspconfig'.gopls.setup {}
     require'navigator'.setup({
       debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
-      code_action_icon = "A ",
+      icons = {code_action_icon = "A "},
       width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
       height = 0.3, -- max list window height, 0.3 by default
       preview_height = 0.35, -- max height of preview windows
@@ -97,7 +97,7 @@ describe("should run lsp reference", function()
     vim.bo.filetype = "go"
     require'navigator'.setup({
       debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
-      code_action_icon = "A ",
+      icons = {code_action_icon = "A "},
       width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
       height = 0.3, -- max list window height, 0.3 by default
       preview_height = 0.35, -- max height of preview windows
@@ -133,9 +133,7 @@ describe("should run lsp reference", function()
       }, {})
 
     else
-      win, items, width = require('navigator.reference').reference_handler(nil,
-                                                                           "textDocument/references",
-                                                                           result, 1, 1)
+      win, items, width = require('navigator.reference').reference_handler(nil, "textDocument/references", result, 1, 1)
 
     end
 
@@ -165,7 +163,7 @@ describe("should run lsp reference", function()
     vim.bo.filetype = "go"
     require'navigator'.setup({
       debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
-      code_action_icon = "A ",
+      icons = {code_action_icon = "A "},
       width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
       height = 0.3, -- max list window height, 0.3 by default
       preview_height = 0.35, -- max height of preview windows
@@ -201,9 +199,7 @@ describe("should run lsp reference", function()
       }, {truncate = 2})
 
     else
-      win, items, width = require('navigator.reference').reference_handler(nil,
-                                                                           "textDocument/references",
-                                                                           result, 1, 1)
+      win, items, width = require('navigator.reference').reference_handler(nil, "textDocument/references", result, 1, 1)
 
     end
 
