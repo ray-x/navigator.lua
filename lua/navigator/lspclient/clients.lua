@@ -101,9 +101,10 @@ end
 -- TODO end
 
 local setups = {
- clojure_lsp = {
+  clojure_lsp = {
     root_dir = function(fname)
-      return util.root_pattern("deps.edn", "build.boot", "project.clj", "shadow-cljs.edn", "bb.edn", ".git")(fname) or util.path.dirname(fname)
+      return util.root_pattern("deps.edn", "build.boot", "project.clj", "shadow-cljs.edn", "bb.edn", ".git")(fname)
+                 or util.path.dirname(fname)
     end,
     on_attach = on_attach,
     filetypes = {"clojure", "edn"},
@@ -627,4 +628,11 @@ local function setup(user_opts)
   -- _LoadedFiletypes[ft] = vim.tbl_extend("keep", _LoadedFiletypes[ft] or {}, {ft})
 
 end
-return {setup = setup, get_cfg = get_cfg, lsp = servers}
+
+-- append lsps to servers
+function add_servers(lsps)
+  vim.validate {lsps = {lsps, 't'}}
+  vim.list_extend(servers, lsps)
+end
+
+return {setup = setup, get_cfg = get_cfg, lsp = servers, add_servers = add_servers}

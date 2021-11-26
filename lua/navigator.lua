@@ -66,7 +66,8 @@ _NgConfigValues = {
       -- sumneko_root_path = sumneko_root_path,
       -- sumneko_binary = sumneko_binary,
       -- cmd = {'lua-language-server'}
-    }
+    },
+    servers = {} -- you can add additional lsp server so navigator will load the default for you
   },
   lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   icons = {
@@ -132,6 +133,10 @@ local extend_config = function(opts)
   opts = opts or {}
   if next(opts) == nil then
     return
+  end
+  if opts.lsp and opts.lsp.servers then
+    require('navigator.lspclient.clients').add_servers(opts.lsp.servers)
+    opts.lsp.server = nil
   end
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then

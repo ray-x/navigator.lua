@@ -290,6 +290,10 @@ require'navigator'.setup({
       sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
       sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
     },
+    servers = {'cmake', 'ltex'}, -- by default empty, but if you whant navigator load  e.g. `cmake` and `ltex` for you , you
+    -- can put them in the `servers` list and navigator will auto load them.
+    -- you could still specify the custom config  like this
+    -- cmake = {filetypes = {'cmake', 'makefile'}, single_file_support = false},
   }
 })
 
@@ -306,7 +310,7 @@ local servers = {
   "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
   "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
   "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
-  "r_language_server", "rust_analyzer", "terraformls", "clojure_lsp"
+  "r_language_server", "rust_analyzer", "terraformls", "svelte", "texlab", "clojure_lsp"
 }
 
 ```
@@ -332,10 +336,23 @@ servers. (Prevent loading multiple LSP for same source code.) e.g. I saw strange
 pylsp+pyright+jedi
 together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
 
-Note: If you have multiple lsp installed for same language, please only enable one at a time by disable others with e.g. `disable_lsp={'denols', 'clangd'}`
+#### Add your own servers
+
+Above servers covered a small part neovim lspconfig support, You can still use lspconfig to add and config servers not
+in the list. If you would like to add a server not in the list, you can check this PR https://github.com/ray-x/navigator.lua/pull/107
+
+Also, an option in setup:
+
+```lua
+require'navigator'setup{lsp={servers={'cmake', 'lexls'}}}
+
+```
+
+Above example add cmake and lexls to the default server list
 
 ### Disable a lsp client loading from navigator
 
+Note: If you have multiple lsp installed for same language, please only enable one at a time by disable others with e.g. `disable_lsp={'denols', 'clangd'}`
 To disable a specific LSP, set `filetypes` to {} e.g.
 
 ```lua
