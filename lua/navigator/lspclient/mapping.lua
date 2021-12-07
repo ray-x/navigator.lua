@@ -215,12 +215,12 @@ M.toggle_lspformat = function(on)
     if on == nil then
       print("format on save true")
     end
-    vim.cmd([[set eventignore=""]])
+    vim.cmd([[set eventignore-=BufWritePre]])
   else
     if on == nil then
       print("format on save false")
     end
-    vim.cmd([[set eventignore=BufWritePre]])
+    vim.cmd([[set eventignore+=BufWritePre]])
   end
 
 end

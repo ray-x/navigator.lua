@@ -1,36 +1,36 @@
 local M = {}
 
-local util = require "navigator.util"
+local util = require('navigator.util')
 local nvim_0_6 = util.nvim_0_6()
 
-local gutil = require "guihua.util"
-local lsp = require "vim.lsp"
+local gutil = require('guihua.util')
+local lsp = require('vim.lsp')
 local api = vim.api
-local log = require"navigator.util".log
-local lerr = require"navigator.util".error
-local trace = require"navigator.util".trace
-local symbol_kind = require"navigator.lspclient.lspkind".symbol_kind
+local log = require('navigator.util').log
+local lerr = require('navigator.util').error
+local trace = require('navigator.util').trace
+local symbol_kind = require('navigator.lspclient.lspkind').symbol_kind
 local cwd = vim.loop.cwd()
 
-local is_win = vim.loop.os_uname().sysname:find("Windows")
+local is_win = vim.loop.os_uname().sysname:find('Windows')
 
-local path_sep = require"navigator.util".path_sep()
-local path_cur = require"navigator.util".path_cur()
+local path_sep = require('navigator.util').path_sep()
+local path_cur = require('navigator.util').path_cur()
 cwd = gutil.add_pec(cwd)
 local ts_nodes = require('navigator.lru').new(1000, 1024 * 1024)
 local ts_nodes_time = require('navigator.lru').new(1000)
-local TS_analysis_enabled = require"navigator".config_values().treesitter_analysis
+local TS_analysis_enabled = require('navigator').config_values().treesitter_analysis
 
 -- extract symbol from range
 function M.get_symbol(text, range)
   if range == nil then
-    return ""
+    return ''
   end
   return string.sub(text, range.start.character + 1, range['end'].character)
 end
 
 local function check_lhs(text, symbol)
-  local find = require'guihua.util'.word_find
+  local find = require('guihua.util').word_find
   local s = find(text, symbol)
   local eq = string.find(text, '=') or 0
   local eq2 = string.find(text, '==') or 0
@@ -40,7 +40,7 @@ local function check_lhs(text, symbol)
     return false
   end
   if s < eq and eq ~= eq2 then
-    trace(symbol, "modified")
+    trace(symbol, 'modified')
   end
   if eq == eq3 + 1 then
     return false
@@ -54,18 +54,20 @@ local function check_lhs(text, symbol)
 end
 
 function M.lines_from_locations(locations, include_filename)
-  local fnamemodify = (function(filename)
+  local fnamemodify = function(filename)
     if include_filename then
-      return vim.fn.fnamemodify(filename, ":~:.") .. ":"
+      return vim.fn.fnamemodify(filename, ':~:.') .. ':'
     else
-      return ""
+      return ''
     end
-  end)
+  end
 
   local lines = {}
   for _, loc in ipairs(locations) do
-    table.insert(lines,
-                 (fnamemodify(loc["filename"]) .. loc["lnum"] .. ":" .. loc["col"] .. ": " .. vim.trim(loc["text"])))
+    table.insert(
+      lines,
+      (fnamemodify(loc['filename']) .. loc['lnum'] .. ':' .. loc['col'] .. ': ' .. vim.trim(loc['text']))
+    )
   end
 
   return lines
@@ -83,18 +85,18 @@ function M.symbols_to_items(result)
       item.name = result[i].name -- symbol name
       item.text = result[i].name
       if kind ~= nil then
-        item.text = kind .. ": " .. item.text
+        item.text = kind .. ': ' .. item.text
       end
       item.filename = vim.uri_to_fname(item.uri)
 
       item.display_filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
       if item.range == nil or item.range.start == nil then
-        log("range not set", result[i], item)
+        log('range not set', result[i], item)
       end
       item.lnum = item.range.start.line + 1
 
       if item.containerName ~= nil then
-        item.text = " " .. item.containerName .. item.text
+        item.text = ' ' .. item.containerName .. item.text
       end
       table.insert(locations, item)
     end
@@ -131,9 +133,9 @@ function M.check_capabilities(feature, client_id)
     return true
   else
     if #clients == 0 then
-      log("LSP: no client attached")
+      log('LSP: no client attached')
     else
-      trace("LSP: server does not support " .. feature)
+      trace('LSP: server does not support ' .. feature)
     end
     return false
   end
@@ -145,7 +147,7 @@ function M.call_sync(method, params, opts, handler)
   local results_lsp, err = lsp.buf_request_sync(0, method, params, opts.timeout or vim.g.navtator_timeout or 1000)
 
   if nvim_0_6() then
-    handler(err, extract_result(results_lsp), {method = method}, nil)
+    handler(err, extract_result(results_lsp), { method = method }, nil)
   else
     handler(err, method, extract_result(results_lsp), nil, nil)
   end
@@ -163,18 +165,18 @@ end
 
 local function ts_functions(uri)
   local unload_bufnr
-  local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
+  local ts_enabled, _ = pcall(require, 'nvim-treesitter.locals')
   if not ts_enabled or not TS_analysis_enabled then
-    lerr("ts not enabled")
+    lerr('ts not enabled')
     return nil
   end
-  local ts_func = require"navigator.treesitter".buf_func
+  local ts_func = require('navigator.treesitter').buf_func
   local bufnr = vim.uri_to_bufnr(uri)
   local x = os.clock()
   trace(ts_nodes)
   local tsnodes = ts_nodes:get(uri)
   if tsnodes ~= nil then
-    trace("get data from cache")
+    trace('get data from cache')
     local t = ts_nodes_time:get(uri) or 0
     local fname = vim.uri_to_fname(uri)
     local modified = vim.fn.getftime(fname)
@@ -188,7 +190,7 @@ local function ts_functions(uri)
   end
   local unload = false
   if not api.nvim_buf_is_loaded(bufnr) then
-    trace("! load buf !", uri, bufnr)
+    trace('! load buf !', uri, bufnr)
     vim.fn.bufload(bufnr)
     -- vim.api.nvim_buf_detach(bufnr) -- if user opens the buffer later, it prevents user attach event
     unload = true
@@ -201,35 +203,35 @@ local function ts_functions(uri)
   ts_nodes:set(uri, funcs)
   ts_nodes_time:set(uri, os.time())
   trace(funcs, ts_nodes:get(uri))
-  trace(string.format("elapsed time: %.4f\n", os.clock() - x)) -- how long it tooks
+  trace(string.format('elapsed time: %.4f\n', os.clock() - x)) -- how long it tooks
   return funcs, unload_bufnr
 end
 
 local function ts_definition(uri, range)
   local unload_bufnr
-  local ts_enabled, _ = pcall(require, "nvim-treesitter.locals")
+  local ts_enabled, _ = pcall(require, 'nvim-treesitter.locals')
   if not ts_enabled or not TS_analysis_enabled then
-    lerr("ts not enabled")
+    lerr('ts not enabled')
     return nil
   end
 
   local key = string.format('%s_%d_%d_%d', uri, range.start.line, range.start.character, range['end'].line)
-  local tsnode = ts_nodes:get(key)
+  local tsnodes = ts_nodes:get(key)
   local ftime = ts_nodes_time:get(key)
 
   local fname = vim.uri_to_fname(uri)
   local modified = vim.fn.getftime(fname)
   if tsnodes and modified <= ftime then
     log('ts def from cache')
-    return tsnode
+    return tsnodes
   end
-  local ts_def = require"navigator.treesitter".find_definition
+  local ts_def = require('navigator.treesitter').find_definition
   local bufnr = vim.uri_to_bufnr(uri)
   local x = os.clock()
   trace(ts_nodes)
   local unload = false
   if not api.nvim_buf_is_loaded(bufnr) then
-    log("! load buf !", uri, bufnr)
+    log('! load buf !', uri, bufnr)
     vim.fn.bufload(bufnr)
     unload = true
   end
@@ -238,7 +240,7 @@ local function ts_definition(uri, range)
   if unload then
     unload_bufnr = bufnr
   end
-  trace(string.format(" ts def elapsed time: %.4f\n", os.clock() - x), def_range) -- how long it takes
+  trace(string.format(' ts def elapsed time: %.4f\n', os.clock() - x), def_range) -- how long it takes
   ts_nodes:set(key, def_range)
   ts_nodes_time:set(key, x)
   return def_range, unload_bufnr
@@ -279,7 +281,7 @@ local function slice_locations(locations, max_items)
   if #locations > max_items then
     local uri = locations[max_items]
     for i = max_items + 1, #locations do
-      if uri ~= locations[i] and not brk then
+      if uri ~= locations[i] then
         cut = i
         break
       end
@@ -291,15 +293,17 @@ local function slice_locations(locations, max_items)
     second_part = vim.list_slice(locations, cut + 1, #locations)
   end
   return first_part, second_part
-
 end
 
 local function test_locations()
   local locations = {
-    {uri = '1', range = {start = {line = 1}}}, {uri = '2', range = {start = {line = 2}}},
-    {uri = '2', range = {start = {line = 3}}}, {uri = '1', range = {start = {line = 3}}},
-    {uri = '1', range = {start = {line = 4}}}, {uri = '3', range = {start = {line = 4}}},
-    {uri = '3', range = {start = {line = 4}}}
+    { uri = '1', range = { start = { line = 1 } } },
+    { uri = '2', range = { start = { line = 2 } } },
+    { uri = '2', range = { start = { line = 3 } } },
+    { uri = '1', range = { start = { line = 3 } } },
+    { uri = '1', range = { start = { line = 4 } } },
+    { uri = '3', range = { start = { line = 4 } } },
+    { uri = '3', range = { start = { line = 4 } } },
   }
   local second_part
   order_locations(locations)
@@ -310,7 +314,7 @@ end
 function M.locations_to_items(locations, max_items)
   max_items = max_items or 100000 --
   if not locations or vim.tbl_isempty(locations) then
-    print("list not avalible")
+    print('list not avalible')
     return
   end
   local width = 4
@@ -325,12 +329,14 @@ function M.locations_to_items(locations, max_items)
   locations, second_part = slice_locations(locations, max_items)
   trace(locations)
 
+  vim.cmd([[set eventignore+=FileType]])
+
   local cut = -1
 
   local unload_bufnrs = {}
   for i, loc in ipairs(locations) do
     local funcs = nil
-    local item = lsp.util.locations_to_items({loc})[1]
+    local item = lsp.util.locations_to_items({ loc })[1]
     -- log(item)
     item.range = locations[i].range or locations[i].targetRange
     item.uri = locations[i].uri or locations[i].targetUri
@@ -376,7 +382,7 @@ function M.locations_to_items(locations, max_items)
       local def = uri_def[item.uri]
       if def and def.start and item.range then
         if def.start.line == item.range.start.line then
-          log("ts def in current line")
+          log('ts def in current line')
           item.definition = true
         end
       end
@@ -400,17 +406,19 @@ function M.locations_to_items(locations, max_items)
     vim.defer_fn(function()
       for i, bufnr_unload in ipairs(unload_bufnrs) do
         if api.nvim_buf_is_loaded(bufnr_unload) and i > 10 then
-          api.nvim_buf_delete(bufnr_unload, {unload = true})
+          api.nvim_buf_delete(bufnr_unload, { unload = true })
         end
       end
     end, 100)
   end
 
+  vim.cmd([[set eventignore-=FileType]])
+
   return items, width + 24, second_part -- TODO handle long line?
 end
 
 function M.apply_action(action, ctx, client)
-  assert(action ~= nil, "action must not be nil")
+  assert(action ~= nil, 'action must not be nil')
   if action.edit then
     vim.lsp.util.apply_workspace_edit(action.edit)
   end
@@ -426,7 +434,6 @@ function M.apply_action(action, ctx, client)
     end
   end
   log(action)
-
 end
 
 local function apply_action(action, client, ctx)
@@ -466,9 +473,12 @@ function M.on_user_choice(action_tuple, ctx)
   --
   local client = vim.lsp.get_client_by_id(action_tuple[1])
   local action = action_tuple[2]
-  if not action.edit and client and type(client.resolved_capabilities.code_action) == 'table'
-      and client.resolved_capabilities.code_action.resolveProvider then
-
+  if
+    not action.edit
+    and client
+    and type(client.resolved_capabilities.code_action) == 'table'
+    and client.resolved_capabilities.code_action.resolveProvider
+  then
     client.request('codeAction/resolve', action, function(err, resolved_action)
       if err then
         vim.notify(err.code .. ': ' .. err.message, vim.log.levels.ERROR)
@@ -483,7 +493,7 @@ end
 
 function M.symbol_to_items(locations)
   if not locations or vim.tbl_isempty(locations) then
-    print("list not avalible")
+    print('list not avalible')
     return
   end
 
@@ -520,7 +530,6 @@ function M.request(method, hdlr) -- e.g  textDocument/reference
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
     client.request(method, ref_params, hdlr, bufnr)
   end)
-
 end
 
 return M
