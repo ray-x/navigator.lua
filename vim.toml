@@ -8,6 +8,9 @@ any = true
 [_G]
 property = true
 writable = "new-fields"
+[_NgConfigValues]
+property = true
+writable = "new-fields"
 
 [debug]
 property = true

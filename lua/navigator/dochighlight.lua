@@ -240,13 +240,13 @@ local function documentHighlight()
       return
     end
     trace('dochl', result)
-    vim.lsp.util.buf_clear_references(bufnr)
-    vim.lsp.util.buf_highlight_references(bufnr, result)
     bufnr = bufnr or 0
     if type(result) ~= 'table' then
       vim.lsp.util.buf_clear_references(bufnr)
       return
     end
+    vim.lsp.util.buf_clear_references(bufnr)
+    vim.lsp.util.buf_highlight_references(bufnr, result)
     table.sort(result, function(a, b)
       return before(a.range, b.range)
     end)
