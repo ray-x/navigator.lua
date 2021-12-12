@@ -1,0 +1,694 @@
+navigator.txt
+
+================================================================================
+CONTENTS                                                      *navigator-contents*
+
+1. Navigator.................................................|navigator-navigator|
+            1.1. Example: Javascript closure.|navigator-example:_javascript_closure|
+            1.2. Example: C++ definition.......|navigator-example:_c++_definition|
+            1.3. Golang struct type.................|navigator-golang_struct_type|
+2. Features:.................................................|navigator-features:|
+3. Why a new plugin...................................|navigator-why_a_new_plugin|
+4. Similar projects / special mentions:.|navigator-similar_projects_/_special_mentions:|
+5. Install.....................................................|navigator-install|
+    5.1. Setup...................................................|navigator-setup|
+    5.2. Sample vimrc turning your neovim into a full-featured IDE.|navigator-sample_vimrc_turning_your_neovim_into_a_full-featured_ide|
+    5.3. Work with nvim-cmp and nvim-autopairs.|navigator-work_with_nvim-cmp_and_nvim-autopairs|
+    5.4. All configure options...................|navigator-all_configure_options|
+        5.4.1. LSP clients.................................|navigator-lsp_clients|
+            5.4.1.1. Add your own servers.........|navigator-add_your_own_servers|
+        5.4.2. Disable a lsp client loading from navigator.|navigator-disable_a_lsp_client_loading_from_navigator|
+        5.4.3. Default keymaps.........................|navigator-default_keymaps|
+        5.4.4. Colors/Highlight:.....................|navigator-colors/highlight:|
+    5.5. Dependency.........................................|navigator-dependency|
+    5.6. Integration with lsp_installer (williamboman/nvim-lsp-installer).|navigator-integration_with_lsp_installer_(williamboman/nvim-lsp-installer)|
+    5.7. Usage...................................................|navigator-usage|
+    5.8. Configuration...................................|navigator-configuration|
+    5.9. Highlight...........................................|navigator-highlight|
+    5.10. commands............................................|navigator-commands|
+    5.11. Screenshots......................................|navigator-screenshots|
+        5.11.1. Reference....................................|navigator-reference|
+        5.11.2. Definition preview..................|navigator-definition_preview|
+        5.11.3. GUI and multigrid support....|navigator-gui_and_multigrid_support|
+        5.11.4. Document Symbol........................|navigator-document_symbol|
+        5.11.5. Workspace Symbol......................|navigator-workspace_symbol|
+        5.11.6. highlight document symbol and jump between reference.|navigator-highlight_document_symbol_and_jump_between_reference|
+6. Current symbol highlight and jump backward/forward between symbols.|navigator-current_symbol_highlight_and_jump_backward/forward_between_symbols|
+        6.1. Diagnostic.....................................|navigator-diagnostic|
+        6.2. Edit in preview window.............|navigator-edit_in_preview_window|
+        6.3. Implementation.............................|navigator-implementation|
+        6.4. Fzy search in reference...........|navigator-fzy_search_in_reference|
+        6.5. Code actions.................................|navigator-code_actions|
+        6.6. Symbol rename...............................|navigator-symbol_rename|
+            6.6.1. Fill struct with gopls.......|navigator-fill_struct_with_gopls|
+        6.7. Code preview with highlight...|navigator-code_preview_with_highlight|
+        6.8. Treesitter symbol.......................|navigator-treesitter_symbol|
+        6.9. Signature help.............................|navigator-signature_help|
+        6.10. Call hierarchy (incomming/outgoing calls).|navigator-call_hierarchy_(incomming/outgoing_calls)|
+        6.11. Light bulb if codeAction available.|navigator-light_bulb_if_codeaction_available|
+        6.12. Codelens........................................|navigator-codelens|
+        6.13. Predefined LSP symbol nerdfont/emoji.|navigator-predefined_lsp_symbol_nerdfont/emoji|
+7. Debug the plugin...................................|navigator-debug_the_plugin|
+8. Break changes and known issues.......|navigator-break_changes_and_known_issues|
+9. Todo...........................................................|navigator-todo|
+10. Errors and Bug Reporting..................|navigator-errors_and_bug_reporting|
+
+================================================================================
+NAVIGATOR                                                    *navigator-navigator*
+
+*   Easy code navigation, view diagnostic errors, see relationships of functions, variables
+*   A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
+
+Here are some examples
+
+EXAMPLE: JAVASCRIPT CLOSURE                *navigator-example:_javascript_closure*
+
+The following screenshot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming & outgoing calls from LSP. It is designed for the symbol analysis.
+
+
+
+Explanation:
+
+*   The first line of floating windows shows there are 3 references for the symbol  browser  in closure.js
+*   The first reference of browser is an assignment, an emoji 📝 indicates the value is changed in this line. In many
+    cases, we search for references to find out when the value changed.
+*   The second reference of `browser` is inside function `displayName` and `displayName` sit inside `makeFunc`, So you
+    will see `displayName{} <- makeFunc{}`
+*   The third similar to the second, as var browser is on the right side of '=', the value not changed in this line
+    and emoji is not shown.
+
+EXAMPLE: C++ DEFINITION                        *navigator-example:_c++_definition*
+
+C++ example: search reference and definition
+
+You may find a 🦕 dinosaur(d) on the line of `Rectangle rect,` which means there is a definition (d for def) of rect in this line.
+
+`<- f main()` means the definition is inside function main().
+
+GOLANG STRUCT TYPE                                  *navigator-golang_struct_type*
+
+Struct type references in multiple Go ﳑ files
+
+
+
+This feature can provide you info in which function/class/method the variable was referenced. It is handy for a large
+project where class/function definition is too long to fit into the preview window. Also provides a bird's eye view of where the
+variable is:
+
+*   Referenced
+*   Modified
+*   Defined
+*   Called
+
+================================================================================
+FEATURES:                                                    *navigator-features:*
+
+*   LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type. This
+    also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better default setup is
+    included for LSP clients.
+*   Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP & Treesitter powered IDE
+*   UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc. It covers
+    all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
+    implementation.
+*   Code Action GUI
+*   Luv async thread and tasks
+*   Edit your code in preview window
+*   Async request with lsp.buf_request for reference search
+*   Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?)
+*   FZY search with either native C (if gcc installed) or Lua-JIT
+*   LSP multiple symbol highlight/marker and hop between document references
+*   Preview definination/references
+*   Better navigation for diagnostic errors, Navigate through all files/buffers that contain errors/warnings
+*   Grouping references/implementation/incoming/outgoing based on file names.
+*   Treesitter based variable/function context analysis. It is 10x times faster compared to purely rely on LSP. In most
+    of the case, it takes treesitter less than 4 ms to read and render all nodes for a file of 1,000 LOC.
+*   The first plugin, IMO, allows you to search in all treesitter symbols in the workspace.
+*   Nerdfont, emoji for LSP and treesitter kind
+*   Optimize display (remove trailing bracket/space), display the caller of reference, de-duplicate lsp results (e.g reference
+    in the same line). Using treesitter for file preview highlighter etc
+*   ccls call hierarchy (Non-standard `ccls/call` API) supports
+*   Syntax folding based on treesitter folding algorithm. (It behaves similar to vs-code)
+*   Fully support LSP CodeAction, CodeLens, CodeLens action. Help you improve code quality.
+*   LRU cache for treesitter nodes
+*   Lazy loader friendly
+*   Multigrid support (different font and detachable)
+
+================================================================================
+WHY A NEW PLUGIN                                      *navigator-why_a_new_plugin*
+
+I'd like to go beyond what the system is offering.
+
+================================================================================
+SIMILAR PROJECTS / SPECIAL MENTIONS: *navigator-similar_projects_/_special_mentions:*
+
+*   nvim-lsputils (https://github.com/RishabhRD/nvim-lsputils)
+*   nvim-fzy (https://github.com/mfussenegger/nvim-fzy.git)
+*   fuzzy (https://github.com/amirrezaask/fuzzy.nvim)
+*   lspsaga (https://github.com/glepnir/lspsaga.nvim)
+*   fzf-lsp lsp with fzf as gui backend (https://github.com/gfanto/fzf-lsp.nvim)
+*   nvim-treesitter-textobjects (https://github.com/nvim-treesitter/nvim-treesitter-textobjects)
+
+================================================================================
+INSTALL                                                        *navigator-install*
+
+Require nvim-0.5.0 (a.k.a nightly)
+
+You can remove your lspconfig setup and use this plugin.
+The plugin depends on lspconfig and guihua.lua (https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(migrate from romgrk's project (romgrk/fzy-lua-native)).
+>
+    Plug 'neovim/nvim-lspconfig'
+    Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
+    Plug 'ray-x/navigator.lua'
+<
+
+Note: Highly recommened: 'nvim-treesitter/nvim-treesitter'
+
+Packer
+>
+    use {'ray-x/navigator.lua', requires = {'ray-x/guihua.lua', run = 'cd lua/fzy && make'}}
+<
+
+--------------------------------------------------------------------------------
+SETUP                                                            *navigator-setup*
+
+Easy setup BOTH lspconfig and navigator with one liner. Navigator covers around 20 most used LSP setup.
+>
+    lua require'navigator'.setup()
+<
+
+--------------------------------------------------------------------------------
+SAMPLE VIMRC TURNING YOUR NEOVIM INTO A FULL-FEATURED IDE *navigator-sample_vimrc_turning_your_neovim_into_a_full-featured_ide*
+>
+    call plug#begin('~/.vim/plugged')
+    Plug 'neovim/nvim-lspconfig'
+    Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
+    Plug 'ray-x/navigator.lua'
+    " Plug 'hrsh7th/nvim-compe' and other plugins you commenly use...
+    " optional, if you need treesitter symbol support
+    Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+    call plug#end()
+    " No need for rquire('lspconfig'), navigator will configure it for you
+    lua <<EOF
+    require'navigator'.setup()
+    EOF
+<
+
+You can remove your lspconfig.lua and use the hooks of navigator.lua. As the
+navigator will bind keys and handler for you. The LSP will be loaded lazily based on filetype.
+
+A treesitter only mode. In some cases LSP is buggy or not available, you can also use treesitter
+standalone
+>
+    call plug#begin('~/.vim/plugged')
+    Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
+    Plug 'ray-x/navigator.lua'
+    " Plug 'hrsh7th/nvim-compe' and other plugins you commenly use...
+    " optional, if you need treesitter symbol support
+    Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+    " optional:
+    Plug 'nvim-treesitter/nvim-treesitter-refactor' " this provides "go to def" etc
+    call plug#end()
+    lua <<EOF
+    require'navigator'.setup()
+    EOF
+<
+
+--------------------------------------------------------------------------------
+WORK WITH NVIM-CMP AND NVIM-AUTOPAIRS *navigator-work_with_nvim-cmp_and_nvim-autopairs*
+
+The buffer type of navigator floating windows is `guihua`
+I would suggest disable `guihua` for autocomplete.
+e.g.
+>
+    require('nvim-autopairs').setup{
+    disable_filetype = { "TelescopePrompt" , "guihua", "guihua_rust", "clap_input" },
+    if vim.o.ft == 'clap_input' and vim.o.ft == 'guihua' and vim.o.ft == 'guihua_rust' then
+      require'cmp'.setup.buffer { completion = {enable = false} }
+    end
+    -- or with autocmd
+    vim.cmd("autocmd FileType guihua lua require('cmp').setup.buffer { enabled = false }")
+    vim.cmd("autocmd FileType guihua_rust lua require('cmp').setup.buffer { enabled = false }")
+    ...
+    }
+<
+
+--------------------------------------------------------------------------------
+ALL CONFIGURE OPTIONS                            *navigator-all_configure_options*
+
+Nondefault configuration example:
+>
+    require'navigator'.setup({
+      debug = false, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
+      width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
+      height = 0.3, -- max list window height, 0.3 by default
+      preview_height = 0.35, -- max height of preview windows
+      border = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}, -- border style, can be one of 'none', 'single', 'double',
+                                                         -- 'shadow', or a list of chars which defines the border
+      on_attach = function(client, bufnr)
+        -- your hook
+      end,
+      -- put a on_attach of your own here, e.g
+      -- function(client, bufnr)
+      --   -- the on_attach will be called at end of navigator on_attach
+      -- end,
+      -- The attach code will apply to all LSP clients
+      default_mapping = true,  -- set to false if you will remap every key
+      keymaps = {{key = "gK", func = "declaration()"}}, -- a list of key maps
+      -- this kepmap gK will override "gD" mapping function declaration()  in default kepmap
+      -- please check mapping.lua for all keymaps
+      treesitter_analysis = true, -- treesitter variable context
+      transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil or 100 to disable it
+      icons = {
+        -- Code action
+        code_action_icon = "🏏",
+        -- Diagnostics
+        diagnostic_head = '🐛',
+        diagnostic_head_severity_1 = "🈲",
+        -- refer to lua/navigator.lua for more icons setups
+      },
+      lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
+      lsp = {
+        code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+        code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+        format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+        disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
+        disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
+        -- only want to enable one lsp server
+        -- to disable all default config and use your own lsp setup set
+        -- disable_lsp = 'all'
+        -- Default {}
+        diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- experimental:  diagnostic status in scroll bar area; set to false to disable the diagnostic sign,
+        -- for other style, set to {'╍', 'ﮆ'} or {'-', '='}
+        diagnostic_virtual_text = true,  -- show virtual for diagnostic message
+        diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
+        disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you  want to
+        ignore it
+        tsserver = {
+          filetypes = {'typescript'} -- disable javascript etc,
+          -- set to {} to disable the lspclient for all filetypes
+        },
+        gopls = {   -- gopls setting
+          on_attach = function(client, bufnr)  -- on_attach for gopls
+            -- your special on attach here
+            -- e.g. disable gopls format because a known issue https://github.com/golang/go/issues/45732
+            print("i am a hook, I will disable document format")
+            client.resolved_capabilities.document_formatting = false
+          end,
+          settings = {
+            gopls = {gofumpt = false} -- disable gofumpt etc,
+          }
+        },
+        sumneko_lua = {
+          sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
+          sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
+        },
+        servers = {'cmake', 'ltex'}, -- by default empty, but if you whant navigator load  e.g. `cmake` and `ltex` for you , you
+        -- can put them in the `servers` list and navigator will auto load them.
+        -- you could still specify the custom config  like this
+        -- cmake = {filetypes = {'cmake', 'makefile'}, single_file_support = false},
+      }
+    })
+<
+
+LSP CLIENTS                                                *navigator-lsp_clients*
+
+Built clients:
+>
+    local servers = {
+      "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
+      "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
+      "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
+      "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
+      "r_language_server", "rust_analyzer", "terraformls", "svelte", "texlab", "clojure_lsp"
+    }
+<
+
+Navigator will try to load avalible lsp server/client based on filetype. The clients has none default on_attach.
+incremental sync and debounce is enabled by navigator. And the lsp
+snippet will be enabled. So you could use COQ and nvim-cmp snippet expand.
+
+Other than above setup, additional none default setup are used for following lsp:
+
+*   gopls
+*   clangd
+*   rust_analyzer
+*   sqls
+*   sumneko_lua
+*   pyright
+*   ccls
+
+Please check client setup (https://github.com/ray-x/navigator.lua/blob/26012cf9c172aa788a2e53018d94b32c5c75af75/lua/navigator/lspclient/clients.lua#L98-L234)
+
+The plugin can work with multiple LSP, e.g sqls+gopls+efm. But there are cases you may need to disable some of the
+servers. (Prevent loading multiple LSP for same source code.) e.g. I saw strange behaviours when I use
+pylsp+pyright+jedi
+together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
+
+ADD YOUR OWN SERVERS                              *navigator-add_your_own_servers*
+
+Above servers covered a small part neovim lspconfig support, You can still use lspconfig to add and config servers not
+in the list. If you would like to add a server not in the list, you can check this PR https://github.com/ray-x/navigator.lua/pull/107
+
+Also, an option in setup:
+>
+    require'navigator'setup{lsp={servers={'cmake', 'lexls'}}}
+<
+
+Above example add cmake and lexls to the default server list
+
+DISABLE A LSP CLIENT LOADING FROM NAVIGATOR *navigator-disable_a_lsp_client_loading_from_navigator*
+
+Note: If you have multiple lsp installed for same language, please only enable one at a time by disable others with e.g. `disable_lsp={'denols', 'clangd'}`
+To disable a specific LSP, set `filetypes` to {} e.g.
+>
+    require'navigator'.setup({
+      lsp={
+       pylsd={filetype={}}
+      }
+    })
+<
+
+Or:
+>
+    require'navigator'.setup({
+      lsp={
+        disable_lsp = {'pylsd', 'sqlls'},
+      }
+    })
+<
+
+DEFAULT KEYMAPS                                        *navigator-default_keymaps*
+
+| mode | key             | function                                                   |
+| ---- | --------------- | ---------------------------------------------------------- |
+| n    | gr              | show reference and context                                 |
+| i    | <m-k>         | signature help                                             |
+| n    | <c-k>         | signature help                                             |
+| n    | gW              | workspace symbol                                           |
+| n    | gD              | declaration                                                |
+| n    | gd              | definition                                                 |
+| n    | g0              | document symbol                                            |
+| n    | <C-]>         | go to definition (if multiple show listview)               |
+| n    | gp              | definition preview (Go to Preview)                         |
+| n    | <C-LeftMouse> | definition                                                 |
+| n    | g<LeftMouse>  | implementation                                             |
+| n    | gT              | treesitter document symbol                                 |
+| n    | <Leader>gT    | treesitter symbol for all open buffers                     |
+| n    | K               | hover doc                                                  |
+| n    | <Space>ca     | code action (when you see 🏏 )                             |
+| n    | <Space>la     | code lens action (when you see a codelens indicator)       |
+| v    | <Space>cA     | range code action (when you see 🏏 )                       |
+| n    | <Space>rn     | rename with floating window                                |
+| n    | <Leader>re    | rename (lsp default)                                       |
+| n    | <Leader>gi    | hierarchy incoming calls                                   |
+| n    | <Leader>go    | hierarchy outgoing calls                                   |
+| n    | gi              | implementation                                             |
+| n    | <Sapce> D     | type definition                                            |
+| n    | gL              | show line diagnostic                                       |
+| n    | gG              | show diagnostic for all buffers                            |
+| n    | ]d              | next diagnostic                                            |
+| n    | [d              | previous diagnostic                                        |
+| n    | <Leader> dt   | diagnostic toggle(enable/disable)                          |
+| n    | ]r              | next treesitter reference/usage                            |
+| n    | [r              | previous treesitter reference/usage                        |
+| n    | <Sapce> wa    | add workspace folder                                       |
+| n    | <Sapce> wr    | remove workspace folder                                    |
+| n    | <Sapce> wl    | print workspace folder                                     |
+| n    | <Leader>k     | toggle reference highlight                                 |
+| i/n  | <C-p>         | previous item in list                                      |
+| i/n  | <C-n>         | next item in list                                          |
+| i/n  | number 1~9      | move to ith row/item in the list                           |
+| i/n  | <Up>          | previous item in list                                      |
+| i/n  | <Down>        | next item in list                                          |
+| n    | <Ctrl-w>j     | move cursor to preview (windows move to bottom view point) |
+| n    | <Ctrl-w>k     | move cursor to list (windows move to up view point)        |
+| i/n  | <C-o>         | open preview file in nvim/Apply action                     |
+| n    | <C-v>         | open preview file in nvim with vsplit                      |
+| n    | <C-s>         | open preview file in nvim with split                       |
+| n    | <Enter>       | open preview file in nvim/Apply action                     |
+| n    | <ESC>         | close listview of floating window                          |
+| i/n  | <C-e>         | close listview of floating window                          |
+| i/n  | <C-b>         | previous page in listview                                  |
+| i/n  | <C-f>         | next page in listview                                      |
+| i/n  | <C-s>         | save the modification to preview window to file            |
+
+COLORS/HIGHLIGHT:                                    *navigator-colors/highlight:*
+
+You can override default highlight GHListDark (listview) and GHTextViewDark (code view) and GHListHl (select item)
+
+e.g.
+>
+    hi default GHTextViewDark guifg=#e0d8f4 guibg=#332e55
+    hi default GHListDark guifg=#e0d8f4 guibg=#103234
+    hi default GHListHl guifg=#e0d8f4 guibg=#404254
+<
+
+There are other Lsp highlight been used in this plugin, e.g LspReferenceRead/Text/Write are used for document highlight,
+LspDiagnosticsXXX are used for diagnostic. Please check highlight.lua and dochighlight.lua for more info.
+
+--------------------------------------------------------------------------------
+DEPENDENCY                                                  *navigator-dependency*
+
+*   lspconfig
+*   guihua.lua (provides floating window, FZY)
+*   Optional:
+    *   treesitter (list treesitter symbols, object analysis)
+    *   lsp-signature (better signature help)
+
+The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existance and load those plugins only if they existed.
+
+The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
+
+--------------------------------------------------------------------------------
+INTEGRATION WITH LSP_INSTALLER (WILLIAMBOMAN/NVIM-LSP-INSTALLER) *navigator-integration_with_lsp_installer_(williamboman/nvim-lsp-installer)*
+
+If you'd like to only use the lsp servers installed by lsp_installer. Please set
+>
+    lsp_installer = true
+<
+
+In the config.
+
+Navigator will startup the server installed by lsp-installer. Please do not call `server:setup{opts}` from lsp installer
+as it will override the navigator setup
+
+Also, could use following setups
+>
+    require'navigator'.setup({
+      -- lsp_installer = false -- default value is false
+      lsp = {
+        tsserver = { cmd = {'your tsserver installed by lsp_installer'} }
+      }
+    })
+<
+
+example cmd setup (mac) for pyright :
+>
+    cmd = { "/Users/username/.local/share/nvim/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio" }
+<
+
+--------------------------------------------------------------------------------
+USAGE                                                            *navigator-usage*
+
+Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box.
+
+*   Use <c-e> or `:q!` to kill the floating window
+*    (or <c-n>, <c-p>) to move
+*   <c-o> or <CR> to open location or apply code actions. Note: <CR> might be bound in insert mode by other plugins
+
+--------------------------------------------------------------------------------
+CONFIGURATION                                            *navigator-configuration*
+
+In `navigator.lua` there is a default configuration. You can override the values by passing your own values
+
+e.g
+>
+    -- The attach will be call at end of navigator on_attach()
+    require'navigator'.setup({on_attach = function(client, bufnr) require 'illuminate'.on_attach(client)})
+<
+
+--------------------------------------------------------------------------------
+HIGHLIGHT                                                    *navigator-highlight*
+
+Highlight I am using:
+
+*   LspReferenceRead, LspReferenceText and LspReferenceWrite are used for `autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()`
+    That is where you saw the current symbol been highlighted.
+*   GHListDark and GHTextViewDark is used for floating listvew and TextView. They are be based on current background
+    (Normal) and PmenuSel
+*   In future, I will use NormalFloat for floating view. But ATM, most of colorscheme does not define NormalFloat
+
+You can override the above highlight to fit your current colorscheme
+
+--------------------------------------------------------------------------------
+COMMANDS                                                      *navigator-commands*
+
+| command      | function               |
+| ------------ | ---------------------- |
+| LspToggleFmt | toggle lsp auto format |
+
+--------------------------------------------------------------------------------
+SCREENSHOTS                                                *navigator-screenshots*
+
+colorscheme: aurora (https://github.com/ray-x/aurora)
+
+REFERENCE                                                    *navigator-reference*
+
+Pls check the first part of README
+
+DEFINITION PREVIEW                                  *navigator-definition_preview*
+
+Using treesitter and LSP to view the symbol definition
+
+
+
+GUI AND MULTIGRID SUPPORT                    *navigator-gui_and_multigrid_support*
+
+You can load a different font size for floating win
+
+
+
+DOCUMENT SYMBOL                                        *navigator-document_symbol*
+
+
+
+WORKSPACE SYMBOL                                      *navigator-workspace_symbol*
+
+
+
+HIGHLIGHT DOCUMENT SYMBOL AND JUMP BETWEEN REFERENCE *navigator-highlight_document_symbol_and_jump_between_reference*
+
+
+
+================================================================================
+CURRENT SYMBOL HIGHLIGHT AND JUMP BACKWARD/FORWARD BETWEEN SYMBOLS *navigator-current_symbol_highlight_and_jump_backward/forward_between_symbols*
+
+Document highlight provided by LSP.
+Jump between symbols with treesitter (with `]r` and `[r`)
+
+
+DIAGNOSTIC                                                  *navigator-diagnostic*
+
+Visual studio code style show errors minimap in scroll bar area
+(Check setup for `diagnostic_scrollbar_sign`)
+
+
+
+Diagnostic in single bufer
+
+
+
+Show diagnostic in all buffers
+
+
+
+EDIT IN PREVIEW WINDOW                          *navigator-edit_in_preview_window*
+
+You can in place edit your code in floating window
+
+https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9778-11d0f356b38d.mov
+
+(Note: This feature only avalible in `find reference` and `find diagnostic`, You can not add/remove lines in floating window)
+
+IMPLEMENTATION                                          *navigator-implementation*
+
+
+
+FZY SEARCH IN REFERENCE                        *navigator-fzy_search_in_reference*
+
+
+
+CODE ACTIONS                                              *navigator-code_actions*
+
+
+
+SYMBOL RENAME                                            *navigator-symbol_rename*
+
+
+
+FILL STRUCT WITH GOPLS                          *navigator-fill_struct_with_gopls*
+
+
+
+CODE PREVIEW WITH HIGHLIGHT                *navigator-code_preview_with_highlight*
+
+
+
+TREESITTER SYMBOL                                    *navigator-treesitter_symbol*
+
+Treetsitter symbols in all buffers
+
+
+SIGNATURE HELP                                          *navigator-signature_help*
+
+Improved signature help with current parameter highlighted
+
+
+
+
+
+CALL HIERARCHY (INCOMMING/OUTGOING CALLS) *navigator-call_hierarchy_(incomming/outgoing_calls)*
+
+
+
+LIGHT BULB IF CODEACTION AVAILABLE  *navigator-light_bulb_if_codeaction_available*
+
+
+
+CODELENS                                                      *navigator-codelens*
+
+Codelens for gopls/golang. Garbage collection analyse:
+
+
+
+Codelens for C++/ccls. Symbol reference
+
+
+
+PREDEFINED LSP SYMBOL NERDFONT/EMOJI *navigator-predefined_lsp_symbol_nerdfont/emoji*
+
+
+
+================================================================================
+DEBUG THE PLUGIN                                      *navigator-debug_the_plugin*
+
+One simple way to gether debug info and understand what is wrong is output the debug logs
+>
+    require'navigator'.setup({
+      debug = false, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
+      })
+<
+>
+    -- a example of adding logs in the plugin
+    local log = require"navigator.util".log
+    local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
+      -- output your log
+      log('[definition] log for locations', locations, "and ctx", ctx)
+      if err ~= nil then
+        return
+      end
+    end
+<
+
+================================================================================
+BREAK CHANGES AND KNOWN ISSUES          *navigator-break_changes_and_known_issues*
+
+known issues I am working on (https://github.com/ray-x/navigator.lua/issues/1)
+
+================================================================================
+TODO                                                              *navigator-todo*
+
+*   The project is in the early phase, bugs expected, PRs and suggestions are welcome
+*   Async (some of the requests is slow on large codebases and might be good to use co-rountine)
+*   More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Did not test other languages (e.g dart, swift etc)
+*   Configuration options
+
+================================================================================
+ERRORS AND BUG REPORTING                      *navigator-errors_and_bug_reporting*
+
+*   Please double check your setup and check if minium setup works or not
+*   It should works for 0.5.1, neovim 0.6.x prefered.
+*   Check console output
+*   Check `LspInfo` and treesitter status with `checkhealth`
+*   Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log
+
