@@ -236,7 +236,7 @@ local function documentHighlight()
       print(err)
       return
     end
-    if not result or not result[1]['range'] then
+    if not result or not result[1] or not result[1]['range'] then
       return
     end
     trace('dochl', result)
