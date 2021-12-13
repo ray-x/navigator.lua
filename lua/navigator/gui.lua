@@ -2,25 +2,16 @@ local M = {}
 local ListView = require('guihua.listview')
 local TextView = require('guihua.textview')
 local util = require('navigator.util')
-local log = require('navigator.util').log
+local log = util.log
 local trace = require('navigator.util').trace
 local api = vim.api
 
-local top_center = require('guihua.location').top_center
-
-local path_sep = require('navigator.util').path_sep()
-local path_cur = require('navigator.util').path_cur()
 function M.new_list_view(opts)
   log(opts)
 
   local config = require('navigator').config_values()
 
   local items = opts.items
-  local data = {}
-
-  local wwidth = api.nvim_get_option('columns')
-
-  local loc = 'top_center'
 
   opts.min_width = opts.min_width or 0.3
   opts.min_height = opts.min_height or 0.3
@@ -35,7 +26,6 @@ function M.new_list_view(opts)
     opts.data = require('navigator.render').prepare_for_render(items, opts)
   end
   opts.border = _NgConfigValues.border or 'shadow'
-  opts.rect = { height = lheight, width = width, pos_x = 0, pos_y = 0 }
   if not items or vim.tbl_isempty(items) then
     log('empty data return')
     return
