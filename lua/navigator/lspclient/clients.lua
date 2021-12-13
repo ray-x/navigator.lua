@@ -273,6 +273,9 @@ local setups = {
       java = { signatureHelp = { enabled = true }, contentProvider = { preferred = 'fernflower' } },
     },
   },
+  omnisharp = {
+    cmd = { 'omnisharp', '--languageserver', '--hostPID', tostring(vim.fn.getpid()) },
+  },
 }
 
 setups.sumneko_lua = vim.tbl_deep_extend('force', luadev, setups.sumneko_lua)
@@ -551,13 +554,6 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if nulls_cfg then
       local cfg = {}
       cfg = vim.tbl_deep_extend('keep', cfg, nulls_cfg)
-      cfg.on_attach = function(client, bufnr)
-        if efm_cfg.on_attach then
-          efm_cfg.on_attach(client, bufnr)
-        end
-        on_attach(client, bufnr)
-      end
-
       lspconfig['null-ls'].setup(cfg)
       log('null-ls loading')
       _NG_Loaded['null-ls'] = true
@@ -601,7 +597,6 @@ local function get_cfg(client)
 end
 
 local function setup(user_opts)
-
   local ft = vim.bo.filetype
   local bufnr = vim.api.nvim_get_current_buf()
   local uri = vim.uri_from_bufnr(bufnr)
@@ -699,20 +694,19 @@ function add_servers(lsps)
 end
 
 function on_filetype()
-
   local bufnr = vim.api.nvim_get_current_buf()
   local uri = vim.uri_from_bufnr(bufnr)
 
   local ft = vim.bo.filetype
-  if ft == nil then return end
+  if ft == nil then
+    return
+  end
   if uri == 'file://' or uri == 'file:///' then
     log('skip loading for ft ', ft, uri)
     return
   end
 
-
   log(uri)
-
 
   local wids = vim.fn.win_findbuf(bufnr)
   if wins == nil or wins == {} then
@@ -721,4 +715,4 @@ function on_filetype()
   setup()
 end
 
-return { setup = setup, get_cfg = get_cfg, lsp = servers, add_servers = add_servers , on_filetype = on_filetype}
+return { setup = setup, get_cfg = get_cfg, lsp = servers, add_servers = add_servers, on_filetype = on_filetype }
