@@ -417,27 +417,11 @@ function M.locations_to_items(locations, max_items)
   return items, width + 24, second_part -- TODO handle long line?
 end
 
-function M.apply_action(action, ctx, client)
-  assert(action ~= nil, 'action must not be nil')
-  if action.edit then
-    vim.lsp.util.apply_workspace_edit(action.edit)
-  end
-  if action.command then
-    local command = type(action.command) == 'table' and action.command or action
-    local fn = client.commands[command.command] or (vim.lsp.commands and vim.lsp.commands[command.command])
-    if fn then
-      local enriched_ctx = vim.deepcopy(ctx)
-      enriched_ctx.client_id = client.id
-      fn(command, enriched_ctx)
-    else
-      M.execute_command(command)
-    end
-  end
+local function apply_action(action, client)
+  -- local client = vim.lsp.get_client_by_id(ctx.client_id)
   log(action)
-end
 
-local function apply_action(action, client, ctx)
-  log(action, client)
+  assert(action ~= nil, 'action must not be nil')
   if action.edit then
     require('vim.lsp.util').apply_workspace_edit(action.edit)
   end
@@ -454,7 +438,10 @@ local function apply_action(action, client, ctx)
   end
 end
 
+M.apply_action = apply_action
+
 function M.on_user_choice(action_tuple, ctx)
+  log(ctx)
   if not action_tuple then
     return
   end
@@ -471,7 +458,27 @@ function M.on_user_choice(action_tuple, ctx)
   --  command: string
   --  arguments?: any[]
   --
-  local client = vim.lsp.get_client_by_id(action_tuple[1])
+  local function apply_code_action(action, client)
+    if action.edit then
+      util.apply_workspace_edit(action.edit)
+    end
+    if action.command then
+      local command = type(action.command) == 'table' and action.command or action
+      local fn = client.commands[command.command] or vim.lsp.commands[command.command]
+      if fn then
+        local enriched_ctx = vim.deepcopy(ctx)
+        enriched_ctx.client_id = client.id
+        fn(command, enriched_ctx)
+      else
+        M.execute_command(command)
+      end
+    end
+  end
+
+  if action_tuple[1] ~= nil then
+    ctx.client_id = action_tuple[1]
+  end
+  local client = vim.lsp.get_client_by_id(ctx.client_id)
   local action = action_tuple[2]
   if
     not action.edit
@@ -479,15 +486,16 @@ function M.on_user_choice(action_tuple, ctx)
     and type(client.resolved_capabilities.code_action) == 'table'
     and client.resolved_capabilities.code_action.resolveProvider
   then
-    client.request('codeAction/resolve', action, function(err, resolved_action)
+    client.request('codeAction/resolve', action, function(err, resolved_action, c)
+      log(resolved_action, c)
       if err then
         vim.notify(err.code .. ': ' .. err.message, vim.log.levels.ERROR)
         return
       end
-      apply_action(resolved_action, client, ctx)
+      apply_code_action(resolved_action, client)
     end)
   else
-    apply_action(action, client, ctx)
+    apply_action(action, client)
   end
 end
 

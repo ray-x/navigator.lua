@@ -5,13 +5,13 @@ local code_action = {}
 local gui = require "navigator.gui"
 local config = require("navigator").config_values()
 local api = vim.api
--- trace = log
+trace = log
 
 local sign_name = "NavigatorLightBulb"
 
 --- `codeAction/resolve`
 -- from neovim buf.lua, change vim.ui.select to gui
-local function on_code_action_results(results, ctx)
+local function on_code_action_results(results, ctx, client)
   local trace = log
   local action_tuples = {}
 
@@ -126,6 +126,7 @@ end
 
 local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 code_action.code_action_handler = util.mk_handler(function(err, results, ctx, cfg)
+  log(ctx)
   if err ~= nil then
     log("code action err", err, results, ctx, cfg)
     return
