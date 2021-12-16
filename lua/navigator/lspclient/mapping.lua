@@ -241,7 +241,7 @@ function M.setup(user_opts)
   end
 
   vim.lsp.handlers["textDocument/references"] = require"navigator.reference".reference_handler
-  vim.lsp.handlers["textDocument/codeAction"] = require"navigator.codeAction".code_action_handler
+  -- vim.lsp.handlers["textDocument/codeAction"] = require"navigator.codeAction".code_action_handler
   vim.lsp.handlers["textDocument/definition"] = require"navigator.definition".definition_handler
 
   if cap.declaration then

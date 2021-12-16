@@ -23,6 +23,7 @@ local sign_group = 'nvcodelensaction'
 
 local get_current_winid = require('navigator.util').get_current_winid
 
+local is_enabled = true
 local code_lens_action = {}
 
 local function _update_sign(line)
@@ -83,7 +84,7 @@ function M.setup()
       codelens_hdlr(err, result, ctx, cfg)
     else
       on_codelens(err, ctx.method, result, ctx.client_id, ctx.bufnr)
-      codelens_hdlr(err, _, result, ctx.client_id or 0, ctx.bufnr or 0)
+      codelens_hdlr(err, nil, result, ctx.client_id or 0, ctx.bufnr or 0)
     end
   end)
 end
@@ -101,87 +102,28 @@ function M.refresh()
   vim.lsp.codelens.refresh()
 end
 
-function M.run_action()
-  log('run code len action')
-
-  assert(#vim.lsp.buf_get_clients() > 0, 'Must have a client running to use lsp code action')
-  if not lsphelper.check_capabilities('code_lens') then
-    return
-  end
-
-  local line = api.nvim_win_get_cursor(0)[1]
-  local bufnr = api.nvim_get_current_buf()
-
-  local lenses = codelens.get(bufnr)
-  log(lenses)
-  if lenses == nil or #lenses == 0 then
-    return
-  end
-  local width = 40
-
-  local data = {
-    ' ' .. _NgConfigValues.icons.code_lens_action_icon .. ' CodeLens Action  <C-o> Apply <C-e> Exit',
-  }
-  local idx = 1
-  for i, lens in pairs(lenses) do
-    if lens.range.start.line == (line - 1) then
-      local title = lens.command.title:gsub('\r\n', '\\r\\n')
-      title = title:gsub('\n', '\\n')
-      title = string.format('[%d] %s', idx, title)
-      table.insert(data, title)
-      lenses[i].display_title = title
-      width = math.max(width, #lens.command.title)
-      idx = idx + 1
-    end
-  end
-  local apply = require('navigator.lspwrapper').apply_action
-  local function apply_action(action)
-    local action_chosen = nil
-    for key, value in pairs(lenses) do
-      if value.display_title == action then
-        action_chosen = value
-      end
-    end
-    if action_chosen == nil then
-      log('no match for ', action, lenses)
-      return
-    end
-    apply(action_chosen, M.codelens_ctx)
-  end
-
-  local divider = string.rep('─', width + 2)
-
-  table.insert(data, 2, divider)
-  if #data > 2 then
-    local lv = gui.new_list_view({
-      items = data,
-      width = width + 4,
-      loc = 'top_center',
-      relative = 'cursor',
-      rawdata = true,
-      data = data,
-      on_confirm = function(pos)
-        log(pos)
-        apply_action(pos)
-      end,
-      on_move = function(pos)
-        log(pos)
-        return pos
-      end,
-    })
-
-    vim.api.nvim_buf_add_highlight(lv.bufnr, -1, 'Title', 0, 0, -1)
-  else
-    print('no codelense in current line')
-  end
-end
-
 local virtual_types_ns = api.nvim_create_namespace('ng_virtual_types')
 
 function M.disable()
   local bufnr = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_clear_namespace(bufnr, virtual_types_ns, 0, -1)
   is_enabled = false
+end
+
+
+function M.run_action()
+  local original_select = vim.ui.select
+  vim.ui.select = require("guihua.gui").select
+
+  log('codeaction')
+
+  codelens.run()
+  vim.defer_fn(
+    function ()
+        vim.ui.select = original_select
+    end, 1000
+  )
+
 end
 
 M.inline = function()
@@ -237,3 +179,81 @@ M.inline = function()
 end
 
 return M
+
+
+
+-- function M.run_action()
+--   log('run code len action')
+--
+--   assert(#vim.lsp.buf_get_clients() > 0, 'Must have a client running to use lsp code action')
+--   if not lsphelper.check_capabilities('code_lens') then
+--     return
+--   end
+--
+--   local line = api.nvim_win_get_cursor(0)[1]
+--   local bufnr = api.nvim_get_current_buf()
+--
+--   local lenses = codelens.get(bufnr)
+--   log(lenses)
+--   if lenses == nil or #lenses == 0 then
+--     return
+--   end
+--   local width = 40
+--
+--   local data = {
+--     ' ' .. _NgConfigValues.icons.code_lens_action_icon .. ' CodeLens Action  <C-o> Apply <C-e> Exit',
+--   }
+--   local idx = 1
+--   for i, lens in pairs(lenses) do
+--     if lens.range.start.line == (line - 1) then
+--       local title = lens.command.title:gsub('\r\n', '\\r\\n')
+--       title = title:gsub('\n', '\\n')
+--       title = string.format('[%d] %s', idx, title)
+--       table.insert(data, title)
+--       lenses[i].display_title = title
+--       width = math.max(width, #lens.command.title)
+--       idx = idx + 1
+--     end
+--   end
+--   local apply = require('navigator.lspwrapper').apply_action
+--   local function apply_action(action)
+--     local action_chosen = nil
+--     for key, value in pairs(lenses) do
+--       if value.display_title == action then
+--         action_chosen = value
+--       end
+--     end
+--     if action_chosen == nil then
+--       log('no match for ', action, lenses)
+--       return
+--     end
+--     apply(action_chosen, M.codelens_ctx)
+--   end
+--
+--   local divider = string.rep('─', width + 2)
+--
+--   table.insert(data, 2, divider)
+--   if #data > 2 then
+--     local lv = gui.new_list_view({
+--       items = data,
+--       width = width + 4,
+--       loc = 'top_center',
+--       relative = 'cursor',
+--       rawdata = true,
+--       data = data,
+--       on_confirm = function(pos)
+--         log(pos)
+--         apply_action(pos)
+--       end,
+--       on_move = function(pos)
+--         log(pos)
+--         return pos
+--       end,
+--     })
+--
+--     vim.api.nvim_buf_add_highlight(lv.bufnr, -1, 'Title', 0, 0, -1)
+--   else
+--     print('no codelense in current line')
+--   end
+-- end
+--
