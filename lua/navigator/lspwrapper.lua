@@ -418,6 +418,9 @@ function M.locations_to_items(locations, max_items)
 end
 
 function M.apply_action(action, ctx, client)
+  if client == nil then
+    client = vim.lsp.get_client_by_id(ctx.client_id or 1)
+  end
   assert(action ~= nil, 'action must not be nil')
   if action.edit then
     vim.lsp.util.apply_workspace_edit(action.edit)
