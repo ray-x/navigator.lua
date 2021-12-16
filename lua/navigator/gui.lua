@@ -38,6 +38,10 @@ function M.new_list_view(opts)
   return require('guihua.gui').new_list_view(opts)
 end
 
+function M.select(items, opts, on_choice)
+  return
+end
+
 return M
 
 -- Doc

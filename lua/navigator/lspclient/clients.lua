@@ -554,7 +554,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if nulls_cfg then
       local cfg = {}
       cfg = vim.tbl_deep_extend('keep', cfg, nulls_cfg)
-      lspconfig['null-ls'].setup(cfg)
+      vim.defer_fn(
+        function ()
+          lspconfig['null-ls'].setup(cfg)  -- adjust null_ls startup timing
+        end,
+        1000
+      )
       log('null-ls loading')
       _NG_Loaded['null-ls'] = true
       configs['null-ls'] = cfg

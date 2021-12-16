@@ -490,6 +490,17 @@ cmd = { "/Users/username/.local/share/nvim/lsp_servers/python/node_modules/.bin/
 
 ```
 
+The lsp servers installed by nvim-lsp-installer is in following dir
+```lua
+local path = require 'nvim-lsp-installer.path'
+local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
+
+```
+
+And you can setup binary full path to this: (e.g. with gopls)
+`install_root_dir .. '/go/gopls'`
+
+
 ## Usage
 
 Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box.
