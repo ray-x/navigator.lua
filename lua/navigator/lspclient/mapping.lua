@@ -1,60 +1,61 @@
-local log = require"navigator.util".log
-local trace = require"navigator.util".trace
+local log = require('navigator.util').log
+local trace = require('navigator.util').trace
 
 local event_hdlrs = {
-  {ev = "BufWritePre", func = [[require "navigator.diagnostics".set_diag_loclist()]]},
-  {ev = "CursorHold", func = "document_highlight()"},
-  {ev = "CursorHoldI", func = "document_highlight()"},
-  {ev = "CursorMoved", func = "clear_references()"}
+  { ev = 'BufWritePre', func = [[require "navigator.diagnostics".set_diag_loclist()]] },
+  { ev = 'CursorHold', func = 'document_highlight()' },
+  { ev = 'CursorHoldI', func = 'document_highlight()' },
+  { ev = 'CursorMoved', func = 'clear_references()' },
 }
 
-local double = {"╔", "═", "╗", "║", "╝", "═", "╚", "║"}
-local single = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
+local double = { '╔', '═', '╗', '║', '╝', '═', '╚', '║' }
+local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
 -- LuaFormatter off
 local key_maps = {
-  {key = "gr", func = "require('navigator.reference').reference()"},
-  {mode = "i", key = "<M-k>", func = "signature_help()"},
-  {key = "<c-k>", func = "signature_help()"},
-  {key = "g0", func = "require('navigator.symbols').document_symbols()"},
-  {key = "gW", func = "workspace_symbol()"},
-  {key = "<c-]>", func = "require('navigator.definition').definition()"},
-  {key = "gD", func = "declaration({ border = 'rounded', max_width = 80 })"},
-  {key = "gp", func = "require('navigator.definition').definition_preview()"},
-  {key = "gT", func = "require('navigator.treesitter').buf_ts()"},
-  {key = "<Leader>gT", func = "require('navigator.treesitter').bufs_ts()"},
-  {key = "K", func = "hover({ popup_opts = { border = single, max_width = 80 }})"},
-  {key = "<Space>ca", mode = "n", func = "require('navigator.codeAction').code_action()"},
-  {key = "<Space>cA", mode = "v", func = "range_code_action()"},
-  {key = "<Leader>re", func = "rename()"},
-  {key = "<Space>rn", func = "require('navigator.rename').rename()"},
-  {key = "<Leader>gi", func = "incoming_calls()"},
-  {key = "<Leader>go", func = "outgoing_calls()"},
-  {key = "gi", func = "implementation()"},
-  {key = "<Space>D", func = "type_definition()"},
-  {key = "gL", func = "require('navigator.diagnostics').show_diagnostics()"},
-  {key = "gG", func = "require('navigator.diagnostics').show_buf_diagnostics()"},
-  {key = "<Leader>dt", func = "require('navigator.diagnostics').toggle_diagnostics()"},
-  {key = "]d", func = "diagnostic.goto_next({ border = 'rounded', max_width = 80})"},
-  {key = "[d", func = "diagnostic.goto_prev({ border = 'rounded', max_width = 80})"},
-  {key = "]r", func = "require('navigator.treesitter').goto_next_usage()"},
-  {key = "[r", func = "require('navigator.treesitter').goto_previous_usage()"},
-  {key = "<C-LeftMouse>", func = "definition()"},
-  {key = "g<LeftMouse>", func = "implementation()"},
-  {key = "<Leader>k", func = "require('navigator.dochighlight').hi_symbol()"},
-  {key = '<Space>wa', func = 'add_workspace_folder()'},
-  {key = '<Space>wr', func = 'remove_workspace_folder()'},
-  {key = '<Space>ff', func = 'formatting()', mode='n'},
-  {key = '<Space>ff', func = 'range_formatting()', mode='v'},
-  {key = '<Space>wl', func = 'print(vim.inspect(vim.lsp.buf.list_workspace_folders()))'},
-  {key = "<Space>la", mode = "n", func = "require('navigator.codelens').run_action()"},
-
+  { key = 'gr', func = "require('navigator.reference').reference()" },
+  { mode = 'i', key = '<M-k>', func = 'signature_help()' },
+  { key = '<c-k>', func = 'signature_help()' },
+  { key = 'g0', func = "require('navigator.symbols').document_symbols()" },
+  { key = 'gW', func = 'workspace_symbol()' },
+  { key = '<c-]>', func = "require('navigator.definition').definition()" },
+  { key = 'gD', func = "declaration({ border = 'rounded', max_width = 80 })" },
+  { key = 'gp', func = "require('navigator.definition').definition_preview()" },
+  { key = 'gT', func = "require('navigator.treesitter').buf_ts()" },
+  { key = '<Leader>gT', func = "require('navigator.treesitter').bufs_ts()" },
+  { key = 'K', func = 'hover({ popup_opts = { border = single, max_width = 80 }})' },
+  { key = '<Space>ca', mode = 'n', func = "require('navigator.codeAction').code_action()" },
+  { key = '<Space>cA', mode = 'v', func = 'range_code_action()' },
+  { key = '<Leader>re', func = 'rename()' },
+  { key = '<Space>rn', func = "require('navigator.rename').rename()" },
+  { key = '<Leader>gi', func = 'incoming_calls()' },
+  { key = '<Leader>go', func = 'outgoing_calls()' },
+  { key = 'gi', func = 'implementation()' },
+  { key = '<Space>D', func = 'type_definition()' },
+  { key = 'gL', func = "require('navigator.diagnostics').show_diagnostics()" },
+  { key = 'gG', func = "require('navigator.diagnostics').show_buf_diagnostics()" },
+  { key = '<Leader>dt', func = "require('navigator.diagnostics').toggle_diagnostics()" },
+  { key = ']d', func = "diagnostic.goto_next({ border = 'rounded', max_width = 80})" },
+  { key = '[d', func = "diagnostic.goto_prev({ border = 'rounded', max_width = 80})" },
+  { key = ']r', func = "require('navigator.treesitter').goto_next_usage()" },
+  { key = '[r', func = "require('navigator.treesitter').goto_previous_usage()" },
+  { key = '<C-LeftMouse>', func = 'definition()' },
+  { key = 'g<LeftMouse>', func = 'implementation()' },
+  { key = '<Leader>k', func = "require('navigator.dochighlight').hi_symbol()" },
+  { key = '<Space>wa', func = 'add_workspace_folder()' },
+  { key = '<Space>wr', func = 'remove_workspace_folder()' },
+  { key = '<Space>ff', func = 'formatting()', mode = 'n' },
+  { key = '<Space>ff', func = 'range_formatting()', mode = 'v' },
+  { key = '<Space>wl', func = 'print(vim.inspect(vim.lsp.buf.list_workspace_folders()))' },
+  { key = '<Space>la', mode = 'n', func = "require('navigator.codelens').run_action()" },
 }
+
+local key_maps_help = {}
 -- LuaFormatter on
 local M = {}
 
 local ccls_mappings = {
-  {key = "<Leader>gi", func = "require('navigator.cclshierarchy').incoming_calls()"},
-  {key = "<Leader>go", func = "require('navigator.cclshierarchy').outgoing_calls()"}
+  { key = '<Leader>gi', func = "require('navigator.cclshierarchy').incoming_calls()" },
+  { key = '<Leader>go', func = "require('navigator.cclshierarchy').outgoing_calls()" },
 }
 
 local check_cap = function(cap)
@@ -76,8 +77,8 @@ local check_cap = function(cap)
         rfmt = true
       end
 
-      log("override ccls", value.config)
-      if value.config.name == "ccls" then
+      log('override ccls', value.config)
+      if value.config.name == 'ccls' then
         ccls = true
       end
     end
@@ -87,7 +88,7 @@ end
 
 local function set_mapping(user_opts)
   log('setup mapping')
-  local opts = {noremap = true, silent = true}
+  local opts = { noremap = true, silent = true }
   user_opts = user_opts or {}
 
   local user_key = _NgConfigValues.keymaps or {}
@@ -111,10 +112,10 @@ local function set_mapping(user_opts)
 
   if _NgConfigValues.default_mapping ~= false then
     for _, v in pairs(user_key) do
-      trace("binding", v)
+      trace('binding', v)
       local exists = false
       for _, default in pairs(key_maps) do
-        if v.func == default.func and (not default.override) then
+        if v.func == default.func and not default.override then
           default.key, default.override, exists = v.key, true, true
           break
         end
@@ -125,31 +126,35 @@ local function set_mapping(user_opts)
     end
   else
     key_maps = _NgConfigValues.keymaps or {}
-    log("setting maps to ", key_maps)
+    log('setting maps to ', key_maps)
   end
   local fmtkey, rfmtkey
   for _, value in pairs(key_maps) do
-    local f = "<Cmd>lua vim.lsp.buf." .. value.func .. "<CR>"
-    if string.find(value.func, "require") then
-      f = "<Cmd>lua " .. value.func .. "<CR>"
-    elseif string.find(value.func, "diagnostic") then
+    local f = '<Cmd>lua vim.lsp.buf.' .. value.func .. '<CR>'
+    if string.find(value.func, 'require') then
+      f = '<Cmd>lua ' .. value.func .. '<CR>'
+    elseif string.find(value.func, 'diagnostic') then
       local diagnostic = '<Cmd>lua vim.'
       if vim.lsp.diagnostic ~= nil then
         diagnostic = '<Cmd>lua vim.lsp.'
       end
-      f = diagnostic .. value.func .. "<CR>"
-    elseif string.find(value.func, "vim.") then
-      f = "<Cmd>lua " .. value.func .. "<CR>"
+      f = diagnostic .. value.func .. '<CR>'
+    elseif string.find(value.func, 'vim.') then
+      f = '<Cmd>lua ' .. value.func .. '<CR>'
     end
     local k = value.key
-    local m = value.mode or "n"
-    if string.find(value.func, "range_formatting") then
+    local m = value.mode or 'n'
+    if string.find(value.func, 'range_formatting') then
       rfmtkey = value.key
-    elseif string.find(value.func, "formatting") then
+    elseif string.find(value.func, 'formatting') then
       fmtkey = value.key
     end
-    log("binding", k, f)
+    log('binding', k, f)
     set_keymap(m, k, f, opts)
+  end
+
+  for _, val in pairs(key_maps) do
+    table.insert(key_maps_help, (val.mode or 'n') .. '|' .. val.key .. '|' .. val.func)
   end
 
   -- if user_opts.cap.document_formatting then
@@ -165,41 +170,44 @@ local function set_mapping(user_opts)
     del_keymap('n', fmtkey)
   end
   if user_opts.cap.document_range_formatting then
-    log("formatting enabled", user_opts.cap)
+    log('formatting enabled', user_opts.cap)
   end
 
   if not range_fmt and rfmtkey then
-    del_keymap("v", rfmtkey)
+    del_keymap('v', rfmtkey)
   end
 
-  log("enable format ", doc_fmt, range_fmt)
+  log('enable format ', doc_fmt, range_fmt)
 end
 
 local function autocmd(user_opts)
-  vim.api.nvim_exec([[
+  vim.api.nvim_exec(
+    [[
             aug NavigatorDocHlAu
                 au!
                 au CmdlineLeave : lua require('navigator.dochighlight').cmd_nohl()
             aug END
-        ]], false)
+        ]],
+    false
+  )
 end
 
 local function set_event_handler(user_opts)
   user_opts = user_opts or {}
   local file_types =
-      "c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,yaml,kotlin,php,dart,nim,terraform,java"
+    'c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,yaml,kotlin,php,dart,nim,terraform,java'
   -- local format_files = "c,cpp,h,go,python,vim,javascript,typescript" --html,css,
-  vim.api.nvim_command [[augroup nvim_lsp_autos]]
-  vim.api.nvim_command [[autocmd!]]
+  vim.api.nvim_command([[augroup nvim_lsp_autos]])
+  vim.api.nvim_command([[autocmd!]])
 
   for _, value in pairs(event_hdlrs) do
-    local f = ""
-    if string.find(value.func, "require") ~= nil then
-      f = "lua " .. value.func
+    local f = ''
+    if string.find(value.func, 'require') ~= nil then
+      f = 'lua ' .. value.func
     else
-      f = "lua vim.lsp.buf." .. value.func
+      f = 'lua vim.lsp.buf.' .. value.func
     end
-    local cmd = "autocmd FileType " .. file_types .. " autocmd nvim_lsp_autos " .. value.ev .. " <buffer> silent! " .. f
+    local cmd = 'autocmd FileType ' .. file_types .. ' autocmd nvim_lsp_autos ' .. value.ev .. ' <buffer> silent! ' .. f
     vim.api.nvim_command(cmd)
   end
   vim.api.nvim_command([[augroup END]])
@@ -213,16 +221,15 @@ M.toggle_lspformat = function(on)
   end
   if _NgConfigValues.lsp.format_on_save then
     if on == nil then
-      print("format on save true")
+      print('format on save true')
     end
     vim.cmd([[set eventignore-=BufWritePre]])
   else
     if on == nil then
-      print("format on save false")
+      print('format on save false')
     end
     vim.cmd([[set eventignore+=BufWritePre]])
   end
-
 end
 
 function M.setup(user_opts)
@@ -236,45 +243,58 @@ function M.setup(user_opts)
   log('lsp cap:', cap)
 
   if cap.call_hierarchy or cap.callHierarchy then
-    vim.lsp.handlers["callHierarchy/incomingCalls"] = require"navigator.hierarchy".incoming_calls_handler
-    vim.lsp.handlers["callHierarchy/outgoingCalls"] = require"navigator.hierarchy".outgoing_calls_handler
+    vim.lsp.handlers['callHierarchy/incomingCalls'] = require('navigator.hierarchy').incoming_calls_handler
+    vim.lsp.handlers['callHierarchy/outgoingCalls'] = require('navigator.hierarchy').outgoing_calls_handler
   end
 
-  vim.lsp.handlers["textDocument/references"] = require"navigator.reference".reference_handler
+  vim.lsp.handlers['textDocument/references'] = require('navigator.reference').reference_handler
   -- vim.lsp.handlers["textDocument/codeAction"] = require"navigator.codeAction".code_action_handler
-  vim.lsp.handlers["textDocument/definition"] = require"navigator.definition".definition_handler
+  vim.lsp.handlers['textDocument/definition'] = require('navigator.definition').definition_handler
 
   if cap.declaration then
-    vim.lsp.handlers["textDocument/declaration"] = require"navigator.definition".declaration_handler
+    vim.lsp.handlers['textDocument/declaration'] = require('navigator.definition').declaration_handler
   end
 
-  vim.lsp.handlers["textDocument/typeDefinition"] = require"navigator.definition".typeDefinition_handler
-  vim.lsp.handlers["textDocument/implementation"] = require"navigator.implementation".implementation_handler
+  vim.lsp.handlers['textDocument/typeDefinition'] = require('navigator.definition').typeDefinition_handler
+  vim.lsp.handlers['textDocument/implementation'] = require('navigator.implementation').implementation_handler
 
-  vim.lsp.handlers["textDocument/documentSymbol"] = require"navigator.symbols".document_symbol_handler
-  vim.lsp.handlers["workspace/symbol"] = require"navigator.symbols".workspace_symbol_handler
-  vim.lsp.handlers["textDocument/publishDiagnostics"] = require"navigator.diagnostics".diagnostic_handler
+  vim.lsp.handlers['textDocument/documentSymbol'] = require('navigator.symbols').document_symbol_handler
+  vim.lsp.handlers['workspace/symbol'] = require('navigator.symbols').workspace_symbol_handler
+  vim.lsp.handlers['textDocument/publishDiagnostics'] = require('navigator.diagnostics').diagnostic_handler
 
   -- TODO: when active signature merge to neovim, remove this setup:
 
   if _NgConfigValues.signature_help_cfg or _NgConfigValues.lsp_signature_help then
-    log("setup signature from navigator")
-    local hassig, sig = pcall(require, "lsp_signature")
+    log('setup signature from navigator')
+    local hassig, sig = pcall(require, 'lsp_signature')
     if hassig then
       sig.setup(_NgConfigValues.signature_help_cfg or {})
     end
   else
-    vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(require"navigator.signature".signature_handler, {
-      border = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
+    vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(require('navigator.signature').signature_handler, {
+      border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
     })
   end
 
-  vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})
+  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = single })
   if cap.document_formatting then
-    log("formatting enabled setup hdl")
-    vim.lsp.handlers["textDocument/formatting"] = require"navigator.formatting".format_hdl
+    log('formatting enabled setup hdl')
+    vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl
   end
+end
 
+M.get_keymaps_help = function()
+  local ListView = require('guihua.listview')
+  local win = ListView:new({
+    loc = 'top_center',
+    border = 'none',
+    prompt = true,
+    enter = true,
+    rect = { height = 20, width = 90 },
+    data = key_maps_help,
+  })
+
+  return win
 end
 
 return M

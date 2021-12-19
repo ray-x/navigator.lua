@@ -110,6 +110,7 @@ _NgConfigValues = {
 vim.cmd("command! -nargs=0 LspLog lua require'navigator.lspclient.config'.open_lsp_log()")
 vim.cmd("command! -nargs=0 LspRestart lua require'navigator.lspclient.config'.reload_lsp()")
 vim.cmd("command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>")
+vim.cmd("command! -nargs=0 LspKeymaps lua require'navigator.lspclient.mapping'.get_keymaps_help()<CR>")
 
 M.deprecated = function(cfg)
   local warn = require('navigator.util').warn
