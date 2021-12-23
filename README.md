@@ -379,6 +379,7 @@ require'navigator'.setup({
 | mode | key             | function                                                   |
 | ---- | --------------- | ---------------------------------------------------------- |
 | n    | gr              | show reference and context                                 |
+| n    | Gr              | async references                                           |
 | i    | \<m-k\>         | signature help                                             |
 | n    | \<c-k\>         | signature help                                             |
 | n    | gW              | workspace symbol                                           |
