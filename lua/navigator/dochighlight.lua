@@ -233,7 +233,7 @@ local function documentHighlight()
   vim.lsp.handlers['textDocument/documentHighlight'] = mk_handler(function(err, result, ctx)
     local bufnr = ctx.bufnr or api.nvim_get_current_buf()
     if err then
-      print(err)
+      vim.notify(err, vim.lsp.log_levels.ERROR)
       return
     end
     if not result or not result[1] or not result[1]['range'] then

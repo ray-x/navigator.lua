@@ -427,7 +427,7 @@ end
 
 -- TODO: update the marker
 if _NgConfigValues.diagnostic_scrollbar_sign then
-  print("config deprecated, set lsp.diagnostic_scrollbar_sign instead")
+  vim.notify("config deprecated, set lsp.diagnostic_scrollbar_sign instead", vim.lsp.log_levels.WARN)
 end
 
 if _NgConfigValues.lsp.diagnostic_scrollbar_sign then

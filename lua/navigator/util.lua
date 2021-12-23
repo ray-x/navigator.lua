@@ -211,7 +211,7 @@ function M.getArgs(inputstr)
 end
 
 function M.p(t)
-  print(vim.inspect(t))
+  vim.notify(vim.inspect(t), vim.log.levels.INFO)
 end
 
 function M.printError(msg)

@@ -11,14 +11,14 @@ local cwd = vim.loop.cwd()
 local M = {}
 local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_message)
   if not result then
-    print("No call hierarchy items found")
+    vim.notify ("No call hierarchy items found", vim.lsp.log_levels.WARN)
     return
   end
   trace('call_hierarchy', result)
   assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running to use lsp_tags")
   if err ~= nil then
     log("dir", direction, "result", result, "err", err, ctx)
-    print("ERROR: " .. error_message)
+    vim.notify("ERROR: " .. error_message, vim.lsp.log_levels.WARN)
     return
   end
 

@@ -32,7 +32,7 @@ vim.opt.viewoptions:remove("options")
 
 function M.setup_fold()
   if not parsers.has_parser() then
-    print("treesitter folding not enabled for current file")
+    vim.notify("treesitter folding not enabled for current file", vim.lsp.log_levels.WARN)
     return
   end
   log("setup treesitter folding")

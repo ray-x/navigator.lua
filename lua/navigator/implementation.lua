@@ -10,7 +10,7 @@ local log = util.log
 -- dataformat should be same as reference
 local function location_handler(err, locations, ctx, cfg, msg)
   if err ~= nil then
-    print("ERROR: " .. tostring(err) .. " " .. msg)
+    vim.notify("ERROR: " .. tostring(err) .. " " .. msg, vim.lsp.log_levels.WARN)
     return
   end
   return locations_to_items(locations)

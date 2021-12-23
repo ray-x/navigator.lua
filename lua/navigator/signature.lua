@@ -52,7 +52,7 @@ local signature_handler = mk_handler(function(err, result, ctx, config)
     log("config nil")
   end
   if err then
-    print("signature help error: ", err, vim.inspect(result), ctx, config)
+    vim.notify("signature help error: ", err, vim.inspect(result), ctx, config, vim.lsp.log_levels.WARN)
   end
   config = config or {}
   if config.border == nil then

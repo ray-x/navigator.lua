@@ -8,7 +8,7 @@ local TextView = require("guihua.textview")
 local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
   -- log(locations)
   if err ~= nil then
-    print(err, ctx)
+    vim.notify(err, ctx, vim.lsp.log_levels.WARN)
     return
   end
   if type(locations) == "number" then
@@ -16,7 +16,7 @@ local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
     log("unable to handle request")
   end
   if locations == nil or vim.tbl_isempty(locations) then
-    print "Definition not found"
+    vim.notify "Definition not found"
     return
   end
   if vim.tbl_islist(locations) then
@@ -43,7 +43,7 @@ local function def_preview(timeout_ms)
   local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)
 
   if result == nil or vim.tbl_isempty(result) then
-    print("No result found: " .. method)
+    vim.notify("No result found: " .. method, vim.lsp.log_levels.WARN)
     return nil
   end
 
@@ -58,7 +58,7 @@ local function def_preview(timeout_ms)
   end
 
   if vim.tbl_isempty(data) then
-    print("No result found: " .. method)
+    vim.notify("No result found: " .. method, vim.lsp.log_levels.WARN)
     return nil
   end
 

@@ -314,7 +314,7 @@ end
 function M.locations_to_items(locations, max_items)
   max_items = max_items or 100000 --
   if not locations or vim.tbl_isempty(locations) then
-    print('list not avalible')
+    vim.notify('list not avalible', vim.lsp.log_levels.WARN)
     return
   end
   local width = 4
@@ -420,7 +420,7 @@ end
 
 function M.symbol_to_items(locations)
   if not locations or vim.tbl_isempty(locations) then
-    print('list not avalible')
+    vim.notify('list not avalible', vim.lsp.log_levels.WARN)
     return
   end
 

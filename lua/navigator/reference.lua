@@ -20,18 +20,18 @@ local ref_view = function(err, locations, ctx, cfg)
   -- log("num", num)
   -- log("bfnr", bufnr)
   if err ~= nil then
-    print('lsp ref callback error', err, ctx, vim.inspect(locations))
+    vim.notify('lsp ref callback error', err, ctx, vim.inspect(locations), vim.lsp.log_levels.WARN)
     log('ref callback error, lsp may not ready', err, ctx, vim.inspect(locations))
     return
   end
   if type(locations) ~= 'table' then
     log(locations)
     log('ctx', ctx)
-    print('incorrect setup', locations)
+    vim.notify('incorrect setup', locations, vim.lsp.log_levels.WARN)
     return
   end
   if locations == nil or vim.tbl_isempty(locations) then
-    print('References not found')
+    vim.notify('References not found', vim.lsp.log_levels.WARN)
     return
   end
 
@@ -58,7 +58,7 @@ local ref_view = function(err, locations, ctx, cfg)
   local listview = gui.new_list_view(opts)
 
   if listview == nil then
-    print('failed to create preview windows')
+    vim.notify('failed to create preview windows', vim.lsp.log_levels.WARN)
     return
   end
   -- trace("update items", listview.ctrl.class)

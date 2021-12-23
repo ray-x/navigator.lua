@@ -30,7 +30,7 @@ local symbols_to_items = lsphelper.symbols_to_items
 --   if #lines > 0 then
 --     gui.new_list_view({data = lines})
 --   else
---     print("symbols not found")
+--     vim.notify("symbols not found")
 --   end
 -- end
 
@@ -77,12 +77,12 @@ end
 
 M.document_symbol_handler = mk_handler(function(err, result, ctx)
   if err then
-    print('failed to get document symbol', ctx)
+    vim.notify('failed to get document symbol', ctx, vim.lsp.log_levels.WARN)
   end
   local bufnr = ctx.bufnr or 0
 
   if not result or vim.tbl_isempty(result) then
-    print('symbol not found for buf', ctx)
+    vim.notify('symbol not found for buf', ctx, vim.lsp.log_levels.WARN)
     return
   end
   -- log(result)
@@ -134,10 +134,10 @@ end)
 
 M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
   if err then
-    print('failed to get workspace symbol', ctx)
+    vim.notify('failed to get workspace symbol', ctx, vim.lsp.log_levels.WARN)
   end
   if not result or vim.tbl_isempty(result) then
-    print('symbol not found for buf', ctx)
+    vim.notify('symbol not found for buf', ctx, vim.lsp.log_levels.WARN)
     return
   end
   log(result[1])
@@ -161,7 +161,7 @@ M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
   -- gui.new_list_view({items = items, prompt = true, ft = ft, rowdata = true, api = " "})
 
   -- if locations == nil or vim.tbl_isempty(locations) then
-  --   print "References not found"
+  --   vim.notify "References not found"
   --   return
   -- end
   -- local items = locations_to_items(locations)

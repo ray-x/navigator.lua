@@ -45,7 +45,7 @@ local key_maps = {
   { key = '<Space>wr', func = 'remove_workspace_folder()' },
   { key = '<Space>ff', func = 'formatting()', mode = 'n' },
   { key = '<Space>ff', func = 'range_formatting()', mode = 'v' },
-  { key = '<Space>wl', func = 'print(vim.inspect(vim.lsp.buf.list_workspace_folders()))' },
+  { key = '<Space>wl', func = 'vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))' },
   { key = '<Space>la', mode = 'n', func = "require('navigator.codelens').run_action()" },
 }
 
@@ -221,12 +221,12 @@ M.toggle_lspformat = function(on)
   end
   if _NgConfigValues.lsp.format_on_save then
     if on == nil then
-      print('format on save true')
+      vim.notify('format on save true', vim.lsp.log_levels.INFO)
     end
     vim.cmd([[set eventignore-=BufWritePre]])
   else
     if on == nil then
-      print('format on save false')
+      vim.notify('format on save false', vim.lsp.log_levels.INFO)
     end
     vim.cmd([[set eventignore+=BufWritePre]])
   end

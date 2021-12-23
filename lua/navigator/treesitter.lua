@@ -292,11 +292,11 @@ local function get_all_nodes(bufnr, filter, summary)
 
   trace(bufnr, filter, summary)
   if not bufnr then
-    print("get_all_node invalide bufnr")
+    vim.notify("get_all_node invalide bufnr", vim.lsp.log_levels.WARN)
   end
   summary = summary or false
   if not parsers.has_parser() then
-    print("ts not loaded")
+    vim.notify("ts not loaded", vim.lsp.log_levels.WARN)
   end
 
   local path_sep = require"navigator.util".path_sep()

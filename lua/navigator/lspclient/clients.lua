@@ -18,7 +18,7 @@ local has_lsp, lspconfig = pcall(require, 'lspconfig')
 if not has_lsp then
   return {
     setup = function()
-      print('loading lsp config failed LSP may not working correctly')
+      vim.notify('loading lsp config failed LSP may not working correctly', vim.lsp.log_levels.WARN)
     end,
   }
 end
@@ -457,14 +457,14 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     local default_config = {}
     log(lspclient)
     if lspconfig[lspclient] == nil then
-      print('lspclient', lspclient, 'no longer support by lspconfig, please submit an issue')
+      vim.notify('lspclient', lspclient, 'no longer support by lspconfig, please submit an issue', vim.lsp.log_levels.WARN)
       goto continue
     end
 
     if lspconfig[lspclient].document_config and lspconfig[lspclient].document_config.default_config then
       default_config = lspconfig[lspclient].document_config.default_config
     else
-      print('missing document config for client: ', lspclient)
+      vim.notify('missing document config for client: ', lspclient, vim.lsp.log_levels.WARN)
       goto continue
     end
 
@@ -525,7 +525,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
       cfg.on_init = function(client)
         if client and client.config and client.config.settings then
-          client.notify('workspace/didChangeConfiguration', { settings = client.config.settings })
+          client.notify('workspace/didChangeConfiguration', { settings = client.config.settings }, vim.lsp.log_levels.WARN)
         end
       end
     end
