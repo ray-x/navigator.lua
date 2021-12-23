@@ -361,8 +361,10 @@ function M.locations_to_items(locations, max_items)
           uri_def[item.uri] = def
           if def.start then -- find for the 1st time
             for j = 1, #items do
-              if items[j].uri == item.uri and items[j].range.start.line == def.start.line then
-                items[j].definition = true
+              if items[j].definition ~= nil then
+                if items[j].uri == item.uri and items[j].range.start.line == def.start.line then
+                  items[j].definition = true
+                end
               end
             end
           end
@@ -379,9 +381,9 @@ function M.locations_to_items(locations, max_items)
         end
       end
       trace(uri_def[item.uri], item.range) -- set to log if need to get all in rnge
-      local def = uri_def[item.uri]
-      if def and def.start and item.range then
-        if def.start.line == item.range.start.line then
+      local def1 = uri_def[item.uri]
+      if def1 and def1.start and item.range then
+        if def1.start.line == item.range.start.line then
           log('ts def in current line')
           item.definition = true
         end
@@ -417,7 +419,6 @@ function M.locations_to_items(locations, max_items)
   return items, width + 24, second_part -- TODO handle long line?
 end
 
-
 function M.symbol_to_items(locations)
   if not locations or vim.tbl_isempty(locations) then
     vim.notify('list not avalible', vim.lsp.log_levels.WARN)
@@ -427,6 +428,9 @@ function M.symbol_to_items(locations)
   local items = {} -- lsp.util.locations_to_items(locations)
   -- items and locations may not matching
   table.sort(locations, function(i, j)
+    if i.definition then
+      return true
+    end
     if i.uri == j.uri then
       if i.range and i.range.start then
         return i.range.start.line < j.range.start.line

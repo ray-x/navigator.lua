@@ -13,6 +13,7 @@ local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
 -- LuaFormatter off
 local key_maps = {
   { key = 'gr', func = "require('navigator.reference').reference()" },
+  { key = 'Gr', func = "require('navigator.reference').async_ref()" },
   { mode = 'i', key = '<M-k>', func = 'signature_help()' },
   { key = '<c-k>', func = 'signature_help()' },
   { key = 'g0', func = "require('navigator.symbols').document_symbols()" },

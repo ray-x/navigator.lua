@@ -17,6 +17,32 @@ local ref_view = function(err, locations, ctx, cfg)
   local opts = {}
   trace('arg1', err, ctx, locations)
   trace(locations)
+  if ctx.combine then
+    -- wait for both request
+    if #ctx.results.definitions.result == nil or ctx.results.references.result == nil then
+      log('not all requests returned')
+      return
+    end
+    local definitions = ctx.results.definitions
+    local references = ctx.results.references
+    if definitions.error and references.error then
+      vim.notify('lsp ref callback error', vim.inspect(ctx.result), vim.lsp.log_levels.WARN)
+    end
+    locations = {}
+    if definitions.result then
+      for i, _ in ipairs(definitions.result) do
+        definitions.result[i].definition = true
+      end
+      vim.list_extend(locations, definitions.result)
+    end
+    if references.result then
+      vim.list_extend(locations, references.result)
+    end
+    ctx = references.ctx or definitions.ctx
+    err = nil
+    cfg = references.config or definitions.config
+    trace(ctx, locations)
+  end
   -- log("num", num)
   -- log("bfnr", bufnr)
   if err ~= nil then
@@ -100,12 +126,37 @@ local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
   M.async_hdlr:send()
 end)
 
--- local async_reference_request = function()
---   local ref_params = vim.lsp.util.make_position_params()
---   ref_params.context = {includeDeclaration = true}
---   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
---   lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
--- end
+local async_ref = function()
+  local ref_params = vim.lsp.util.make_position_params()
+  local results = { definitions = {}, references = {} }
+  ref_params.context = { includeDeclaration = false }
+  lsp.call_async('textDocument/definition', ref_params, function(err, result, ctx, config)
+    trace(err, result, ctx, config)
+    results.definitions = {
+      error = err,
+      result = result,
+      ctx = ctx,
+      config = config,
+    }
+    ctx = ctx or {}
+    ctx.results = results
+    ctx.combine = true
+    ref_view(err, result, ctx, config)
+  end) -- return asyncresult, canceller
+  lsp.call_async('textDocument/references', ref_params, function(err, result, ctx, config)
+    trace(err, result, ctx, config)
+    results.references = {
+      error = err,
+      result = result,
+      ctx = ctx,
+      config = config,
+    }
+    ctx = ctx or {}
+    ctx.results = results
+    ctx.combine = true
+    ref_view(err, result, ctx, config)
+  end) -- return asyncresult, canceller
+end
 
 local ref_req = function()
   if _NgConfigValues.closer ~= nil then
@@ -135,4 +186,4 @@ local ref = function()
   end)
 end
 
-return { reference_handler = ref_hdlr, reference = ref_req, ref_view = ref_view }
+return { reference_handler = ref_hdlr, reference = ref_req, ref_view = ref_view, async_ref = async_ref }

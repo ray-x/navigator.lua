@@ -91,7 +91,7 @@ _NgConfigValues = {
     diagnostic_file = '🚑',
     -- Values
     value_changed = '📝',
-    value_definition = '🐶', -- it is easier to see than 🦕
+    value_definition = '🐶🍡', -- it is easier to see than 🦕
     -- Treesitter
     match_kinds = {
       var = ' ', -- "👹", -- Vampaire
