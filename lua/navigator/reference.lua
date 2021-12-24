@@ -19,6 +19,9 @@ local ref_view = function(err, locations, ctx, cfg)
   trace(locations)
   if ctx.combine then
     -- wait for both request
+    if ctx.results == nil then
+      return
+    end
     if #ctx.results.definitions.result == nil or ctx.results.references.result == nil then
       log('not all requests returned')
       return
@@ -79,7 +82,7 @@ local ref_view = function(err, locations, ctx, cfg)
     ft = ft,
     width = width,
     api = 'Reference',
-    enable_preview_edit = true,
+    enable_preview_edit = true
   }
   local listview = gui.new_list_view(opts)
 
@@ -128,16 +131,11 @@ end)
 
 local async_ref = function()
   local ref_params = vim.lsp.util.make_position_params()
-  local results = { definitions = {}, references = {} }
-  ref_params.context = { includeDeclaration = false }
+  local results = {definitions = {}, references = {}}
+  ref_params.context = {includeDeclaration = false}
   lsp.call_async('textDocument/definition', ref_params, function(err, result, ctx, config)
     trace(err, result, ctx, config)
-    results.definitions = {
-      error = err,
-      result = result,
-      ctx = ctx,
-      config = config,
-    }
+    results.definitions = {error = err, result = result, ctx = ctx, config = config}
     ctx = ctx or {}
     ctx.results = results
     ctx.combine = true
@@ -145,12 +143,7 @@ local async_ref = function()
   end) -- return asyncresult, canceller
   lsp.call_async('textDocument/references', ref_params, function(err, result, ctx, config)
     trace(err, result, ctx, config)
-    results.references = {
-      error = err,
-      result = result,
-      ctx = ctx,
-      config = config,
-    }
+    results.references = {error = err, result = result, ctx = ctx, config = config}
     ctx = ctx or {}
     ctx.results = results
     ctx.combine = true
@@ -164,7 +157,7 @@ local ref_req = function()
     _NgConfigValues.closer()
   end
   local ref_params = vim.lsp.util.make_position_params()
-  ref_params.context = { includeDeclaration = true }
+  ref_params.context = {includeDeclaration = true}
   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
   local bufnr = vim.api.nvim_get_current_buf()
   log('bufnr', bufnr)
@@ -186,4 +179,15 @@ local ref = function()
   end)
 end
 
-return { reference_handler = ref_hdlr, reference = ref_req, ref_view = ref_view, async_ref = async_ref }
+
+return {
+
+  reference_handler = ref_hdlr,
+
+  reference = ref_req,
+
+  ref_view = ref_view,
+
+  async_ref = async_ref
+
+}
