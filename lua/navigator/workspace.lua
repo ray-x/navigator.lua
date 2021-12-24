@@ -6,8 +6,7 @@ local util = require('navigator.util')
 M.add_workspace_folder = function()
   util.log(vim.ui.input)
   local input = require('guihua.floating').input
-  input({ prompt = 'Workspace To Add: ', default = vim.fn.expand('%:p:h') }, function(inputs)
-    util.log(inputs)
+  input({prompt = 'Workspace To Add: ', default = vim.fn.expand('%:p:h')}, function(inputs)
     vim.lsp.buf.add_workspace_folder(inputs)
   end)
 end
@@ -17,21 +16,19 @@ M.remove_workspace_folder = function()
   local folders = vim.lsp.buf.list_workspace_folders()
 
   if #folders > 1 then
-    select(folders, { prompt = 'select workspace to delete' }, function(workspace)
-      util.log(workspace)
+    select(folders, {prompt = 'select workspace to delete'}, function(workspace)
       vim.lsp.buf.remove_workspace_folder(workspace)
     end)
   end
 end
 
 M.workspace_symbol = function()
-  local input = vim.ui.input
-
-  vim.ui.input = require('guihua.floating').input
-  vim.lsp.buf.workspace_symbol()
-  vim.defer_fn(function()
-    vim.ui.input = input
-  end, 1000)
+  local input = require('guihua.floating').input
+  input({prompt = 'Find symbol: ', default = ''}, function(inputs)
+    util.log(inputs)
+    print(inputs)
+    vim.lsp.buf.workspace_symbol(inputs)
+  end)
 end
 
 M.list_workspace_folders = function()
@@ -41,7 +38,8 @@ M.list_workspace_folders = function()
       items = folders,
       border = 'single',
       rawdata = true,
-      on_move = function(...) end,
+      on_move = function(...)
+      end
     })
   end
 end

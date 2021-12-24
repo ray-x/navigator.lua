@@ -2,14 +2,14 @@ local log = require('navigator.util').log
 local trace = require('navigator.util').trace
 
 local event_hdlrs = {
-  { ev = 'BufWritePre', func = [[require "navigator.diagnostics".set_diag_loclist()]] },
-  { ev = 'CursorHold', func = 'document_highlight()' },
-  { ev = 'CursorHoldI', func = 'document_highlight()' },
-  { ev = 'CursorMoved', func = 'clear_references()' },
+  {ev = 'BufWritePre', func = [[require "navigator.diagnostics".set_diag_loclist()]]},
+  {ev = 'CursorHold', func = 'document_highlight()'},
+  {ev = 'CursorHoldI', func = 'document_highlight()'},
+  {ev = 'CursorMoved', func = 'clear_references()'}
 }
 
-local double = { '╔', '═', '╗', '║', '╝', '═', '╚', '║' }
-local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
+local double = {'╔', '═', '╗', '║', '╝', '═', '╚', '║'}
+local single = {'╭', '─', '╮', '│', '╯', '─', '╰', '│'}
 -- LuaFormatter off
 local key_maps = {
   { key = 'gr', func = "require('navigator.reference').reference()" },
@@ -17,7 +17,7 @@ local key_maps = {
   { mode = 'i', key = '<M-k>', func = 'signature_help()' },
   { key = '<c-k>', func = 'signature_help()' },
   { key = 'g0', func = "require('navigator.symbols').document_symbols()" },
-  { key = 'gW', func = 'workspace_symbol()' },
+  { key = 'gW', func = "require('navigator.workspace').workspace_symbol()" },
   { key = '<c-]>', func = "require('navigator.definition').definition()" },
   { key = 'gD', func = "declaration({ border = 'rounded', max_width = 80 })" },
   { key = 'gp', func = "require('navigator.definition').definition_preview()" },
@@ -26,7 +26,7 @@ local key_maps = {
   { key = 'K', func = 'hover({ popup_opts = { border = single, max_width = 80 }})' },
   { key = '<Space>ca', mode = 'n', func = "require('navigator.codeAction').code_action()" },
   { key = '<Space>cA', mode = 'v', func = 'range_code_action()' },
-  { key = '<Leader>re', func = 'rename()' },
+  -- { key = '<Leader>re', func = 'rename()' },
   { key = '<Space>rn', func = "require('navigator.rename').rename()" },
   { key = '<Leader>gi', func = 'incoming_calls()' },
   { key = '<Leader>go', func = 'outgoing_calls()' },
@@ -42,11 +42,11 @@ local key_maps = {
   { key = '<C-LeftMouse>', func = 'definition()' },
   { key = 'g<LeftMouse>', func = 'implementation()' },
   { key = '<Leader>k', func = "require('navigator.dochighlight').hi_symbol()" },
-  { key = '<Space>wa', func = 'add_workspace_folder()' },
-  { key = '<Space>wr', func = 'remove_workspace_folder()' },
+  { key = '<Space>wa', func = "require('navigator.workspace').add_workspace_folder()" },
+  { key = '<Space>wr', func = "require('navigator.workspace').remove_workspace_folder()" },
   { key = '<Space>ff', func = 'formatting()', mode = 'n' },
   { key = '<Space>ff', func = 'range_formatting()', mode = 'v' },
-  { key = '<Space>wl', func = 'vim.notify(vim.inspect(vim.lsp.buf.list_workspace_folders()))' },
+  { key = '<Space>wl', func = "require('navigator.workspace').list_workspace_folders()" },
   { key = '<Space>la', mode = 'n', func = "require('navigator.codelens').run_action()" },
 }
 
@@ -55,8 +55,8 @@ local key_maps_help = {}
 local M = {}
 
 local ccls_mappings = {
-  { key = '<Leader>gi', func = "require('navigator.cclshierarchy').incoming_calls()" },
-  { key = '<Leader>go', func = "require('navigator.cclshierarchy').outgoing_calls()" },
+  {key = '<Leader>gi', func = "require('navigator.cclshierarchy').incoming_calls()"},
+  {key = '<Leader>go', func = "require('navigator.cclshierarchy').outgoing_calls()"}
 }
 
 local check_cap = function(cap)
@@ -89,7 +89,7 @@ end
 
 local function set_mapping(user_opts)
   log('setup mapping')
-  local opts = { noremap = true, silent = true }
+  local opts = {noremap = true, silent = true}
   user_opts = user_opts or {}
 
   local user_key = _NgConfigValues.keymaps or {}
@@ -182,21 +182,18 @@ local function set_mapping(user_opts)
 end
 
 local function autocmd(user_opts)
-  vim.api.nvim_exec(
-    [[
+  vim.api.nvim_exec([[
             aug NavigatorDocHlAu
                 au!
                 au CmdlineLeave : lua require('navigator.dochighlight').cmd_nohl()
             aug END
-        ]],
-    false
-  )
+        ]], false)
 end
 
 local function set_event_handler(user_opts)
   user_opts = user_opts or {}
   local file_types =
-    'c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,yaml,kotlin,php,dart,nim,terraform,java'
+      'c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,yaml,kotlin,php,dart,nim,terraform,java'
   -- local format_files = "c,cpp,h,go,python,vim,javascript,typescript" --html,css,
   vim.api.nvim_command([[augroup nvim_lsp_autos]])
   vim.api.nvim_command([[autocmd!]])
@@ -259,7 +256,7 @@ function M.setup(user_opts)
   vim.lsp.handlers['textDocument/typeDefinition'] = require('navigator.definition').typeDefinition_handler
   vim.lsp.handlers['textDocument/implementation'] = require('navigator.implementation').implementation_handler
 
-  vim.lsp.handlers['textDocument/documentSymbol'] = require('navigator.symbols').document_symbol_handler
+  -- vim.lsp.handlers['textDocument/documentSymbol'] = require('navigator.symbols').document_symbol_handler
   vim.lsp.handlers['workspace/symbol'] = require('navigator.symbols').workspace_symbol_handler
   vim.lsp.handlers['textDocument/publishDiagnostics'] = require('navigator.diagnostics').diagnostic_handler
 
@@ -273,11 +270,11 @@ function M.setup(user_opts)
     end
   else
     vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(require('navigator.signature').signature_handler, {
-      border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
+      border = {'╭', '─', '╮', '│', '╯', '─', '╰', '│'}
     })
   end
 
-  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = single })
+  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})
   if cap.document_formatting then
     log('formatting enabled setup hdl')
     vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl
@@ -291,8 +288,8 @@ M.get_keymaps_help = function()
     border = 'none',
     prompt = true,
     enter = true,
-    rect = { height = 20, width = 90 },
-    data = key_maps_help,
+    rect = {height = 20, width = 90},
+    data = key_maps_help
   })
 
   return win
