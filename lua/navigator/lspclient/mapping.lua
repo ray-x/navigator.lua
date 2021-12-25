@@ -116,7 +116,7 @@ local function set_mapping(user_opts)
       trace('binding', v)
       local exists = false
       for _, default in pairs(key_maps) do
-        if v.func == default.func and not default.override then
+        if v.func == default.func and (v.mode or 'n') == (default.mode or 'n') and not default.override then
           default.key, default.override, exists = v.key, true, true
           break
         end
