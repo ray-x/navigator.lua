@@ -4,6 +4,8 @@
 
 - A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
 
+- [![a short intro of navigator](https://user-images.githubusercontent.com/1681295/147378701-013213fa-7961-45c5-b478-553298cc36d7.jpeg)](https://youtu.be/P1kd7Y8AatE)
+
 Here are some examples
 
 #### Example: Javascript closure
@@ -152,7 +154,7 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
 Plug 'ray-x/navigator.lua'
 
-" Plug 'hrsh7th/nvim-compe' and other plugins you commenly use...
+" Plug 'hrsh7th/nvim-cmp' and other plugins you commenly use...
 
 " optional, if you need treesitter symbol support
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
