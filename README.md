@@ -4,7 +4,7 @@
 
 - A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
 
-- [![a short intro of navigator](https://user-images.githubusercontent.com/1681295/147378701-013213fa-7961-45c5-b478-553298cc36d7.jpeg)](https://youtu.be/P1kd7Y8AatE)
+- [![a short intro of navigator](https://user-images.githubusercontent.com/1681295/147378905-51eede5f-e36d-48f4-9799-ae562949babe.jpeg)](https://youtu.be/P1kd7Y8AatE)
 
 Here are some examples
 
