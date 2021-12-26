@@ -161,7 +161,7 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
 call plug#end()
 
-" No need for rquire('lspconfig'), navigator will configure it for you
+" No need for require('lspconfig'), navigator will configure it for you
 lua <<EOF
 require'navigator'.setup()
 EOF
