@@ -411,9 +411,9 @@ require'navigator'.setup({
 | n    | \<Leader\> dt   | diagnostic toggle(enable/disable)                          |
 | n    | ]r              | next treesitter reference/usage                            |
 | n    | [r              | previous treesitter reference/usage                        |
-| n    | \<Sapce\> wa    | add workspace folder                                       |
-| n    | \<Sapce\> wr    | remove workspace folder                                    |
-| n    | \<Sapce\> wl    | print workspace folder                                     |
+| n    | \<Space\> wa    | add workspace folder                                       |
+| n    | \<Space\> wr    | remove workspace folder                                    |
+| n    | \<Space\> wl    | print workspace folder                                     |
 | n    | \<Leader\>k     | toggle reference highlight                                 |
 | i/n  | \<C-p\>         | previous item in list                                      |
 | i/n  | \<C-n\>         | next item in list                                          |
