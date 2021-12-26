@@ -403,7 +403,7 @@ require'navigator'.setup({
 | n    | \<Leader\>gi    | hierarchy incoming calls                                   |
 | n    | \<Leader\>go    | hierarchy outgoing calls                                   |
 | n    | gi              | implementation                                             |
-| n    | \<Sapce\> D     | type definition                                            |
+| n    | \<Space\> D     | type definition                                            |
 | n    | gL              | show line diagnostic                                       |
 | n    | gG              | show diagnostic for all buffers                            |
 | n    | ]d              | next diagnostic                                            |
