@@ -161,7 +161,7 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
 call plug#end()
 
-" No need for rquire('lspconfig'), navigator will configure it for you
+" No need for require('lspconfig'), navigator will configure it for you
 lua <<EOF
 require'navigator'.setup()
 EOF
@@ -260,7 +260,7 @@ require'navigator'.setup({
   lsp = {
     code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
-    format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+    format_on_save = true, -- set to false to disable lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
     disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     -- only want to enable one lsp server
@@ -403,7 +403,7 @@ require'navigator'.setup({
 | n    | \<Leader\>gi    | hierarchy incoming calls                                   |
 | n    | \<Leader\>go    | hierarchy outgoing calls                                   |
 | n    | gi              | implementation                                             |
-| n    | \<Sapce\> D     | type definition                                            |
+| n    | \<Space\> D     | type definition                                            |
 | n    | gL              | show line diagnostic                                       |
 | n    | gG              | show diagnostic for all buffers                            |
 | n    | ]d              | next diagnostic                                            |
@@ -411,9 +411,9 @@ require'navigator'.setup({
 | n    | \<Leader\> dt   | diagnostic toggle(enable/disable)                          |
 | n    | ]r              | next treesitter reference/usage                            |
 | n    | [r              | previous treesitter reference/usage                        |
-| n    | \<Sapce\> wa    | add workspace folder                                       |
-| n    | \<Sapce\> wr    | remove workspace folder                                    |
-| n    | \<Sapce\> wl    | print workspace folder                                     |
+| n    | \<Space\> wa    | add workspace folder                                       |
+| n    | \<Space\> wr    | remove workspace folder                                    |
+| n    | \<Space\> wl    | print workspace folder                                     |
 | n    | \<Leader\>k     | toggle reference highlight                                 |
 | i/n  | \<C-p\>         | previous item in list                                      |
 | i/n  | \<C-n\>         | next item in list                                          |
