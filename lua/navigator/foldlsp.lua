@@ -93,7 +93,7 @@ M.fold_handler = mk_handler(function(err, result, ctx, config)
   -- params: err, method, result, client_id, bufnr
   -- XXX: handle err?
   if err or result == nil or #result == 0 then
-    vim.notify(err, ctx.method, ctx.client_id, vim.lsp.log_levels.WARN)
+    vim.notify(string.format("%s %s ", tostring(err), vim.inspect(ctx)), vim.lsp.log_levels.WARN)
     return
   end
   M.debug_folds()

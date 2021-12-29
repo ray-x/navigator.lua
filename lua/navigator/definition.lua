@@ -1,28 +1,28 @@
-local util = require "navigator.util"
-local lsphelper = require "navigator.lspwrapper"
+local util = require('navigator.util')
+local lsphelper = require('navigator.lspwrapper')
 local locations_to_items = lsphelper.locations_to_items
-local gui = require "navigator.gui"
+local gui = require('navigator.gui')
 local log = util.log
-local TextView = require("guihua.textview")
+local TextView = require('guihua.textview')
 -- callback for lsp definition, implementation and declaration handler
 local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
   -- log(locations)
   if err ~= nil then
-    vim.notify(err, ctx, vim.lsp.log_levels.WARN)
+    vim.notify('Defination: ', tostring(err) .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
     return
   end
-  if type(locations) == "number" then
+  if type(locations) == 'number' then
     log(locations)
-    log("unable to handle request")
+    log('unable to handle request')
   end
   if locations == nil or vim.tbl_isempty(locations) then
-    vim.notify "Definition not found"
+    vim.notify('Definition not found')
     return
   end
   if vim.tbl_islist(locations) then
     if #locations > 1 then
       local items = locations_to_items(locations)
-      gui.new_list_view({items = items, api = 'Definition'})
+      gui.new_list_view({ items = items, api = 'Definition' })
     else
       vim.lsp.util.jump_to_location(locations[1])
     end
@@ -37,13 +37,13 @@ local function get_symbol()
 end
 
 local function def_preview(timeout_ms)
-  assert(#vim.lsp.buf_get_clients() > 0, "Must have a client running")
-  local method = "textDocument/definition"
+  assert(#vim.lsp.buf_get_clients() > 0, 'Must have a client running')
+  local method = 'textDocument/definition'
   local params = vim.lsp.util.make_position_params()
   local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)
 
   if result == nil or vim.tbl_isempty(result) then
-    vim.notify("No result found: " .. method, vim.lsp.log_levels.WARN)
+    vim.notify('No result found: ' .. method, vim.lsp.log_levels.WARN)
     return nil
   end
 
@@ -58,7 +58,7 @@ local function def_preview(timeout_ms)
   end
 
   if vim.tbl_isempty(data) then
-    vim.notify("No result found: " .. method, vim.lsp.log_levels.WARN)
+    vim.notify('No result found: ' .. method, vim.lsp.log_levels.WARN)
     return nil
   end
 
@@ -77,13 +77,13 @@ local function def_preview(timeout_ms)
     vim.fn.bufload(bufnr)
   end
 
-  local ok, parsers = pcall(require, "nvim-treesitter.parsers")
+  local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
   local lines_num = 12
   if ok then
-    local ts = require 'navigator.treesitter'
+    local ts = require('navigator.treesitter')
     local root = parsers.get_parser(bufnr)
     log(range)
-    local def_node = ts.get_node_at_pos({range['start'].line, range['start'].character}, root)
+    local def_node = ts.get_node_at_pos({ range['start'].line, range['start'].character }, root)
 
     local sr, _, er, _ = ts.get_node_scope(def_node)
     log(sr, er)
@@ -91,7 +91,7 @@ local function def_preview(timeout_ms)
   end
 
   -- TODO: 12 should be an option
-  local definition = vim.api.nvim_buf_get_lines(bufnr, row, range["end"].line + lines_num, false)
+  local definition = vim.api.nvim_buf_get_lines(bufnr, row, range['end'].line + lines_num, false)
   local def_line = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range.start.line + 1, false)
   for _ = 1, math.min(3, #definition), 1 do
     if #definition[1] < 2 then
@@ -108,30 +108,30 @@ local function def_preview(timeout_ms)
     width = math.max(width, #value + 4)
     width = math.min(maxwidth, width)
   end
-  definition = vim.list_extend({"    [" .. get_symbol() .. "] Definition: "}, definition)
-  local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
+  definition = vim.list_extend({ '    [' .. get_symbol() .. '] Definition: ' }, definition)
+  local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
 
   -- TODO multiple resuts?
   local opts = {
-    relative = "cursor",
-    style = "minimal",
+    relative = 'cursor',
+    style = 'minimal',
     ft = filetype,
-    rect = {width = width, height = #definition + 3},
+    rect = { width = width, height = #definition + 3 },
     data = definition,
     enter = true,
-    border = _NgConfigValues.border or "shadow"
+    border = _NgConfigValues.border or 'shadow',
   }
 
   TextView:new(opts)
   delta = delta + 1 -- header
-  local cmd = "normal! " .. tostring(delta) .. "G"
+  local cmd = 'normal! ' .. tostring(delta) .. 'G'
 
   vim.cmd(cmd)
   vim.cmd('set cursorline')
   if #def_line > 0 then
     local niddle = require('guihua.util').add_escape(def_line[1])
     -- log(def_line[1], niddle)
-    vim.fn.matchadd("Search", niddle)
+    vim.fn.matchadd('Search', niddle)
   end
   -- TODO:
   -- https://github.com/oblitum/goyo.vim/blob/master/autoload/goyo.vim#L108-L135
@@ -143,17 +143,16 @@ local def = function()
   local ref_params = vim.lsp.util.make_position_params()
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
     if client.resolved_capabilities.goto_definition then
-      client.request("textDocument/definition", ref_params, definition_hdlr, _bufnr)
+      client.request('textDocument/definition', ref_params, definition_hdlr, _bufnr)
     end
   end)
-
 end
 
-vim.lsp.handlers["textDocument/definition"] = definition_hdlr
+vim.lsp.handlers['textDocument/definition'] = definition_hdlr
 return {
   definition = def,
   definition_handler = definition_hdlr,
   definition_preview = def_preview,
   declaration_handler = definition_hdlr,
-  typeDefinition_handler = definition_hdlr
+  typeDefinition_handler = definition_hdlr,
 }

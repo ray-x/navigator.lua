@@ -29,7 +29,7 @@ local ref_view = function(err, locations, ctx, cfg)
     local definitions = ctx.results.definitions
     local references = ctx.results.references
     if definitions.error and references.error then
-      vim.notify('lsp ref callback error', vim.inspect(ctx.result), vim.lsp.log_levels.WARN)
+      vim.notify('lsp ref callback error' .. vim.inspect(ctx.result), vim.lsp.log_levels.WARN)
     end
     locations = {}
     if definitions.result then
@@ -49,14 +49,17 @@ local ref_view = function(err, locations, ctx, cfg)
   -- log("num", num)
   -- log("bfnr", bufnr)
   if err ~= nil then
-    vim.notify('lsp ref callback error', err, ctx, vim.inspect(locations), vim.lsp.log_levels.WARN)
+    vim.notify(
+      'lsp ref callback error' .. vim.inspect(err) .. vim.inspect(ctx) .. vim.inspect(locations),
+      vim.lsp.log_levels.WARN
+    )
     log('ref callback error, lsp may not ready', err, ctx, vim.inspect(locations))
     return
   end
   if type(locations) ~= 'table' then
     log(locations)
     log('ctx', ctx)
-    vim.notify('incorrect setup', locations, vim.lsp.log_levels.WARN)
+    vim.notify('incorrect setup' .. vim.inspect(locations), vim.lsp.log_levels.WARN)
     return
   end
   if locations == nil or vim.tbl_isempty(locations) then
@@ -82,7 +85,7 @@ local ref_view = function(err, locations, ctx, cfg)
     ft = ft,
     width = width,
     api = 'Reference',
-    enable_preview_edit = true
+    enable_preview_edit = true,
   }
   local listview = gui.new_list_view(opts)
 
@@ -131,11 +134,11 @@ end)
 
 local async_ref = function()
   local ref_params = vim.lsp.util.make_position_params()
-  local results = {definitions = {}, references = {}}
-  ref_params.context = {includeDeclaration = false}
+  local results = { definitions = {}, references = {} }
+  ref_params.context = { includeDeclaration = false }
   lsp.call_async('textDocument/definition', ref_params, function(err, result, ctx, config)
     trace(err, result, ctx, config)
-    results.definitions = {error = err, result = result, ctx = ctx, config = config}
+    results.definitions = { error = err, result = result, ctx = ctx, config = config }
     ctx = ctx or {}
     ctx.results = results
     ctx.combine = true
@@ -143,7 +146,7 @@ local async_ref = function()
   end) -- return asyncresult, canceller
   lsp.call_async('textDocument/references', ref_params, function(err, result, ctx, config)
     trace(err, result, ctx, config)
-    results.references = {error = err, result = result, ctx = ctx, config = config}
+    results.references = { error = err, result = result, ctx = ctx, config = config }
     ctx = ctx or {}
     ctx.results = results
     ctx.combine = true
@@ -157,7 +160,7 @@ local ref_req = function()
     _NgConfigValues.closer()
   end
   local ref_params = vim.lsp.util.make_position_params()
-  ref_params.context = {includeDeclaration = true}
+  ref_params.context = { includeDeclaration = true }
   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
   local bufnr = vim.api.nvim_get_current_buf()
   log('bufnr', bufnr)
@@ -179,7 +182,6 @@ local ref = function()
   end)
 end
 
-
 return {
 
   reference_handler = ref_hdlr,
@@ -188,6 +190,5 @@ return {
 
   ref_view = ref_view,
 
-  async_ref = async_ref
-
+  async_ref = async_ref,
 }

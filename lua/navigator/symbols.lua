@@ -15,13 +15,13 @@ function M.workspace_symbols(query)
     loc = 'top_center',
     prompt = true,
     -- rawdata = true,
-    api = ' '
+    api = ' ',
   }
 
   query = query or pcall(vim.fn.input, 'Query: ')
   local bufnr = vim.api.nvim_get_current_buf()
   vim.list_extend(lspopts, opts)
-  local params = {query = query}
+  local params = { query = query }
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
     if client.resolved_capabilities.workspace_symbol then
       client.request('workspace/symbol', params, M.workspace_symbol_handler, _bufnr)
@@ -35,13 +35,13 @@ function M.document_symbols(opts)
     loc = 'top_center',
     prompt = true,
     -- rawdata = true,
-    api = ' '
+    api = ' ',
   }
 
   local bufnr = vim.api.nvim_get_current_buf()
   vim.list_extend(lspopts, opts)
   local params = vim.lsp.util.make_position_params()
-  params.context = {includeDeclaration = true}
+  params.context = { includeDeclaration = true }
   params.query = opts.prompt or ''
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
     if client.resolved_capabilities.document_symbol then
@@ -52,12 +52,12 @@ end
 
 M.document_symbol_handler = mk_handler(function(err, result, ctx)
   if err then
-    vim.notify('failed to get document symbol', ctx, vim.lsp.log_levels.WARN)
+    vim.notify('failed to get document symbol' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
   end
   local bufnr = ctx.bufnr or 0
 
   if not result or vim.tbl_isempty(result) then
-    vim.notify('symbol not found for buf', ctx, vim.lsp.log_levels.WARN)
+    vim.notify('symbol not found for buf' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
     return
   end
   local locations = {}
@@ -103,16 +103,16 @@ M.document_symbol_handler = mk_handler(function(err, result, ctx)
   end
 
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
-  gui.new_list_view({items = locations, prompt = true, rawdata = true, ft = ft, api = ' '})
+  gui.new_list_view({ items = locations, prompt = true, rawdata = true, ft = ft, api = ' ' })
 end)
 
 M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
   trace(err, result, ctx, cfg)
   if err then
-    vim.notify('failed to get workspace symbol', ctx, vim.lsp.log_levels.WARN)
+    vim.notify('failed to get workspace symbol' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
   end
   if not result or vim.tbl_isempty(result) then
-    vim.notify('symbol not found for buf', ctx, vim.lsp.log_levels.WARN)
+    vim.notify('symbol not found for buf' .. vim.inpsect(ctx), vim.lsp.log_levels.WARN)
     return
   end
   log(result[1])
@@ -120,8 +120,7 @@ M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
   log(items[1])
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
-  gui.new_list_view({items = items, prompt = true, ft = ft, rowdata = true, api = " "})
-
+  gui.new_list_view({ items = items, prompt = true, ft = ft, rowdata = true, api = ' ' })
 end)
 
 return M
