@@ -1,28 +1,28 @@
 -- retreives data form file
 -- and line to highlight
 -- Some of function copied from https://github.com/RishabhRD/nvim-lsputils
-local M = {log_path = vim.lsp.get_log_path()}
+local M = { log_path = vim.lsp.get_log_path() }
 -- local is_windows = uv.os_uname().version:match("Windows")
 
 local nvim_0_6
 
 M.path_sep = function()
-  local is_win = vim.loop.os_uname().sysname:find("Windows")
+  local is_win = vim.loop.os_uname().sysname:find('Windows')
   if is_win then
-    return "\\"
+    return '\\'
   else
-    return "/"
+    return '/'
   end
 end
 
 local path_sep = M.path_sep()
 
 M.path_cur = function()
-  local is_win = vim.loop.os_uname().sysname:find("Windows")
+  local is_win = vim.loop.os_uname().sysname:find('Windows')
   if is_win then
-    return ".\\"
+    return '.\\'
   else
-    return "./"
+    return './'
   end
 end
 
@@ -39,7 +39,7 @@ function M.get_data_from_file(filename, startLine)
     startLine = startLine - 2
     displayLine = 2
   end
-  local uri = "file:///" .. filename
+  local uri = 'file:///' .. filename
   local bufnr = vim.uri_to_bufnr(uri)
   if not vim.api.nvim_buf_is_loaded(bufnr) then
     vim.fn.bufload(bufnr)
@@ -51,11 +51,11 @@ function M.get_data_from_file(filename, startLine)
     local len = #data
     startLine = startLine + 1
     for i = 1, len, 1 do
-      data[i] = startLine .. " " .. data[i]
+      data[i] = startLine .. ' ' .. data[i]
       startLine = startLine + 1
     end
   end
-  return {data = data, line = displayLine}
+  return { data = data, line = displayLine }
 end
 
 M.merge = function(t1, t2)
@@ -66,12 +66,12 @@ M.merge = function(t1, t2)
 end
 
 M.map = function(modes, key, result, options)
-  options = M.merge({noremap = true, silent = false, expr = false, nowait = false}, options or {})
+  options = M.merge({ noremap = true, silent = false, expr = false, nowait = false }, options or {})
   local buffer = options.buffer
   options.buffer = nil
 
-  if type(modes) ~= "table" then
-    modes = {modes}
+  if type(modes) ~= 'table' then
+    modes = { modes }
   end
 
   for i = 1, #modes do
@@ -132,7 +132,7 @@ function M.get_relative_path(base_path, my_path)
     end
     cur = i
   end
-  local data = ""
+  local data = ''
   for i = cur + 1, my_len do
     data = data .. my_data[i] .. path_sep
   end
@@ -140,18 +140,18 @@ function M.get_relative_path(base_path, my_path)
   return data
 end
 
-local level = "error"
+local level = 'error'
 if _NgConfigValues.debug == true then
-  level = "info"
-elseif _NgConfigValues.debug == "trace" then
-  level = "trace"
+  level = 'info'
+elseif _NgConfigValues.debug == 'trace' then
+  level = 'trace'
 end
-local default_config = {use_console = false, use_file = true, level = level}
+local default_config = { use_console = false, use_file = true, level = level }
 if _NgConfigValues.debug_console_output then
   default_config.use_console = true
   default_config.use_file = false
 end
-M._log = require("guihua.log").new(default_config, true)
+M._log = require('guihua.log').new(default_config, true)
 
 -- add log to you lsp.log
 M.log = M._log.info
@@ -165,10 +165,10 @@ end
 
 function M.split(inputstr, sep)
   if sep == nil then
-    sep = "%s"
+    sep = '%s'
   end
   local t = {}
-  for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
+  for str in string.gmatch(inputstr, '([^' .. sep .. ']+)') do
     table.insert(t, str)
   end
   return t
@@ -178,29 +178,29 @@ function M.quickfix_extract(line)
   -- check if it is a line of file pos been selected
   local split = M.split
   line = vim.trim(line)
-  local sep = split(line, " ")
+  local sep = split(line, ' ')
   if #sep < 2 then
     M.log(line)
     return nil
   end
-  sep = split(sep[1], ":")
+  sep = split(sep[1], ':')
   if #sep < 3 then
     M.log(line)
     return nil
   end
   local location = {
-    uri = "file:///" .. sep[1],
-    range = {start = {line = sep[2] - 3 > 0 and sep[2] - 3 or 1}}
+    uri = 'file:///' .. sep[1],
+    range = { start = { line = sep[2] - 3 > 0 and sep[2] - 3 or 1 } },
   }
-  location.range["end"] = {line = sep[2] + 15}
+  location.range['end'] = { line = sep[2] + 15 }
   return location
 end
 
 function M.getArgs(inputstr)
-  local sep = "%s"
+  local sep = '%s'
   local t = {}
   local cmd
-  for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
+  for str in string.gmatch(inputstr, '([^' .. sep .. ']+)') do
     if not cmd then
       cmd = str
     else
@@ -215,42 +215,42 @@ function M.p(t)
 end
 
 function M.printError(msg)
-  vim.cmd("echohl ErrorMsg")
+  vim.cmd('echohl ErrorMsg')
   vim.cmd(string.format([[echomsg '%s']], msg))
-  vim.cmd("echohl None")
+  vim.cmd('echohl None')
 end
 
 function M.reload()
   vim.lsp.stop_client(vim.lsp.get_active_clients())
-  vim.cmd [[edit]]
+  vim.cmd([[edit]])
 end
 
 function M.open_log()
   local path = vim.lsp.get_log_path()
-  vim.cmd("edit " .. path)
+  vim.cmd('edit ' .. path)
 end
 
 function table.pack(...)
-  return {n = select("#", ...), ...}
+  return { n = select('#', ...), ... }
 end
 
 function M.show(...)
-  local string = ""
+  local string = ''
 
   local args = table.pack(...)
 
   for i = 1, args.n do
-    string = string .. tostring(args[i]) .. "\t"
+    string = string .. tostring(args[i]) .. '\t'
   end
 
-  return string .. "\n"
+  return string .. '\n'
 end
 
 function M.split2(s, sep)
   local fields = {}
 
-  sep = sep or " "
-  local pattern = string.format("([^%s]+)", sep)
+  sep = sep or ' '
+  local pattern = string.format('([^%s]+)', sep)
   string.gsub(s, pattern, function(c)
     fields[#fields + 1] = c
   end)
@@ -278,17 +278,17 @@ function M.trim_and_pad(txt)
 end
 
 M.open_file = function(filename)
-  vim.api.nvim_command(string.format("e! %s", filename))
+  vim.api.nvim_command(string.format('e! %s', filename))
 end
 
 M.open_file_at = function(filename, line, col, split)
   if split == nil then
     -- code
-    vim.api.nvim_command(string.format("e! +%s %s", line, filename))
+    vim.api.nvim_command(string.format('e! +%s %s', line, filename))
   elseif split == 'v' then
-    vim.api.nvim_command(string.format("vsp! +%s %s", line, filename))
+    vim.api.nvim_command(string.format('vsp! +%s %s', line, filename))
   elseif split == 's' then
-    vim.api.nvim_command(string.format("sp! +%s %s", line, filename))
+    vim.api.nvim_command(string.format('sp! +%s %s', line, filename))
   end
   -- vim.api.nvim_command(string.format("e! %s", filename))
   col = col or 1
@@ -303,7 +303,7 @@ function M.exists(var)
   end
 end
 
-local exclude_ft = {"scrollbar", "help", "NvimTree"}
+local exclude_ft = { 'scrollbar', 'help', 'NvimTree' }
 function M.exclude(fname)
   for i = 1, #exclude_ft do
     if string.find(fname, exclude_ft[i]) then
@@ -322,13 +322,12 @@ local bufs
 
 function M.set_virt_eol(bufnr, lnum, chunks, priority, id)
   if nss == nil then
-    nss = api.nvim_create_namespace("navigator_search")
+    nss = api.nvim_create_namespace('navigator_search')
   end
   bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
   bufs[bufnr] = true
   -- id may be nil
-  return api.nvim_buf_set_extmark(bufnr, nss, lnum, -1,
-                                  {id = id, virt_text = chunks, priority = priority})
+  return api.nvim_buf_set_extmark(bufnr, nss, lnum, -1, { id = id, virt_text = chunks, priority = priority })
 end
 
 function M.clear_buf(bufnr)
@@ -381,7 +380,7 @@ function M.mk_handler(fn)
       local client_id = select(4, ...)
       local bufnr = select(5, ...)
       local config = select(6, ...)
-      return fn(err, result, {method = method, client_id = client_id, bufnr = bufnr}, config)
+      return fn(err, result, { method = method, client_id = client_id, bufnr = bufnr }, config)
     end
   end
 end
@@ -392,18 +391,25 @@ function M.partial(func, arg)
   end))
 end
 
+function M.empty(t)
+  if t == nil then
+    return true
+  end
+  return next(t) == nil
+end
+
 -- alternatively: use  vim.notify("namespace does not exist or is anonymous", vim.log.levels.ERROR)
 
 function M.warn(msg)
-  vim.api.nvim_echo({{"WRN: " .. msg, "WarningMsg"}}, true, {})
+  vim.api.nvim_echo({ { 'WRN: ' .. msg, 'WarningMsg' } }, true, {})
 end
 
 function M.error(msg)
-  vim.api.nvim_echo({{"ERR: " .. msg, "ErrorMsg"}}, true, {})
+  vim.api.nvim_echo({ { 'ERR: ' .. msg, 'ErrorMsg' } }, true, {})
 end
 
 function M.info(msg)
-  vim.api.nvim_echo({{"Info: " .. msg}}, true, {})
+  vim.api.nvim_echo({ { 'Info: ' .. msg } }, true, {})
 end
 
 return M

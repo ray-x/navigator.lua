@@ -10,8 +10,7 @@ _NG_ref_hi_idx = 1
 
 -- extract symbol from cursor
 local function get_symbol()
-  local currentWord = vim.fn.expand('<cword>')
-  return currentWord
+  return vim.fn.expand('<cword>')
 end
 
 local function add_locs(bufnr, result)
@@ -21,7 +20,7 @@ local function add_locs(bufnr, result)
   end
   symbol = string.format('%s_%i_%i_%i', symbol, bufnr, result[1].range.start.line, result[1].range.start.character)
   if _NG_hi_list[symbol] == nil then
-    _NG_hi_list[symbol] = { range = {} }
+    _NG_hi_list[symbol] = {range = {}}
   end
   if _NG_hi_list[symbol] ~= nil then
     trace('already added', symbol)
@@ -107,8 +106,8 @@ local function hi_symbol()
       end
       local w = value.range['end'].character - value.range.start.character
       local hi_name = string.format('NGHiReference_%i_%i', _NG_ref_hi_idx, k)
-      trace(hi_name, { l, cs, w })
-      local m = vim.fn.matchaddpos(hi_name, { { l, cs, w } }, 10)
+      trace(hi_name, {l, cs, w})
+      local m = vim.fn.matchaddpos(hi_name, {{l, cs, w}}, 10)
       table.insert(_NG_hi_list[symbol].hi_ids, m)
     end
   end
@@ -159,7 +158,7 @@ end)
 -- modify from vim-illuminate
 local function goto_adjent_reference(opt)
   trace(opt)
-  opt = vim.tbl_extend('force', { forward = true, wrap = true }, opt or {})
+  opt = vim.tbl_extend('force', {forward = true, wrap = true}, opt or {})
 
   local bufnr = vim.api.nvim_get_current_buf()
   local refs = references[bufnr]
@@ -170,7 +169,7 @@ local function goto_adjent_reference(opt)
   local next = nil
   local nexti = nil
   local crow, ccol = unpack(vim.api.nvim_win_get_cursor(0))
-  local crange = { start = { line = crow - 1, character = ccol } }
+  local crange = {start = {line = crow - 1, character = ccol}}
 
   for i, ref in ipairs(refs) do
     local range = ref.range
@@ -193,7 +192,7 @@ local function goto_adjent_reference(opt)
   end
 
   trace(next)
-  vim.api.nvim_win_set_cursor(0, { next.start.line + 1, next.start.character })
+  vim.api.nvim_win_set_cursor(0, {next.start.line + 1, next.start.character})
   return next
 end
 
@@ -215,8 +214,7 @@ _G.nav_doc_hl = function()
 end
 
 local function documentHighlight()
-  api.nvim_exec(
-    [[
+  api.nvim_exec([[
       autocmd ColorScheme * |
         hi default LspReferenceRead cterm=bold gui=Bold ctermbg=yellow guifg=yellow guibg=purple4 |
         hi default LspReferenceText cterm=bold gui=Bold ctermbg=red guifg=SlateBlue guibg=MidnightBlue |
@@ -227,9 +225,7 @@ local function documentHighlight()
         autocmd CursorHold <buffer> lua nav_doc_hl()
         autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
       augroup END
-    ]],
-    false
-  )
+    ]], false)
   vim.lsp.handlers['textDocument/documentHighlight'] = mk_handler(function(err, result, ctx)
     local bufnr = ctx.bufnr or api.nvim_get_current_buf()
     if err then
@@ -261,5 +257,5 @@ return {
   handle_document_highlight = handle_document_highlight,
   hi_symbol = hi_symbol,
   nohl = nohl,
-  cmd_nohl = cmd_nohl,
+  cmd_nohl = cmd_nohl
 }

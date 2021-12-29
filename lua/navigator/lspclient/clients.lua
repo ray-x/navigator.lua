@@ -1,9 +1,10 @@
 -- todo allow config passed in
-local log = require('navigator.util').log
-local trace = require('navigator.util').trace
+local util = require('navigator.util')
+local log = util.log
+local trace = util.trace
 local uv = vim.loop
-
-local warn = require('navigator.util').warn
+local empty = util.empty
+local warn = util.warn
 _NG_Loaded = {}
 
 _LoadedFiletypes = {}
@@ -457,7 +458,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     local default_config = {}
     log(lspclient)
     if lspconfig[lspclient] == nil then
-      vim.notify('lspclient', lspclient, 'no longer support by lspconfig, please submit an issue', vim.lsp.log_levels.WARN)
+      vim.notify(
+        'lspclient',
+        lspclient,
+        'no longer support by lspconfig, please submit an issue',
+        vim.lsp.log_levels.WARN
+      )
       goto continue
     end
 
@@ -525,7 +531,11 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
       cfg.on_init = function(client)
         if client and client.config and client.config.settings then
-          client.notify('workspace/didChangeConfiguration', { settings = client.config.settings }, vim.lsp.log_levels.WARN)
+          client.notify(
+            'workspace/didChangeConfiguration',
+            { settings = client.config.settings },
+            vim.lsp.log_levels.WARN
+          )
         end
       end
     end
@@ -711,7 +721,7 @@ function on_filetype()
   log(uri)
 
   local wids = vim.fn.win_findbuf(bufnr)
-  if wins == nil or wins == {} then
+  if empty(wins) then
     log('buf not shown return')
   end
   setup()
