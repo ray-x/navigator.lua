@@ -5,12 +5,22 @@ local util = require('navigator.util')
 local log = util.log
 local trace = require('navigator.util').trace
 local api = vim.api
+local active_list_view -- only one listview at a time
 
 function M.new_list_view(opts)
   log(opts)
-
   local config = require('navigator').config_values()
 
+  if active_list_view ~= nil then
+    log(active_list_view)
+    local winnr = active_list_view.win
+    local bufnr = active_list_view.buf
+
+    if bufnr and vim.api.nvim_buf_is_valid(bufnr) and winnr and vim.api.nvim_win_is_valid(winnr) then
+      log('list view already present')
+      return
+    end
+  end
   local items = opts.items
 
   opts.min_width = opts.min_width or 0.3
@@ -35,7 +45,8 @@ function M.new_list_view(opts)
   opts.external = _NgConfigValues.external
   opts.preview_lines_before = 3
   log(opts)
-  return require('guihua.gui').new_list_view(opts)
+  active_list_view = require('guihua.gui').new_list_view(opts)
+  return active_list_view
 end
 
 function M.select(items, opts, on_choice)
