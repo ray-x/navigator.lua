@@ -112,7 +112,7 @@ M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
     vim.notify('failed to get workspace symbol' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
   end
   if not result or vim.tbl_isempty(result) then
-    vim.notify('symbol not found for buf' .. vim.inpsect(ctx), vim.lsp.log_levels.WARN)
+    vim.notify('symbol not found for buf' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
     return
   end
   log(result[1])
