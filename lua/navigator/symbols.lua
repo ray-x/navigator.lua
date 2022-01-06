@@ -10,17 +10,8 @@ local symbol_kind = require('navigator.lspclient.lspkind').symbol_kind
 local symbols_to_items = lsphelper.symbols_to_items
 
 function M.workspace_symbols(query)
-  opts = opts or {}
-  local lspopts = {
-    loc = 'top_center',
-    prompt = true,
-    -- rawdata = true,
-    api = ' ',
-  }
-
   query = query or pcall(vim.fn.input, 'Query: ')
   local bufnr = vim.api.nvim_get_current_buf()
-  vim.list_extend(lspopts, opts)
   local params = { query = query }
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
     if client.resolved_capabilities.workspace_symbol then
@@ -115,7 +106,7 @@ M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
   if err then
     vim.notify('failed to get workspace symbol' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
   end
-  query = ' '
+  local query = ' '
   if ctx.params and ctx.params.query then
     query = query .. ctx.params.query .. ' '
   end
