@@ -666,10 +666,11 @@ Codelens for C++/ccls. Symbol reference
 
 ### VS-code style folding with treesitter
 
+#### folding function
 ![image](https://user-images.githubusercontent.com/1681295/148491596-6cd6c507-c157-4536-b8c4-dc969436763a.png)
 
+#### folding comments
 ![image](https://user-images.githubusercontent.com/1681295/148491845-5ffb18ea-f05d-4229-aec3-aa635b3de814.png)
-
 
 # Debug the plugin
 
