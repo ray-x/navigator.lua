@@ -664,6 +664,13 @@ Codelens for C++/ccls. Symbol reference
 
 ![nerdfont](https://github.com/ray-x/files/blob/master/img/navigator/icon_nerd.jpg?raw=true)
 
+### VS-code style folding with treesitter
+
+![image](https://user-images.githubusercontent.com/1681295/148491596-6cd6c507-c157-4536-b8c4-dc969436763a.png)
+
+![image](https://user-images.githubusercontent.com/1681295/148491845-5ffb18ea-f05d-4229-aec3-aa635b3de814.png)
+
+
 # Debug the plugin
 
 One simple way to gether debug info and understand what is wrong is output the debug logs
