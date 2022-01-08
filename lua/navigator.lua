@@ -20,6 +20,8 @@ _NgConfigValues = {
   external = nil, -- true: enable for goneovim multigrid otherwise false
 
   border = 'single', -- border style, can be one of 'none', 'single', 'double', "shadow"
+  lines_show_prompt = 10, -- when the result list items number more than lines_show_prompt,
+  -- fuzzy finder prompt will be shown
   combined_attach = 'both', -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
   on_attach = function(client, bufnr)
     -- your on_attach will be called at end of navigator on_attach

@@ -564,9 +564,15 @@ You can load a different font size for floating win
 
 ![multigrid2](https://user-images.githubusercontent.com/1681295/139196378-bf69ade9-c916-42a9-a91f-cccb39b9c4eb.jpg)
 
-### Document Symbol
+### Document Symbol and navigate through the list
 
-![document symbol](https://github.com/ray-x/files/blob/master/img/navigator/doc_symbol.gif?raw=true)
+![doc_symbol_and_navigate](https://user-images.githubusercontent.com/1681295/148642747-1870b1a4-67c2-4a0d-8a41-d462ecdc663e.gif)
+The key binding to navigate in the list.
+
+- up and down key
+- `<Ctrl-f/b>` for page up and down
+- number key 1~9 go to the ith item.
+- If there are loads of results, would be good to use fzy search prompt to filter out the result you are interested.
 
 ### Workspace Symbol
 
@@ -667,9 +673,11 @@ Codelens for C++/ccls. Symbol reference
 ### VS-code style folding with treesitter
 
 #### folding function
+
 ![image](https://user-images.githubusercontent.com/1681295/148491596-6cd6c507-c157-4536-b8c4-dc969436763a.png)
 
 #### folding comments
+
 ![image](https://user-images.githubusercontent.com/1681295/148491845-5ffb18ea-f05d-4229-aec3-aa635b3de814.png)
 
 # Debug the plugin

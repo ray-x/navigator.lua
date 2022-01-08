@@ -42,6 +42,10 @@ function M.new_list_view(opts)
   end
 
   opts.transparency = _NgConfigValues.transparency
+  if #items >= _NgConfigValues.lines_show_prompt then
+    opts.prompt = true
+  end
+
   opts.external = _NgConfigValues.external
   opts.preview_lines_before = 3
   log(opts)
