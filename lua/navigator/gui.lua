@@ -18,7 +18,7 @@ function M.new_list_view(opts)
 
     if bufnr and vim.api.nvim_buf_is_valid(bufnr) and winnr and vim.api.nvim_win_is_valid(winnr) then
       log('list view already present')
-      return
+      return active_list_view
     end
   end
   local items = opts.items

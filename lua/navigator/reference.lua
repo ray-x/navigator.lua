@@ -90,7 +90,7 @@ local ref_view = function(err, locations, ctx, cfg)
   local listview = gui.new_list_view(opts)
 
   if listview == nil then
-    vim.notify('failed to create preview windows', vim.lsp.log_levels.WARN)
+    vim.notify('failed to create preview windows', vim.lsp.log_levels.INFO)
     return
   end
   -- trace("update items", listview.ctrl.class)
@@ -127,7 +127,9 @@ local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
   trace(err, locations, ctx, cfg)
   M.async_hdlr = vim.loop.new_async(vim.schedule_wrap(function()
     ref_view(err, locations, ctx, cfg)
-    M.async_hdlr:close()
+    if M.async_hdlr:is_active() then
+      M.async_hdlr:close()
+    end
   end))
   M.async_hdlr:send()
 end)
