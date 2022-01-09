@@ -382,7 +382,7 @@ require'navigator'.setup({
 
 ### Try it your self
 
-In `playground` folder, there is a `init.lua` and source code for you to play with. Check [playground/README.md](https://github.com/ray-x/navigator.lua/playground/README.md) for more
+In `playground` folder, there is a `init.lua` and source code for you to play with. Check [playground/README.md](https://github.com/ray-x/navigator.lua/blob/master/playground/README.md) for more
 details
 
 ### Default keymaps
