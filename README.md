@@ -248,6 +248,10 @@ require'navigator'.setup({
   -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil or 100 to disable it
+
+  lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
+  -- setup here. if it is nil, navigator will not init signature help
+  signature_help_cfg = nil, -- if you would like to init ray-x/lsp_signature plugin in navigator, and pass in your own config to signature help
   icons = {
     -- Code action
     code_action_icon = "🏏",
@@ -375,6 +379,11 @@ require'navigator'.setup({
   }
 })
 ```
+
+### Try it your self
+
+In `playground` folder, there is a `init.lua` and source code for you to play with. Check [playground/README.md](https://github.com/ray-x/navigator.lua/playground/README.md) for more
+details
 
 ### Default keymaps
 
