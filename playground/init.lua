@@ -23,6 +23,7 @@ local function load_plugins()
       use({ 'ray-x/aurora' })
       use({
         'ray-x/navigator.lua',
+        -- '~/github/navigator.lua',
         requires = { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
         config = function()
           require('navigator').setup({
