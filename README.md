@@ -296,7 +296,8 @@ require'navigator'.setup({
       sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
       sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
     },
-    servers = {'cmake', 'ltex'}, -- by default empty, but if you whant navigator load  e.g. `cmake` and `ltex` for you , you
+    servers = {'cmake', 'ltex'}, -- by default empty, and it should load all LSP clients avalible based on filetype
+    -- but if you whant navigator load  e.g. `cmake` and `ltex` for you , you
     -- can put them in the `servers` list and navigator will auto load them.
     -- you could still specify the custom config  like this
     -- cmake = {filetypes = {'cmake', 'makefile'}, single_file_support = false},
@@ -468,21 +469,21 @@ The plugin can be loaded lazily (packer `opt = true` ), And it will check if opt
 
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
-## Integration with lsp_installer (williamboman/nvim-lsp-installer)
+## Integrat with lsp_installer (williamboman/nvim-lsp-installer)
 
-If you'd like to only use the lsp servers installed by lsp_installer. Please set
+If you are using lsp_installer and would like to use the lsp servers installed by lsp_installer. Please set
 
 ```lua
 lsp_installer = true
 
 ```
 
-In the config.
+In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
 
-Navigator will startup the server installed by lsp-installer. Please do not call `server:setup{opts}` from lsp installer
+Alternatively, Navigator can be used to startup the server installed by lsp-installer. Please do not call `server:setup{opts}` from lsp installer
 as it will override the navigator setup
 
-Also, could use following setups
+To start LSP installed by lsp_installer, please use following setups
 
 ```lua
 
@@ -498,7 +499,15 @@ require'navigator'.setup({
 example cmd setup (mac) for pyright :
 
 ```
-cmd = { "/Users/username/.local/share/nvim/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio" }
+require'navigator'.setup({
+  -- lsp_installer = false -- default value is false
+
+  lsp = {
+    tsserver = {
+      cmd = { "/Users/username/.local/share/nvim/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio" }
+    }
+  }
+}
 
 ```
 
@@ -511,7 +520,24 @@ local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
 ```
 
 And you can setup binary full path to this: (e.g. with gopls)
-`install_root_dir .. '/go/gopls'`
+`install_root_dir .. '/go/gopls'` So the config is
+
+```lua
+
+local path = require 'nvim-lsp-installer.path'
+local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
+
+require'navigator'.setup({
+  -- lsp_installer = false -- default value is false
+
+  lsp = {
+    gopls = {
+      cmd = { install_root_dir .. '/go/gopls' }
+    }
+  }
+}
+
+```
 
 ## Usage
 
