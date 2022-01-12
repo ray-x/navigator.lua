@@ -402,7 +402,7 @@ details
 | n    | gp              | definition preview (Go to Preview)                         |
 | n    | \<C-LeftMouse\> | definition                                                 |
 | n    | g\<LeftMouse\>  | implementation                                             |
-| n    | gT              | treesitter document symbol                                 |
+| n    | \<Leader>gt     | treesitter document symbol                                 |
 | n    | \<Leader\>gT    | treesitter symbol for all open buffers                     |
 | n    | K               | hover doc                                                  |
 | n    | \<Space\>ca     | code action (when you see 🏏 )                             |

@@ -2,14 +2,15 @@ local log = require('navigator.util').log
 local trace = require('navigator.util').trace
 
 local event_hdlrs = {
-  {ev = 'BufWritePre', func = [[require "navigator.diagnostics".set_diag_loclist()]]},
-  {ev = 'CursorHold', func = 'document_highlight()'},
-  {ev = 'CursorHoldI', func = 'document_highlight()'},
-  {ev = 'CursorMoved', func = 'clear_references()'}
+  { ev = 'BufWritePre', func = [[require "navigator.diagnostics".set_diag_loclist()]] },
+  { ev = 'CursorHold', func = 'document_highlight()' },
+  { ev = 'CursorHoldI', func = 'document_highlight()' },
+  { ev = 'CursorMoved', func = 'clear_references()' },
 }
 
-local double = {'╔', '═', '╗', '║', '╝', '═', '╚', '║'}
-local single = {'╭', '─', '╮', '│', '╯', '─', '╰', '│'}
+local double = { '╔', '═', '╗', '║', '╝', '═', '╚', '║' }
+local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
+-- TODO https://github.com/neovim/neovim/pull/16591 use vimkeymap.set/del
 -- LuaFormatter off
 local key_maps = {
   { key = 'gr', func = "require('navigator.reference').reference()" },
@@ -21,7 +22,7 @@ local key_maps = {
   { key = '<c-]>', func = "require('navigator.definition').definition()" },
   { key = 'gD', func = "declaration({ border = 'rounded', max_width = 80 })" },
   { key = 'gp', func = "require('navigator.definition').definition_preview()" },
-  { key = 'gT', func = "require('navigator.treesitter').buf_ts()" },
+  { key = '<Leader>gt', func = "require('navigator.treesitter').buf_ts()" },
   { key = '<Leader>gT', func = "require('navigator.treesitter').bufs_ts()" },
   { key = 'K', func = 'hover({ popup_opts = { border = single, max_width = 80 }})' },
   { key = '<Space>ca', mode = 'n', func = "require('navigator.codeAction').code_action()" },
@@ -55,8 +56,8 @@ local key_maps_help = {}
 local M = {}
 
 local ccls_mappings = {
-  {key = '<Leader>gi', func = "require('navigator.cclshierarchy').incoming_calls()"},
-  {key = '<Leader>go', func = "require('navigator.cclshierarchy').outgoing_calls()"}
+  { key = '<Leader>gi', func = "require('navigator.cclshierarchy').incoming_calls()" },
+  { key = '<Leader>go', func = "require('navigator.cclshierarchy').outgoing_calls()" },
 }
 
 local check_cap = function(cap)
@@ -89,7 +90,7 @@ end
 
 local function set_mapping(user_opts)
   log('setup mapping')
-  local opts = {noremap = true, silent = true}
+  local opts = { noremap = true, silent = true }
   user_opts = user_opts or {}
 
   local user_key = _NgConfigValues.keymaps or {}
@@ -182,18 +183,21 @@ local function set_mapping(user_opts)
 end
 
 local function autocmd(user_opts)
-  vim.api.nvim_exec([[
+  vim.api.nvim_exec(
+    [[
             aug NavigatorDocHlAu
                 au!
                 au CmdlineLeave : lua require('navigator.dochighlight').cmd_nohl()
             aug END
-        ]], false)
+        ]],
+    false
+  )
 end
 
 local function set_event_handler(user_opts)
   user_opts = user_opts or {}
   local file_types =
-      'c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,yaml,kotlin,php,dart,nim,terraform,java'
+    'c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,yaml,kotlin,php,dart,nim,terraform,java'
   -- local format_files = "c,cpp,h,go,python,vim,javascript,typescript" --html,css,
   vim.api.nvim_command([[augroup nvim_lsp_autos]])
   vim.api.nvim_command([[autocmd!]])
@@ -262,7 +266,9 @@ function M.setup(user_opts)
 
   -- TODO: when active signature merge to neovim, remove this setup:
 
-  if _NgConfigValues.signature_help_cfg or _NgConfigValues.lsp_signature_help then
+  if
+    _NgConfigValues.signature_help_cfg and #_NgConfigValues.signature_help_cfg > 0 or _NgConfigValues.lsp_signature_help
+  then
     log('setup signature from navigator')
     local hassig, sig = pcall(require, 'lsp_signature')
     if hassig then
@@ -270,11 +276,11 @@ function M.setup(user_opts)
     end
   else
     vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(require('navigator.signature').signature_handler, {
-      border = {'╭', '─', '╮', '│', '╯', '─', '╰', '│'}
+      border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
     })
   end
 
-  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {border = single})
+  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = single })
   if cap.document_formatting then
     log('formatting enabled setup hdl')
     vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl
@@ -288,8 +294,8 @@ M.get_keymaps_help = function()
     border = 'none',
     prompt = true,
     enter = true,
-    rect = {height = 20, width = 90},
-    data = key_maps_help
+    rect = { height = 20, width = 90 },
+    data = key_maps_help,
   })
 
   return win
