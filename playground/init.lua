@@ -95,8 +95,9 @@ if vim.fn.isdirectory(install_path) == 0 then
   })
   load_plugins()
   require('packer').sync()
+  vim.cmd('colorscheme aurora')
+
 else
   load_plugins()
+  vim.cmd('colorscheme aurora')
 end
-
-vim.cmd('colorscheme aurora')
