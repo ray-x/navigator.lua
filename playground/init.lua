@@ -4,6 +4,21 @@ vim.cmd([[set packpath=/tmp/nvim/site]])
 local package_root = '/tmp/nvim/site/pack'
 local install_path = package_root .. '/packer/start/packer.nvim'
 
+-- IMPORTANT: update the sumneko setup if you need lua language server
+-- I installed it in '/github/sumneko/lua-language-server'
+local sumneko_root_path = vim.fn.expand('$HOME') .. '/github/sumneko/lua-language-server'
+local sumneko_binary = vim.fn.expand('$HOME') .. '/github/sumneko/lua-language-server/bin/macOS/lua-language-server'
+
+local lua_cfg = {
+  cmd = { sumneko_binary, '-E', sumneko_root_path .. '/main.lua' },
+  settings = {
+    Lua = {
+      runtime = { version = 'LuaJIT', path = vim.split(package.path, ';') },
+      diagnostics = { enable = true },
+    },
+  },
+}
+
 local function load_plugins()
   require('packer').startup({
     function(use)
@@ -96,7 +111,6 @@ if vim.fn.isdirectory(install_path) == 0 then
   load_plugins()
   require('packer').sync()
   vim.cmd('colorscheme aurora')
-
 else
   load_plugins()
   vim.cmd('colorscheme aurora')
