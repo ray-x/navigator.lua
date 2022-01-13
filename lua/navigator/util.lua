@@ -395,6 +395,10 @@ function M.empty(t)
   if t == nil then
     return true
   end
+
+  if type(t) ~= 'table' then
+    return false
+  end
   return next(t) == nil
 end
 
