@@ -402,6 +402,17 @@ function M.empty(t)
   return next(t) == nil
 end
 
+function M.encoding(client)
+  local oe = client.offset_encoding
+  if oe == nil then
+    return 'utf-8'
+  end
+  if type(oe) == 'table' then
+    oe = oe[1] or 'utf-8'
+  end
+  return oe
+end
+
 -- alternatively: use  vim.notify("namespace does not exist or is anonymous", vim.log.levels.ERROR)
 
 function M.warn(msg)

@@ -21,15 +21,16 @@ local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
   end
 
   local client = vim.lsp.get_client_by_id(ctx.client_id)
+  local oe = require('navigator.util').encoding()
   if vim.tbl_islist(locations) then
     if #locations > 1 then
       local items = locations_to_items(locations)
       gui.new_list_view({ items = items, api = 'Definition' })
     else
-      vim.lsp.util.jump_to_location(locations[1], client.offset_encoding)
+      vim.lsp.util.jump_to_location(locations[1], oe)
     end
   else
-    vim.lsp.util.jump_to_location(locations, client.offset_encoding)
+    vim.lsp.util.jump_to_location(locations, oe)
   end
 end)
 

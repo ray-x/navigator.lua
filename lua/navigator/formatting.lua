@@ -10,7 +10,7 @@ return {
     local util = require('navigator.util')
     local log = util.log
 
-    local offset_encoding = vim.lsp.get_client_by_id(ctx.client_id).offset_encoding
+    local offset_encoding = util.encoding(vim.lsp.get_client_by_id(ctx.client_id))
 
     -- If the buffer hasn't been modified before the formatting has finished,
     -- update the buffer
