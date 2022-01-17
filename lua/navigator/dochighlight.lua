@@ -153,8 +153,7 @@ local handle_document_highlight = mk_handler(function(_, result, ctx)
   end)
   references[ctx.bufnr] = result
   local client_id = ctx.client_id
-  local client = vim.lsp.get_client_by_id(client_id)
-  vim.lsp.util.buf_highlight_references(ctx.bufnr, result, util.encoding())
+  vim.lsp.util.buf_highlight_references(ctx.bufnr, result, util.encoding(client_id))
 end)
 -- modify from vim-illuminate
 local function goto_adjent_reference(opt)
@@ -246,9 +245,8 @@ local function documentHighlight()
       return
     end
     local client_id = ctx.client_id
-    local client = vim.lsp.get_client_by_id(client_id)
     vim.lsp.util.buf_clear_references(bufnr)
-    vim.lsp.util.buf_highlight_references(bufnr, result, util.encoding())
+    vim.lsp.util.buf_highlight_references(bufnr, result, util.encoding(client_id))
     table.sort(result, function(a, b)
       return before(a.range, b.range)
     end)

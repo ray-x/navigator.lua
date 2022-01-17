@@ -403,6 +403,12 @@ function M.empty(t)
 end
 
 function M.encoding(client)
+  if type(client) ~= 'table' then
+    if client == nil then
+      client = 1
+    end
+    client = vim.lsp.get_client_by_id(client)
+  end
   local oe = client.offset_encoding
   if oe == nil then
     return 'utf-8'

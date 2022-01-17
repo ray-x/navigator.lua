@@ -20,8 +20,7 @@ local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
     return
   end
 
-  local client = vim.lsp.get_client_by_id(ctx.client_id)
-  local oe = require('navigator.util').encoding()
+  local oe = require('navigator.util').encoding(ctx.client_id)
   if vim.tbl_islist(locations) then
     if #locations > 1 then
       local items = locations_to_items(locations)
