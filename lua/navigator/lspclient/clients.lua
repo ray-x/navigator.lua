@@ -321,6 +321,7 @@ local servers = {
   'clojure_lsp',
 }
 
+local lsp_installer_servers = {}
 local has_lspinst = false
 
 if config.lsp_installer == true then
@@ -329,10 +330,10 @@ if config.lsp_installer == true then
     local srvs = require('nvim-lsp-installer.servers').get_installed_servers()
     log('lsp_installered servers', srvs)
     if #srvs > 0 then
-      servers = srvs
+      lsp_installer_servers = srvs
     end
   end
-  log(servers)
+  log(lsp_installer_servers)
 end
 if config.lsp.disable_lsp == 'all' then
   config.lsp.disable_lsp = servers
@@ -544,10 +545,10 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if has_lspinst and _NgConfigValues.lsp_installer then
       local installed, installer_cfg = require('nvim-lsp-installer.servers').get_server(lspconfig[lspclient].name)
 
-      log('lsp server', installer_cfg, lspconfig[lspclient].name)
+      log('lsp installer server', installer_cfg, lspconfig[lspclient].name)
+      log('options', installer_cfg:get_default_options())
       if installed and installer_cfg then
-        cfg.cmd = installer_cfg:get_default_options().cmd
-        log(cfg)
+        cfg.cmd = { installer_cfg.root_dir .. path_sep .. installer_cfg.name }
       end
     end
 
