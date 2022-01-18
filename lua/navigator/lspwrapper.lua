@@ -101,7 +101,6 @@ function M.symbols_to_items(result)
       table.insert(locations, item)
     end
   end
-  -- local items = locations_to_items(locations)
   -- log(locations[1])
   return locations
 end
@@ -311,15 +310,18 @@ local function test_locations()
   log(locations, second_part)
 end
 
-function M.locations_to_items(locations, max_items)
-  max_items = max_items or 100000 --
+function M.locations_to_items(locations, ctx)
+  ctx = ctx or {}
+  local max_items = ctx.max_items or 100000 --
+  local client_id = ctx.client_id or 1
+  local enc = util.encoding(client_id)
   if not locations or vim.tbl_isempty(locations) then
     vim.notify('list not avalible', vim.lsp.log_levels.WARN)
     return
   end
   local width = 4
 
-  local items = {} -- lsp.util.locations_to_items(locations)
+  local items = {}
   -- items and locations may not matching
 
   local uri_def = {}
@@ -331,12 +333,10 @@ function M.locations_to_items(locations, max_items)
 
   vim.cmd([[set eventignore+=FileType]])
 
-  local cut = -1
-
   local unload_bufnrs = {}
   for i, loc in ipairs(locations) do
     local funcs = nil
-    local item = lsp.util.locations_to_items({ loc })[1]
+    local item = lsp.util.locations_to_items({ loc }, enc)[1]
     -- log(item)
     item.range = locations[i].range or locations[i].targetRange
     item.uri = locations[i].uri or locations[i].targetUri
@@ -425,7 +425,7 @@ function M.symbol_to_items(locations)
     return
   end
 
-  local items = {} -- lsp.util.locations_to_items(locations)
+  local items = {}
   -- items and locations may not matching
   table.sort(locations, function(i, j)
     if i.definition then
@@ -441,7 +441,7 @@ function M.symbol_to_items(locations)
     end
   end)
   for i, _ in ipairs(locations) do
-    local item = {} -- lsp.util.locations_to_items({loc})[1]
+    local item = {}
     item.uri = locations[i].uri
     item.range = locations[i].range
     item.filename = assert(vim.uri_to_fname(item.uri))

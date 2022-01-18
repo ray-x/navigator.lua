@@ -67,7 +67,8 @@ local ref_view = function(err, locations, ctx, cfg)
     return
   end
 
-  local items, width, second_part = locations_to_items(locations, truncate)
+  ctx.max_items = truncate
+  local items, width, second_part = locations_to_items(locations, ctx)
   local thread_items = vim.deepcopy(items)
   log('splits: ', #items, #second_part)
 
@@ -100,7 +101,7 @@ local ref_view = function(err, locations, ctx, cfg)
     if vim.tbl_isempty(second_part) then
       return
     end
-    local items2 = locations_to_items(second_part)
+    local items2 = locations_to_items(second_part, ctx)
 
     vim.list_extend(thread_items, items2)
 

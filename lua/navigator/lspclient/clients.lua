@@ -405,6 +405,7 @@ local function load_cfg(ft, client, cfg, loaded)
   -- need to verify the lsp server is up
 end
 
+-- run setup for lsp clients
 local function lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
@@ -468,7 +469,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if lspconfig[lspclient].document_config and lspconfig[lspclient].document_config.default_config then
       default_config = lspconfig[lspclient].document_config.default_config
     else
-      vim.notify('missing document config for client: ' ..  vim.inspect(lspclient), vim.lsp.log_levels.WARN)
+      vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.lsp.log_levels.WARN)
       goto continue
     end
 
@@ -694,7 +695,6 @@ local function setup(user_opts)
   end
 
   _LoadedFiletypes[ft] = true
-  -- _LoadedFiletypes[ft] = vim.tbl_extend("keep", _LoadedFiletypes[ft] or {}, {ft})
 end
 
 -- append lsps to servers
