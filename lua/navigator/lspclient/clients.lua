@@ -545,9 +545,9 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if has_lspinst and _NgConfigValues.lsp_installer then
       local installed, installer_cfg = require('nvim-lsp-installer.servers').get_server(lspconfig[lspclient].name)
 
-      log('lsp installer server', installer_cfg, lspconfig[lspclient].name)
-      log('options', installer_cfg:get_default_options())
+      log('lsp installer server config', installer_cfg, lspconfig[lspclient].name)
       if installed and installer_cfg then
+        log('options', installer_cfg:get_default_options())
         cfg.cmd = { installer_cfg.root_dir .. path_sep .. installer_cfg.name }
       end
     end
