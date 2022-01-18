@@ -1,13 +1,12 @@
-local util = require "navigator.util"
+local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
 local code_action = {}
-local gui = require "navigator.gui"
-local config = require("navigator").config_values()
+local gui = require('navigator.gui')
+local config = require('navigator').config_values()
 local api = vim.api
-trace = log
 
-local sign_name = "NavigatorLightBulb"
+local sign_name = 'NavigatorLightBulb'
 
 --- `codeAction/resolve`
 -- from neovim buf.lua, change vim.ui.select to gui
@@ -16,7 +15,7 @@ local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 
 -- https://github.com/glepnir/lspsaga.nvim/blob/main/lua/lspsaga/codeaction.lua
 -- lspsaga has a clever design to inject code action indicator
-local sign_group = "nvcodeaction"
+local sign_group = 'nvcodeaction'
 local get_namespace = function()
   return api.nvim_create_namespace(sign_group)
 end
@@ -31,23 +30,22 @@ local function _update_virtual_text(line, actions)
 
   if line then
     trace(line, actions)
-    local icon_with_indent = "  " .. config.icons.code_action_icon
+    local icon_with_indent = '  ' .. config.icons.code_action_icon
 
     local title = actions[1].title
     pcall(api.nvim_buf_set_extmark, 0, namespace, line, -1, {
-      virt_text = {{icon_with_indent .. title, "LspDiagnosticsSignHint"}},
-      virt_text_pos = "overlay",
-      hl_mode = "combine"
+      virt_text = { { icon_with_indent .. title, 'LspDiagnosticsSignHint' } },
+      virt_text_pos = 'overlay',
+      hl_mode = 'combine',
     })
   end
 end
 
 local function _update_sign(line)
-
   if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
     vim.fn.sign_define(sign_name, {
       text = config.icons.code_action_icon,
-      texthl = "LspDiagnosticsSignHint"
+      texthl = 'LspDiagnosticsSignHint',
     })
   end
   local winid = get_current_winid()
@@ -55,23 +53,28 @@ local function _update_sign(line)
     code_action[winid] = {}
   end
   if code_action[winid].lightbulb_line ~= 0 then
-    vim.fn.sign_unplace(sign_group, {id = code_action[winid].lightbulb_line, buffer = "%"})
+    vim.fn.sign_unplace(sign_group, { id = code_action[winid].lightbulb_line, buffer = '%' })
   end
 
   if line then
     -- log("updatasign", line, sign_group, sign_name)
-    vim.fn.sign_place(line, sign_group, sign_name, "%",
-                      {lnum = line + 1, priority = config.lsp.code_action.sign_priority})
+    vim.fn.sign_place(
+      line,
+      sign_group,
+      sign_name,
+      '%',
+      { lnum = line + 1, priority = config.lsp.code_action.sign_priority }
+    )
     code_action[winid].lightbulb_line = line
   end
 end
 
 -- local need_check_diagnostic = {["go"] = true, ["python"] = true}
-local need_check_diagnostic = {['python'] = true}
+local need_check_diagnostic = { ['python'] = true }
 
 function code_action:render_action_virtual_text(line, diagnostics)
   return function(err, actions, context)
-    if actions == nil or type(actions) ~= "table" or vim.tbl_isempty(actions) then
+    if actions == nil or type(actions) ~= 'table' or vim.tbl_isempty(actions) then
       -- no actions cleanup
       if config.lsp.code_action.virtual_text then
         _update_virtual_text(nil)
@@ -110,13 +113,13 @@ function code_action:render_action_virtual_text(line, diagnostics)
 end
 
 local special_buffers = {
-  ["lspsagafinder"] = true,
-  ["NvimTree"] = true,
-  ["vista"] = true,
-  ["guihua"] = true,
-  ["lspinfo"] = true,
-  ["markdown"] = true,
-  ["text"] = true
+  ['lspsagafinder'] = true,
+  ['NvimTree'] = true,
+  ['vista'] = true,
+  ['guihua'] = true,
+  ['lspinfo'] = true,
+  ['markdown'] = true,
+  ['text'] = true,
 }
 -- local action_call_back = function (_,_)
 --   return Action:action_callback()
@@ -127,29 +130,24 @@ local action_virtual_call_back = function(line, diagnostics)
 end
 
 local code_action_req = function(_call_back_fn, diagnostics)
-  local context = {diagnostics = diagnostics}
+  local context = { diagnostics = diagnostics }
   local params = vim.lsp.util.make_range_params()
   params.context = context
   local line = params.range.start.line
   local callback = _call_back_fn(line, diagnostics)
-  vim.lsp.buf_request(0, "textDocument/codeAction", params, callback)
+  vim.lsp.buf_request(0, 'textDocument/codeAction', params, callback)
 end
 
-
 code_action.code_action = function()
-
   local original_select = vim.ui.select
-  vim.ui.select = require("guihua.gui").select
+  vim.ui.select = require('guihua.gui').select
 
   log('codeaction')
 
   vim.lsp.buf.code_action()
-  vim.defer_fn(
-    function ()
-        vim.ui.select = original_select
-    end, 1000
-  )
-
+  vim.defer_fn(function()
+    vim.ui.select = original_select
+  end, 1000)
 end
 
 code_action.range_code_action = function(startpos, endpos)
@@ -158,16 +156,13 @@ code_action.range_code_action = function(startpos, endpos)
   local params = util.make_given_range_params(startpos, endpos)
   params.context = context
 
-
   local original_select = vim.ui.select
-  vim.ui.select = require("guihua.gui").select
+  vim.ui.select = require('guihua.gui').select
 
   vim.lsp.buf.range_code_action(context, startpos, endpos)
-  vim.defer_fn(
-    function ()
-        vim.ui.select = original_select
-    end, 1000
-  )
+  vim.defer_fn(function()
+    vim.ui.select = original_select
+  end, 1000)
 end
 
 code_action.code_action_prompt = function()
@@ -182,7 +177,7 @@ code_action.code_action_prompt = function()
     diagnostics = diagnostic.get_line_diagnostics()
   else
     local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
-    diagnostics = diagnostic.get(vim.api.nvim_get_current_buf(), {lnum = lnum})
+    diagnostics = diagnostic.get(vim.api.nvim_get_current_buf(), { lnum = lnum })
   end
 
   local winid = get_current_winid()
