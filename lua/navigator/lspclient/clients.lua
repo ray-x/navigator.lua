@@ -355,6 +355,7 @@ local function load_cfg(ft, client, cfg, loaded)
   -- end
 
   log(ft, client, loaded)
+  trace(cfg)
   if lspconfig[client] == nil then
     log('not supported by nvim', client)
     return
@@ -545,11 +546,19 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if has_lspinst and _NgConfigValues.lsp_installer then
       local installed, installer_cfg = require('nvim-lsp-installer.servers').get_server(lspconfig[lspclient].name)
 
-      log('lsp installer server config', installer_cfg, lspconfig[lspclient].name)
+      log('lsp installer server config' .. lspconfig[lspclient].name , installer_cfg)
       if installed and installer_cfg then
         log('options', installer_cfg:get_default_options())
-        cfg.cmd = { installer_cfg.root_dir .. path_sep .. installer_cfg.name }
+        -- if cfg.cmd / {lsp_server_name, arg} not present or lsp_server_name is not in PATH
+        if vim.fn.empty(cfg.cmd) == 1 or vim.fn.executable(cfg.cmd[1] or '') == 0 then
+          cfg.cmd = { installer_cfg.root_dir .. path_sep .. installer_cfg.name }
+          log('update cmd', cfg.cmd)
+        end
       end
+    end
+
+    if vim.fn.executable(cfg.cmd[1]) == 0 then
+      vim.notify('lsp server not installed in path ' .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)
     end
 
     load_cfg(ft, lspclient, cfg, loaded)
