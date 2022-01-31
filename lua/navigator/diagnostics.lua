@@ -307,7 +307,9 @@ local diagnostic_cfg = {
   -- Enable underline, use default values
   underline = true,
   -- Enable virtual text, override spacing to 3  (prevent overlap)
-  virtual_text = { spacing = 3, prefix = _NgConfigValues.icons.diagnostic_virtual_text },
+  virtual_text = {
+      spacing = 3,
+      prefix = _NgConfigValues.icons.icons and _NgConfigValues.icons.diagnostic_virtual_text or "" },
   -- Use a function to dynamically turn signs off
   -- and on, using buffer local variables
   signs = true,
