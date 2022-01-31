@@ -124,6 +124,9 @@ end
 
 -- returns r1 < r2 based on start of range
 local function before(r1, r2)
+  if not r1 or not r2 then
+    return false
+  end
   if r1.start.line < r2.start.line then
     return true
   end
@@ -142,7 +145,7 @@ local handle_document_highlight = mk_handler(function(_, result, ctx)
     log('ducment highlight error', result, ctx)
     return
   end
-  if type(result) ~= 'table' then
+  if type(result) ~= 'table' or vim.fn.empty(result) == 1 then
     log('clear up', result)
     vim.lsp.util.buf_clear_references(ctx.bufnr)
     return
