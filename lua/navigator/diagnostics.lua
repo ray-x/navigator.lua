@@ -203,11 +203,11 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     trace('diagnostic', result.diagnostics, ctx, config)
   end
 
-  if util.nvim_0_6() then
+  if util.nvim_0_6_1() then
     trace(err, result, ctx, config)
     vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   else
-    log('old version of lsp nvim 050')
+    log('old version of lsp nvim <=0.5.0')
     vim.lsp.diagnostic.on_publish_diagnostics(err, _, result, ctx.client_id, _, config)
   end
   local uri = result.uri
@@ -215,7 +215,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
   local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
 
   if empty(result.diagnostics) and diag_cnt > 0 then
-    log('no result? ', diag_cnt)
+    trace('no result? ', diag_cnt)
     return
   end
   -- trace("diag: ", mode, result, ctx, config)
@@ -305,24 +305,27 @@ end
 local M = {}
 local diagnostic_cfg = {
   -- Enable underline, use default values
-  underline = true,
+  underline = _NgConfigValues.lsp.diagnostic.underline,
   -- Enable virtual text, override spacing to 3  (prevent overlap)
   virtual_text = {
-      spacing = 3,
-      prefix = _NgConfigValues.icons.icons and _NgConfigValues.icons.diagnostic_virtual_text or "" },
+    spacing = _NgConfigValues.lsp.diagnostic.virtual_text.spacing,
+    prefix = _NgConfigValues.icons.diagnostic_virtual_text,
+  },
   -- Use a function to dynamically turn signs off
   -- and on, using buffer local variables
   signs = true,
-  update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false,
-  severity_sort = { reverse = true },
+  update_in_insert = _NgConfigValues.lsp.diagnostic.update_in_insert or false,
+  severity_sort = _NgConfigValues.lsp.diagnostic.severity_sort,
 }
 
-if _NgConfigValues.lsp.diagnostic_virtual_text == false then
+if _NgConfigValues.lsp.diagnostic.virtual_text == false then
   diagnostic_cfg.virtual_text = false
 end
 
 -- vim.lsp.handlers["textDocument/publishDiagnostics"]
 M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
+
+vim.diagnostic.config(diagnostic_cfg)
 
 M.hide_diagnostic = function()
   if _NG_VT_DIAG_NS then
@@ -361,7 +364,9 @@ M.show_buf_diagnostics = function()
         enable_preview_edit = true,
       })
       trace('new buffer', listview.bufnr)
-      vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
+      if listview.bufnr then
+        vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
+      end
     end
   end
 end
@@ -431,11 +436,6 @@ function M.update_err_marker()
   marker(result, { bufnr = bufnr, method = 'textDocument/publishDiagnostics' })
 end
 
--- TODO: update the marker
-if _NgConfigValues.diagnostic_scrollbar_sign then
-  vim.notify('config deprecated, set lsp.diagnostic_scrollbar_sign instead', vim.lsp.log_levels.WARN)
-end
-
 if _NgConfigValues.lsp.diagnostic_scrollbar_sign then
   vim.cmd([[autocmd WinScrolled * lua require'navigator.diagnostics'.update_err_marker()]])
 end
@@ -462,4 +462,18 @@ function M.show_diagnostics(pos)
   end
 end
 
+function M.config(cfg)
+  cfg = cfg
+    or {
+      underline = true,
+      virtual_text = true,
+      signs = { _NgConfigValues.icons.diagnostic_err },
+      update_in_insert = false,
+    }
+  vim.diagnostic.config(cfg)
+end
+
+if not util.nvim_0_6_1() then
+  util.warn('Navigator 0.3.1+ only support nvim-0.6+, please use 0.3.0')
+end
 return M

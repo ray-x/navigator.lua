@@ -1,5 +1,6 @@
-local log = require('navigator.util').log
-local trace = require('navigator.util').trace
+local util = require('navigator.util')
+local log = util.log
+local trace = util.trace
 
 local event_hdlrs = {
   { ev = 'BufWritePre', func = [[require "navigator.diagnostics".set_diag_loclist()]] },
@@ -39,6 +40,7 @@ local key_maps = {
   { key = '<Leader>dt', func = "require('navigator.diagnostics').toggle_diagnostics()" },
   { key = ']d', func = "diagnostic.goto_next({ border = 'rounded', max_width = 80})" },
   { key = '[d', func = "diagnostic.goto_prev({ border = 'rounded', max_width = 80})" },
+  { key = ']O', func = 'diagnostic.set_loclist()' },
   { key = ']r', func = "require('navigator.treesitter').goto_next_usage()" },
   { key = '[r', func = "require('navigator.treesitter').goto_previous_usage()" },
   { key = '<C-LeftMouse>', func = 'definition()' },
@@ -138,8 +140,10 @@ local function set_mapping(user_opts)
       f = '<Cmd>lua ' .. value.func .. '<CR>'
     elseif string.find(value.func, 'diagnostic') then
       local diagnostic = '<Cmd>lua vim.'
-      if vim.lsp.diagnostic ~= nil then
-        diagnostic = '<Cmd>lua vim.lsp.'
+      if vim.diagnostic ~= nil then
+        diagnostic = '<Cmd>lua vim.'
+      else
+        util.error('Please update nvim to 0.6.1+')
       end
       f = diagnostic .. value.func .. '<CR>'
     elseif string.find(value.func, 'vim.') then
@@ -152,7 +156,7 @@ local function set_mapping(user_opts)
     elseif string.find(value.func, 'formatting') then
       fmtkey = value.key
     end
-    log('binding', k, f)
+    trace('binding', k, f)
     set_keymap(m, k, f, opts)
   end
 
@@ -171,9 +175,6 @@ local function set_mapping(user_opts)
      ]])
   elseif fmtkey then
     del_keymap('n', fmtkey)
-  end
-  if user_opts.cap.document_range_formatting then
-    log('formatting enabled', user_opts.cap)
   end
 
   if not range_fmt and rfmtkey then
@@ -242,7 +243,9 @@ function M.setup(user_opts)
   autocmd(user_opts)
   set_event_handler(user_opts)
 
-  local cap = user_opts.cap or vim.lsp.protocol.make_client_capabilities()
+  local client = user_opts.client or {}
+  local cap = client.resolved_capabilities or vim.lsp.protocol.make_client_capabilities()
+
   log('lsp cap:', cap)
 
   if cap.call_hierarchy or cap.callHierarchy then

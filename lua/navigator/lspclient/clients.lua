@@ -6,11 +6,11 @@ local uv = vim.loop
 local empty = util.empty
 local warn = util.warn
 _NG_Loaded = {}
-
 _LoadedFiletypes = {}
 local loader = nil
 packer_plugins = packer_plugins or nil -- suppress warnings
 
+trace = log
 -- packer only
 
 local highlight = require('navigator.lspclient.highlight')
@@ -412,6 +412,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
 
+  trace(ft, 'lsp startup')
   local loaded = {}
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
@@ -433,7 +434,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
   end
   for _, lspclient in ipairs(servers) do
     -- check should load lsp
-
+    trace('loading :', lspclient)
     if type(lspclient) == 'table' then
       if lspclient.name then
         lspclient = lspclient.name
@@ -442,6 +443,14 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         goto continue
       end
     end
+
+    -- for lazy loading
+    -- e.g. {lsp={tsserver=function() if tsver>'1.17' then return {xxx} else return {xxx} end}}
+    if type(user_lsp_opts[lspclient]) == 'function' then
+      user_lsp_opts[lspclient] = user_lsp_opts[lspclient]()
+      trace('loading from func:', user_lsp_opts[lspclient])
+    end
+
     if user_lsp_opts[lspclient] ~= nil and user_lsp_opts[lspclient].filetypes ~= nil then
       if not vim.tbl_contains(user_lsp_opts[lspclient].filetypes, ft) then
         trace('ft', ft, 'disabled for', lspclient)
@@ -459,7 +468,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     local default_config = {}
-    log(lspclient)
+    trace(lspclient)
+
     if lspconfig[lspclient] == nil then
       vim.notify(
         'lspclient' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
@@ -477,6 +487,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     default_config = vim.tbl_deep_extend('force', default_config, ng_default_cfg)
     local cfg = setups[lspclient] or {}
+
     cfg = vim.tbl_deep_extend('keep', cfg, default_config)
     -- filetype disabled
     if not vim.tbl_contains(cfg.filetypes or {}, ft) then
@@ -492,11 +503,11 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
       log(lspclient, config.lsp.disable_format_cap)
       if vim.tbl_contains(config.lsp.disable_format_cap or {}, lspclient) then
-        log('fileformat disabled for ', lspclient)
+        trace('fileformat disabled for ', lspclient)
         disable_fmt = true
       end
       cfg = vim.tbl_deep_extend('force', cfg, user_lsp_opts[lspclient])
-      if config.combined_attach == nil then
+      if config.combined_attach == nil or config.combined_attach == 'their' then
         cfg.on_attach = function(client, bufnr)
           on_attach(client, bufnr)
           if disable_fmt then
@@ -546,7 +557,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if has_lspinst and _NgConfigValues.lsp_installer then
       local installed, installer_cfg = require('nvim-lsp-installer.servers').get_server(lspconfig[lspclient].name)
 
-      log('lsp installer server config' .. lspconfig[lspclient].name , installer_cfg)
+      log('lsp installer server config' .. lspconfig[lspclient].name, installer_cfg)
       if installed and installer_cfg then
         log('options', installer_cfg:get_default_options())
         -- if cfg.cmd / {lsp_server_name, arg} not present or lsp_server_name is not in PATH
@@ -635,11 +646,13 @@ local function setup(user_opts)
   local disable_ft = {
     'NvimTree',
     'guihua',
+    'notify',
     'clap_input',
     'clap_spinner',
     'vista',
     'vista_kind',
     'TelescopePrompt',
+    'TelescopeResults',
     'guihua_rust',
     'csv',
     'txt',
@@ -648,13 +661,13 @@ local function setup(user_opts)
   }
   for i = 1, #disable_ft do
     if ft == disable_ft[i] or _LoadedFiletypes[ft] then
-      trace('navigator disabled for ft or it is loaded', ft)
+      log('navigator disabled for ft or it is loaded', ft)
       return
     end
   end
 
   if user_opts ~= nil then
-    log('navigator user setup', user_opts)
+    trace('navigator user setup', user_opts)
   end
   trace(debug.traceback())
   if #vim.lsp.buf_get_clients() > 0 and user_opts == nil then
@@ -729,8 +742,8 @@ function on_filetype()
   log(uri)
 
   local wids = vim.fn.win_findbuf(bufnr)
-  if empty(wins) then
-    log('buf not shown return')
+  if empty(wins) == 1 then
+    log('buf not shown return', winds, empty(winds))
   end
   setup()
 end

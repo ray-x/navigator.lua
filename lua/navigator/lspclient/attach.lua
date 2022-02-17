@@ -5,11 +5,6 @@ local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
 
-local diagnostic_map = function(bufnr)
-  local opts = { noremap = true, silent = true }
-  api.nvim_buf_set_keymap(bufnr, 'n', ']O', ':lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-end
-
 local M = {}
 
 M.on_attach = function(client, bufnr)
@@ -29,23 +24,12 @@ M.on_attach = function(client, bufnr)
 
   trace(client)
 
-  diagnostic_map(bufnr)
-  -- add highlight for Lspxxx
-  require('navigator.lspclient.highlight').add_highlight()
-  require('navigator.lspclient.highlight').diagnositc_config_sign()
   api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   require('navigator.lspclient.mapping').setup({
     client = client,
     bufnr = bufnr,
-    cap = client.resolved_capabilities,
   })
-
-  if client.resolved_capabilities.document_highlight then
-    require('navigator.dochighlight').documentHighlight()
-  end
-
-  require('navigator.lspclient.lspkind').init()
 
   local config = require('navigator').config_values()
   trace(client.name, 'navigator on attach')

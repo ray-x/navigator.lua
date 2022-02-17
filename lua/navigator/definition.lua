@@ -8,7 +8,7 @@ local TextView = require('guihua.textview')
 local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
   -- log(locations)
   if err ~= nil then
-    vim.notify('Defination: ', tostring(err) .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
+    vim.notify('Defination: ' .. tostring(err) .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
     return
   end
   if type(locations) == 'number' then

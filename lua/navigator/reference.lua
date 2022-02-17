@@ -22,29 +22,41 @@ local ref_view = function(err, locations, ctx, cfg)
     if ctx.results == nil then
       return
     end
-    if #ctx.results.definitions.result == nil or ctx.results.references.result == nil then
+    if (ctx.results.definitions == nil) or (ctx.results.references == nil) then
       log('not all requests returned')
       return
     end
     local definitions = ctx.results.definitions
     local references = ctx.results.references
+    log(ctx)
     if definitions.error and references.error then
       vim.notify('lsp ref callback error' .. vim.inspect(ctx.result), vim.lsp.log_levels.WARN)
     end
     locations = {}
-    if definitions.result then
+    if definitions and definitions.result then
       for i, _ in ipairs(definitions.result) do
         definitions.result[i].definition = true
       end
       vim.list_extend(locations, definitions.result)
     end
-    if references.result then
-      vim.list_extend(locations, references.result)
+    if references and references.result and #references.result > 0 then
+      local refs = references.result
+      for _, value in pairs(locations) do
+        vrange = value.range or { start = { line = 0 }, ['end'] = { line = 0 } }
+        for i = 1, #refs, 1 do
+          local rg = refs[i].range or {}
+          log(value, refs[i])
+          log(rg, vrange)
+          if rg.start.line == vrange.start.line and rg['end'].line == vrange['end'].line then
+            table.remove(refs, i)
+            break
+          end
+        end
+      end
+      vim.list_extend(locations, refs)
     end
-    ctx = references.ctx or definitions.ctx
     err = nil
-    cfg = references.config or definitions.config
-    trace(ctx, locations)
+    log(locations)
   end
   -- log("num", num)
   -- log("bfnr", bufnr)
@@ -63,7 +75,7 @@ local ref_view = function(err, locations, ctx, cfg)
     return
   end
   if locations == nil or vim.tbl_isempty(locations) then
-    vim.notify('References not found', vim.lsp.log_levels.WARN)
+    vim.notify('References not found', vim.lsp.log_levels.INFO)
     return
   end
 
@@ -137,11 +149,17 @@ end)
 
 local async_ref = function()
   local ref_params = vim.lsp.util.make_position_params()
-  local results = { definitions = {}, references = {} }
+  local results = {}
   ref_params.context = { includeDeclaration = false }
   lsp.call_async('textDocument/definition', ref_params, function(err, result, ctx, config)
     trace(err, result, ctx, config)
+    for i = 1, #result do
+      if result[i].range == nil and result[i].targetRange then
+        result[i].range = result[i].targetRange
+      end
+    end
     results.definitions = { error = err, result = result, ctx = ctx, config = config }
+    log(result)
     ctx = ctx or {}
     ctx.results = results
     ctx.combine = true

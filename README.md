@@ -271,6 +271,12 @@ require'navigator'.setup({
     -- to disable all default config and use your own lsp setup set
     -- disable_lsp = 'all'
     -- Default {}
+    diagnostic = {
+      underline = true,
+      virtual_text = true, -- show virtual for diagnostic message
+      update_in_insert = false, -- update diagnostic message in insert mode
+    },
+
     diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- experimental:  diagnostic status in scroll bar area; set to false to disable the diagnostic sign,
     -- for other style, set to {'╍', 'ﮆ'} or {'-', '='}
     diagnostic_virtual_text = true,  -- show virtual for diagnostic message

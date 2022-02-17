@@ -4,6 +4,7 @@ local trace = util.trace
 local mk_handler = util.mk_handler
 local api = vim.api
 local references = {}
+trace = log
 _NG_hi_list = {}
 _NG_current_symbol = ''
 _NG_ref_hi_idx = 1
@@ -219,14 +220,9 @@ end
 local function documentHighlight()
   api.nvim_exec(
     [[
-      autocmd ColorScheme * |
-        hi default LspReferenceRead cterm=bold gui=Bold ctermbg=yellow guifg=yellow guibg=purple4 |
-        hi default LspReferenceText cterm=bold gui=Bold ctermbg=red guifg=SlateBlue guibg=MidnightBlue |
-        hi default LspReferenceWrite cterm=bold gui=Bold,Italic ctermbg=red guifg=DarkSlateBlue guibg=MistyRose
-
       augroup lsp_document_highlight
         autocmd! * <buffer>
-        autocmd CursorHold <buffer> lua nav_doc_hl()
+        autocmd CursorHold,CursorHoldI <buffer> lua nav_doc_hl()
         autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
       augroup END
     ]],

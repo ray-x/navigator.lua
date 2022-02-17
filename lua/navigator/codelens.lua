@@ -5,7 +5,7 @@ local codelens = require('vim.lsp.codelens')
 
 local log = require('navigator.util').log
 local mk_handler = require('navigator.util').mk_handler
-local nvim_0_6 = require('navigator.util').nvim_0_6
+local nvim_0_6_1 = require('navigator.util').nvim_0_6_1
 local trace = require('navigator.util').trace
 
 local lsphelper = require('navigator.lspwrapper')
@@ -50,7 +50,7 @@ local function _update_sign(line)
 end
 
 local codelens_hdlr = mk_handler(function(err, result, ctx, cfg)
-  log(ctx, result)
+  trace(ctx, result)
   M.codelens_ctx = ctx
   if err or result == nil then
     if err then
@@ -79,7 +79,7 @@ function M.setup()
     -- trace(err, result, ctx.client_id, ctx.bufnr, cfg or {})
     cfg = cfg or {}
     ctx = ctx or { bufnr = vim.api.nvim_get_current_buf() }
-    if nvim_0_6() then
+    if nvim_0_6_1() then
       on_codelens(err, result, ctx, cfg)
       codelens_hdlr(err, result, ctx, cfg)
     else
@@ -110,20 +110,16 @@ function M.disable()
   is_enabled = false
 end
 
-
 function M.run_action()
   local original_select = vim.ui.select
-  vim.ui.select = require("guihua.gui").select
+  vim.ui.select = require('guihua.gui').select
 
   log('codeaction')
 
   codelens.run()
-  vim.defer_fn(
-    function ()
-        vim.ui.select = original_select
-    end, 1000
-  )
-
+  vim.defer_fn(function()
+    vim.ui.select = original_select
+  end, 1000)
 end
 
 M.inline = function()

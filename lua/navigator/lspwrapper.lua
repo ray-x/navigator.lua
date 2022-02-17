@@ -1,7 +1,7 @@
 local M = {}
 
 local util = require('navigator.util')
-local nvim_0_6 = util.nvim_0_6()
+local nvim_0_6_1 = util.nvim_0_6_1()
 
 local gutil = require('guihua.util')
 local lsp = require('vim.lsp')
@@ -145,7 +145,7 @@ function M.call_sync(method, params, opts, handler)
   opts = opts or {}
   local results_lsp, err = lsp.buf_request_sync(0, method, params, opts.timeout or vim.g.navtator_timeout or 1000)
 
-  if nvim_0_6() then
+  if nvim_0_6_1() then
     handler(err, extract_result(results_lsp), { method = method }, nil)
   else
     handler(err, method, extract_result(results_lsp), nil, nil)
@@ -263,6 +263,10 @@ end
 
 local function order_locations(locations)
   table.sort(locations, function(i, j)
+    if i == nil or j == nil or i.uri == nil or j.uri == nil then
+      -- log(i, j)
+      return false
+    end
     if i.uri == j.uri then
       if i.range and i.range.start then
         return i.range.start.line < j.range.start.line
@@ -337,9 +341,9 @@ function M.locations_to_items(locations, ctx)
   for i, loc in ipairs(locations) do
     local funcs = nil
     local item = lsp.util.locations_to_items({ loc }, enc)[1]
-    -- log(item)
     item.range = locations[i].range or locations[i].targetRange
     item.uri = locations[i].uri or locations[i].targetUri
+    item.definition = locations[i].definition
 
     if is_win then
       log(item.uri) -- file:///C:/path/to/file
@@ -416,6 +420,7 @@ function M.locations_to_items(locations, ctx)
 
   vim.cmd([[set eventignore-=FileType]])
 
+  log(items)
   return items, width + 24, second_part -- TODO handle long line?
 end
 
@@ -430,6 +435,9 @@ function M.symbol_to_items(locations)
   table.sort(locations, function(i, j)
     if i.definition then
       return true
+    end
+    if j.definition then
+      return false
     end
     if i.uri == j.uri then
       if i.range and i.range.start then

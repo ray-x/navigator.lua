@@ -33,7 +33,7 @@ _NgConfigValues = {
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
-  signature_help_cfg = {debug=false}, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
+  signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
   lsp = {
     code_action = {
       enable = true,
@@ -48,6 +48,12 @@ _NgConfigValues = {
       sign_priority = 40,
       virtual_text = true,
       virtual_text_icon = true,
+    },
+    diagnostic = {
+      underline = true,
+      virtual_text = { spacing = 3 }, -- show virtual for diagnostic message
+      update_in_insert = false, -- update diagnostic message in insert mode
+      severity_sort = { reverse = true },
     },
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
@@ -129,6 +135,10 @@ M.deprecated = function(cfg)
 
   if cfg.lspinstall ~= nil then
     warn('lspinstall deprecated, please use lsp-installer instead or use "lspinstall" branch')
+  end
+  -- TODO: update the marker
+  if cfg.diagnostic_scrollbar_sign then
+    vim.notify('config deprecated, set lsp.diagnostic_scrollbar_sign instead', vim.lsp.log_levels.WARN)
   end
 end
 
@@ -218,27 +228,34 @@ M.setup = function(cfg)
   extend_config(cfg)
 
   vim.cmd([[autocmd FileType,BufEnter * lua require'navigator.lspclient.clients'.on_filetype()]]) -- BufWinEnter BufNewFile,BufRead ?
-  -- local log = require"navigator.util".log
-  -- log(debug.traceback())
-  -- log(cfg, _NgConfigValues)
-  -- print("loading navigator")
   require('navigator.lazyloader').init()
   require('navigator.lspclient.clients').setup(_NgConfigValues)
-  -- require("navigator.lspclient.mapping").setup(_NgConfigValues)
   require('navigator.reference')
   require('navigator.definition')
   require('navigator.hierarchy')
   require('navigator.implementation')
 
-  -- log("navigator loader")
-
-  -- vim.cmd("autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4")
+  require('navigator.diagnostics').config(cfg.diagnostic)
   if not _NgConfigValues.loaded then
     _NgConfigValues.loaded = true
   end
 
   if _NgConfigValues.ts_fold == true then
-    require('navigator.foldts').on_attach()
+    local ok, _ = pcall(require, 'nvim-treesitter')
+    if ok then
+      require('navigator.foldts').on_attach()
+    end
+  end
+
+  local _start_client = vim.lsp.start_client
+  vim.lsp.start_client = function(lsp_config)
+    -- add highlight for Lspxxx
+    require('navigator.dochighlight').documentHighlight()
+    require('navigator.lspclient.highlight').add_highlight()
+    require('navigator.lspclient.highlight').diagnositc_config_sign()
+    -- require('navigator.lspclient.mapping').setup()
+    require('navigator.lspclient.lspkind').init()
+    return _start_client(lsp_config)
   end
 end
 

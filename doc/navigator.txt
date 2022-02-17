@@ -279,8 +279,6 @@ Nondefault configuration example:
         -- Default {}
         diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- experimental:  diagnostic status in scroll bar area; set to false to disable the diagnostic sign,
         -- for other style, set to {'╍', 'ﮆ'} or {'-', '='}
-        diagnostic_virtual_text = true,  -- show virtual for diagnostic message
-        diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
         disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you  want to
         ignore it
         tsserver = {
@@ -691,4 +689,3 @@ ERRORS AND BUG REPORTING                      *navigator-errors_and_bug_reportin
 *   Check console output
 *   Check `LspInfo` and treesitter status with `checkhealth`
 *   Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log
-
