@@ -20,7 +20,7 @@ local key_maps = {
   { key = 'g0', func = "require('navigator.symbols').document_symbols()" },
   { key = 'gW', func = "require('navigator.workspace').workspace_symbol()" },
   { key = '<c-]>', func = "require('navigator.definition').definition()" },
-  { key = '<gd>', func = "require('navigator.definition').definition()" },
+  { key = 'gd', func = "require('navigator.definition').definition()" },
   { key = 'gD', func = "declaration({ border = 'rounded', max_width = 80 })" },
   { key = 'gp', func = "require('navigator.definition').definition_preview()" },
   { key = '<Leader>gt', func = "require('navigator.treesitter').buf_ts()" },
