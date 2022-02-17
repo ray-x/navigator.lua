@@ -116,7 +116,7 @@ I'd like to go beyond what the system is offering.
 
 # Install
 
-Require nvim-0.5.0 (a.k.a nightly)
+Require nvim-0.6.1, nightly prefered
 
 You can remove your lspconfig setup and use this plugin.
 The plugin depends on lspconfig and [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(migrate from [romgrk's project](romgrk/fzy-lua-native)).
@@ -760,7 +760,7 @@ end
 # Errors and Bug Reporting
 
 - Please double check your setup and check if minium setup works or not
-- It should works for 0.5.1, neovim 0.6.x prefered.
+- It should works for 0.6.1, neovim 0.7.x prefered.
 - Check console output
 - Check `LspInfo` and treesitter status with `checkhealth`
 - Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log
