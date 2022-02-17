@@ -449,9 +449,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if type(user_lsp_opts[lspclient]) == 'function' then
       user_lsp_opts[lspclient] = user_lsp_opts[lspclient]()
       trace('loading from func:', user_lsp_opts[lspclient])
-    end
-
-    if user_lsp_opts[lspclient] ~= nil and user_lsp_opts[lspclient].filetypes ~= nil then
+    elseif user_lsp_opts[lspclient] ~= nil and user_lsp_opts[lspclient].filetypes ~= nil then
       if not vim.tbl_contains(user_lsp_opts[lspclient].filetypes, ft) then
         trace('ft', ft, 'disabled for', lspclient)
         goto continue
