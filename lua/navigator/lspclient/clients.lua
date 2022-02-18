@@ -8,7 +8,6 @@ local warn = util.warn
 _NG_Loaded = {}
 
 _LoadedFiletypes = {}
-local loader = nil
 packer_plugins = packer_plugins or nil -- suppress warnings
 
 -- packer only
@@ -724,12 +723,12 @@ local function setup(user_opts)
 end
 
 -- append lsps to servers
-function add_servers(lsps)
+local function add_servers(lsps)
   vim.validate({ lsps = { lsps, 't' } })
   vim.list_extend(servers, lsps)
 end
 
-function on_filetype()
+local function on_filetype()
   local bufnr = vim.api.nvim_get_current_buf()
   local uri = vim.uri_from_bufnr(bufnr)
 
