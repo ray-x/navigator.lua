@@ -407,12 +407,8 @@ local function load_cfg(ft, client, cfg, loaded)
   -- need to verify the lsp server is up
 end
 
--- run setup for lsp clients
-local function lsp_startup(ft, retry, user_lsp_opts)
-  retry = retry or false
-  local clients = vim.lsp.get_active_clients() or {}
+local function update_capabilities()
 
-  local loaded = {}
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
   capabilities.textDocument.completion.completionItem.preselectSupport = true
@@ -425,6 +421,17 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     properties = { 'documentation', 'detail', 'additionalTextEdits' },
   }
   capabilities.workspace.configuration = true
+  return capabilities
+
+end
+
+-- run setup for lsp clients
+local function lsp_startup(ft, retry, user_lsp_opts)
+  retry = retry or false
+  local clients = vim.lsp.get_active_clients() or {}
+
+  local loaded = {}
+  local capabilities = update_capabilities()
 
   for _, client in ipairs(clients) do
     if client ~= nil then
@@ -490,24 +497,24 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       goto continue
     end
 
+    local disable_fmt = false
+
     -- if user provides override values
     cfg.capabilities = capabilities
+    log(lspclient, config.lsp.disable_format_cap)
+    if vim.tbl_contains(config.lsp.disable_format_cap or {}, lspclient) then
+      log('fileformat disabled for ', lspclient)
+      disable_fmt = true
+    end
+
+   local enable_fmt = not disable_fmt
     if user_lsp_opts[lspclient] ~= nil then
       -- log(lsp_opts[lspclient], cfg)
-      local disable_fmt = false
-
-      log(lspclient, config.lsp.disable_format_cap)
-      if vim.tbl_contains(config.lsp.disable_format_cap or {}, lspclient) then
-        log('fileformat disabled for ', lspclient)
-        disable_fmt = true
-      end
       cfg = vim.tbl_deep_extend('force', cfg, user_lsp_opts[lspclient])
       if config.combined_attach == nil then
         cfg.on_attach = function(client, bufnr)
           on_attach(client, bufnr)
-          if disable_fmt then
-            client.resolved_capabilities.document_formatting = false
-          end
+          client.resolved_capabilities.document_formatting = enable_fmt
         end
       end
       if config.combined_attach == 'mine' then
@@ -516,9 +523,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         end
         cfg.on_attach = function(client, bufnr)
           config.on_attach(client, bufnr)
-          if disable_fmt then
-            client.resolved_capabilities.document_formatting = false
-          end
+          client.resolved_capabilities.document_formatting = enable_fmt
         end
       end
       if config.combined_attach == 'both' then
@@ -531,9 +536,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
           else
             on_attach(client, bufnr)
           end
-          if disable_fmt then
-            client.resolved_capabilities.document_formatting = false
-          end
+          client.resolved_capabilities.document_formatting = enable_fmt
         end
       end
       cfg.on_init = function(client)
@@ -543,6 +546,13 @@ local function lsp_startup(ft, retry, user_lsp_opts)
             { settings = client.config.settings },
             vim.lsp.log_levels.WARN
           )
+        end
+      end
+    else
+      if disable_fmt then
+        cfg.on_attach = function(client, bufnr)
+          on_attach(client, bufnr)
+          client.resolved_capabilities.document_formatting = enable_fmt
         end
       end
     end
