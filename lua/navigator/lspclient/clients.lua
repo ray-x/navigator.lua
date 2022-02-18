@@ -6,11 +6,11 @@ local uv = vim.loop
 local empty = util.empty
 local warn = util.warn
 _NG_Loaded = {}
+
 _LoadedFiletypes = {}
 local loader = nil
 packer_plugins = packer_plugins or nil -- suppress warnings
 
-trace = log
 -- packer only
 
 local highlight = require('navigator.lspclient.highlight')
@@ -501,11 +501,11 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
       log(lspclient, config.lsp.disable_format_cap)
       if vim.tbl_contains(config.lsp.disable_format_cap or {}, lspclient) then
-        trace('fileformat disabled for ', lspclient)
+        log('fileformat disabled for ', lspclient)
         disable_fmt = true
       end
       cfg = vim.tbl_deep_extend('force', cfg, user_lsp_opts[lspclient])
-      if config.combined_attach == nil or config.combined_attach == 'their' then
+      if config.combined_attach == nil then
         cfg.on_attach = function(client, bufnr)
           on_attach(client, bufnr)
           if disable_fmt then
@@ -555,7 +555,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if has_lspinst and _NgConfigValues.lsp_installer then
       local installed, installer_cfg = require('nvim-lsp-installer.servers').get_server(lspconfig[lspclient].name)
 
-      log('lsp installer server config' .. lspconfig[lspclient].name, installer_cfg)
+      log('lsp installer server config' .. lspconfig[lspclient].name , installer_cfg)
       if installed and installer_cfg then
         log('options', installer_cfg:get_default_options())
         -- if cfg.cmd / {lsp_server_name, arg} not present or lsp_server_name is not in PATH
@@ -644,13 +644,11 @@ local function setup(user_opts)
   local disable_ft = {
     'NvimTree',
     'guihua',
-    'notify',
     'clap_input',
     'clap_spinner',
     'vista',
     'vista_kind',
     'TelescopePrompt',
-    'TelescopeResults',
     'guihua_rust',
     'csv',
     'txt',
@@ -659,13 +657,13 @@ local function setup(user_opts)
   }
   for i = 1, #disable_ft do
     if ft == disable_ft[i] or _LoadedFiletypes[ft] then
-      log('navigator disabled for ft or it is loaded', ft)
+      trace('navigator disabled for ft or it is loaded', ft)
       return
     end
   end
 
   if user_opts ~= nil then
-    trace('navigator user setup', user_opts)
+    log('navigator user setup', user_opts)
   end
   trace(debug.traceback())
   if #vim.lsp.buf_get_clients() > 0 and user_opts == nil then
@@ -740,8 +738,8 @@ function on_filetype()
   log(uri)
 
   local wids = vim.fn.win_findbuf(bufnr)
-  if empty(wins) == 1 then
-    log('buf not shown return', winds, empty(winds))
+  if empty(wins) then
+    log('buf not shown return')
   end
   setup()
 end
