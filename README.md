@@ -348,14 +348,14 @@ together. If you have multiple similar LSP installed and have trouble with the p
 Above servers covered a small part neovim lspconfig support, You can still use lspconfig to add and config servers not
 in the list. If you would like to add a server not in the list, you can check this PR https://github.com/ray-x/navigator.lua/pull/107
 
-Also, an option in setup:
+Alternatively, update following option in setup(if you do not want a PR):
 
 ```lua
 require'navigator'setup{lsp={servers={'cmake', 'lexls'}}}
 
 ```
 
-Above example add cmake and lexls to the default server list
+Above option add cmake and lexls to the default server list
 
 ### Disable a lsp client loading from navigator
 
@@ -758,3 +758,5 @@ end
 - Check console output
 - Check `LspInfo` and treesitter status with `checkhealth`
 - Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log
+- Submit Issue with minium vimrc. Please check playground/init.lua as a vimrc template. !!!Please DONOT use a packer vimrc
+that installs everything to default folder!!! Also check this repo [navigator bug report](https://github.com/fky2015/navigator.nvim-bug-report)
