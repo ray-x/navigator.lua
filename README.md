@@ -758,3 +758,5 @@ end
 - Check console output
 - Check `LspInfo` and treesitter status with `checkhealth`
 - Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log
+- Submit Issue with minium vimrc. Please check playground/init.lua as a vimrc template. !!!Please DONOT use a packer vimrc
+that installs everything to default folder!!! Also check this repo [navigator bug report](https://github.com/fky2015/navigator.nvim-bug-report)
