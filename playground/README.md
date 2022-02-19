@@ -18,7 +18,7 @@ There also three folder `js`, `go`, `py`. Those folder have some basic source co
 
 The playground has js, py, go folder, so you can install either one your self in your PATH.
 If you want to try lua, Please check sumneko setup in init.lua make sure it pointed to correct path. By default it
-potint to ~/github/sumneko
+potint to ~/github/sumneko if not existed in your PATH.
 
 ## run init.lua
 
