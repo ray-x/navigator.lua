@@ -172,7 +172,7 @@ local function set_mapping(user_opts)
   elseif fmtkey then
     del_keymap('n', fmtkey)
   end
-  if user_opts.cap.document_range_formatting then
+  if user_opts.cap and user_opts.cap.document_range_formatting then
     log('formatting enabled', user_opts.cap)
   end
 

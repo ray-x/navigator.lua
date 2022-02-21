@@ -33,7 +33,7 @@ _NgConfigValues = {
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
-  signature_help_cfg = {debug=false}, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
+  signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
   lsp = {
     code_action = {
       enable = true,
@@ -224,7 +224,8 @@ M.setup = function(cfg)
   -- print("loading navigator")
   require('navigator.lazyloader').init()
   require('navigator.lspclient.clients').setup(_NgConfigValues)
-  -- require("navigator.lspclient.mapping").setup(_NgConfigValues)
+  -- keymaps should be added to on_attach. in case on_attach is not called
+  -- require('navigator.lspclient.mapping').setup(_NgConfigValues)
   require('navigator.reference')
   require('navigator.definition')
   require('navigator.hierarchy')
