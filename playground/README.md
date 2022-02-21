@@ -12,7 +12,8 @@ most used plugins for programmer.
 - luasnip
 - aurora (colorscheme used in the screenshot)
 
-There also three folder `js`, `go`, `py`. Those folder have some basic source code you can play with.
+There are three folders `js`, `go`, `py`. Those folders have some basic source code you can play with.
+The init will install the plugins in ``/tmp/nvim`` folder. It will not affect your current setup.
 
 ## Install LSP
 
