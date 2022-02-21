@@ -24,12 +24,21 @@ M.on_attach = function(client, bufnr)
 
   trace(client)
 
+  -- add highlight for Lspxxx
+  require('navigator.lspclient.highlight').add_highlight()
+  require('navigator.lspclient.highlight').diagnositc_config_sign()
   api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   require('navigator.lspclient.mapping').setup({
     client = client,
     bufnr = bufnr,
   })
+
+  if client.resolved_capabilities.document_highlight then
+    require('navigator.dochighlight').documentHighlight()
+  end
+
+  require('navigator.lspclient.lspkind').init()
 
   local config = require('navigator').config_values()
   trace(client.name, 'navigator on attach')

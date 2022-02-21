@@ -33,7 +33,7 @@ _NgConfigValues = {
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
-  signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
+  signature_help_cfg = {debug=false}, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
   lsp = {
     code_action = {
       enable = true,
@@ -135,10 +135,6 @@ M.deprecated = function(cfg)
 
   if cfg.lspinstall ~= nil then
     warn('lspinstall deprecated, please use lsp-installer instead or use "lspinstall" branch')
-  end
-  -- TODO: update the marker
-  if cfg.diagnostic_scrollbar_sign then
-    vim.notify('config deprecated, set lsp.diagnostic_scrollbar_sign instead', vim.lsp.log_levels.WARN)
   end
 end
 

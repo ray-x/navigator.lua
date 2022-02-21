@@ -4,7 +4,6 @@ local trace = util.trace
 local mk_handler = util.mk_handler
 local api = vim.api
 local references = {}
-trace = log
 _NG_hi_list = {}
 _NG_current_symbol = ''
 _NG_ref_hi_idx = 1

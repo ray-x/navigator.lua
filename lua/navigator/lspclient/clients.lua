@@ -8,6 +8,7 @@ local warn = util.warn
 _NG_Loaded = {}
 
 _LoadedFiletypes = {}
+local loader = nil
 packer_plugins = packer_plugins or nil -- suppress warnings
 
 -- packer only
@@ -441,7 +442,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
   end
   for _, lspclient in ipairs(servers) do
     -- check should load lsp
-    trace('loading :', lspclient)
+
     if type(lspclient) == 'table' then
       if lspclient.name then
         lspclient = lspclient.name
@@ -473,8 +474,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     local default_config = {}
-    trace(lspclient)
-
+    log(lspclient)
     if lspconfig[lspclient] == nil then
       vim.notify(
         'lspclient' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
@@ -510,7 +510,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       disable_fmt = true
     end
 
-   local enable_fmt = not disable_fmt
+    local enable_fmt = not disable_fmt
     if user_lsp_opts[lspclient] ~= nil then
       -- log(lsp_opts[lspclient], cfg)
       cfg = vim.tbl_deep_extend('force', cfg, user_lsp_opts[lspclient])
