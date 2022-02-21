@@ -1,4 +1,3 @@
--- todo allow config passed in
 local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
@@ -415,7 +414,7 @@ local function update_capabilities()
   capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
   capabilities.textDocument.completion.completionItem.deprecatedSupport = true
   capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
-  capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
+  -- capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
   capabilities.textDocument.completion.completionItem.resolveSupport = {
     properties = { 'documentation', 'detail', 'additionalTextEdits' },
   }
@@ -506,7 +505,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       disable_fmt = true
     end
 
-   local enable_fmt = not disable_fmt
+    local enable_fmt = not disable_fmt
     if user_lsp_opts[lspclient] ~= nil then
       -- log(lsp_opts[lspclient], cfg)
       cfg = vim.tbl_deep_extend('force', cfg, user_lsp_opts[lspclient])
@@ -523,11 +522,29 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         cfg.on_attach = function(client, bufnr)
           config.on_attach(client, bufnr)
           client.resolved_capabilities.document_formatting = enable_fmt
+          require('navigator.lspclient.mapping').setup({
+            client = client,
+            bufnr = bufnr,
+            cap = capabilities,
+          })
+        end
+      end
+      if config.combined_attach == 'their' then
+        cfg.on_attach = function(client, bufnr)
+          on_attach(client, bufnr)
+          config.on_attach(client, bufnr)
+          client.resolved_capabilities.document_formatting = enable_fmt
+          require('navigator.lspclient.mapping').setup({
+            client = client,
+            bufnr = bufnr,
+            cap = capabilities,
+          })
         end
       end
       if config.combined_attach == 'both' then
         cfg.on_attach = function(client, bufnr)
-          if config.on_attach then
+          client.resolved_capabilities.document_formatting = enable_fmt
+          if config.on_attach and type(config.on_attach) == 'function' then
             config.on_attach(client, bufnr)
           end
           if setups[lspclient] and setups[lspclient].on_attach then
@@ -535,7 +552,11 @@ local function lsp_startup(ft, retry, user_lsp_opts)
           else
             on_attach(client, bufnr)
           end
-          client.resolved_capabilities.document_formatting = enable_fmt
+          require('navigator.lspclient.mapping').setup({
+            client = client,
+            bufnr = bufnr,
+            cap = capabilities,
+          })
         end
       end
       cfg.on_init = function(client)
@@ -548,11 +569,9 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         end
       end
     else
-      if disable_fmt then
-        cfg.on_attach = function(client, bufnr)
-          on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
-        end
+      cfg.on_attach = function(client, bufnr)
+        on_attach(client, bufnr)
+        client.resolved_capabilities.document_formatting = enable_fmt
       end
     end
 
