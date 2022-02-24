@@ -14,8 +14,8 @@ local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
 -- TODO https://github.com/neovim/neovim/pull/16591 use vimkeymap.set/del
 -- LuaFormatter off
 local key_maps = {
-  { key = 'gr', func = "require('navigator.reference').reference()" },
-  { key = 'Gr', func = "require('navigator.reference').async_ref()" },
+  { key = 'gr', func = "require('navigator.reference').async_ref()" },
+  { key = '<Leader>gr', func = "require('navigator.reference').reference()" }, -- reference deprecated
   { mode = 'i', key = '<M-k>', func = 'signature_help()' },
   { key = '<c-k>', func = 'signature_help()' },
   { key = 'g0', func = "require('navigator.symbols').document_symbols()" },
@@ -180,7 +180,6 @@ local function set_mapping(user_opts)
   if user_opts.cap and user_opts.cap.document_range_formatting then
     log('formatting enabled', user_opts.cap)
   end
-
 
   if not range_fmt and rfmtkey then
     del_keymap('v', rfmtkey)

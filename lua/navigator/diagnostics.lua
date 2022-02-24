@@ -33,6 +33,29 @@ if vim.diagnostic then
   }
 end
 
+local diagnostic_cfg = {
+  -- Enable underline, use default values
+  underline = _NgConfigValues.lsp.diagnostic.underline,
+  -- Enable virtual text, override spacing to 3  (prevent overlap)
+  virtual_text = {
+    spacing = _NgConfigValues.lsp.diagnostic.virtual_text.spacing,
+    prefix = _NgConfigValues.icons.diagnostic_virtual_text,
+  },
+  -- Use a function to dynamically turn signs off
+  -- and on, using buffer local variables
+  signs = true,
+  update_in_insert = _NgConfigValues.lsp.diagnostic.update_in_insert or false,
+  severity_sort = _NgConfigValues.lsp.diagnostic.severity_sort,
+  float = {
+    focusable = false,
+    style = 'minimal',
+    border = 'rounded',
+    source = 'always',
+    header = '',
+    prefix = '',
+  },
+}
+
 local function get_count(bufnr, level)
   if vim.diagnostic ~= nil then
     return #diagnostic.get(bufnr, { severity = diag_map[level] })
@@ -182,6 +205,7 @@ end
 
 local diag_hdlr = mk_handler(function(err, result, ctx, config)
   require('navigator.lspclient.highlight').diagnositc_config_sign()
+  config = config or diagnostic_cfg
   if err ~= nil then
     log(err, config, result)
     return
@@ -303,21 +327,6 @@ local diag_hdlr_async = function()
 end
 
 local M = {}
-local diagnostic_cfg = {
-  -- Enable underline, use default values
-  underline = _NgConfigValues.lsp.diagnostic.underline,
-  -- Enable virtual text, override spacing to 3  (prevent overlap)
-  virtual_text = {
-    spacing = _NgConfigValues.lsp.diagnostic.virtual_text.spacing,
-    prefix = _NgConfigValues.icons.diagnostic_virtual_text,
-  },
-  -- Use a function to dynamically turn signs off
-  -- and on, using buffer local variables
-  signs = true,
-  update_in_insert = _NgConfigValues.lsp.diagnostic.update_in_insert or false,
-  severity_sort = _NgConfigValues.lsp.diagnostic.severity_sort,
-}
-
 if _NgConfigValues.lsp.diagnostic.virtual_text == false then
   diagnostic_cfg.virtual_text = false
 end
@@ -474,6 +483,6 @@ function M.config(cfg)
 end
 
 if not util.nvim_0_6_1() then
-  util.warn('Navigator 0.3.1+ only support nvim-0.6+, please use 0.3.0')
+  util.warn('Navigator 0.4+ only support nvim-0.6+, please use 0.3.x')
 end
 return M
