@@ -113,6 +113,22 @@ local setups = {
     cmd = { 'clojure-lsp' },
   },
 
+  elixirls = {
+    on_attach = on_attach,
+    filetypes = { 'elixir', 'eelixir'},
+    cmd = {'elixir-ls'},
+    message_level = vim.lsp.protocol.MessageType.error,
+    settings = {
+      elixirLS = {
+        dialyzerEnabled = true, fetchDeps = false
+      }
+    },
+    root_dir = function(fname)
+      return util.root_pattern('mix.exs', '.git')(fname)
+        or util.path.dirname(fname)
+    end,
+  },
+
   gopls = {
     on_attach = on_attach,
     -- capabilities = cap,
@@ -319,6 +335,7 @@ local servers = {
   'svelte',
   'texlab',
   'clojure_lsp',
+  'elixirls'
 }
 
 local lsp_installer_servers = {}
