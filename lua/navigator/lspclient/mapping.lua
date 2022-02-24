@@ -198,9 +198,9 @@ end
 local function set_event_handler(user_opts)
   user_opts = user_opts or {}
   local file_types =
-    'c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,yaml,kotlin,php,dart,nim,terraform,java'
+    'c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,kotlin,php,dart,nim,java'
   -- local format_files = "c,cpp,h,go,python,vim,javascript,typescript" --html,css,
-  vim.api.nvim_command([[augroup nvim_lsp_autos]])
+  vim.api.nvim_command([[augroup nvim_nv_lsp_autos]])
   vim.api.nvim_command([[autocmd!]])
 
   for _, value in pairs(event_hdlrs) do
@@ -210,7 +210,12 @@ local function set_event_handler(user_opts)
     else
       f = 'lua vim.lsp.buf.' .. value.func
     end
-    local cmd = 'autocmd FileType ' .. file_types .. ' autocmd nvim_lsp_autos ' .. value.ev .. ' <buffer> silent! ' .. f
+    local cmd = 'autocmd FileType '
+      .. file_types
+      .. ' autocmd nvim_nv_lsp_autos '
+      .. value.ev
+      .. ' <buffer> silent! '
+      .. f
     vim.api.nvim_command(cmd)
   end
   vim.api.nvim_command([[augroup END]])
