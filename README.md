@@ -395,8 +395,8 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 
 | mode | key             | function                                                   |
 | ---- | --------------- | ---------------------------------------------------------- |
-| n    | gr              | show reference and context                                 |
-| n    | Gr              | async references, definitions and context (experiential)   |
+| n    | gr              | async references, definitions and context                  |
+| n    | \<Leader>gr     | show reference and context                                 |
 | i    | \<m-k\>         | signature help                                             |
 | n    | \<c-k\>         | signature help                                             |
 | n    | gW              | workspace symbol                                           |
