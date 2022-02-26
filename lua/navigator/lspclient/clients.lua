@@ -670,7 +670,8 @@ end
 
 local function setup(user_opts)
   local ft = vim.bo.filetype
-  local bufnr = vim.api.nvim_get_current_buf()
+
+  local bufnr = user_opts.bufnr or vim.api.nvim_get_current_buf()
   local uri = vim.uri_from_bufnr(bufnr)
 
   if uri == 'file://' or uri == 'file:///' then
@@ -706,13 +707,22 @@ local function setup(user_opts)
 
   if user_opts ~= nil then
     log('navigator user setup', user_opts)
+  else
+    user_opts = {}
   end
   trace(debug.traceback())
-  if #vim.lsp.buf_get_clients() > 0 and user_opts == nil then
-    log('already setup')
-    return
+
+  local clients = vim.lsp.buf_get_clients(bufnr)
+  for key, client in pairs(clients) do
+    if client.name ~= "null_ls" and client.name ~= "efm" then
+      if vim.tbl_contains(client.filetypes, vim.o.ft) then
+        log('client already loaded', client.name)
+      end
+    end
   end
-  user_opts = user_opts or config -- incase setup was triggered from autocmd
+
+  _LoadedFiletypes[ft] = true
+  user_opts = vim.list_extend(user_opts, config) -- incase setup was triggered from autocmd
 
   if ft == nil then
     ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
@@ -720,6 +730,7 @@ local function setup(user_opts)
 
   if ft == nil or ft == '' then
     log('nil filetype, callback')
+    vim.cmd([[e]])
     vim.defer_fn(function()
       setup(user_opts)
     end, 200)
@@ -731,7 +742,7 @@ local function setup(user_opts)
   log('loading for ft ', ft, uri)
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
-  local lsp_opts = user_opts.lsp
+  local lsp_opts = user_opts.lsp or {}
 
   if vim.bo.filetype == 'lua' then
     local slua = lsp_opts.sumneko_lua
@@ -755,7 +766,6 @@ local function setup(user_opts)
     require('navigator.codelens').setup()
   end
 
-  _LoadedFiletypes[ft] = true
 end
 
 -- append lsps to servers
@@ -780,10 +790,10 @@ local function on_filetype()
   log(uri)
 
   local wids = vim.fn.win_findbuf(bufnr)
-  if empty(wins) then
+  if empty(wids) then
     log('buf not shown return')
   end
-  setup()
+  setup({bufnr=bufnr})
 end
 
 return { setup = setup, get_cfg = get_cfg, lsp = servers, add_servers = add_servers, on_filetype = on_filetype }
