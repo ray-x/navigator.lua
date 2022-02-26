@@ -702,6 +702,7 @@ local function setup(user_opts)
     'txt',
     'defx',
     'packer',
+    'gitcommit',
   }
   for i = 1, #disable_ft do
     if ft == disable_ft[i] or _LoadedFiletypes[ft] then
