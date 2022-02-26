@@ -203,7 +203,7 @@ end
 local function set_event_handler(user_opts)
   user_opts = user_opts or {}
   local file_types =
-    'c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,json,kotlin,php,dart,nim,java'
+    'c,cpp,h,go,python,vim,sh,javascript,html,css,lua,typescript,rust,javascriptreact,typescriptreact,kotlin,php,dart,nim,java'
   -- local format_files = "c,cpp,h,go,python,vim,javascript,typescript" --html,css,
   vim.api.nvim_command([[augroup nvim_nv_lsp_autos]])
   vim.api.nvim_command([[autocmd!]])
