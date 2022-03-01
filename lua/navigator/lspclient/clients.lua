@@ -727,7 +727,7 @@ local function setup(user_opts)
     end
   end
 
-  _LoadedFiletypes[ft] = true
+  _LoadedFiletypes[ft..tostring(bufnr)] = true
   user_opts = vim.list_extend(user_opts, config) -- incase setup was triggered from autocmd
 
   if ft == nil then
