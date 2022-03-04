@@ -538,6 +538,11 @@ require'navigator'.setup({
 
 ```
 
+Use lsp_installer configs
+You can delegate the lsp server setup to lsp_installer with `server:setup{opts}`
+Here is an example [init_lsp_installer.lua](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
+
+
 ## Usage
 
 Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box.
