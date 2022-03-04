@@ -12,7 +12,7 @@ function M.new_list_view(opts)
   local config = require('navigator').config_values()
 
   if active_list_view ~= nil then
-    log(active_list_view)
+    trace(active_list_view)
     local winnr = active_list_view.win
     local bufnr = active_list_view.buf
 
@@ -48,7 +48,7 @@ function M.new_list_view(opts)
 
   opts.external = _NgConfigValues.external
   opts.preview_lines_before = 3
-  log(opts)
+  trace(opts)
   active_list_view = require('guihua.gui').new_list_view(opts)
   return active_list_view
 end

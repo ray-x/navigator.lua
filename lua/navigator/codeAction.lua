@@ -138,9 +138,16 @@ local code_action_req = function(_call_back_fn, diagnostics)
   vim.lsp.buf_request(0, 'textDocument/codeAction', params, callback)
 end
 
+local function sort_select(action_tuples, opts, on_user_choice)
+  table.sort(action_tuples, function(a, b)
+      return a[1] > b[1]
+  end)
+  require('guihua.gui').select(action_tuples, opts, on_user_choice)
+end
+
 code_action.code_action = function()
   local original_select = vim.ui.select
-  vim.ui.select = require('guihua.gui').select
+  vim.ui.select = sort_select
 
   log('codeaction')
 

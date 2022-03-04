@@ -219,14 +219,9 @@ end
 local function documentHighlight()
   api.nvim_exec(
     [[
-      autocmd ColorScheme * |
-        hi default LspReferenceRead cterm=bold gui=Bold ctermbg=yellow guifg=yellow guibg=purple4 |
-        hi default LspReferenceText cterm=bold gui=Bold ctermbg=red guifg=SlateBlue guibg=MidnightBlue |
-        hi default LspReferenceWrite cterm=bold gui=Bold,Italic ctermbg=red guifg=DarkSlateBlue guibg=MistyRose
-
       augroup lsp_document_highlight
         autocmd! * <buffer>
-        autocmd CursorHold <buffer> lua nav_doc_hl()
+        autocmd CursorHold,CursorHoldI <buffer> lua nav_doc_hl()
         autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
       augroup END
     ]],

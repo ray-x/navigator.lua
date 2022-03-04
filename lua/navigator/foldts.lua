@@ -1,6 +1,7 @@
 -- NOTE: this file is a modified version of fold.lua from nvim-treesitter
 
 local log = require('navigator.util').log
+local trace = require('navigator.util').trace
 local api = vim.api
 local tsutils = require('nvim-treesitter.ts_utils')
 local query = require('nvim-treesitter.query')
@@ -23,7 +24,7 @@ function _G.custom_fold_text()
   return ' ⚡' .. line .. ': ' .. line_count .. ' lines'
 end
 
-vim.opt.foldtext = custom_fold_text()
+vim.opt.foldtext = _G.custom_fold_text()
 
 vim.opt.fillchars = { eob = '-', fold = ' ' }
 
@@ -61,7 +62,7 @@ local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
   local parser = parsers.get_parser(bufnr)
 
   if not parser then
-    warn('treesitter parser not loaded')
+    log('treesitter parser not loaded')
     return {}
   end
 
@@ -148,12 +149,12 @@ local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
         levels[lnum + 1] = tostring(trimmed_level)
       else
         -- if levels[lnum + 1] == nil then
-          levels[lnum + 1] = tostring(trimmed_level + 1)
+        levels[lnum + 1] = tostring(trimmed_level + 1)
         -- end
       end
     end
   end
-  log(levels)
+  trace(levels)
 
   return levels
 end)

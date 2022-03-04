@@ -3,8 +3,8 @@
 -- Some of function copied from https://github.com/RishabhRD/nvim-lsputils
 local M = { log_path = vim.lsp.get_log_path() }
 -- local is_windows = uv.os_uname().version:match("Windows")
-
-local nvim_0_6
+local guihua = require('guihua.util')
+local nvim_0_6_1
 
 M.path_sep = function()
   local is_win = vim.loop.os_uname().sysname:find('Windows')
@@ -281,19 +281,7 @@ M.open_file = function(filename)
   vim.api.nvim_command(string.format('e! %s', filename))
 end
 
-M.open_file_at = function(filename, line, col, split)
-  if split == nil then
-    -- code
-    vim.api.nvim_command(string.format('e! +%s %s', line, filename))
-  elseif split == 'v' then
-    vim.api.nvim_command(string.format('vsp! +%s %s', line, filename))
-  elseif split == 's' then
-    vim.api.nvim_command(string.format('sp! +%s %s', line, filename))
-  end
-  -- vim.api.nvim_command(string.format("e! %s", filename))
-  col = col or 1
-  vim.fn.cursor(line, col)
-end
+M.open_file_at = guihua.open_file_at
 
 function M.exists(var)
   for k, _ in pairs(_G) do
@@ -355,32 +343,21 @@ function M.get_current_winid()
   return api.nvim_get_current_win()
 end
 
-function M.nvim_0_6()
-  if nvim_0_6 ~= nil then
-    return nvim_0_6
+function M.nvim_0_6_1()
+  if nvim_0_6_1 ~= nil then
+    return nvim_0_6_1
   end
-  if debug.getinfo(vim.lsp.handlers.signature_help).nparams == 4 then
-    nvim_0_6 = true
-  else
-    nvim_0_6 = false
+  nvim_0_6_1 = vim.fn.has('nvim-0.6.1') == 1
+  if nvim_0_6_1 == false then
+    M.warn('Please use navigator 0.3 version for neovim version < 0.6.1')
   end
-  return nvim_0_6
+  return nvim_0_6_1
 end
 
 function M.mk_handler(fn)
   return function(...)
-    local config_or_client_id = select(4, ...)
-    local is_new = M.nvim_0_6()
-    if is_new then
+    if M.nvim_0_6_1() then
       return fn(...)
-    else
-      local err = select(1, ...)
-      local method = select(2, ...)
-      local result = select(3, ...)
-      local client_id = select(4, ...)
-      local bufnr = select(5, ...)
-      local config = select(6, ...)
-      return fn(err, result, { method = method, client_id = client_id, bufnr = bufnr }, config)
     end
   end
 end
@@ -422,15 +399,15 @@ end
 -- alternatively: use  vim.notify("namespace does not exist or is anonymous", vim.log.levels.ERROR)
 
 function M.warn(msg)
-  vim.api.nvim_echo({ { 'WRN: ' .. msg, 'WarningMsg' } }, true, {})
+  vim.notify('WRN: ' .. msg, vim.lsp.log_levels.WARN)
 end
 
 function M.error(msg)
-  vim.api.nvim_echo({ { 'ERR: ' .. msg, 'ErrorMsg' } }, true, {})
+  vim.notify('ERR: ' .. msg, vim.lsp.log_levels.EROR)
 end
 
 function M.info(msg)
-  vim.api.nvim_echo({ { 'Info: ' .. msg } }, true, {})
+  vim.notify('INF: ' .. msg, vim.lsp.log_levels.INFO)
 end
 
 return M

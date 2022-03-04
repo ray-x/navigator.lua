@@ -1,3 +1,4 @@
+-- todo allow config passed in
 local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
@@ -7,6 +8,7 @@ local warn = util.warn
 _NG_Loaded = {}
 
 _LoadedFiletypes = {}
+local loader = nil
 packer_plugins = packer_plugins or nil -- suppress warnings
 
 -- packer only
@@ -429,6 +431,8 @@ end
 
 local function update_capabilities()
 
+  trace(ft, 'lsp startup')
+  local loaded = {}
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
   capabilities.textDocument.completion.completionItem.preselectSupport = true
@@ -436,7 +440,7 @@ local function update_capabilities()
   capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
   capabilities.textDocument.completion.completionItem.deprecatedSupport = true
   capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
-  -- capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
+  capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
   capabilities.textDocument.completion.completionItem.resolveSupport = {
     properties = { 'documentation', 'detail', 'additionalTextEdits' },
   }
@@ -510,6 +514,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     default_config = vim.tbl_deep_extend('force', default_config, ng_default_cfg)
     local cfg = setups[lspclient] or {}
+
     cfg = vim.tbl_deep_extend('keep', cfg, default_config)
     -- filetype disabled
     if not vim.tbl_contains(cfg.filetypes or {}, ft) then
