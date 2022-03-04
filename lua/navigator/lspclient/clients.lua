@@ -293,6 +293,9 @@ local setups = {
   omnisharp = {
     cmd = { 'omnisharp', '--languageserver', '--hostPID', tostring(vim.fn.getpid()) },
   },
+  terraformls = {
+    filetypes = { 'terraform', 'tf'},
+  },
 }
 
 setups.sumneko_lua = vim.tbl_deep_extend('force', luadev, setups.sumneko_lua)
@@ -379,7 +382,9 @@ local function load_cfg(ft, client, cfg, loaded)
   end
 
   local lspft = lspconfig[client].document_config.default_config.filetypes
+  local additional_ft = setups[client] and setups[client].filetypes or {}
   local cmd = cfg.cmd
+  vim.list_extend(lspft, additional_ft)
 
   local should_load = false
   if lspft ~= nil and #lspft > 0 then
@@ -703,6 +708,7 @@ local function setup(user_opts)
     'defx',
     'packer',
     'gitcommit',
+    'windline',
   }
   for i = 1, #disable_ft do
     if ft == disable_ft[i] or _LoadedFiletypes[ft] then
@@ -721,7 +727,7 @@ local function setup(user_opts)
   local clients = vim.lsp.buf_get_clients(bufnr)
   for key, client in pairs(clients) do
     if client.name ~= "null_ls" and client.name ~= "efm" then
-      if vim.tbl_contains(client.filetypes, vim.o.ft) then
+      if vim.tbl_contains(client.filetypes or {}, vim.o.ft) then
         log('client already loaded', client.name)
       end
     end
