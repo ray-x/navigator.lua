@@ -296,6 +296,11 @@ local setups = {
   terraformls = {
     filetypes = { 'terraform', 'tf'},
   },
+
+  sourcekit = {
+      cmd = { 'sourcekit-lsp' },
+      filetypes = { 'swift' } -- This is recommended if you have separate settings for clangd.
+  }
 }
 
 setups.sumneko_lua = vim.tbl_deep_extend('force', luadev, setups.sumneko_lua)
@@ -338,7 +343,11 @@ local servers = {
   'svelte',
   'texlab',
   'clojure_lsp',
-  'elixirls'
+  'elixirls',
+  'sourcekit',
+  'fsautocomplete',
+  'vls',
+  'hls'
 }
 
 local lsp_installer_servers = {}
