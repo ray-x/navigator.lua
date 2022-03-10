@@ -30,7 +30,6 @@ local function load_plugins()
             end,
             ['tsserver'] = function(options)
               options.on_attach = function(client)
-                print('attach from installer')
                 client.resolved_capabilities.document_formatting = false
               end
             end,
