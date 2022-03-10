@@ -46,9 +46,17 @@ M.on_attach = function(client, bufnr)
     log(client.name, 'customized attach for all clients')
     config.on_attach(client, bufnr)
   end
-  if config.lsp and config.lsp[client.name] and config.lsp[client.name].on_attach ~= nil then
-    log('lsp client specific attach for', client.name)
-    config.lsp[client.name].on_attach(client, bufnr)
+  if config.lsp and config.lsp[client.name] then
+    if type(config.lsp[client.name]) == 'function' then
+      local attach = config.lsp[client.name]().on_attach
+      if attach then
+        attach(client, bufnr)
+      end
+    elseif config.lsp[client.name].on_attach ~= nil then
+      log(client.name, 'customized attach for this client')
+      log('lsp client specific attach for', client.name)
+      config.lsp[client.name].on_attach(client, bufnr)
+    end
   end
 
   if _NgConfigValues.lsp.code_action.enable then
