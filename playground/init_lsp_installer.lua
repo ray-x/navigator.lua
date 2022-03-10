@@ -30,6 +30,7 @@ local function load_plugins()
             end,
             ['tsserver'] = function(options)
               options.on_attach = function(client)
+                print('attach from installer')
                 client.resolved_capabilities.document_formatting = false
               end
             end,
@@ -50,7 +51,9 @@ local function load_plugins()
         'ray-x/navigator.lua',
         config = function()
           require('navigator').setup({
+            debug = true,
             lsp_installer = true,
+            keymaps = { { key = 'gR', func = "require('navigator.reference').async_ref()" } },
           })
         end,
       })
