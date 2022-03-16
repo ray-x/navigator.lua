@@ -33,7 +33,7 @@ _NgConfigValues = {
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
-  signature_help_cfg = {debug=false}, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
+  signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
   lsp = {
     code_action = {
       enable = true,
@@ -51,7 +51,7 @@ _NgConfigValues = {
     },
     diagnostic = {
       underline = true,
-      virtual_text = { spacing = 3 }, -- show virtual for diagnostic message
+      virtual_text = { spacing = 3, source = true }, -- show virtual for diagnostic message
       update_in_insert = false, -- update diagnostic message in insert mode
       severity_sort = { reverse = true },
     },

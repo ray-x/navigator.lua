@@ -36,11 +36,7 @@ end
 local diagnostic_cfg = {
   -- Enable underline, use default values
   underline = _NgConfigValues.lsp.diagnostic.underline,
-  -- Enable virtual text, override spacing to 3  (prevent overlap)
-  virtual_text = {
-    spacing = _NgConfigValues.lsp.diagnostic.virtual_text.spacing,
-    prefix = _NgConfigValues.icons.diagnostic_virtual_text,
-  },
+  -- Enable virtual
   -- Use a function to dynamically turn signs off
   -- and on, using buffer local variables
   signs = true,
@@ -327,10 +323,11 @@ local diag_hdlr_async = function()
 end
 
 local M = {}
-if _NgConfigValues.lsp.diagnostic.virtual_text == false then
-  diagnostic_cfg.virtual_text = false
-end
 
+diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
+if type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' then
+  diagnostic_cfg.virtual_text.prefix = _NgConfigValues.icons.diagnostic_virtual_text
+end
 -- vim.lsp.handlers["textDocument/publishDiagnostics"]
 M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
 
