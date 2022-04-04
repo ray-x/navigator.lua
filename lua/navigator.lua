@@ -221,6 +221,7 @@ M.config_values = function()
 end
 
 M.setup = function(cfg)
+  cfg = cfg or {}
   extend_config(cfg)
 
   vim.cmd([[autocmd FileType,BufEnter * lua require'navigator.lspclient.clients'.on_filetype()]]) -- BufWinEnter BufNewFile,BufRead ?
