@@ -688,17 +688,27 @@ local function get_cfg(client)
 end
 
 local function setup(user_opts)
+  user_opts = user_opts or {}
   local ft = vim.bo.filetype
-
   local bufnr = user_opts.bufnr or vim.api.nvim_get_current_buf()
+  if ft == '' then
+    log('nil filetype, callback')
+    local ext = vim.fn.expand('%:e')
+    if ext ~= '' then
+      local opts = vim.deepcopy(user_opts)
+      return vim.defer_fn(function()
+        setup(opts)
+      end, 200)
+    else
+      log("no filetype, no ext return")
+    end
+  end
   local uri = vim.uri_from_bufnr(bufnr)
 
   if uri == 'file://' or uri == 'file:///' then
     log('skip loading for ft ', ft, uri)
     return
   end
-  log(user_opts)
-  log(uri)
   if _LoadedFiletypes[ft .. tostring(bufnr)] then
     log('navigator was loaded for ft', ft)
     return
@@ -726,11 +736,6 @@ local function setup(user_opts)
     end
   end
 
-  if user_opts ~= nil then
-    log('navigator user setup', user_opts)
-  else
-    user_opts = {}
-  end
   trace(debug.traceback())
 
   local clients = vim.lsp.buf_get_clients(bufnr)
@@ -743,24 +748,12 @@ local function setup(user_opts)
   end
 
   _LoadedFiletypes[ft..tostring(bufnr)] = true
-  user_opts = vim.list_extend(user_opts, config) -- incase setup was triggered from autocmd
+  user_opts = vim.tbl_extend("keep", user_opts, config) -- incase setup was triggered from autocmd
 
-  if ft == nil then
-    ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
-  end
-
-  if ft == nil or ft == '' then
-    log('nil filetype, callback')
-    vim.cmd([[e]])
-    vim.defer_fn(function()
-      setup(user_opts)
-    end, 200)
-    return
-  end
+  log(user_opts)
   local retry = true
 
-  trace('setup', user_opts)
-  log('loading for ft ', ft, uri)
+  log('loading for ft ', ft, uri, user_opts)
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
   local lsp_opts = user_opts.lsp or {}
