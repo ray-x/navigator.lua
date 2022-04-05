@@ -11,7 +11,7 @@ local M = {}
 
 local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_message)
   log('call_hierarchy')
-  log('call_hierarchy', direction, err, result)
+  log('call_hierarchy', direction, err, result, ctx, cfg)
 
   assert(#vim.lsp.buf_get_clients() > 0, 'Must have a client running to use lsp_tags')
   if err ~= nil then
@@ -56,15 +56,15 @@ local function incoming_calls_handler(bang, err, result, ctx, cfg)
 
   local results = call_hierarchy_handler_from(err, result, ctx, cfg, 'Incoming calls not found')
 
-  local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
-  gui.new_list_view({ items = results, ft = ft, api = ' ' })
+  local ft = vim.api.nvim_buf_get_option(ctx.bufnr or 0, 'ft')
+  gui.new_list_view({ items = results, ft = ft or 'cpp', api = ' ' })
 end
 --  err, method, result, client_id, bufnr
 local function outgoing_calls_handler(bang, err, result, ctx, cfg)
   local results = call_hierarchy_handler_to(err, result, ctx, cfg, 'Outgoing calls not found')
 
-  local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
-  gui.new_list_view({ items = results, ft = ft, api = ' ' })
+  local ft = vim.api.nvim_buf_get_option(ctx.bufnr or 0, 'ft')
+  gui.new_list_view({ items = results, ft = ft or cpp, api = ' ' })
   -- fzf_locations(bang, "", "Outgoing Calls", results, false)
 end
 
