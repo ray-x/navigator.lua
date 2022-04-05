@@ -153,6 +153,10 @@ local async_ref = function()
   ref_params.context = { includeDeclaration = false }
   lsp.call_async('textDocument/definition', ref_params, function(err, result, ctx, config)
     trace(err, result, ctx, config)
+    if err ~= nil or result == nil then
+      log('failed to get def', err, result, ctx, config)
+      result = {}
+    end
     for i = 1, #result do
       if result[i].range == nil and result[i].targetRange then
         result[i].range = result[i].targetRange
@@ -166,6 +170,10 @@ local async_ref = function()
     ref_view(err, result, ctx, config)
   end) -- return asyncresult, canceller
   lsp.call_async('textDocument/references', ref_params, function(err, result, ctx, config)
+    if err ~= nil or result == nil then
+      log('failed to get ref', err, result, ctx, config)
+      result = {}
+    end
     trace(err, result, ctx, config)
     results.references = { error = err, result = result, ctx = ctx, config = config }
     ctx = ctx or {}

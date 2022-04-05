@@ -143,10 +143,6 @@ local extend_config = function(opts)
   if next(opts) == nil then
     return
   end
-  if opts.lsp and opts.lsp.servers then
-    require('navigator.lspclient.clients').add_servers(opts.lsp.servers)
-    opts.lsp.server = nil
-  end
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then
       warn(
@@ -227,6 +223,7 @@ M.setup = function(cfg)
   vim.cmd([[autocmd FileType,BufEnter * lua require'navigator.lspclient.clients'.on_filetype()]]) -- BufWinEnter BufNewFile,BufRead ?
   require('navigator.lazyloader').init()
   require('navigator.lspclient.clients').setup(_NgConfigValues)
+
   require('navigator.reference')
   require('navigator.definition')
   require('navigator.hierarchy')
