@@ -430,9 +430,6 @@ local function load_cfg(ft, client, cfg, loaded)
     -- log(lspconfig.available_servers())
     -- force reload with config
     lspconfig[client].setup(cfg)
-    vim.defer_fn(function()
-      vim.cmd([[doautocmd FileType ]] .. ft)
-    end, 100)
     log(client, 'loading for', ft)
   end
   -- need to verify the lsp server is up
@@ -692,7 +689,7 @@ local function get_cfg(client)
   end
 end
 
-local function setup(user_opts)
+local function setup(user_opts, cnt)
   user_opts = user_opts or {}
   local ft = vim.bo.filetype
   local bufnr = user_opts.bufnr or vim.api.nvim_get_current_buf()
@@ -700,10 +697,17 @@ local function setup(user_opts)
     log('nil filetype, callback')
     local ext = vim.fn.expand('%:e')
     if ext ~= '' then
+      local cnt = cnt or 0
       local opts = vim.deepcopy(user_opts)
+      if cnt > 3 then
+        log('failed to load filetype, skip')
+        return
+      else
+        cnt = cnt + 1
+      end
       vim.defer_fn(function()
         log('defer_fn', ext, ft)
-        setup(opts)
+        setup(opts, cnt)
       end, 200)
       return
     else
