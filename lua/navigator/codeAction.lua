@@ -139,9 +139,9 @@ local code_action_req = function(_call_back_fn, diagnostics)
 end
 
 local function sort_select(action_tuples, opts, on_user_choice)
-  table.sort(action_tuples, function(a, b)
-      return a[1] > b[1]
-  end)
+  -- table.sort(action_tuples, function(a, b)
+  --   return a[1] > b[1]
+  -- end)
   require('guihua.gui').select(action_tuples, opts, on_user_choice)
 end
 
