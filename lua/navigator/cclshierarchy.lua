@@ -64,7 +64,7 @@ local function outgoing_calls_handler(bang, err, result, ctx, cfg)
   local results = call_hierarchy_handler_to(err, result, ctx, cfg, 'Outgoing calls not found')
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr or 0, 'ft')
-  gui.new_list_view({ items = results, ft = ft or cpp, api = ' ' })
+  gui.new_list_view({ items = results, ft = ft or 'cpp', api = ' ' })
   -- fzf_locations(bang, "", "Outgoing Calls", results, false)
 end
 
