@@ -1,5 +1,5 @@
-local log = require"navigator.util".log
-local mk_handler = require"navigator.util".mk_handler
+local log = require('navigator.util').log
+local mk_handler = require('navigator.util').mk_handler
 
 local lsp = vim.lsp
 local api = vim.api
@@ -18,7 +18,7 @@ M.servers_supporting_folding = {
   texlab = true,
   clangd = false,
   gopls = true,
-  julials = false
+  julials = false,
 }
 
 M.active_folding_clients = {}
@@ -29,11 +29,11 @@ function M.on_attach()
 end
 
 function M.setup_plugin()
-  api.nvim_command("augroup FoldingCommand")
-  api.nvim_command("autocmd! * <buffer>")
+  api.nvim_command('augroup FoldingCommand')
+  api.nvim_command('autocmd! * <buffer>')
   api.nvim_command("autocmd BufEnter <buffer> lua require'navigator.foldlsp'.update_folds()")
   api.nvim_command("autocmd BufWritePost <buffer> lua require'navigator.foldlsp'.update_folds()")
-  api.nvim_command("augroup end")
+  api.nvim_command('augroup end')
 
   -- vim.cmd([[
   --
@@ -43,7 +43,7 @@ function M.setup_plugin()
   --
   --   ]])
 
-  local clients = vim.lsp.buf_get_clients()
+  local clients = vim.lsp.buf_get_clients(0)
 
   for _, client in pairs(clients) do
     local client_id = client['id']
@@ -73,9 +73,8 @@ function M.update_folds()
         -- XXX: better to pass callback in this method or add it directly in the config?
         -- client.config.callbacks['textDocument/foldingRange'] = M.fold_handler
         local current_bufnr = api.nvim_get_current_buf()
-        local params = {uri = vim.uri_from_bufnr(current_bufnr)}
-        client.request('textDocument/foldingRange', {textDocument = params}, M.fold_handler,
-                       current_bufnr)
+        local params = { uri = vim.uri_from_bufnr(current_bufnr) }
+        client.request('textDocument/foldingRange', { textDocument = params }, M.fold_handler, current_bufnr)
       end
     end
   end
@@ -93,7 +92,7 @@ M.fold_handler = mk_handler(function(err, result, ctx, config)
   -- params: err, method, result, client_id, bufnr
   -- XXX: handle err?
   if err or result == nil or #result == 0 then
-    vim.notify(string.format("%s %s ", tostring(err), vim.inspect(ctx)), vim.lsp.log_levels.WARN)
+    vim.notify(string.format('%s %s ', tostring(err), vim.inspect(ctx)), vim.lsp.log_levels.WARN)
     return
   end
   M.debug_folds()
@@ -160,13 +159,12 @@ function M.get_fold_indic(lnum)
     -- without any marker.
     return fold_level
   elseif is_foldstart then
-    return string.format(">%d", fold_level)
+    return string.format('>%d', fold_level)
   elseif is_foldend then
-    return string.format("<%d", fold_level)
+    return string.format('<%d', fold_level)
   else
     return fold_level
   end
-
 end
 
 return M

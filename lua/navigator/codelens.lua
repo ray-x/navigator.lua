@@ -92,7 +92,7 @@ end
 M.lsp_clients = {}
 
 function M.refresh()
-  if #vim.lsp.buf_get_clients() < 1 then
+  if next(vim.lsp.buf_get_clients(0)) == nil then
     log('Must have a client running to use lsp code action')
     return
   end
@@ -130,7 +130,8 @@ M.inline = function()
   if vim.fn.getcmdwintype() == ':' then
     return
   end
-  if #vim.lsp.buf_get_clients() == 0 then
+
+  if next(vim.lsp.buf_get_clients(0)) == nil then
     return
   end
 

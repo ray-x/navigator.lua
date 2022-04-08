@@ -13,7 +13,7 @@ local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_me
   log('call_hierarchy')
   log('call_hierarchy', direction, err, result, ctx, cfg)
 
-  assert(#vim.lsp.buf_get_clients() > 0, 'Must have a client running to use lsp_tags')
+  assert(next(vim.lsp.buf_get_clients()), 'Must have a client running to use lsp_tags')
   if err ~= nil then
     log('hierarchy error', ctx, 'dir', direction, 'result', result, 'err', err)
     vim.notify('ERROR: ' .. error_message, vim.lsp.log_levels.WARN)
@@ -52,7 +52,8 @@ local call_hierarchy_handler_from = partial(call_hierarchy_handler, 'from')
 local call_hierarchy_handler_to = partial(call_hierarchy_handler, 'to')
 
 local function incoming_calls_handler(bang, err, result, ctx, cfg)
-  assert(#vim.lsp.buf_get_clients() > 0, 'Must have a client running to use lsp_tags')
+  local bufnr = vim.api.nvim_get_current_buf()
+  assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use lsp_tags')
 
   local results = call_hierarchy_handler_from(err, result, ctx, cfg, 'Incoming calls not found')
 
@@ -69,7 +70,8 @@ local function outgoing_calls_handler(bang, err, result, ctx, cfg)
 end
 
 function M.incoming_calls(bang, opts)
-  assert(#vim.lsp.buf_get_clients() > 0, 'Must have a client running to use lsp_tags')
+  local bufnr = vim.api.nvim_get_current_buf()
+  assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use lsp_tags')
   -- if not lsphelper.check_capabilities("call_hierarchy") then
   --   return
   -- end
@@ -85,7 +87,8 @@ function M.incoming_calls(bang, opts)
 end
 
 function M.outgoing_calls(bang, opts)
-  assert(#vim.lsp.buf_get_clients() > 0, 'Must have a client running to use lsp_tags')
+  local bufnr = vim.api.nvim_get_current_buf()
+  assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use lsp_tags')
   local params = vim.lsp.util.make_position_params()
   params['levels'] = 2
   params['callee'] = true
