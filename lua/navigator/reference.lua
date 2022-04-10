@@ -150,7 +150,6 @@ end)
 local async_ref = function()
   local ref_params = vim.lsp.util.make_position_params()
   local results = {}
-  ref_params.context = { includeDeclaration = false }
   lsp.call_async('textDocument/definition', ref_params, function(err, result, ctx, config)
     trace(err, result, ctx, config)
     if err ~= nil or result == nil then
@@ -169,6 +168,8 @@ local async_ref = function()
     ctx.combine = true
     ref_view(err, result, ctx, config)
   end) -- return asyncresult, canceller
+
+  ref_params.context = { includeDeclaration = false }
   lsp.call_async('textDocument/references', ref_params, function(err, result, ctx, config)
     if err ~= nil or result == nil then
       log('failed to get ref', err, result, ctx, config)
