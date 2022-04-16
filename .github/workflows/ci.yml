@@ -38,7 +38,7 @@ jobs:
             mkdir -p _neovim
             curl -sL ${{ matrix.url }} | tar xzf - --strip-components=1 -C "${PWD}/_neovim"
           }
-          GO111MODULE=on go get golang.org/x/tools/gopls@latest
+          GO111MODULE=on go install golang.org/x/tools/gopls@latest
 
           mkdir -p ~/.local/share/nvim/site/pack/vendor/start
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
