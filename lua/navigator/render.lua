@@ -148,7 +148,7 @@ function M.prepare_for_render(items, opts)
       ts_report = _NgConfigValues.icons.value_changed
     end
 
-    log(item)
+    log(item.text, item.symbol_name, item.uri)
     if item.definition then
       log('definition', item)
       ts_report = ts_report .. _NgConfigValues.icons.value_definition .. ' '
