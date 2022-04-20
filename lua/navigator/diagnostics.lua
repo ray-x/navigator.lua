@@ -12,16 +12,11 @@ local path_sep = require('navigator.util').path_sep()
 local mk_handler = require('navigator.util').mk_handler
 local path_cur = require('navigator.util').path_cur()
 local empty = util.empty
-diagnostic_list[vim.bo.filetype] = {}
-local function clear_diag_VT(bufnr) -- important for clearing out when no more errors
-  log(bufnr, _NG_VT_DIAG_NS)
-  if bufnr == nil or _NG_VT_DIAG_NS == nil then
-    return
-  end
 
-  vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
-  _NG_VT_DIAG_NS = nil
+if not util.nvim_0_6_1() then
+  util.warn('Navigator 0.4+ only support nvim-0.6+, please use Navigator 0.3.x or a newer version of neovim')
 end
+diagnostic_list[vim.bo.filetype] = {}
 
 local diag_map = {}
 if vim.diagnostic then
@@ -164,7 +159,7 @@ local function error_marker(result, ctx, config)
     if not vim.tbl_isempty(pos) then
       vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
     end
-    for i, s in pairs(pos) do
+    for _, s in pairs(pos) do
       local hl = 'ErrorMsg'
       if type(s.severity) == 'number' then
         if s.severity == 2 then
@@ -223,13 +218,8 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     trace('diagnostic', result.diagnostics, ctx, config)
   end
 
-  if util.nvim_0_6_1() then
-    trace(err, result, ctx, config)
-    vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
-  else
-    log('old version of lsp nvim <=0.5.0')
-    vim.lsp.diagnostic.on_publish_diagnostics(err, _, result, ctx.client_id, _, config)
-  end
+  trace(err, result, ctx, config)
+  vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   local uri = result.uri
 
   local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
@@ -333,10 +323,20 @@ M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
 
 vim.diagnostic.config(diagnostic_cfg)
 
+local function clear_diag_VT(bufnr) -- important for clearing out when no more errors
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  log(bufnr, _NG_VT_DIAG_NS)
+  if _NG_VT_DIAG_NS == nil then
+    return
+  end
+
+  vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
+  _NG_VT_DIAG_NS = nil
+end
+
 M.hide_diagnostic = function()
   if _NG_VT_DIAG_NS then
-    vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
-    _NG_VT_DIAG_NS = nil
+    clear_diag_VT()
   end
 end
 
@@ -386,7 +386,6 @@ M.set_diag_loclist = function()
     return
   end
 
-  local bufnr = vim.api.nvim_get_current_buf()
   local clients = vim.lsp.buf_get_clients(bufnr)
   local cfg = { open = diag_cnt > 0 }
   for _, client in pairs(clients) do
@@ -471,17 +470,15 @@ function M.show_diagnostics(pos)
 end
 
 function M.config(cfg)
-  cfg = cfg
-    or {
-      underline = true,
-      virtual_text = true,
-      signs = { _NgConfigValues.icons.diagnostic_err },
-      update_in_insert = false,
-    }
+  cfg = cfg or {}
+  local default_cfg = {
+    underline = true,
+    virtual_text = true,
+    signs = { _NgConfigValues.icons.diagnostic_err },
+    update_in_insert = false,
+  }
+  cfg = vim.tbl_extend('keep', cfg, default_cfg)
   vim.diagnostic.config(cfg)
 end
 
-if not util.nvim_0_6_1() then
-  util.warn('Navigator 0.4+ only support nvim-0.6+, please use 0.3.x')
-end
 return M
