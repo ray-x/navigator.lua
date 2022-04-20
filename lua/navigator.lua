@@ -229,7 +229,7 @@ M.setup = function(cfg)
   require('navigator.hierarchy')
   require('navigator.implementation')
 
-  require('navigator.diagnostics').config(cfg.diagnostic)
+  require('navigator.diagnostics').config(cfg.lsp.diagnostic)
   if not _NgConfigValues.loaded then
     _NgConfigValues.loaded = true
   end
