@@ -741,7 +741,7 @@ local function setup(user_opts, cnt)
     'windline',
   }
   for i = 1, #disable_ft do
-    if ft == disable_ft[i] or _LoadedFiletypes[ft] then
+    if ft == disable_ft[i] then
       trace('navigator disabled for ft or it is loaded', ft)
       return
     end
@@ -789,12 +789,12 @@ local function setup(user_opts, cnt)
 
   lsp_startup(ft, retry, lsp_opts)
 
-  --- if code line enabled
-  if _NgConfigValues.lsp.code_lens then
+  --- if code lens enabled
+  if _NgConfigValues.lsp.code_lens_action.enable then
     require('navigator.codelens').setup()
   end
 
-  -- _LoadedFiletypes[ft .. tostring(bufnr)] = true
+  -- _LoadedFiletypes[ft .. tostring(bufnr)] = true -- may prevent lsp config when reboot lsp
 end
 
 local function on_filetype()

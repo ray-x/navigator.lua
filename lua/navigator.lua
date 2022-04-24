@@ -27,8 +27,6 @@ _NgConfigValues = {
     -- your on_attach will be called at end of navigator on_attach
   end,
   ts_fold = false,
-  -- code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
-  -- code_lens_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
@@ -58,7 +56,6 @@ _NgConfigValues = {
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = {}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
-    code_lens = false,
     -- only want to enable one lsp server
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
     diagnostic_load_files = false, -- lsp diagnostic errors list may contains uri that not opened yet set to true
@@ -131,6 +128,10 @@ M.deprecated = function(cfg)
 
   if cfg.lsp ~= nil and cfg.lsp.disable_format_ft ~= nil and cfg.lsp.disable_format_ft ~= {} then
     warn('disable_format_ft renamed to disable_format_cap')
+  end
+
+  if cfg.lsp ~= nil and cfg.lsp.code_lens == true then
+    warn('code_lens moved to lsp.code_lens_action')
   end
 
   if cfg.lspinstall ~= nil then
