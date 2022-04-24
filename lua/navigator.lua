@@ -222,7 +222,7 @@ M.setup = function(cfg)
 
   vim.cmd([[autocmd FileType,BufEnter * lua require'navigator.lspclient.clients'.on_filetype()]]) -- BufWinEnter BufNewFile,BufRead ?
   require('navigator.lazyloader').init()
-  require('navigator.lspclient.clients').setup(_NgConfigValues)
+  require('navigator.lspclient.clients').setup(cfg)
 
   require('navigator.reference')
   require('navigator.definition')

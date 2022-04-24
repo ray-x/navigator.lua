@@ -790,7 +790,7 @@ local function setup(user_opts, cnt)
   lsp_startup(ft, retry, lsp_opts)
 
   --- if code line enabled
-  if _NgConfigValues.lsp.code_lens then
+  if user_opts.lsp.code_lens then
     require('navigator.codelens').setup()
   end
 

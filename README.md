@@ -263,6 +263,7 @@ require'navigator'.setup({
   lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   lsp = {
     code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+    code_lens = true,
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     format_on_save = true, -- set to false to disable lsp code format on save (if you are using prettier/efm/formater etc)
     disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
@@ -548,7 +549,6 @@ require'navigator'.setup({
 Use lsp_installer configs
 You can delegate the lsp server setup to lsp_installer with `server:setup{opts}`
 Here is an example [init_lsp_installer.lua](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
-
 
 ## Usage
 
