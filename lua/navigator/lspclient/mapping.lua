@@ -9,6 +9,9 @@ local event_hdlrs = {
   { ev = 'CursorMoved', func = 'clear_references()' },
 }
 
+if vim.diagnostic == nil then
+  util.error('Please update nvim to 0.6.1+')
+end
 local double = { '╔', '═', '╗', '║', '╝', '═', '╚', '║' }
 local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
 -- TODO https://github.com/neovim/neovim/pull/16591 use vimkeymap.set/del
@@ -63,9 +66,15 @@ local ccls_mappings = {
   { key = '<Leader>go', func = "require('navigator.cclshierarchy').outgoing_calls()" },
 }
 
-local check_cap = function(cap)
+local check_cap = function(opts)
   -- log(vim.lsp.buf_get_clients(0))
   local fmt, rfmt, ccls
+  local cap = opts.cap
+  if cap == nil then
+    if opts.client and opts.client.resolved_capabilities then
+      cap = opts.client.resolved_capabilities
+    end
+  end
   if cap and cap.document_formatting then
     fmt = true
   end
@@ -92,10 +101,9 @@ local check_cap = function(cap)
 end
 
 local function set_mapping(user_opts)
-  log('setup mapping')
   local opts = { noremap = true, silent = true }
   user_opts = user_opts or {}
-
+  log('setup mapping', user_opts)
   local user_key = _NgConfigValues.keymaps or {}
   local bufnr = user_opts.bufnr or 0
 
@@ -109,7 +117,7 @@ local function set_mapping(user_opts)
   -- local function buf_set_option(...)
   --   vim.api.nvim_buf_set_option(bufnr, ...)
   -- end
-  local doc_fmt, range_fmt, ccls = check_cap(user_opts.cap)
+  local doc_fmt, range_fmt, ccls = check_cap(user_opts)
 
   if ccls then
     vim.list_extend(key_maps, ccls_mappings)
@@ -140,11 +148,7 @@ local function set_mapping(user_opts)
       f = '<Cmd>lua ' .. value.func .. '<CR>'
     elseif string.find(value.func, 'diagnostic') then
       local diagnostic = '<Cmd>lua vim.'
-      if vim.diagnostic ~= nil then
-        diagnostic = '<Cmd>lua vim.'
-      else
-        util.error('Please update nvim to 0.6.1+')
-      end
+      diagnostic = '<Cmd>lua vim.'
       f = diagnostic .. value.func .. '<CR>'
     elseif string.find(value.func, 'vim.') then
       f = '<Cmd>lua ' .. value.func .. '<CR>'
@@ -156,7 +160,7 @@ local function set_mapping(user_opts)
     elseif string.find(value.func, 'formatting') then
       fmtkey = value.key
     end
-    trace('binding', k, f)
+    log('binding', k, f)
     set_keymap(m, k, f, opts)
   end
 
@@ -185,7 +189,7 @@ local function set_mapping(user_opts)
     del_keymap('v', rfmtkey)
   end
 
-  log('enable format ', doc_fmt, range_fmt)
+  log('enable format ', doc_fmt, range_fmt, _NgConfigValues.lsp.format_on_save)
 end
 
 local function autocmd(user_opts)
