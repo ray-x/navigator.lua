@@ -348,6 +348,7 @@ local servers = {
   'fsautocomplete',
   'vls',
   'hls',
+  'tflint',
 }
 
 local lsp_installer_servers = {}
