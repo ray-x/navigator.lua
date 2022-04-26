@@ -349,6 +349,7 @@ local servers = {
   'vls',
   'hls',
   'tflint',
+  'terraform_lsp',
 }
 
 local lsp_installer_servers = {}
@@ -625,7 +626,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     if vim.fn.executable(cfg.cmd[1]) == 0 then
-      vim.notify('lsp server not installed in path ' .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)
+      log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)
     end
 
     load_cfg(ft, lspclient, cfg, loaded)
@@ -698,7 +699,7 @@ local function setup(user_opts, cnt)
     log('nil filetype, callback')
     local ext = vim.fn.expand('%:e')
     if ext ~= '' then
-      local cnt = cnt or 0
+      cnt = cnt or 0
       local opts = vim.deepcopy(user_opts)
       if cnt > 3 then
         log('failed to load filetype, skip')
