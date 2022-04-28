@@ -11,7 +11,7 @@ M.on_attach = function(client, bufnr)
   bufnr = bufnr or 0
 
   if bufnr == 0 then
-    vim.notify('no bufnr provided from LSP ', client.name)
+    vim.notify('no bufnr provided from LSP ' .. client.name, vim.log.levels.DEBUG)
   end
   local uri = vim.uri_from_bufnr(bufnr)
 
