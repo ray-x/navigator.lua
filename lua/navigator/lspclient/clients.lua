@@ -184,9 +184,9 @@ local setups = {
       '--cross-file-rename',
     },
     filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
-    on_attach = function(client)
+    on_attach = function(client, buffnr)
       client.resolved_capabilities.document_formatting = true
-      on_attach(client)
+      on_attach(client, bufnr)
     end,
   },
   rust_analyzer = {
