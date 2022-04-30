@@ -79,7 +79,7 @@ end
 function M.incoming_calls(bang, opts)
   local bufnr = vim.api.nvim_get_current_buf()
   assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use lsp hierarchy')
-  if not lsphelper.check_capabilities('call_hierarchy') then
+  if not lsphelper.check_capabilities('callHierarchyProvider') then
     return
   end
 
@@ -90,7 +90,7 @@ end
 function M.outgoing_calls(bang, opts)
   local bufnr = vim.api.nvim_get_current_buf()
   assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use lsp_tags')
-  if not lsphelper.check_capabilities('call_hierarchy') then
+  if not lsphelper.check_capabilities('callHierarchyProvider') then
     return
   end
 

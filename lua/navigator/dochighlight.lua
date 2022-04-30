@@ -210,7 +210,7 @@ _G.nav_doc_hl = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local ref_params = vim.lsp.util.make_position_params()
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, bufnr)
-    if client.resolved_capabilities.document_highlight then
+    if client.server_capabilities.documentHighlightProvider then
       client.request('textDocument/documentHighlight', ref_params, handle_document_highlight, bufnr)
     end
   end)

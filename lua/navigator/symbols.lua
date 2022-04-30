@@ -14,7 +14,8 @@ function M.workspace_symbols(query)
   local bufnr = vim.api.nvim_get_current_buf()
   local params = { query = query }
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
-    if client.resolved_capabilities.workspace_symbol then
+    -- if client.resolved_capabilities.workspace_symbol then
+    if client.server_capabilities.workspaceSymbolProvider then
       client.request('workspace/symbol', params, M.workspace_symbol_handler, _bufnr)
     end
   end)
@@ -35,7 +36,8 @@ function M.document_symbols(opts)
   params.context = { includeDeclaration = true }
   params.query = opts.prompt or ''
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
-    if client.resolved_capabilities.document_symbol then
+    -- if client.resolved_capabilities.document_symbol then
+    if client.server_capabilities.documentSymbolProvider then
       client.request('textDocument/documentSymbol', params, M.document_symbol_handler, _bufnr)
     end
   end)

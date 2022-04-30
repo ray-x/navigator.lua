@@ -184,8 +184,8 @@ local setups = {
       '--cross-file-rename',
     },
     filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
-    on_attach = function(client, buffnr)
-      client.resolved_capabilities.document_formatting = true
+    on_attach = function(client, bufnr)
+      client.server_capabilities.documentFormattingProvider = true
       on_attach(client, bufnr)
     end,
   },
@@ -208,7 +208,7 @@ local setups = {
   sqls = {
     filetypes = { 'sql' },
     on_attach = function(client, bufnr)
-      client.resolved_capabilities.execute_command = true
+      client.server_capabilities.executeCommandProvider = true
       highlight.diagnositc_config_sign()
       require('sqls').setup({ picker = 'telescope' }) -- or default
     end,
@@ -546,7 +546,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       if config.combined_attach == nil then
         cfg.on_attach = function(client, bufnr)
           on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+          client.server_capabilities.documentFormattingProvider = enable_fmt
         end
       end
       if config.combined_attach == 'mine' then
@@ -555,7 +555,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         end
         cfg.on_attach = function(client, bufnr)
           config.on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+          client.server_capabilities.documentFormattingProvider = enable_fmt
           require('navigator.lspclient.mapping').setup({
             client = client,
             bufnr = bufnr,
@@ -567,7 +567,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         cfg.on_attach = function(client, bufnr)
           on_attach(client, bufnr)
           config.on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+          client.server_capabilities.documentFormattingProvider = enable_fmt
           require('navigator.lspclient.mapping').setup({
             client = client,
             bufnr = bufnr,
@@ -577,7 +577,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
       if config.combined_attach == 'both' then
         cfg.on_attach = function(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+          client.server_capabilities.documentFormattingProvider = enable_fmt
           if config.on_attach and type(config.on_attach) == 'function' then
             config.on_attach(client, bufnr)
           end
@@ -605,7 +605,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     else
       cfg.on_attach = function(client, bufnr)
         on_attach(client, bufnr)
-        client.resolved_capabilities.document_formatting = enable_fmt
+        client.server_capabilities.documentFormattingProvider = enable_fmt
       end
     end
 

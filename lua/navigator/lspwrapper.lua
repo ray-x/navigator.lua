@@ -122,7 +122,8 @@ function M.check_capabilities(feature, client_id)
 
   local supported_client = false
   for _, client in pairs(clients) do
-    supported_client = client.resolved_capabilities[feature]
+    -- supported_client = client.resolved_capabilities[feature]
+    supported_client = client.server_capabilities[feature]
     if supported_client then
       break
     end

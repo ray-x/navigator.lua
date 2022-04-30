@@ -71,23 +71,23 @@ local check_cap = function(opts)
   local fmt, rfmt, ccls
   local cap = opts.cap
   if cap == nil then
-    if opts.client and opts.client.resolved_capabilities then
-      cap = opts.client.resolved_capabilities
+    if opts.client and opts.client.server_capabilities then
+      cap = opts.client.server_capabilities
     end
   end
-  if cap and cap.document_formatting then
+  if cap and cap.documentFormattingProvider then
     fmt = true
   end
-  if cap and cap.document_range_formatting then
+  if cap and cap.documentRangeFormattingProvider then
     rfmt = true
   end
   for _, value in pairs(vim.lsp.buf_get_clients(0)) do
     trace(value)
-    if value ~= nil and value.resolved_capabilities == nil then
-      if value.resolved_capabilities.document_formatting then
+    if value ~= nil and value.server_capabilities == nil then
+      if value.server_capabilities.documentFormattingProvider then
         fmt = true
       end
-      if value.resolved_capabilities.document_range_formatting then
+      if value.server_capabilities.documentRangeFormattingProvider then
         rfmt = true
       end
 
@@ -257,11 +257,11 @@ function M.setup(user_opts)
   set_event_handler(user_opts)
 
   local client = user_opts.client or {}
-  local cap = client.resolved_capabilities or vim.lsp.protocol.make_client_capabilities()
+  local cap = client.server_capabilities or vim.lsp.protocol.make_client_capabilities()
 
   log('lsp cap:', cap)
 
-  if cap.call_hierarchy or cap.callHierarchy then
+  if cap.call_hierarchy or cap.callHierarchyProvider then
     vim.lsp.handlers['callHierarchy/incomingCalls'] = require('navigator.hierarchy').incoming_calls_handler
     vim.lsp.handlers['callHierarchy/outgoingCalls'] = require('navigator.hierarchy').outgoing_calls_handler
   end
@@ -270,7 +270,7 @@ function M.setup(user_opts)
   -- vim.lsp.handlers["textDocument/codeAction"] = require"navigator.codeAction".code_action_handler
   vim.lsp.handlers['textDocument/definition'] = require('navigator.definition').definition_handler
 
-  if cap.declaration then
+  if cap.declarationProvider then
     vim.lsp.handlers['textDocument/declaration'] = require('navigator.definition').declaration_handler
   end
 
@@ -298,7 +298,7 @@ function M.setup(user_opts)
   end
 
   vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = single })
-  if cap.document_formatting then
+  if cap.documentFormattingProvider then
     log('formatting enabled setup hdl')
     vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl
   end

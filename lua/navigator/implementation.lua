@@ -23,7 +23,7 @@ local function implementation_handler(bang, err, result, ctx, cfg)
 end
 
 function M.implementation(bang, opts)
-  if not lsphelper.check_capabilities('implementation') then
+  if not lsphelper.check_capabilities('implementationProvider') then
     return
   end
 

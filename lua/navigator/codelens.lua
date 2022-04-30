@@ -96,7 +96,7 @@ function M.refresh()
     log('Must have a client running to use lsp code action')
     return
   end
-  if not lsphelper.check_capabilities('code_lens') then
+  if not lsphelper.check_capabilities('codeLensProvider') then
     return
   end
   vim.lsp.codelens.refresh()
