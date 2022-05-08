@@ -9,6 +9,10 @@ local event_hdlrs = {
   { ev = 'CursorMoved', func = 'clear_references()' },
 }
 
+if vim.lsp.buf.format == nil then
+  vim.lsp.buf.format = vim.lsp.buf.formatting
+end
+
 if vim.diagnostic == nil then
   util.error('Please update nvim to 0.6.1+')
 end
@@ -51,7 +55,7 @@ local key_maps = {
   { key = '<Leader>k', func = "require('navigator.dochighlight').hi_symbol()" },
   { key = '<Space>wa', func = "require('navigator.workspace').add_workspace_folder()" },
   { key = '<Space>wr', func = "require('navigator.workspace').remove_workspace_folder()" },
-  { key = '<Space>ff', func = 'formatting()', mode = 'n' },
+  { key = '<Space>ff', func = 'format({async = true})', mode = 'n' },
   { key = '<Space>ff', func = 'range_formatting()', mode = 'v' },
   { key = '<Space>wl', func = "require('navigator.workspace').list_workspace_folders()" },
   { key = '<Space>la', mode = 'n', func = "require('navigator.codelens').run_action()" },
@@ -157,7 +161,7 @@ local function set_mapping(user_opts)
     local m = value.mode or 'n'
     if string.find(value.func, 'range_formatting') then
       rfmtkey = value.key
-    elseif string.find(value.func, 'formatting') then
+    elseif string.find(value.func, 'format') then
       fmtkey = value.key
     end
     log('binding', k, f)
@@ -174,7 +178,7 @@ local function set_mapping(user_opts)
     vim.cmd([[
       aug NavigatorAuFormat
         au!
-        autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()
+        autocmd BufWritePre <buffer> lua vim.lsp.buf.format({async = true})
       aug END
      ]])
   elseif fmtkey then
