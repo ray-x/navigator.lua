@@ -380,12 +380,6 @@ local configs = {}
 
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
-  -- if _NG_LSPCfgSetup ~= true then
-  -- log(lspconfig_setup)
-  -- lspconfig_setup(cfg)
-  -- _NG_LSPCfgSetup = true
-  -- end
-
   log(ft, client, loaded)
   trace(cfg)
   if lspconfig[client] == nil then
