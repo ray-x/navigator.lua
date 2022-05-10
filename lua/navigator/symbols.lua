@@ -2,7 +2,6 @@ local gui = require('navigator.gui')
 local M = {}
 local log = require('navigator.util').log
 local trace = require('navigator.util').trace
-local mk_handler = require('navigator.util').mk_handler
 local lsphelper = require('navigator.lspwrapper')
 local locations_to_items = lsphelper.locations_to_items
 local clone = require('guihua.util').clone
@@ -43,7 +42,7 @@ function M.document_symbols(opts)
   end)
 end
 
-M.document_symbol_handler = mk_handler(function(err, result, ctx)
+M.document_symbol_handler = function(err, result, ctx)
   if err then
     vim.notify('failed to get document symbol' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
   end
@@ -101,9 +100,9 @@ M.document_symbol_handler = mk_handler(function(err, result, ctx)
 
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
   gui.new_list_view({ items = locations, prompt = true, rawdata = true, ft = ft, api = ' ' })
-end)
+end
 
-M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
+M.workspace_symbol_handler = function(err, result, ctx, cfg)
   trace(err, result, ctx, cfg)
   if err then
     vim.notify('failed to get workspace symbol' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
@@ -123,6 +122,6 @@ M.workspace_symbol_handler = mk_handler(function(err, result, ctx, cfg)
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
   gui.new_list_view({ items = items, prompt = true, ft = ft, rowdata = true, api = ' ' })
-end)
+end
 
 return M

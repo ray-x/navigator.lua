@@ -4,8 +4,6 @@
 local codelens = require('vim.lsp.codelens')
 
 local log = require('navigator.util').log
-local mk_handler = require('navigator.util').mk_handler
-local nvim_0_6_1 = require('navigator.util').nvim_0_6_1
 local trace = require('navigator.util').trace
 
 local lsphelper = require('navigator.lspwrapper')
@@ -49,7 +47,7 @@ local function _update_sign(line)
   end
 end
 
-local codelens_hdlr = mk_handler(function(err, result, ctx, cfg)
+local codelens_hdlr = function(err, result, ctx, cfg)
   trace(ctx, result)
   M.codelens_ctx = ctx
   if err or result == nil then
@@ -62,7 +60,7 @@ local codelens_hdlr = mk_handler(function(err, result, ctx, cfg)
   for _, v in pairs(result) do
     _update_sign(v.range.start.line)
   end
-end)
+end
 
 function M.setup()
   vim.cmd('highlight! link LspCodeLens LspDiagnosticsHint')
@@ -75,18 +73,13 @@ function M.setup()
   vim.cmd("autocmd BufEnter,CursorHold,InsertLeave <buffer> lua require('navigator.codelens').refresh()")
   vim.cmd('augroup end')
   local on_codelens = vim.lsp.handlers['textDocument/codeLens']
-  vim.lsp.handlers['textDocument/codeLens'] = mk_handler(function(err, result, ctx, cfg)
+  vim.lsp.handlers['textDocument/codeLens'] = function(err, result, ctx, cfg)
     -- trace(err, result, ctx.client_id, ctx.bufnr, cfg or {})
     cfg = cfg or {}
     ctx = ctx or { bufnr = vim.api.nvim_get_current_buf() }
-    if nvim_0_6_1() then
-      on_codelens(err, result, ctx, cfg)
-      codelens_hdlr(err, result, ctx, cfg)
-    else
-      on_codelens(err, ctx.method, result, ctx.client_id, ctx.bufnr)
-      codelens_hdlr(err, nil, result, ctx.client_id or 0, ctx.bufnr or 0)
-    end
-  end)
+    on_codelens(err, result, ctx, cfg)
+    codelens_hdlr(err, result, ctx, cfg)
+  end
 end
 
 M.lsp_clients = {}

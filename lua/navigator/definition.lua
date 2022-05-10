@@ -5,7 +5,7 @@ local gui = require('navigator.gui')
 local log = util.log
 local TextView = require('guihua.textview')
 -- callback for lsp definition, implementation and declaration handler
-local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
+local definition_hdlr = function(err, locations, ctx, _)
   -- log(locations)
   if err ~= nil then
     vim.notify('Defination: ' .. tostring(err) .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
@@ -31,7 +31,7 @@ local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
   else
     vim.lsp.util.jump_to_location(locations, oe)
   end
-end)
+end
 
 local function get_symbol()
   local currentWord = vim.fn.expand('<cword>')

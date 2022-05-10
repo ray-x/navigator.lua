@@ -1,5 +1,4 @@
 local util = require('navigator.util')
-local mk_handler = util.mk_handler
 local lsphelper = require('navigator.lspwrapper')
 local gui = require('navigator.gui')
 local M = {}

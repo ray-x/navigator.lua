@@ -9,7 +9,6 @@ local trace = require('guihua.log').trace
 -- trace = log
 local error = util.error
 local path_sep = require('navigator.util').path_sep()
-local mk_handler = require('navigator.util').mk_handler
 local path_cur = require('navigator.util').path_cur()
 local empty = util.empty
 
@@ -194,7 +193,7 @@ local update_err_marker_async = function()
   return debounce(400, error_marker)
 end
 
-local diag_hdlr = mk_handler(function(err, result, ctx, config)
+local diag_hdlr = function(err, result, ctx, config)
   require('navigator.lspclient.highlight').diagnositc_config_sign()
   config = config or diagnostic_cfg
   if err ~= nil then
@@ -305,7 +304,7 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
     _NG_VT_DIAG_NS = nil
   end
-end)
+end
 
 local diag_hdlr_async = function()
   local debounce = require('navigator.debounce').debounce_trailing
