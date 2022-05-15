@@ -1,7 +1,6 @@
 local M = {}
 
 local util = require('navigator.util')
-local nvim_0_6_1 = util.nvim_0_6_1()
 
 local gutil = require('guihua.util')
 local lsp = require('vim.lsp')
@@ -122,7 +121,8 @@ function M.check_capabilities(feature, client_id)
 
   local supported_client = false
   for _, client in pairs(clients) do
-    supported_client = client.resolved_capabilities[feature]
+    -- supported_client = client.resolved_capabilities[feature]
+    supported_client = client.server_capabilities[feature]
     if supported_client then
       break
     end
@@ -145,11 +145,7 @@ function M.call_sync(method, params, opts, handler)
   opts = opts or {}
   local results_lsp, err = lsp.buf_request_sync(0, method, params, opts.timeout or vim.g.navtator_timeout or 1000)
 
-  if nvim_0_6_1 then
-    handler(err, extract_result(results_lsp), { method = method }, nil)
-  else
-    handler(err, method, extract_result(results_lsp), nil, nil)
-  end
+  handler(err, extract_result(results_lsp), { method = method }, nil)
 end
 
 function M.call_async(method, params, handler)

@@ -1,5 +1,4 @@
 local log = require('navigator.util').log
-local mk_handler = require('navigator.util').mk_handler
 
 local lsp = vim.lsp
 local api = vim.api
@@ -88,7 +87,7 @@ function M.debug_folds()
   end
 end
 
-M.fold_handler = mk_handler(function(err, result, ctx, config)
+M.fold_handler = function(err, result, ctx, config)
   -- params: err, method, result, client_id, bufnr
   -- XXX: handle err?
   if err or result == nil or #result == 0 then
@@ -112,7 +111,7 @@ M.fold_handler = mk_handler(function(err, result, ctx, config)
     api.nvim_win_set_option(current_window, 'foldmethod', 'expr')
     api.nvim_win_set_option(current_window, 'foldexpr', 'foldlsp#foldexpr()')
   end
-end)
+end
 
 function M.adjust_foldstart(line_no)
   return line_no + 1

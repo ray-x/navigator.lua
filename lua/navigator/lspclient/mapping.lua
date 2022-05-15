@@ -9,6 +9,10 @@ local event_hdlrs = {
   { ev = 'CursorMoved', func = 'clear_references()' },
 }
 
+if vim.lsp.buf.format == nil then
+  vim.lsp.buf.format = vim.lsp.buf.formatting
+end
+
 if vim.diagnostic == nil then
   util.error('Please update nvim to 0.6.1+')
 end
@@ -51,7 +55,7 @@ local key_maps = {
   { key = '<Leader>k', func = "require('navigator.dochighlight').hi_symbol()" },
   { key = '<Space>wa', func = "require('navigator.workspace').add_workspace_folder()" },
   { key = '<Space>wr', func = "require('navigator.workspace').remove_workspace_folder()" },
-  { key = '<Space>ff', func = 'formatting()', mode = 'n' },
+  { key = '<Space>ff', func = 'format({async = true})', mode = 'n' },
   { key = '<Space>ff', func = 'range_formatting()', mode = 'v' },
   { key = '<Space>wl', func = "require('navigator.workspace').list_workspace_folders()" },
   { key = '<Space>la', mode = 'n', func = "require('navigator.codelens').run_action()" },
@@ -71,23 +75,23 @@ local check_cap = function(opts)
   local fmt, rfmt, ccls
   local cap = opts.cap
   if cap == nil then
-    if opts.client and opts.client.resolved_capabilities then
-      cap = opts.client.resolved_capabilities
+    if opts.client and opts.client.server_capabilities then
+      cap = opts.client.server_capabilities
     end
   end
-  if cap and cap.document_formatting then
+  if cap and cap.documentFormattingProvider then
     fmt = true
   end
-  if cap and cap.document_range_formatting then
+  if cap and cap.documentRangeFormattingProvider then
     rfmt = true
   end
   for _, value in pairs(vim.lsp.buf_get_clients(0)) do
     trace(value)
-    if value ~= nil and value.resolved_capabilities == nil then
-      if value.resolved_capabilities.document_formatting then
+    if value ~= nil and value.server_capabilities == nil then
+      if value.server_capabilities.documentFormattingProvider then
         fmt = true
       end
-      if value.resolved_capabilities.document_range_formatting then
+      if value.server_capabilities.documentRangeFormattingProvider then
         rfmt = true
       end
 
@@ -157,7 +161,7 @@ local function set_mapping(user_opts)
     local m = value.mode or 'n'
     if string.find(value.func, 'range_formatting') then
       rfmtkey = value.key
-    elseif string.find(value.func, 'formatting') then
+    elseif string.find(value.func, 'format') then
       fmtkey = value.key
     end
     log('binding', k, f)
@@ -174,7 +178,7 @@ local function set_mapping(user_opts)
     vim.cmd([[
       aug NavigatorAuFormat
         au!
-        autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()
+        autocmd BufWritePre <buffer> lua vim.lsp.buf.format({async = true})
       aug END
      ]])
   elseif fmtkey then
@@ -257,11 +261,11 @@ function M.setup(user_opts)
   set_event_handler(user_opts)
 
   local client = user_opts.client or {}
-  local cap = client.resolved_capabilities or vim.lsp.protocol.make_client_capabilities()
+  local cap = client.server_capabilities or vim.lsp.protocol.make_client_capabilities()
 
   log('lsp cap:', cap)
 
-  if cap.call_hierarchy or cap.callHierarchy then
+  if cap.call_hierarchy or cap.callHierarchyProvider then
     vim.lsp.handlers['callHierarchy/incomingCalls'] = require('navigator.hierarchy').incoming_calls_handler
     vim.lsp.handlers['callHierarchy/outgoingCalls'] = require('navigator.hierarchy').outgoing_calls_handler
   end
@@ -270,7 +274,7 @@ function M.setup(user_opts)
   -- vim.lsp.handlers["textDocument/codeAction"] = require"navigator.codeAction".code_action_handler
   vim.lsp.handlers['textDocument/definition'] = require('navigator.definition').definition_handler
 
-  if cap.declaration then
+  if cap.declarationProvider then
     vim.lsp.handlers['textDocument/declaration'] = require('navigator.definition').declaration_handler
   end
 
@@ -298,7 +302,7 @@ function M.setup(user_opts)
   end
 
   vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = single })
-  if cap.document_formatting then
+  if cap.documentFormattingProvider then
     log('formatting enabled setup hdl')
     vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl
   end

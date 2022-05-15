@@ -185,7 +185,8 @@ local setups = {
     },
     filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
     on_attach = function(client, bufnr)
-      client.resolved_capabilities.document_formatting = true
+      client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
+        or true
       on_attach(client, bufnr)
     end,
   },
@@ -208,7 +209,7 @@ local setups = {
   sqls = {
     filetypes = { 'sql' },
     on_attach = function(client, bufnr)
-      client.resolved_capabilities.execute_command = true
+      client.server_capabilities.executeCommandProvider = client.server_capabilities.documentFormattingProvider or true
       highlight.diagnositc_config_sign()
       require('sqls').setup({ picker = 'telescope' }) -- or default
     end,
@@ -379,12 +380,6 @@ local configs = {}
 
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
-  -- if _NG_LSPCfgSetup ~= true then
-  -- log(lspconfig_setup)
-  -- lspconfig_setup(cfg)
-  -- _NG_LSPCfgSetup = true
-  -- end
-
   log(ft, client, loaded)
   trace(cfg)
   if lspconfig[client] == nil then
@@ -437,8 +432,25 @@ local function load_cfg(ft, client, cfg, loaded)
   -- need to verify the lsp server is up
 end
 
+local function setup_fmt(client, enabled)
+  if not require('navigator.util').nvim_0_8() then
+    if enabled == false then
+      client.resolved_capabilities.document_formatting = enabled
+    else
+      client.resolved_capabilities.document_formatting = client.resolved_capabilities.document_formatting or enabled
+    end
+  end
+
+  if enabled == false then
+    client.server_capabilities.documentFormattingProvider = false
+  else
+    client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
+      or enabled
+  end
+end
+
 local function update_capabilities()
-  trace(ft, 'lsp startup')
+  trace(vim.o.ft, 'lsp startup')
   local loaded = {}
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
@@ -526,6 +538,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     -- filetype disabled
     if not vim.tbl_contains(cfg.filetypes or {}, ft) then
       trace('ft', ft, 'disabled for', lspclient)
+
       goto continue
     end
 
@@ -544,10 +557,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       -- log(lsp_opts[lspclient], cfg)
       cfg = vim.tbl_deep_extend('force', cfg, user_lsp_opts[lspclient])
       if config.combined_attach == nil then
-        cfg.on_attach = function(client, bufnr)
-          on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
-        end
+        setup_fmt(client, enable_fmt)
       end
       if config.combined_attach == 'mine' then
         if config.on_attach == nil then
@@ -555,7 +565,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         end
         cfg.on_attach = function(client, bufnr)
           config.on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+
+          setup_fmt(client, enable_fmt)
           require('navigator.lspclient.mapping').setup({
             client = client,
             bufnr = bufnr,
@@ -567,7 +578,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         cfg.on_attach = function(client, bufnr)
           on_attach(client, bufnr)
           config.on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+          setup_fmt(client, enable_fmt)
           require('navigator.lspclient.mapping').setup({
             client = client,
             bufnr = bufnr,
@@ -577,7 +588,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
       if config.combined_attach == 'both' then
         cfg.on_attach = function(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+          setup_fmt(client, enable_fmt)
+
           if config.on_attach and type(config.on_attach) == 'function' then
             config.on_attach(client, bufnr)
           end
@@ -605,7 +617,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     else
       cfg.on_attach = function(client, bufnr)
         on_attach(client, bufnr)
-        client.resolved_capabilities.document_formatting = enable_fmt
+
+        setup_fmt(client, enable_fmt)
       end
     end
 

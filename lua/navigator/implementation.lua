@@ -1,5 +1,4 @@
 local util = require('navigator.util')
-local mk_handler = util.mk_handler
 local lsphelper = require('navigator.lspwrapper')
 local gui = require('navigator.gui')
 local M = {}
@@ -23,7 +22,7 @@ local function implementation_handler(bang, err, result, ctx, cfg)
 end
 
 function M.implementation(bang, opts)
-  if not lsphelper.check_capabilities('implementation') then
+  if not lsphelper.check_capabilities('implementationProvider') then
     return
   end
 

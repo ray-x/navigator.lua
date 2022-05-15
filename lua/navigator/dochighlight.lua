@@ -1,7 +1,6 @@
 local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
-local mk_handler = util.mk_handler
 local api = vim.api
 local references = {}
 _NG_hi_list = {}
@@ -139,7 +138,7 @@ local function before(r1, r2)
   return false
 end
 
-local handle_document_highlight = mk_handler(function(_, result, ctx)
+local handle_document_highlight = function(_, result, ctx)
   trace(result, ctx)
   if not ctx.bufnr then
     log('ducment highlight error', result, ctx)
@@ -157,7 +156,7 @@ local handle_document_highlight = mk_handler(function(_, result, ctx)
   references[ctx.bufnr] = result
   local client_id = ctx.client_id
   vim.lsp.util.buf_highlight_references(ctx.bufnr, result, util.encoding(client_id))
-end)
+end
 -- modify from vim-illuminate
 local function goto_adjent_reference(opt)
   trace(opt)
@@ -210,7 +209,7 @@ _G.nav_doc_hl = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local ref_params = vim.lsp.util.make_position_params()
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, bufnr)
-    if client.resolved_capabilities.document_highlight then
+    if client.server_capabilities.documentHighlightProvider then
       client.request('textDocument/documentHighlight', ref_params, handle_document_highlight, bufnr)
     end
   end)
@@ -227,7 +226,7 @@ local function documentHighlight()
     ]],
     false
   )
-  vim.lsp.handlers['textDocument/documentHighlight'] = mk_handler(function(err, result, ctx)
+  vim.lsp.handlers['textDocument/documentHighlight'] = function(err, result, ctx)
     local bufnr = ctx.bufnr or api.nvim_get_current_buf()
     if err then
       vim.notify(err, vim.lsp.log_levels.ERROR)
@@ -250,7 +249,7 @@ local function documentHighlight()
     end)
     references[bufnr] = result
     add_locs(bufnr, result)
-  end)
+  end
 end
 
 return {

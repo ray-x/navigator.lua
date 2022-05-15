@@ -1,5 +1,4 @@
 local util = require('navigator.util')
-local mk_handler = util.mk_handler
 local log = util.log
 local lsphelper = require('navigator.lspwrapper')
 local gui = require('navigator.gui')
@@ -135,7 +134,7 @@ local ref_view = function(err, locations, ctx, cfg)
   return listview, items, width
 end
 
-local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
+local ref_hdlr = function(err, locations, ctx, cfg)
   _NgConfigValues.closer = nil
   trace(err, locations, ctx, cfg)
   M.async_hdlr = vim.loop.new_async(vim.schedule_wrap(function()
@@ -145,7 +144,7 @@ local ref_hdlr = mk_handler(function(err, locations, ctx, cfg)
     end
   end))
   M.async_hdlr:send()
-end)
+end
 
 local async_ref = function()
   local ref_params = vim.lsp.util.make_position_params()
@@ -206,7 +205,7 @@ local ref = function()
 
   local ref_params = vim.lsp.util.make_position_params()
   vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, bufnr)
-    if client.resolved_capabilities.find_references then
+    if client.server_capabilities.referencesProvider then
       client.request('textDocument/references', ref_params, ref_hdlr, bufnr)
     end
   end)

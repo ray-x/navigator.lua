@@ -5,6 +5,7 @@ local M = { log_path = vim.lsp.get_log_path() }
 -- local is_windows = uv.os_uname().version:match("Windows")
 local guihua = require('guihua.util')
 local nvim_0_6_1
+local nvim_0_8
 
 M.path_sep = function()
   local is_win = vim.loop.os_uname().sysname:find('Windows')
@@ -354,11 +355,20 @@ function M.nvim_0_6_1()
   return nvim_0_6_1
 end
 
+function M.nvim_0_8()
+  if nvim_0_8 ~= nil then
+    return nvim_0_8
+  end
+  nvim_0_8 = vim.fn.has('nvim-0.8') == 1
+  if nvim_0_8 == false then
+    M.log('Please use navigator 0.4 version for neovim version < 0.8')
+  end
+  return nvim_0_8
+end
+
 function M.mk_handler(fn)
   return function(...)
-    if M.nvim_0_6_1() then
-      return fn(...)
-    end
+    return fn(...)
   end
 end
 
@@ -392,7 +402,7 @@ function M.encoding(client)
     return 'utf-8'
   end
   if type(oe) == 'table' then
-    oe = oe[1] or 'utf-8'
+    return oe[1]
   end
   return oe
 end

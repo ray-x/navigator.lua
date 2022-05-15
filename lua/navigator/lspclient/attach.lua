@@ -34,7 +34,7 @@ M.on_attach = function(client, bufnr)
     bufnr = bufnr,
   })
 
-  if client.resolved_capabilities.document_highlight then
+  if client.server_capabilities.documentHighlightProvider then
     require('navigator.dochighlight').documentHighlight()
   end
 
@@ -60,8 +60,8 @@ M.on_attach = function(client, bufnr)
   end
 
   if _NgConfigValues.lsp.code_action.enable then
-    if client.resolved_capabilities.code_action then
-      log('code action enabled for client', client.resolved_capabilities.code_action)
+    if client.server_capabilities.codeActionProvider then
+      log('code action enabled for client', client.server_capabilities.codeActionProvider)
       vim.cmd([[autocmd CursorHold,CursorHoldI <buffer> lua require'navigator.codeAction'.code_action_prompt()]])
     end
   end
