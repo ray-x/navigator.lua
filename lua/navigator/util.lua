@@ -361,7 +361,7 @@ function M.nvim_0_8()
   end
   nvim_0_8 = vim.fn.has('nvim-0.8') == 1
   if nvim_0_8 == false then
-    M.warn('Please use navigator 0.4 version for neovim version < 0.8')
+    M.log('Please use navigator 0.4 version for neovim version < 0.8')
   end
   return nvim_0_8
 end
