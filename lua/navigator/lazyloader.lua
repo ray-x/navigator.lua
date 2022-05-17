@@ -25,7 +25,7 @@ return {
     end
 
     if _NgConfigValues.lsp_installer == true then
-      local has_lspinst, lspinst = pcall(require, 'lsp_installer')
+      local has_lspinst, lspinst = pcall(require, 'nvim-lsp-installer')
       log('lsp_installer installed', has_lspinst)
       if has_lspinst then
         lspinst.setup()
