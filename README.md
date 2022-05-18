@@ -132,9 +132,13 @@ Note: Highly recommened: 'nvim-treesitter/nvim-treesitter'
 Packer
 
 ```lua
-
-use {'ray-x/navigator.lua', requires = {'ray-x/guihua.lua', run = 'cd lua/fzy && make'}}
-
+use({
+    'ray-x/navigator.lua',
+    requires = {
+        { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
+        { 'neovim/nvim-lspconfig' },
+    },
+})
 ```
 
 ## Setup
