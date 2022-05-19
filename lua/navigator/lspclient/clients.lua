@@ -53,11 +53,6 @@ if ok and l then
   luadev = l.setup(luadevcfg)
 end
 
-local path = vim.split(package.path, ';')
-
-table.insert(path, 'lua/?.lua')
-table.insert(path, 'lua/?/init.lua')
-
 local function add(lib)
   for _, p in pairs(vim.fn.expand(lib, false, true)) do
     p = vim.loop.fs_realpath(p)
@@ -235,8 +230,6 @@ local setups = {
         runtime = {
           -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
           version = 'LuaJIT',
-          -- Setup your lua path
-          path = vim.split(package.path, ';'),
         },
         diagnostics = {
           enable = true,
