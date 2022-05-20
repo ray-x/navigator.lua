@@ -152,13 +152,22 @@ if _NgConfigValues.debug_console_output then
   default_config.use_console = true
   default_config.use_file = false
 end
-M._log = require('guihua.log').new(default_config, true)
 
--- add log to you lsp.log
-M.log = M._log.info
-M.info = M._log.info
-M.trace = M._log.trace
-M.error = M._log.error
+if _NgConfigValues.debug then
+  M._log = require('guihua.log').new(default_config, true)
+
+  -- add log to you lsp.log
+  M.log = M._log.info
+  M.info = M._log.info
+  M.trace = M._log.trace
+  M.error = M._log.error
+else
+  M._log = {}
+  M.log = function() end
+  M.info = function() end
+  M.trace = function() end
+  M.error = function() end
+end
 
 function M.fmt(...)
   M._log.fmt_info(...)
