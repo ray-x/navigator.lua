@@ -461,11 +461,12 @@ local function update_capabilities()
 end
 
 -- run setup for lsp clients
+
+local loaded = {}
 local function lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
   local clients = vim.lsp.get_active_clients() or {}
 
-  local loaded = {}
   local capabilities = update_capabilities()
 
   for _, client in ipairs(clients) do
@@ -499,6 +500,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     if _NG_Loaded[lspclient] then
       log('client loaded', lspclient)
+      goto continue -- may create multiple lsp server
     end
 
     if vim.tbl_contains(config.lsp.disable_lsp or {}, lspclient) then
