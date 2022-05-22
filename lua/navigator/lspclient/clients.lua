@@ -500,7 +500,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     if _NG_Loaded[lspclient] then
       log('client loaded', lspclient)
-      goto continue -- may create multiple lsp server
+      -- goto continue -- may create multiple lsp server
     end
 
     if vim.tbl_contains(config.lsp.disable_lsp or {}, lspclient) then
