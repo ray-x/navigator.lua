@@ -402,10 +402,10 @@ local function load_cfg(ft, client, cfg, loaded)
       return
     end
 
-    for _, c in pairs(loaded) do
-      if client == c then
+    for k, c in pairs(loaded) do
+      if client == k then
         -- loaded
-        trace(client, 'already been loaded for', ft, loaded)
+        log(client, 'already been loaded for', ft, loaded, c)
         return
       end
     end
@@ -465,16 +465,16 @@ end
 local loaded = {}
 local function lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
-  local clients = vim.lsp.get_active_clients() or {}
 
   local capabilities = update_capabilities()
 
-  for _, client in ipairs(clients) do
-    if client ~= nil then
-      table.insert(loaded, client.name)
-    end
-  end
   for _, lspclient in ipairs(servers) do
+    local clients = vim.lsp.get_active_clients() or {}
+    for _, client in ipairs(clients) do
+      if client ~= nil then
+        loaded[client.name] = true
+      end
+    end
     -- check should load lsp
 
     if type(lspclient) == 'table' then
@@ -496,11 +496,6 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         trace('ft', ft, 'disabled for', lspclient)
         goto continue
       end
-    end
-
-    if _NG_Loaded[lspclient] then
-      log('client loaded', lspclient)
-      -- goto continue -- may create multiple lsp server
     end
 
     if vim.tbl_contains(config.lsp.disable_lsp or {}, lspclient) then
@@ -637,6 +632,9 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)
     end
 
+    if _NG_Loaded[lspclient] then
+      log('client loaded ?', lspclient)
+    end
     load_cfg(ft, lspclient, cfg, loaded)
 
     _NG_Loaded[lspclient] = true
