@@ -34,7 +34,7 @@ M.on_attach = function(client, bufnr)
     bufnr = bufnr,
   })
 
-  if client.server_capabilities.documentHighlightProvider then
+  if client.server_capabilities.documentHighlightProvider == true then
     require('navigator.dochighlight').documentHighlight()
   end
 
