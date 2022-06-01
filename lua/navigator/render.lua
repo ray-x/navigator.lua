@@ -68,16 +68,16 @@ function M.prepare_for_render(items, opts)
     local ext = extension(fn)
     icon = devicons.get_icon(fn, ext) or icon
   end
-  local call_by_presented = false
+  -- local call_by_presented = false
   local width = 100
   opts.width = opts.width or width
   local win_width = opts.width -- buf
 
-  for i = 1, #items do
-    if items[i].call_by and #items[i].call_by > 0 then
-      call_by_presented = true
-    end
-  end
+  -- for i = 1, #items do
+  --   if items[i].call_by and #items[i].call_by > 0 then
+  --     call_by_presented = true
+  --   end
+  -- end
   -- log(items[1])
 
   for i = 1, #items do

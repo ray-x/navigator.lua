@@ -8,7 +8,7 @@ local api = vim.api
 local active_list_view -- only one listview at a time
 
 function M.new_list_view(opts)
-  log(opts)
+  -- log(opts)
   local config = require('navigator').config_values()
 
   if active_list_view ~= nil then
@@ -36,6 +36,9 @@ function M.new_list_view(opts)
     opts.data = require('navigator.render').prepare_for_render(items, opts)
   end
   opts.border = _NgConfigValues.border or 'shadow'
+  if vim.fn.hlID('TelescopePromptBorder') > 0 then
+    opts.border_hl = 'TelescopePromptBorder'
+  end
   if not items or vim.tbl_isempty(items) then
     log('empty data return')
     return
@@ -48,7 +51,7 @@ function M.new_list_view(opts)
 
   opts.external = _NgConfigValues.external
   opts.preview_lines_before = 3
-  trace(opts)
+  log(opts)
   active_list_view = require('guihua.gui').new_list_view(opts)
   return active_list_view
 end

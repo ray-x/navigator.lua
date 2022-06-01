@@ -1,14 +1,12 @@
 -- todo allow config passed in
-local util = require('navigator.util')
-local log = util.log
-local trace = util.trace
-local uv = vim.loop
-local empty = util.empty
-local warn = util.warn
+local ng_util = require('navigator.util')
+local log = ng_util.log
+local trace = ng_util.trace
+local empty = ng_util.empty
+local warn = ng_util.warn
 _NG_Loaded = {}
 
 _LoadedFiletypes = {}
-local loader = nil
 packer_plugins = packer_plugins or nil -- suppress warnings
 
 -- packer only
@@ -203,7 +201,7 @@ local setups = {
   },
   sqls = {
     filetypes = { 'sql' },
-    on_attach = function(client, bufnr)
+    on_attach = function(client, _)
       client.server_capabilities.executeCommandProvider = client.server_capabilities.documentFormattingProvider or true
       highlight.diagnositc_config_sign()
       require('sqls').setup({ picker = 'telescope' }) -- or default
@@ -369,7 +367,6 @@ local ng_default_cfg = {
   flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
 }
 
-local configs = {}
 
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
@@ -444,7 +441,6 @@ end
 
 local function update_capabilities()
   trace(vim.o.ft, 'lsp startup')
-  local loaded = {}
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
   capabilities.textDocument.completion.completionItem.preselectSupport = true
@@ -481,7 +477,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       if lspclient.name then
         lspclient = lspclient.name
       else
-        warn('incorrect set for lspclient', vim.inspect(lspclient))
+        warn('incorrect set for lspclient'.. vim.inspect(lspclient))
         goto continue
       end
     end
@@ -546,9 +542,9 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if user_lsp_opts[lspclient] ~= nil then
       -- log(lsp_opts[lspclient], cfg)
       cfg = vim.tbl_deep_extend('force', cfg, user_lsp_opts[lspclient])
-      if config.combined_attach == nil then
-        setup_fmt(client, enable_fmt)
-      end
+      -- if config.combined_attach == nil then
+      --   setup_fmt(client, enable_fmt)
+      -- end
       if config.combined_attach == 'mine' then
         if config.on_attach == nil then
           error('on attach not provided')
@@ -652,7 +648,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end, 1000)
       log('null-ls loading')
       _NG_Loaded['null-ls'] = true
-      configs['null-ls'] = cfg
+      setups['null-ls'] = cfg
     end
   end
 
@@ -671,7 +667,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       lspconfig.efm.setup(cfg)
       log('efm loading')
       _NG_Loaded['efm'] = true
-      configs['efm'] = cfg
+      setups['efm'] = cfg
     end
   end
 

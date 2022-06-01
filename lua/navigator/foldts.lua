@@ -17,14 +17,14 @@ function M.on_attach()
   -- M.update_folds()
 end
 
-function _G.custom_fold_text()
+function Custom_fold_text()
   local line = vim.fn.getline(vim.v.foldstart)
   local line_count = vim.v.foldend - vim.v.foldstart + 1
   -- log("" .. line .. " // " .. line_count .. " lines")
   return ' ⚡' .. line .. ': ' .. line_count .. ' lines'
 end
 
-vim.opt.foldtext = _G.custom_fold_text()
+vim.opt.foldtext = Custom_fold_text()
 
 vim.opt.fillchars = { eob = '-', fold = ' ' }
 

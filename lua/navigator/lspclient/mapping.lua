@@ -148,14 +148,14 @@ local function set_mapping(user_opts)
   local fmtkey, rfmtkey
   for _, value in pairs(key_maps) do
     local f = '<Cmd>lua vim.lsp.buf.' .. value.func .. '<CR>'
-    if string.find(value.func, 'require') then
+    if string.find(value.func, 'require') or string.find(value.func, 'vim.') then
       f = '<Cmd>lua ' .. value.func .. '<CR>'
     elseif string.find(value.func, 'diagnostic') then
       local diagnostic = '<Cmd>lua vim.'
       diagnostic = '<Cmd>lua vim.'
       f = diagnostic .. value.func .. '<CR>'
-    elseif string.find(value.func, 'vim.') then
-      f = '<Cmd>lua ' .. value.func .. '<CR>'
+    -- elseif string.find(value.func, 'vim.') then
+    --   f = '<Cmd>lua ' .. value.func .. '<string.find(value.func, 'vim.')CR>'
     end
     local k = value.key
     local m = value.mode or 'n'
@@ -196,7 +196,7 @@ local function set_mapping(user_opts)
   log('enable format ', doc_fmt, range_fmt, _NgConfigValues.lsp.format_on_save)
 end
 
-local function autocmd(user_opts)
+local function autocmd()
   vim.api.nvim_exec(
     [[
             aug NavigatorDocHlAu
@@ -257,7 +257,7 @@ function M.setup(user_opts)
   user_opts = user_opts or _NgConfigValues
   set_mapping(user_opts)
 
-  autocmd(user_opts)
+  autocmd()
   set_event_handler(user_opts)
 
   local client = user_opts.client or {}
@@ -301,7 +301,11 @@ function M.setup(user_opts)
     })
   end
 
-  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = single })
+  local border_style = single
+  if _NgConfigValues.border == 'double' then
+    border_style = double
+  end
+  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = border_style })
   if cap.documentFormattingProvider then
     log('formatting enabled setup hdl')
     vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl

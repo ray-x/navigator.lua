@@ -294,21 +294,21 @@ local function slice_locations(locations, max_items)
   return first_part, second_part
 end
 
-local function test_locations()
-  local locations = {
-    { uri = '1', range = { start = { line = 1 } } },
-    { uri = '2', range = { start = { line = 2 } } },
-    { uri = '2', range = { start = { line = 3 } } },
-    { uri = '1', range = { start = { line = 3 } } },
-    { uri = '1', range = { start = { line = 4 } } },
-    { uri = '3', range = { start = { line = 4 } } },
-    { uri = '3', range = { start = { line = 4 } } },
-  }
-  local second_part
-  order_locations(locations)
-  local locations, second_part = slice_locations(locations, 3)
-  log(locations, second_part)
-end
+-- local function test_locations()
+--   local locations = {
+--     { uri = '1', range = { start = { line = 1 } } },
+--     { uri = '2', range = { start = { line = 2 } } },
+--     { uri = '2', range = { start = { line = 3 } } },
+--     { uri = '1', range = { start = { line = 3 } } },
+--     { uri = '1', range = { start = { line = 4 } } },
+--     { uri = '3', range = { start = { line = 4 } } },
+--     { uri = '3', range = { start = { line = 4 } } },
+--   }
+--   local second_part
+--   order_locations(locations)
+--   local locations, second_part = slice_locations(locations, 3)
+--   log(locations, second_part)
+-- end
 
 function M.locations_to_items(locations, ctx)
   ctx = ctx or {}
@@ -462,7 +462,7 @@ end
 function M.request(method, hdlr) -- e.g  textDocument/reference
   local bufnr = vim.api.nvim_get_current_buf()
   local ref_params = vim.lsp.util.make_position_params()
-  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
+  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _)
     client.request(method, ref_params, hdlr, bufnr)
   end)
 end

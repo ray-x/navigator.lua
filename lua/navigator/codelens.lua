@@ -8,7 +8,6 @@ local trace = require('navigator.util').trace
 
 local lsphelper = require('navigator.lspwrapper')
 local api = vim.api
-local gui = require('navigator.gui')
 local M = {}
 
 local config = require('navigator').config_values()

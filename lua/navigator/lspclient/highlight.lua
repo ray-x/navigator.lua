@@ -1,6 +1,6 @@
 local M = {}
 
-local log = require('navigator.util').log
+-- local log = require('navigator.util').log
 local api = vim.api
 
 -- lsp sign            ﮻           ﯭ                ﳀ    

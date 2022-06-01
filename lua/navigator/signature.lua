@@ -1,10 +1,5 @@
-local gui = require "navigator.gui"
 local util = require "navigator.util"
 local log = util.log
-local partial = util.partial
-local lsphelper = require "navigator.lspwrapper"
-local cwd = vim.loop.cwd()
-local M = {}
 
 ---  navigator signature
 local match_parameter = function(result)

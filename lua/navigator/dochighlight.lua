@@ -205,10 +205,10 @@ local function cmd_nohl()
   end
 end
 
-_G.nav_doc_hl = function()
+local nav_doc_hl = function()
   local bufnr = vim.api.nvim_get_current_buf()
   local ref_params = vim.lsp.util.make_position_params()
-  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, bufnr)
+  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _)
     if client.server_capabilities.documentHighlightProvider == true then
       client.request('textDocument/documentHighlight', ref_params, handle_document_highlight, bufnr)
     end
@@ -220,7 +220,7 @@ local function documentHighlight()
     [[
       augroup lsp_document_highlight
         autocmd! * <buffer>
-        autocmd CursorHold,CursorHoldI <buffer> lua nav_doc_hl()
+        autocmd CursorHold,CursorHoldI <buffer> lua require('navigator.dochighlight').nav_doc_hl()
         autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
       augroup END
     ]],
@@ -258,5 +258,6 @@ return {
   handle_document_highlight = handle_document_highlight,
   hi_symbol = hi_symbol,
   nohl = nohl,
+  nav_doc_hl = nav_doc_hl,
   cmd_nohl = cmd_nohl,
 }

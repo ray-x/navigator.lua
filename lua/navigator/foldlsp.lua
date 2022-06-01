@@ -87,7 +87,7 @@ function M.debug_folds()
   end
 end
 
-M.fold_handler = function(err, result, ctx, config)
+M.fold_handler = function(err, result, ctx, _)
   -- params: err, method, result, client_id, bufnr
   -- XXX: handle err?
   if err or result == nil or #result == 0 then

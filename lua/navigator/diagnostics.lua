@@ -306,10 +306,10 @@ local diag_hdlr = function(err, result, ctx, config)
   end
 end
 
-local diag_hdlr_async = function()
-  local debounce = require('navigator.debounce').debounce_trailing
-  return debounce(100, diag_hdlr)
-end
+-- local diag_hdlr_async = function()
+--   local debounce = require('navigator.debounce').debounce_trailing
+--   return debounce(100, diag_hdlr)
+-- end
 
 local M = {}
 
@@ -368,6 +368,9 @@ M.show_buf_diagnostics = function()
         api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head .. ' Diagnostic ',
         enable_preview_edit = true,
       })
+      if listview == nil then
+        return log("nil listview")
+      end
       trace('new buffer', listview.bufnr)
       if listview.bufnr then
         vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)

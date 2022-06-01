@@ -38,7 +38,7 @@ M.list_workspace_folders = function()
       items = folders,
       border = 'single',
       rawdata = true,
-      on_move = function(...)
+      on_move = function()
       end
     })
   end

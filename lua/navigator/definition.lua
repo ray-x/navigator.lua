@@ -85,6 +85,9 @@ local function def_preview(timeout_ms)
     local ts = require('navigator.treesitter')
     local root = parsers.get_parser(bufnr)
     log(range)
+    if ts == nil then
+      return
+    end
     local def_node = ts.get_node_at_pos({ range['start'].line, range['start'].character }, root)
 
     local sr, _, er, _ = ts.get_node_scope(def_node)
@@ -105,7 +108,7 @@ local function def_preview(timeout_ms)
   end
   local width = 40
   local maxwidth = math.floor(vim.fn.winwidth(0) * 4 / 5)
-  for key, value in pairs(definition) do
+  for _, value in pairs(definition) do
     -- log(key, value, width)
     width = math.max(width, #value + 4)
     width = math.min(maxwidth, width)
@@ -143,7 +146,7 @@ local def = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
   local ref_params = vim.lsp.util.make_position_params()
-  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
+  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     -- if client.resolved_capabilities.goto_definition then
     if client.server_capabilities.definitionProvider then
       client.request('textDocument/definition', ref_params, definition_hdlr, _bufnr)

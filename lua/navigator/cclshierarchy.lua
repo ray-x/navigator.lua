@@ -51,7 +51,7 @@ end
 local call_hierarchy_handler_from = partial(call_hierarchy_handler, 'from')
 local call_hierarchy_handler_to = partial(call_hierarchy_handler, 'to')
 
-local function incoming_calls_handler(bang, err, result, ctx, cfg)
+local function incoming_calls_handler(_, err, result, ctx, cfg)
   local bufnr = vim.api.nvim_get_current_buf()
   assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use lsp_tags')
 
@@ -61,7 +61,7 @@ local function incoming_calls_handler(bang, err, result, ctx, cfg)
   gui.new_list_view({ items = results, ft = ft or 'cpp', api = ' ' })
 end
 --  err, method, result, client_id, bufnr
-local function outgoing_calls_handler(bang, err, result, ctx, cfg)
+local function outgoing_calls_handler(_, err, result, ctx, cfg)
   local results = call_hierarchy_handler_to(err, result, ctx, cfg, 'Outgoing calls not found')
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr or 0, 'ft')

@@ -2,7 +2,7 @@ local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
 local code_action = {}
-local gui = require('navigator.gui')
+-- local gui = require('navigator.gui')
 local config = require('navigator').config_values()
 local api = vim.api
 

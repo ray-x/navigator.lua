@@ -51,7 +51,7 @@ return {
       local lazy_plugins = {}
       lazy_plugins[plugin_name] = path
       loader = require('packer').loader
-      for plugin, url in pairs(lazy_plugins) do
+      for plugin, _ in pairs(lazy_plugins) do
         if packer_plugins[plugin] and packer_plugins[plugin].loaded == false then
           -- log("loading ", plugin)
           pcall(loader, plugin)

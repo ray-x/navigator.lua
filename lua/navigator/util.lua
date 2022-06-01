@@ -114,7 +114,13 @@ end
 
 function M.get_relative_path(base_path, my_path)
   local base_data = getDir(base_path)
+  if base_data == nil then
+    return
+  end
   local my_data = getDir(my_path)
+  if my_data == nil then
+    return
+  end
   local base_len = #base_data
   local my_len = #my_data
 
@@ -163,10 +169,18 @@ if _NgConfigValues.debug then
   M.error = M._log.error
 else
   M._log = {}
-  M.log = function() end
-  M.info = function() end
-  M.trace = function() end
-  M.error = function() end
+  M.log = function(...)
+    return { ... }
+  end
+  M.info = function(...)
+    return { ... }
+  end
+  M.trace = function(...)
+    return { ... }
+  end
+  M.error = function(...)
+    return { ... }
+  end
 end
 
 function M.fmt(...)
@@ -261,7 +275,7 @@ function M.split2(s, sep)
 
   sep = sep or ' '
   local pattern = string.format('([^%s]+)', sep)
-  string.gsub(s, pattern, function(c)
+  _ = string.gsub(s, pattern, function(c)
     fields[#fields + 1] = c
   end)
 
@@ -293,13 +307,13 @@ end
 
 M.open_file_at = guihua.open_file_at
 
-function M.exists(var)
-  for k, _ in pairs(_G) do
-    if k == var then
-      return true
-    end
-  end
-end
+-- function M.exists(var)
+--   for k, _ in pairs(_G) do
+--     if k == var then
+--       return true
+--     end
+--   end
+-- end
 
 local exclude_ft = { 'scrollbar', 'help', 'NvimTree' }
 function M.exclude(fname)

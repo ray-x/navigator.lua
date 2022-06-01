@@ -3,8 +3,6 @@ local M = {}
 local log = require('navigator.util').log
 local trace = require('navigator.util').trace
 local lsphelper = require('navigator.lspwrapper')
-local locations_to_items = lsphelper.locations_to_items
-local clone = require('guihua.util').clone
 local symbol_kind = require('navigator.lspclient.lspkind').symbol_kind
 local symbols_to_items = lsphelper.symbols_to_items
 
@@ -12,7 +10,7 @@ function M.workspace_symbols(query)
   query = query or pcall(vim.fn.input, 'Query: ')
   local bufnr = vim.api.nvim_get_current_buf()
   local params = { query = query }
-  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
+  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     -- if client.resolved_capabilities.workspace_symbol then
     if client.server_capabilities.workspaceSymbolProvider then
       client.request('workspace/symbol', params, M.workspace_symbol_handler, _bufnr)
@@ -34,7 +32,7 @@ function M.document_symbols(opts)
   local params = vim.lsp.util.make_position_params()
   params.context = { includeDeclaration = true }
   params.query = opts.prompt or ''
-  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
+  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     -- if client.resolved_capabilities.document_symbol then
     if client.server_capabilities.documentSymbolProvider then
       client.request('textDocument/documentSymbol', params, M.document_symbol_handler, _bufnr)

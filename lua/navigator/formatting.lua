@@ -1,7 +1,7 @@
 -- https://github.com/wention/dotfiles/blob/master/.config/nvim/lua/config/lsp.lua
 -- https://github.com/lukas-reineke/dotfiles/blob/master/vim/lua/lsp/handlers.lua
 return {
-  format_hdl = function(err, result, ctx, cfg) -- FIXME: bufnr is nil
+  format_hdl = function(err, result, ctx, _) -- FIXME: bufnr is nil
     if err ~= nil or result == nil then
       return
     end

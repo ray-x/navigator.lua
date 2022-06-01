@@ -149,9 +149,7 @@ local function prepare_node(node, kind)
 end
 
 local function get_scope(type, source)
-  local sbl, sbc, sel, sec = source:range()
   local current = source
-  local result = current
   local next = ts_utils.get_next_node(source)
   local parent = current:parent()
   trace(source:type(), source:range(), parent)
@@ -169,7 +167,7 @@ local function get_scope(type, source)
 
     -- for C++
     local n = source
-    for i = 1, 4, 1 do
+    for _ = 1, 4, 1 do
       if n == nil or n:parent() == nil then
         break
       end
@@ -195,7 +193,7 @@ local function get_scope(type, source)
     -- M.fun1 = function() end
     -- lets work up and see next node, lua
     local n = source
-    for i = 1, 4, 1 do
+    for _ = 1, 4, 1 do
       if n == nil or n:parent() == nil then
         break
       end
@@ -303,7 +301,7 @@ local function get_all_nodes(bufnr, filter, summary)
 
   local all_nodes = {}
   -- Support completion-nvim customized label map
-  local customized_labels = vim.g.completion_customize_lsp_label or {}
+  -- local customized_labels = vim.g.completion_customize_lsp_label or {}
 
   -- Force some types to act like they are parents
   -- instead of neighbors of the next nodes.

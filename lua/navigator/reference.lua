@@ -4,7 +4,6 @@ local lsphelper = require('navigator.lspwrapper')
 local gui = require('navigator.gui')
 local lsp = require('navigator.lspwrapper')
 local trace = require('navigator.util').trace
-ListViewCtrl = ListViewCtrl or require('guihua.listviewctrl').ListViewCtrl
 -- local partial = util.partial
 -- local cwd = vim.loop.cwd()
 -- local lsphelper = require "navigator.lspwrapper"
@@ -41,7 +40,7 @@ local ref_view = function(err, locations, ctx, cfg)
     if references and references.result and #references.result > 0 then
       local refs = references.result
       for _, value in pairs(locations) do
-        vrange = value.range or { start = { line = 0 }, ['end'] = { line = 0 } }
+        local vrange = value.range or { start = { line = 0 }, ['end'] = { line = 0 } }
         for i = 1, #refs, 1 do
           local rg = refs[i].range or {}
           log(value, refs[i])
@@ -204,7 +203,7 @@ local ref = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
   local ref_params = vim.lsp.util.make_position_params()
-  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, bufnr)
+  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _)
     if client.server_capabilities.referencesProvider then
       client.request('textDocument/references', ref_params, ref_hdlr, bufnr)
     end
@@ -212,12 +211,9 @@ local ref = function()
 end
 
 return {
-
   reference_handler = ref_hdlr,
-
   reference = ref_req,
-
   ref_view = ref_view,
-
   async_ref = async_ref,
+  all_ref = ref,
 }

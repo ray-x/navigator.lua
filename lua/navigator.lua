@@ -118,7 +118,6 @@ vim.cmd("command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'
 vim.cmd("command! -nargs=0 LspKeymaps lua require'navigator.lspclient.mapping'.get_keymaps_help()<CR>")
 
 M.deprecated = function(cfg)
-  local warn = require('navigator.util').warn
   if cfg.code_action_prompt then
     warn('code_action_prompt moved to lsp.code_action')
   end
