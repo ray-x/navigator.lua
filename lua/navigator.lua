@@ -54,6 +54,7 @@ _NgConfigValues = {
       severity_sort = { reverse = true },
     },
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+    disable_nulls_codeaction_sign = true, -- do not show nulls codeactions (as it will alway has a valid action)
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = {}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     -- only want to enable one lsp server

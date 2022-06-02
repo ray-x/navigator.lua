@@ -52,20 +52,24 @@ local function _update_sign(line)
   if code_action[winid] == nil then
     code_action[winid] = {}
   end
-  if code_action[winid].lightbulb_line ~= 0 then
+  -- only show code action on the current line, remove all others
+  if code_action[winid].lightbulb_line and code_action[winid].lightbulb_line > 0 then
     vim.fn.sign_unplace(sign_group, { id = code_action[winid].lightbulb_line, buffer = '%' })
+
+    log('sign removed', line)
   end
 
   if line then
     -- log("updatasign", line, sign_group, sign_name)
-    vim.fn.sign_place(
+    local id = vim.fn.sign_place(
       line,
       sign_group,
       sign_name,
       '%',
       { lnum = line + 1, priority = config.lsp.code_action.sign_priority }
     )
-    code_action[winid].lightbulb_line = line
+    code_action[winid].lightbulb_line = id
+    log('sign updated', id)
   end
 end
 
@@ -74,6 +78,14 @@ local need_check_diagnostic = { ['python'] = true }
 
 function code_action:render_action_virtual_text(line, diagnostics)
   return function(err, actions, context)
+    trace(actions, context)
+    if context and context.client_id then
+      local cname = vim.lsp.get_active_clients({ id = context.client_id })[1].name
+      if cname == 'null-ls' and _NgConfigValues.lsp.disable_nulls_codeaction_sign then
+        return
+      end
+    end
+    -- if nul-ls enabled, some of the lsp may not send valid code action,
     if actions == nil or type(actions) ~= 'table' or vim.tbl_isempty(actions) then
       -- no actions cleanup
       if config.lsp.code_action.virtual_text then
@@ -84,12 +96,13 @@ function code_action:render_action_virtual_text(line, diagnostics)
       end
     else
       trace(err, line, diagnostics, actions, context)
+
       if config.lsp.code_action.sign then
         if need_check_diagnostic[vim.bo.filetype] then
           if next(diagnostics) == nil then
+            -- no diagnostic, no code action sign..
             _update_sign(nil)
           else
-            -- no diagnostic, no code action sign..
             _update_sign(line)
           end
         else
