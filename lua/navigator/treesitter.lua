@@ -292,7 +292,7 @@ local function get_all_nodes(bufnr, filter, summary)
   end
   summary = summary or false
   if not parsers.has_parser() then
-    vim.notify('ts not loaded', vim.lsp.log_levels.WARN)
+    vim.notify('ts not loaded', vim.lsp.log_levels.Debug)
   end
 
   local path_sep = require('navigator.util').path_sep()
