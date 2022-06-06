@@ -74,6 +74,7 @@ end
 
 function M.symbols_to_items(result)
   local locations = {}
+  result = result or {}
   -- log(result)
   for i = 1, #result do
     local item = result[i].location

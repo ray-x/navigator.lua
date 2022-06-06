@@ -1,4 +1,5 @@
 # Navigator
+- Source code analysis and navigate tool
 
 - Easy code navigation, view diagnostic errors, see relationships of functions, variables
 

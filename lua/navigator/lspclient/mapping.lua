@@ -26,7 +26,7 @@ local key_maps = {
   { mode = 'i', key = '<M-k>', func = 'signature_help()' },
   { key = '<c-k>', func = 'signature_help()' },
   { key = 'g0', func = "require('navigator.symbols').document_symbols()" },
-  { key = 'gW', func = "require('navigator.workspace').workspace_symbol()" },
+  { key = 'gW', func = "require('navigator.workspace').workspace_symbol_live()" },
   { key = '<c-]>', func = "require('navigator.definition').definition()" },
   { key = 'gd', func = "require('navigator.definition').definition()" },
   { key = 'gD', func = "declaration({ border = 'rounded', max_width = 80 })" },
@@ -154,8 +154,8 @@ local function set_mapping(user_opts)
       local diagnostic = '<Cmd>lua vim.'
       diagnostic = '<Cmd>lua vim.'
       f = diagnostic .. value.func .. '<CR>'
-    -- elseif string.find(value.func, 'vim.') then
-    --   f = '<Cmd>lua ' .. value.func .. '<string.find(value.func, 'vim.')CR>'
+      -- elseif string.find(value.func, 'vim.') then
+      --   f = '<Cmd>lua ' .. value.func .. '<string.find(value.func, 'vim.')CR>'
     end
     local k = value.key
     local m = value.mode or 'n'
