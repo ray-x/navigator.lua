@@ -60,10 +60,19 @@ function M.workspace_symbol_live()
     end,
     on_input_filter = function(text)
       local params = { query = text or '#' }
-      local result = vim.lsp.buf_request_sync(bufnr, 'workspace/symbol', params)
-      util.log(vim.inspect(result[1].result))
-      result = result[1].result -- this is different from handler,
-      -- result[1].result is same as result in handler
+      local results = vim.lsp.buf_request_sync(bufnr, 'workspace/symbol', params)
+      local result
+      for _, r in pairs(results) do
+        -- util.log(r)
+        if r.result then
+          result = r.result
+          break
+        end
+      end
+      if not result then
+        result = {}
+      end
+
       local items = symbols_to_items(result)
       items = gutil.dedup(items, 'name', 'kind')
       return items
