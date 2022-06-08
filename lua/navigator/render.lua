@@ -187,6 +187,16 @@ function M.prepare_for_render(items, opts)
       space, trim = get_pads(win_width, item.text, ts_report)
       if trim then
         item.text = string.sub(item.text, 1, opts.width - 20) .. ''
+        local _, j = string.gsub(item.text, [["]], "")
+        if j % 2 == 1 then
+          item.text = item.text .. '"'
+        end
+        _, j = string.gsub(item.text, [[']], "")
+        if j % 2 == 1 then
+          item.text = item.text .. [[']]
+        end
+        item.text = item.text .. ''
+        -- let check if there are unmatched "/'
       end
       if #space + #item.text + #ts_report >= win_width then
         if #item.text + #ts_report > win_width then
