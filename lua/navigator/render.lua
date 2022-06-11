@@ -69,16 +69,8 @@ function M.prepare_for_render(items, opts)
     icon = devicons.get_icon(fn, ext) or icon
   end
   -- local call_by_presented = false
-  local width = 100
-  opts.width = opts.width or width
+  opts.width = opts.width or 100
   local win_width = opts.width -- buf
-
-  -- for i = 1, #items do
-  --   if items[i].call_by and #items[i].call_by > 0 then
-  --     call_by_presented = true
-  --   end
-  -- end
-  -- log(items[1])
 
   for i = 1, #items do
     local space
@@ -97,7 +89,7 @@ function M.prepare_for_render(items, opts)
     display_items[last_summary_idx].filename_only = true
     -- trace(items[i], items[i].filename, last_summary_idx, display_items[last_summary_idx].filename)
     -- TODO refact display_filename generate part
-    if items[i].filename == fn then
+    if items[i].filename == fn or opts.hide_filename then
       space, trim = get_pads(opts.width, icon .. ' ' .. dfn, lspapi_display .. ' 14 of 33 ')
       if trim and opts.width > 50 and #dfn > opts.width - 20 then
         local fn1 = string.sub(dfn, 1, opts.width - 50)
@@ -148,7 +140,8 @@ function M.prepare_for_render(items, opts)
       ts_report = _NgConfigValues.icons.value_changed
     end
 
-    log(item.text, item.symbol_name, item.uri)
+    -- log(item.text, item.symbol_name, item.uri)
+    -- log(item.text)
     if item.definition then
       log('definition', item)
       ts_report = ts_report .. _NgConfigValues.icons.value_definition .. ' '

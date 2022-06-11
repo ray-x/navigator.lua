@@ -5,6 +5,8 @@
 
 - A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
 
+- Fuzzy search & build ctags symbols
+
 - [![a short intro of navigator](https://user-images.githubusercontent.com/1681295/147378905-51eede5f-e36d-48f4-9799-ae562949babe.jpeg)](https://youtu.be/P1kd7Y8AatE)
 
 Here are some examples
@@ -117,7 +119,7 @@ I'd like to go beyond what the system is offering.
 
 # Install
 
-Require nvim-0.6.1, nightly prefered
+Require nvim-0.6.1 or above, nightly (0.8) prefered
 
 You can remove your lspconfig setup and use this plugin.
 The plugin depends on lspconfig and [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(migrate from [romgrk's project](romgrk/fzy-lua-native)).
@@ -128,7 +130,7 @@ Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
 Plug 'ray-x/navigator.lua'
 ```
 
-Note: Highly recommened: 'nvim-treesitter/nvim-treesitter'
+Note: Highly recommend: 'nvim-treesitter/nvim-treesitter'
 
 Packer
 
@@ -292,6 +294,11 @@ require'navigator'.setup({
       filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetypes
     },
+    ctags ={
+      cmd = 'ctags',
+      tagfile = 'tags'
+      options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number'
+    }
     gopls = {   -- gopls setting
       on_attach = function(client, bufnr)  -- on_attach for gopls
         -- your special on attach here
@@ -415,6 +422,8 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | g\<LeftMouse\>  | implementation                                             |
 | n    | \<Leader>gt     | treesitter document symbol                                 |
 | n    | \<Leader\>gT    | treesitter symbol for all open buffers                     |
+| n    | \<Leader\> ct   | ctags symbol search                                        |
+| n    | \<Leader\> cg   | ctags symbol generate                                      |
 | n    | K               | hover doc                                                  |
 | n    | \<Space\>ca     | code action (when you see 🏏 )                             |
 | n    | \<Space\>la     | code lens action (when you see a codelens indicator)       |

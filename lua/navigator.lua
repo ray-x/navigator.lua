@@ -32,6 +32,7 @@ _NgConfigValues = {
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
   signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
+  ctags = {cmd='ctags', tagfile='.tags'},
   lsp = {
     code_action = {
       enable = true,
@@ -112,11 +113,6 @@ _NgConfigValues = {
     treesitter_defult = '🌲',
   },
 }
-
-vim.cmd("command! -nargs=0 LspLog lua require'navigator.lspclient.config'.open_lsp_log()")
-vim.cmd("command! -nargs=0 LspRestart lua require'navigator.lspclient.config'.reload_lsp()")
-vim.cmd("command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>")
-vim.cmd("command! -nargs=0 LspKeymaps lua require'navigator.lspclient.mapping'.get_keymaps_help()<CR>")
 
 M.deprecated = function(cfg)
   if cfg.code_action_prompt then

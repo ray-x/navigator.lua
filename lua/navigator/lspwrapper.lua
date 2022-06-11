@@ -75,7 +75,7 @@ end
 function M.symbols_to_items(result)
   local locations = {}
   result = result or {}
-  -- log(result)
+  log(#result)
   for i = 1, #result do
     local item = result[i].location
     if item ~= nil and item.range ~= nil then
@@ -87,8 +87,9 @@ function M.symbols_to_items(result)
       if kind ~= nil then
         item.text = kind .. ': ' .. item.text
       end
-      item.filename = vim.uri_to_fname(item.uri)
-
+      if not item.filename then
+        item.filename = vim.uri_to_fname(item.uri)
+      end
       item.display_filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
       if item.range == nil or item.range.start == nil then
         log('range not set', result[i], item)
@@ -417,7 +418,7 @@ function M.locations_to_items(locations, ctx)
 
   vim.cmd([[set eventignore-=FileType]])
 
-  log(items)
+  trace(items)
   return items, width + 24, second_part -- TODO handle long line?
 end
 

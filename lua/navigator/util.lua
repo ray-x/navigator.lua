@@ -6,6 +6,8 @@ local M = { log_path = vim.lsp.get_log_path() }
 local guihua = require('guihua.util')
 local nvim_0_6_1
 local nvim_0_8
+local vfn = vim.fn
+local api = vim.api
 
 M.path_sep = function()
   local is_win = vim.loop.os_uname().sysname:find('Windows')
@@ -42,10 +44,10 @@ function M.get_data_from_file(filename, startLine)
   end
   local uri = 'file:///' .. filename
   local bufnr = vim.uri_to_bufnr(uri)
-  if not vim.api.nvim_buf_is_loaded(bufnr) then
-    vim.fn.bufload(bufnr)
+  if not api.nvim_buf_is_loaded(bufnr) then
+    vfn.bufload(bufnr)
   end
-  local data = vim.api.nvim_buf_get_lines(bufnr, startLine, startLine + 8, false)
+  local data = api.nvim_buf_get_lines(bufnr, startLine, startLine + 8, false)
   if data == nil or vim.tbl_isempty(data) then
     startLine = nil
   else
@@ -57,6 +59,26 @@ function M.get_data_from_file(filename, startLine)
     end
   end
   return { data = data, line = displayLine }
+end
+
+function M.io_read(filename, total)
+  local f = io.open(filename, 'r')
+  if f == nil then
+    return nil
+  end
+  local content = f:read('*a') -- *a or *all reads the whole file
+  f:close()
+  return content
+end
+
+
+function M.file_exists(name)
+  local f = io.open(name, "r")
+  if f ~= nil then
+    io.close(f)
+    return true
+  end
+  return false
 end
 
 M.merge = function(t1, t2)
@@ -77,9 +99,9 @@ M.map = function(modes, key, result, options)
 
   for i = 1, #modes do
     if buffer then
-      vim.api.nvim_buf_set_keymap(0, modes[i], key, result, options)
+      api.nvim_buf_set_keymap(0, modes[i], key, result, options)
     else
-      vim.api.nvim_set_keymap(modes[i], key, result, options)
+      api.nvim_set_keymap(modes[i], key, result, options)
     end
   end
 end
@@ -302,7 +324,7 @@ function M.trim_and_pad(txt)
 end
 
 M.open_file = function(filename)
-  vim.api.nvim_command(string.format('e! %s', filename))
+  api.nvim_command(string.format('e! %s', filename))
 end
 
 M.open_file_at = guihua.open_file_at
@@ -329,7 +351,6 @@ end
 
 -- name space search
 local nss
-local api = vim.api
 local bufs
 
 function M.set_virt_eol(bufnr, lnum, chunks, priority, id)
@@ -371,7 +392,7 @@ function M.nvim_0_6_1()
   if nvim_0_6_1 ~= nil then
     return nvim_0_6_1
   end
-  nvim_0_6_1 = vim.fn.has('nvim-0.6.1') == 1
+  nvim_0_6_1 = vfn.has('nvim-0.6.1') == 1
   if nvim_0_6_1 == false then
     M.warn('Please use navigator 0.3 version for neovim version < 0.6.1')
   end
@@ -382,7 +403,7 @@ function M.nvim_0_8()
   if nvim_0_8 ~= nil then
     return nvim_0_8
   end
-  nvim_0_8 = vim.fn.has('nvim-0.8') == 1
+  nvim_0_8 = vfn.has('nvim-0.8') == 1
   if nvim_0_8 == false then
     M.log('Please use navigator 0.4 version for neovim version < 0.8')
   end

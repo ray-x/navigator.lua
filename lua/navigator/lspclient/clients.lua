@@ -697,7 +697,7 @@ local function setup(user_opts, cnt)
   user_opts = user_opts or {}
   local ft = vim.bo.filetype
   local bufnr = user_opts.bufnr or vim.api.nvim_get_current_buf()
-  if ft == '' then
+  if ft == '' or ft == nil then
     log('nil filetype, callback')
     local ext = vim.fn.expand('%:e')
     if ext ~= '' then
@@ -716,6 +716,7 @@ local function setup(user_opts, cnt)
       return
     else
       log('no filetype, no ext return')
+      return
     end
   end
   local uri = vim.uri_from_bufnr(bufnr)
@@ -743,6 +744,7 @@ local function setup(user_opts, cnt)
     'packer',
     'gitcommit',
     'windline',
+    'notify',
   }
   for i = 1, #disable_ft do
     if ft == disable_ft[i] then

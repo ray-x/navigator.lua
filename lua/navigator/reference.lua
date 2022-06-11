@@ -26,7 +26,11 @@ local ref_view = function(err, locations, ctx, cfg)
     end
     local definitions = ctx.results.definitions
     local references = ctx.results.references
-    log(ctx)
+    if _NgConfigValues.debug then
+      local logctx = { results = {} }
+      logctx = vim.tbl_extend('keep', logctx, ctx)
+      log(logctx, 'result size', #ctx.results, 'item', ctx.results[1])
+    end
     if definitions.error and references.error then
       vim.notify('lsp ref callback error' .. vim.inspect(ctx.result), vim.lsp.log_levels.WARN)
     end
@@ -43,8 +47,8 @@ local ref_view = function(err, locations, ctx, cfg)
         local vrange = value.range or { start = { line = 0 }, ['end'] = { line = 0 } }
         for i = 1, #refs, 1 do
           local rg = refs[i].range or {}
-          log(value, refs[i])
-          log(rg, vrange)
+          trace(value, refs[i])
+          trace(rg, vrange)
           if rg.start.line == vrange.start.line and rg['end'].line == vrange['end'].line then
             table.remove(refs, i)
             break
@@ -54,7 +58,7 @@ local ref_view = function(err, locations, ctx, cfg)
       vim.list_extend(locations, refs)
     end
     err = nil
-    log(locations)
+    trace(locations)
   end
   -- log("num", num)
   -- log("bfnr", bufnr)

@@ -33,6 +33,7 @@ local key_maps = {
   { key = 'gp', func = "require('navigator.definition').definition_preview()" },
   { key = '<Leader>gt', func = "require('navigator.treesitter').buf_ts()" },
   { key = '<Leader>gT', func = "require('navigator.treesitter').bufs_ts()" },
+  { key = '<Leader>ct', func = "require('navigator.ctags').ctags()" },
   { key = 'K', func = 'hover({ popup_opts = { border = single, max_width = 80 }})' },
   { key = '<Space>ca', mode = 'n', func = "require('navigator.codeAction').code_action()" },
   { key = '<Space>cA', mode = 'v', func = 'range_code_action()' },
@@ -59,6 +60,14 @@ local key_maps = {
   { key = '<Space>ff', func = 'range_formatting()', mode = 'v' },
   { key = '<Space>wl', func = "require('navigator.workspace').list_workspace_folders()" },
   { key = '<Space>la', mode = 'n', func = "require('navigator.codelens').run_action()" },
+}
+
+local commands = {
+  [[command!  -nargs=* Nctags lua require("navigator.ctags").ctags({<f-args>})]],
+  "command! -nargs=0 LspLog lua require'navigator.lspclient.config'.open_lsp_log()",
+  "command! -nargs=0 LspRestart lua require'navigator.lspclient.config'.reload_lsp()",
+  "command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>",
+  "command! -nargs=0 LspKeymaps lua require'navigator.lspclient.mapping'.get_keymaps_help()<CR>",
 }
 
 local key_maps_help = {}
@@ -102,6 +111,12 @@ local check_cap = function(opts)
     end
   end
   return fmt, rfmt, ccls
+end
+
+local function set_cmds(_)
+  for _, value in pairs(commands) do
+    vim.cmd(value)
+  end
 end
 
 local function set_mapping(user_opts)
@@ -256,6 +271,7 @@ end
 function M.setup(user_opts)
   user_opts = user_opts or _NgConfigValues
   set_mapping(user_opts)
+  set_cmds(user_opts)
 
   autocmd()
   set_event_handler(user_opts)

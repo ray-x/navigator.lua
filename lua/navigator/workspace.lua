@@ -34,8 +34,12 @@ M.workspace_symbol = function()
 end
 
 function M.workspace_symbol_live()
-  local height = 15
+  local height = _NgConfigValues.height or 0.4
+  height = math.floor(height * vim.fn.winheight('%'))
+  local width = _NgConfigValues.width or 0.7
+  width = math.floor(width * vfn.winwidth('%'))
   local bufnr = vim.api.nvim_get_current_buf()
+  local ft = vim.o.ft
   local data = { { text = 'input the symbol name to start fuzzy search' } }
   for _ = 1, height do
     table.insert(data, { text = '' })
@@ -47,7 +51,7 @@ function M.workspace_symbol_live()
     data = data,
     items = data,
     enter = true,
-    ft = 'go',
+    ft = ft,
     loc = 'top_center',
     transparency = 50,
     prompt = true,
@@ -77,7 +81,7 @@ function M.workspace_symbol_live()
       items = gutil.dedup(items, 'name', 'kind')
       return items
     end,
-    rect = { height = height, pos_x = 0, pos_y = 0, width = 120 },
+    rect = { height = height, pos_x = 0, pos_y = 0, width = width },
   }
 
   local win = ListView:new(opt)

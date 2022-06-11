@@ -100,7 +100,15 @@ M.document_symbol_handler = function(err, result, ctx)
   end
   
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
-  gui.new_list_view({ items = locations, prompt = true, rawdata = true, ft = ft, api = ' ' })
+  gui.new_list_view({
+    items = locations,
+    prompt = true,
+    rawdata = true,
+    height = 0.62,
+    preview_height = 0.1,
+    ft = ft,
+    api = ' ',
+  })
 end
 
 M.workspace_symbol_handler = function(err, result, ctx, cfg)
