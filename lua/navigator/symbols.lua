@@ -66,8 +66,7 @@ M.document_symbol_handler = function(err, result, ctx)
     item.name = result[i].name
     item.range = result[i].range or result[i].location.range
     if item.range == nil then
-      item.range = {}
-      log(result[i])
+      log("range missing in result", result[i])
     end
     item.uri = uri
     item.selectionRange = result[i].selectionRange
