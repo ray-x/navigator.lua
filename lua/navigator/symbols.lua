@@ -65,6 +65,10 @@ M.document_symbol_handler = function(err, result, ctx)
     local kind = symbol_kind(item.kind)
     item.name = result[i].name
     item.range = result[i].range or result[i].location.range
+    if item.range == nil then
+      item.range = {}
+      log(result[i])
+    end
     item.uri = uri
     item.selectionRange = result[i].selectionRange
     item.detail = result[i].detail or ''
@@ -72,7 +76,7 @@ M.document_symbol_handler = function(err, result, ctx)
       item.detail = 'func'
     end
 
-    item.lnum = result[i].range.start.line + 1
+    item.lnum = item.range.start.line + 1
     item.text = '[' .. kind .. ']' .. item.name .. ' ' .. item.detail
 
     item.filename = fname
@@ -83,21 +87,29 @@ M.document_symbol_handler = function(err, result, ctx)
         local child = {}
         child.kind = c.kind
         child.name = c.name
-        child.range = c.range
+        child.range = c.range or c.location.range
         local ckind = symbol_kind(child.kind)
         child.selectionRange = c.selectionRange
         child.filename = fname
         child.uri = uri
-        child.lnum = c.range.start.line + 1
+        child.lnum = child.range.start.line + 1
         child.detail = c.detail or ''
         child.text = '   ' .. ckind .. '' .. child.name .. ' ' .. child.detail
         table.insert(locations, child)
       end
     end
   end
-
+  
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
-  gui.new_list_view({ items = locations, prompt = true, rawdata = true, ft = ft, api = ' ' })
+  gui.new_list_view({
+    items = locations,
+    prompt = true,
+    rawdata = true,
+    height = 0.62,
+    preview_height = 0.1,
+    ft = ft,
+    api = ' ',
+  })
 end
 
 M.workspace_symbol_handler = function(err, result, ctx, cfg)
