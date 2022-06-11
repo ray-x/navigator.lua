@@ -501,6 +501,8 @@ function M.buf_ts()
     prompt = true,
     ft = ft,
     rawdata = true,
+    height = 0.62,
+    preview_height = 0.12,
     width = width + 10,
     api = _NgConfigValues.icons.treesitter_defult,
   })
@@ -538,6 +540,8 @@ function M.bufs_ts()
       items = ts_opened,
       prompt = true,
       ft = ft,
+      height = 0.62,
+      preview_height = 0.12,
       width = max_length + 10,
       api = _NgConfigValues.icons.treesitter_defult,
     })

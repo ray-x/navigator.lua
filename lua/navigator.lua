@@ -32,7 +32,7 @@ _NgConfigValues = {
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
   signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
-  ctags = {cmd='ctags', tagfile='.tags'},
+  ctags = { cmd = 'ctags', tagfile = '.tags' },
   lsp = {
     code_action = {
       enable = true,
@@ -111,6 +111,7 @@ _NgConfigValues = {
       field = '🏈',
     },
     treesitter_defult = '🌲',
+    doc_symbols = '',
   },
 }
 

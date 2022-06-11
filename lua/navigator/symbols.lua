@@ -98,7 +98,7 @@ M.document_symbol_handler = function(err, result, ctx)
       end
     end
   end
-  
+
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
   gui.new_list_view({
     items = locations,
@@ -107,7 +107,7 @@ M.document_symbol_handler = function(err, result, ctx)
     height = 0.62,
     preview_height = 0.1,
     ft = ft,
-    api = ' ',
+    api = _NgConfigValues.icons.doc_symbol,
   })
 end
 
