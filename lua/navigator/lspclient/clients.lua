@@ -46,6 +46,9 @@ local luadevcfg = {
 
 local luadev = {}
 require('navigator.lazyloader').load('lua-dev.nvim', 'folke/lua-dev.nvim')
+if _NgConfigValues.lsp_installer then
+  require('navigator.lazyloader').load('nvim-lsp-installer', 'williamboman/nvim-lsp-installer')
+end
 local ok, l = pcall(require, 'lua-dev')
 if ok and l then
   luadev = l.setup(luadevcfg)
@@ -367,7 +370,6 @@ local ng_default_cfg = {
   flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
 }
 
-
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
   log(ft, client, loaded)
@@ -477,7 +479,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       if lspclient.name then
         lspclient = lspclient.name
       else
-        warn('incorrect set for lspclient'.. vim.inspect(lspclient))
+        warn('incorrect set for lspclient' .. vim.inspect(lspclient))
         goto continue
       end
     end
@@ -613,13 +615,26 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if has_lspinst and _NgConfigValues.lsp_installer then
       local installed, installer_cfg = require('nvim-lsp-installer.servers').get_server(lspconfig[lspclient].name)
 
-      log('lsp installer server config' .. lspconfig[lspclient].name, installer_cfg)
+      log('lsp installer server config ' .. lspconfig[lspclient].name, installer_cfg)
       if installed and installer_cfg then
-        log('options', installer_cfg:get_default_options())
-        -- if cfg.cmd / {lsp_server_name, arg} not present or lsp_server_name is not in PATH
-        if vim.fn.empty(cfg.cmd) == 1 or vim.fn.executable(cfg.cmd[1] or '') == 0 then
-          cfg.cmd = { installer_cfg.root_dir .. path_sep .. installer_cfg.name }
+        local paths = installer_cfg:get_default_options().cmd_env.PATH
+        paths = vim.split(paths, ':')
+        if vim.fn.empty(cfg.cmd) == 1 then
+          cfg.cmd = { installer_cfg.name }
+        end
+
+        if vim.fn.executable(cfg.cmd[1]) == 0 then
+          for _, path in ipairs(paths) do
+            log(path)
+            if vim.fn.isdirectory(path) == 1 and string.find(path, installer_cfg.root_dir) then
+              cfg.cmd[1] = path .. path_sep .. cfg.cmd[1]
+              log(cfg.cmd)
+              break
+            end
+          end
           log('update cmd', cfg.cmd)
+        else
+          log('cmd installed', cfg.cmd)
         end
       end
     end

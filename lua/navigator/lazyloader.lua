@@ -22,9 +22,15 @@ return {
           loader(plugin)
         end
       end
+    else
+      loader = function(plugin)
+        local cmd = 'packadd ' .. plugin
+        vim.cmd(cmd)
+      end
     end
 
     if _NgConfigValues.lsp_installer == true then
+      vim.cmd('packadd nvim-lsp-installer')
       local has_lspinst, lspinst = pcall(require, 'nvim-lsp-installer')
       log('lsp_installer installed', has_lspinst)
       if has_lspinst then

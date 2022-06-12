@@ -3,9 +3,6 @@ vim.cmd([[set packpath=/tmp/nvim/site]])
 
 local package_root = '/tmp/nvim/site/pack'
 local install_path = package_root .. '/packer/start/packer.nvim'
-vim.g.coq_settings = {
-  ['auto_start'] = 'shut-up',
-}
 
 local function load_plugins()
   require('packer').startup({
@@ -15,12 +12,12 @@ local function load_plugins()
       use({
         'williamboman/nvim-lsp-installer',
         config = function()
-          local lsp_installer = require('nvim-lsp-installer')
-          lsp_installer.setup{}
+          require('nvim-lsp-installer').setup({})
         end,
       })
       use({
         'ray-x/navigator.lua',
+        -- '~/github/ray-x/navigator.lua',
         config = function()
           require('navigator').setup({
             debug = true,
@@ -30,10 +27,31 @@ local function load_plugins()
         end,
       })
       use('ray-x/guihua.lua')
-      -- -- COQ (Autocompletion)
-      use('ms-jpq/coq_nvim')
-      use('ms-jpq/coq.artifacts')
-      use('ms-jpq/coq.thirdparty')
+
+      use({
+        'hrsh7th/nvim-cmp',
+        requires = {
+          'hrsh7th/cmp-nvim-lsp',
+        },
+        config = function()
+          local cmp = require('cmp')
+          cmp.setup({
+            mapping = {
+              ['<CR>'] = cmp.mapping.confirm({ select = true }),
+              ['<Tab>'] = cmp.mapping(function(fallback)
+                if cmp.visible() then
+                  cmp.confirm({ select = true })
+                else
+                  fallback()
+                end
+              end, { 'i', 's' }),
+            },
+            sources = {
+              { name = 'nvim_lsp' },
+            },
+          })
+        end,
+      })
       use('ray-x/aurora')
     end,
     config = {

@@ -500,7 +500,33 @@ lsp_installer = true
 
 In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
 
-Alternatively, Navigator can be used to startup the server installed by lsp-installer. Please do not call `server:setup{opts}` from lsp installer
+example:
+```lua
+      use({
+        'williamboman/nvim-lsp-installer',
+        config = function()
+          local lsp_installer = require('nvim-lsp-installer')
+          lsp_installer.setup{}
+        end,
+      })
+      use({
+        'ray-x/navigator.lua',
+        config = function()
+          require('navigator').setup({
+            debug = true,
+            lsp_installer = true,
+            keymaps = { { key = 'gR', func = "require('navigator.reference').async_ref()" } },
+          })
+        end,
+      })
+
+```
+
+Please refer to [lsp_installer_config](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
+for more info
+
+
+Alternatively, Navigator can be used to startup the server installed by lsp-installer.
 as it will override the navigator setup
 
 To start LSP installed by lsp_installer, please use following setups
