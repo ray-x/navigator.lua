@@ -34,6 +34,7 @@ _NgConfigValues = {
   signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
   ctags = { cmd = 'ctags', tagfile = '.tags' },
   lsp = {
+    enable = true, -- if disabled make sure add require('navigator.lspclient.mapping').setup() in you on_attach
     code_action = {
       enable = true,
       sign = true,
@@ -185,7 +186,7 @@ local extend_config = function(opts)
               if key == 'lsp' then
                 local lsp = require('navigator.lspclient.clients').lsp
                 if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' and k ~= 'null-ls' then
-                  info(string.format('[] extend LSP support for  %s ', k))
+                  info(string.format('[] extend LSP support for  %s %s ', key, k))
                 end
               elseif key == 'keymaps' then
                 info('keymap override')
@@ -228,7 +229,9 @@ M.setup = function(cfg)
   require('navigator.implementation')
 
   cfg.lsp = cfg.lsp or _NgConfigValues.lsp
-  require('navigator.diagnostics').config(cfg.lsp.diagnostic)
+  if cfg.lsp.enable then
+    require('navigator.diagnostics').config(cfg.lsp.diagnostic)
+  end
   if not _NgConfigValues.loaded then
     _NgConfigValues.loaded = true
   end

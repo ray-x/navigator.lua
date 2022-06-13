@@ -269,6 +269,8 @@ require'navigator'.setup({
   },
   lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   lsp = {
+    enable = true,   -- skip lsp setup if disabled make sure add require('navigator.lspclient.mapping').setup() in you
+    -- own on_attach
     code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     format_on_save = true, -- set to false to disable lsp code format on save (if you are using prettier/efm/formater etc)
