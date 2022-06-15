@@ -100,6 +100,15 @@ _NgConfigValues = {
     -- Values
     value_changed = '📝',
     value_definition = '🐶🍡', -- it is easier to see than 🦕
+    side_panel = {
+      section_separator = '',
+      line_num_left = '',
+      line_num_right = '',
+      inner_node = '├○',
+      outer_node = '╰○',
+      bracket_left = '⟪',
+      bracket_right = '⟫',
+    },
     -- Treesitter
     match_kinds = {
       var = ' ', -- "👹", -- Vampaire
@@ -110,6 +119,8 @@ _NgConfigValues = {
       namespace = '🚀',
       type = ' ',
       field = '🏈',
+      module = '📦',
+      flag = '🎏',
     },
     treesitter_defult = '🌲',
     doc_symbols = '',

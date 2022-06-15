@@ -443,7 +443,7 @@ function M.encoding(client)
   end
   local oe = client.offset_encoding
   if oe == nil then
-    return 'utf-8'
+    return 'utf-16'
   end
   if type(oe) == 'table' then
     return oe[1]

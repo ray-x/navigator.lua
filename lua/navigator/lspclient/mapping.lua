@@ -119,12 +119,12 @@ local function set_cmds(_)
   end
 end
 
-local function set_mapping(user_opts)
+local function set_mapping(lsp_info)
   local opts = { noremap = true, silent = true }
-  user_opts = user_opts or {}
-  log('setup mapping', user_opts)
+  lsp_info = lsp_info or {}
+  log('setup mapping', lsp_info.client.name, lsp_info.client.cmd)
   local user_key = _NgConfigValues.keymaps or {}
-  local bufnr = user_opts.bufnr or 0
+  local bufnr = lsp_info.bufnr or 0
 
   local function del_keymap(...)
     vim.api.nvim_buf_del_keymap(bufnr, ...)
@@ -136,7 +136,7 @@ local function set_mapping(user_opts)
   -- local function buf_set_option(...)
   --   vim.api.nvim_buf_set_option(bufnr, ...)
   -- end
-  local doc_fmt, range_fmt, ccls = check_cap(user_opts)
+  local doc_fmt, range_fmt, ccls = check_cap(lsp_info)
 
   if ccls then
     vim.list_extend(key_maps, ccls_mappings)
@@ -200,8 +200,8 @@ local function set_mapping(user_opts)
     del_keymap('n', fmtkey)
   end
 
-  if user_opts.cap and user_opts.cap.document_range_formatting then
-    log('formatting enabled', user_opts.cap)
+  if lsp_info.cap and lsp_info.cap.document_range_formatting then
+    log('formatting enabled', lsp_info.cap)
   end
 
   if not range_fmt and rfmtkey then

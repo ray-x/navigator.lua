@@ -311,6 +311,7 @@ local function get_all_nodes(bufnr, filter, summary)
     ['arrow_function'] = true,
     ['type'] = true,
     ['class'] = true,
+    ['var'] = true,
     ['struct'] = true,
     ['method'] = true,
   }
@@ -436,6 +437,7 @@ local function get_all_nodes(bufnr, filter, summary)
   if should_unload then
     vim.api.nvim_buf_delete(bufnr, { unload = true })
   end
+  lprint(all_nodes)
   return all_nodes, length
 end
 
@@ -496,7 +498,7 @@ function M.buf_ts()
   local all_nodes, width = get_all_nodes(bufnr)
 
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
-  gui.new_list_view({
+  local listview = gui.new_list_view({
     items = all_nodes,
     prompt = true,
     ft = ft,
@@ -506,6 +508,7 @@ function M.buf_ts()
     width = width + 10,
     api = _NgConfigValues.icons.treesitter_defult,
   })
+  return  listview, all_nodes, width
 end
 
 M.get_all_nodes = get_all_nodes

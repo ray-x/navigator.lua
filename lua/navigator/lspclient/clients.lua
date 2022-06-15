@@ -470,7 +470,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     local clients = vim.lsp.get_active_clients() or {}
     for _, client in ipairs(clients) do
       if client ~= nil then
-        loaded[client.name] = true
+        loaded[client.name] = client.id
       end
     end
     -- check should load lsp
@@ -502,7 +502,6 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     local default_config = {}
-    log(lspclient)
     if lspconfig[lspclient] == nil then
       vim.notify(
         'lspclient' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
@@ -532,6 +531,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     local disable_fmt = false
 
+    log(lspclient)
     -- if user provides override values
     cfg.capabilities = capabilities
     log(lspclient, config.lsp.disable_format_cap)
@@ -785,10 +785,10 @@ local function setup(user_opts, cnt)
 
   user_opts = vim.tbl_extend('keep', user_opts, config) -- incase setup was triggered from autocmd
 
-  log(user_opts)
+  log('running lsp setup', ft, bufnr)
   local retry = true
 
-  log('loading for ft ', ft, uri, user_opts)
+  log('loading for ft ', ft, uri)
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
   local lsp_opts = user_opts.lsp or {}
