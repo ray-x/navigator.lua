@@ -17,6 +17,7 @@ local golden_result = {
       },
     },
     node_text = 'main',
+    indent = '',
     range = {
       ['end'] = {
         character = 12,
@@ -38,6 +39,7 @@ local golden_result = {
     full_text = 'func interfaceTest()',
     kind = ' ',
     lnum = 5,
+    indent = '',
     node_scope = {
       ['end'] = {
         character = 1,
@@ -80,6 +82,8 @@ local golden_result = {
         line = 4,
       },
     },
+
+    indent = '  ',
     node_text = 'r',
     range = {
       ['end'] = {
@@ -113,6 +117,7 @@ local golden_result = {
       },
     },
     node_text = 'c',
+    indent = '  ',
     range = {
       ['end'] = {
         character = 2,
@@ -134,6 +139,7 @@ local golden_result = {
     full_text = 'd := circle{radius: 10}',
     kind = ' ',
     lnum = 10,
+    indent = '  ',
     node_scope = {
       ['end'] = {
         character = 1,

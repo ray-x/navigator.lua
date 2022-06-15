@@ -422,6 +422,7 @@ local function get_all_nodes(bufnr, filter, summary)
       if #parents > 1 then
         indent = string.rep('  ', #parents - 1) .. ' '
       end
+      item.indent = indent
 
       item.text = string.format(' %s %s%-10s\t %s', item.kind, indent, item.node_text, item.full_text)
       if #item.text > length then
@@ -437,7 +438,6 @@ local function get_all_nodes(bufnr, filter, summary)
   if should_unload then
     vim.api.nvim_buf_delete(bufnr, { unload = true })
   end
-  lprint(all_nodes)
   return all_nodes, length
 end
 
