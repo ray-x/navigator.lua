@@ -173,15 +173,26 @@ end
 code_action.range_code_action = function(startpos, endpos)
   local context = {}
   context.diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
-  local params = util.make_given_range_params(startpos, endpos)
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  startpos = startpos or api.nvim_buf_get_mark(bufnr, '<')
+  endpos = endpos or api.nvim_buf_get_mark(bufnr, '>')
+  log(startpos, endpos)
+  local params = vim.lsp.util.make_given_range_params(startpos, endpos)
   params.context = context
 
   local original_select = vim.ui.select
   vim.ui.select = require('guihua.gui').select
 
+  local original_input = vim.ui.input
+  vim.ui.input = require('guihua.input').input
   vim.lsp.buf.range_code_action(context, startpos, endpos)
   vim.defer_fn(function()
     vim.ui.select = original_select
+  end, 1000)
+
+  vim.defer_fn(function()
+    vim.ui.input = original_input
   end, 1000)
 end
 

@@ -429,7 +429,7 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | K               | hover doc                                                  |
 | n    | \<Space\>ca     | code action (when you see 🏏 )                             |
 | n    | \<Space\>la     | code lens action (when you see a codelens indicator)       |
-| v    | \<Space\>cA     | range code action (when you see 🏏 )                       |
+| v    | \<Space\>ca     | range code action (when you see 🏏 )                       |
 | n    | \<Space\>rn     | rename with floating window                                |
 | n    | \<Leader\>re    | rename (lsp default)                                       |
 | n    | \<Leader\>gi    | hierarchy incoming calls                                   |
