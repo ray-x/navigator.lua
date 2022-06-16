@@ -91,6 +91,7 @@ local function ctags_symbols()
   local ctags_file = _NgConfigValues.ctags.tagfile
   if not util.file_exists(ctags_file) then
     ctags_gen()
+    vim.cmd('sleep 200m')
   end
   local cnts = util.io_read(ctags_file)
   if cnts == nil then
@@ -135,6 +136,7 @@ local function ctags(...)
   log(gen)
   if gen == '-g' then
     ctags_gen()
+    vim.cmd('sleep 200m')
     ctags_symbols()
   else
     ctags_symbols()
