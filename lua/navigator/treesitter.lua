@@ -423,6 +423,10 @@ local function get_all_nodes(bufnr, filter, summary)
         indent = string.rep('  ', #parents - 1) .. ' '
       end
       item.indent = indent
+      item.indent_level = #parents
+      if #all_nodes >= 1 then
+        all_nodes[#all_nodes].next_indent_level = #parents
+      end
 
       item.text = string.format(' %s %s%-10s\t %s', item.kind, indent, item.node_text, item.full_text)
       if #item.text > length then

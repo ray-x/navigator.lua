@@ -17,15 +17,14 @@ function M.on_attach()
   -- M.update_folds()
 end
 
-function Custom_fold_text()
+function NG_custom_fold_text()
   local line = vim.fn.getline(vim.v.foldstart)
   local line_count = vim.v.foldend - vim.v.foldstart + 1
   -- log("" .. line .. " // " .. line_count .. " lines")
   return ' ⚡' .. line .. ': ' .. line_count .. ' lines'
 end
 
-vim.opt.foldtext = Custom_fold_text()
-
+vim.opt.foldtext = NG_custom_fold_text()
 vim.opt.fillchars = { eob = '-', fold = ' ' }
 
 vim.opt.viewoptions:remove('options')
@@ -39,7 +38,7 @@ function M.setup_fold()
   api.nvim_command('augroup FoldingCommand')
   api.nvim_command('autocmd! * <buffer>')
   api.nvim_command('augroup end')
-  vim.opt.foldtext = 'v:lua.custom_fold_text()'
+  vim.opt.foldtext = 'v:lua.NG_custom_fold_text()'
   vim.opt.fillchars = { eob = '-', fold = ' ' }
   vim.opt.viewoptions:remove('options')
 
