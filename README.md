@@ -94,7 +94,7 @@ variable is:
 
 - ccls call hierarchy (Non-standard `ccls/call` API) supports
 
-- Syntax folding based on treesitter folding algorithm. (It behaves similar to vs-code)
+- Syntax folding based on treesitter or LSP_fold folding algorithm. (It behaves similar to vs-code)
 
 - Fully support LSP CodeAction, CodeLens, CodeLens action. Help you improve code quality.
 

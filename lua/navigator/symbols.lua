@@ -11,7 +11,6 @@ function M.workspace_symbols(query)
   local bufnr = vim.api.nvim_get_current_buf()
   local params = { query = query }
   vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
-    -- if client.resolved_capabilities.workspace_symbol then
     if client.server_capabilities.workspaceSymbolProvider then
       client.request('workspace/symbol', params, M.workspace_symbol_handler, _bufnr)
     end
@@ -33,7 +32,6 @@ function M.document_symbols(opts)
   params.context = { includeDeclaration = true }
   params.query = opts.prompt or ''
   vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
-    -- if client.resolved_capabilities.document_symbol then
     if client.server_capabilities.documentSymbolProvider then
       client.request('textDocument/documentSymbol', params, M.document_symbol_handler, _bufnr)
     end
@@ -51,7 +49,7 @@ M.document_symbol_handler = function(err, result, ctx)
   end
 
   if not result or vim.tbl_isempty(result) then
-    vim.notify('symbol' .. query .. 'not found for buf' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
+    vim.notify('symbol ' .. query .. ' not found for buf ' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
     return
   end
   local locations = {}
@@ -66,7 +64,7 @@ M.document_symbol_handler = function(err, result, ctx)
     item.name = result[i].name
     item.range = result[i].range or result[i].location.range
     if item.range == nil then
-      log("range missing in result", result[i])
+      log('range missing in result', result[i])
     end
     item.uri = uri
     item.selectionRange = result[i].selectionRange
@@ -79,6 +77,10 @@ M.document_symbol_handler = function(err, result, ctx)
     item.text = '[' .. kind .. ']' .. item.name .. ' ' .. item.detail
 
     item.filename = fname
+    item.indent_level = 1
+
+    item.type = kind
+    item.node_text = item.name
 
     table.insert(locations, item)
     if result[i].children ~= nil then
@@ -88,15 +90,22 @@ M.document_symbol_handler = function(err, result, ctx)
         child.name = c.name
         child.range = c.range or c.location.range
         local ckind = symbol_kind(child.kind)
+
+        child.node_text = child.name
+        child.type = ckind
         child.selectionRange = c.selectionRange
         child.filename = fname
         child.uri = uri
         child.lnum = child.range.start.line + 1
         child.detail = c.detail or ''
+        child.indent_level = 2
         child.text = '   ' .. ckind .. '' .. child.name .. ' ' .. child.detail
         table.insert(locations, child)
       end
     end
+  end
+  if ctx.no_show then
+    return locations
   end
 
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
@@ -131,6 +140,29 @@ M.workspace_symbol_handler = function(err, result, ctx, cfg)
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
   gui.new_list_view({ items = items, prompt = true, ft = ft, rowdata = true, api = ' ' })
+end
+
+function M.side_panel()
+  local Panel = require('guihua.panel')
+  local buf = vim.api.nvim_get_current_buf()
+  local p = Panel:new({
+    render = function(bufnr)
+      local ft = vim.api.nvim_buf_get_option(bufnr, 'buftype')
+      if ft == 'nofile' or ft == 'guihua' or ft == 'prompt' then
+        return
+      end
+      print(ft)
+      local params = vim.lsp.util.make_range_params()
+      local sync_req = require('navigator.lspwrapper').call_sync
+      return sync_req(
+        'textDocument/documentSymbol',
+        params,
+        { timeout = 1000, bufnr = bufnr, no_show = true },
+        vim.lsp.with(M.document_symbol_handler, { no_show = true })
+      )
+    end,
+  })
+  p:open(true)
 end
 
 return M

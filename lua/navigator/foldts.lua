@@ -44,7 +44,7 @@ function M.setup_fold()
 
   local current_window = api.nvim_get_current_win()
   api.nvim_win_set_option(current_window, 'foldmethod', 'expr')
-  api.nvim_win_set_option(current_window, 'foldexpr', 'folding#foldexpr()')
+  api.nvim_win_set_option(current_window, 'foldexpr', 'folding#ngfoldexpr()')
 end
 
 -- This is cached on buf tick to avoid computing that multiple times

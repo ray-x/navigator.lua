@@ -179,7 +179,7 @@ local function set_mapping(lsp_info)
     elseif string.find(value.func, 'format') then
       fmtkey = value.key
     end
-    log('binding', k, f)
+    trace('binding', k, f)
     set_keymap(m, k, f, opts)
   end
 
@@ -279,12 +279,12 @@ function M.setup(user_opts)
   local client = user_opts.client or {}
   local cap = client.server_capabilities or vim.lsp.protocol.make_client_capabilities()
 
-  log('lsp cap:', cap)
+  log('lsp cap:', cap.codeActionProvider)
 
-  if cap.call_hierarchy or cap.callHierarchyProvider then
-    vim.lsp.handlers['callHierarchy/incomingCalls'] = require('navigator.hierarchy').incoming_calls_handler
-    vim.lsp.handlers['callHierarchy/outgoingCalls'] = require('navigator.hierarchy').outgoing_calls_handler
-  end
+  -- if cap.call_hierarchy or cap.callHierarchyProvider then
+  --   vim.lsp.handlers['callHierarchy/incomingCalls'] = require('navigator.hierarchy').incoming_calls_handler
+  --   vim.lsp.handlers['callHierarchy/outgoingCalls'] = require('navigator.hierarchy').outgoing_calls_handler
+  -- end
 
   vim.lsp.handlers['textDocument/references'] = require('navigator.reference').reference_handler
   -- vim.lsp.handlers["textDocument/codeAction"] = require"navigator.codeAction".code_action_handler
