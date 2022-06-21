@@ -56,7 +56,6 @@ function M.setup_plugin()
       M.active_folding_clients[client_id] = server_supports_folding
     end
   end
-  -- print(vim.inspect(M.active_folding_clients))
 end
 
 function M.update_folds()

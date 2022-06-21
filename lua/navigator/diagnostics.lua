@@ -350,8 +350,6 @@ end
 
 M.show_buf_diagnostics = function()
   if diagnostic_list[vim.bo.filetype] ~= nil then
-    -- log(diagnostic_list[vim.bo.filetype])
-    -- vim.fn.setqflist({}, " ", {title = "LSP", items = diagnostic_list[vim.bo.filetype]})
     local results = diagnostic_list[vim.bo.filetype]
     local display_items = {}
     for _, client_items in pairs(results) do
@@ -369,7 +367,7 @@ M.show_buf_diagnostics = function()
         enable_preview_edit = true,
       })
       if listview == nil then
-        return log("nil listview")
+        return log('nil listview')
       end
       trace('new buffer', listview.bufnr)
       if listview.bufnr then
@@ -469,6 +467,43 @@ function M.show_diagnostics(pos)
     -- deprecated
     diagnostic.show_line_diagnostics(opt, bufnr, lnum)
   end
+end
+
+function M.treesitter_and_diag_panel()
+  local Panel = require('guihua.panel')
+
+  local ft = vim.bo.filetype
+  local results = diagnostic_list[ft]
+  log(diagnostic_list, ft)
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local p = Panel:new({
+    header = 'treesitter',
+    render = function(b)
+      log('render for ', bufnr, b)
+      return require('navigator.treesitter').all_ts_nodes(b)
+    end,
+  })
+  p:add_section({
+    header = 'diagnostic',
+    render = function(bufnr)
+      if diagnostic_list[ft] ~= nil then
+        local display_items = {}
+        for _, client_items in pairs(results) do
+          for _, items in pairs(client_items) do
+            for _, it in pairs(items) do
+              log(it)
+              table.insert(display_items, it)
+            end
+          end
+        end
+        return display_items
+      else
+        return {}
+      end
+    end,
+  })
+  p:open(true)
 end
 
 function M.config(cfg)

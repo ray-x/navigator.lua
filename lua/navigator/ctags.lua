@@ -54,6 +54,8 @@ end
 local function ctags_gen()
   local cmd = 'ctags' -- -x -n -u -f - ' .. vfn.expand('%:p')
   local output = _NgConfigValues.ctags.tagfile
+  -- rm file first
+  util.rm_file(output)
   local options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number '
   if _NgConfigValues.ctags then
     cmd = _NgConfigValues.ctags.cmd
@@ -64,6 +66,7 @@ local function ctags_gen()
   options = options .. '--language=' .. lang
   cmd = cmd .. ' ' .. options
   cmd = string.format('%s -f %s %s --language=%s', cmd, output, options, lang)
+  cmd = vim.split(cmd, ' ')
   log(cmd)
   vfn.jobstart(cmd, {
     on_stdout = function(_, _, _)
@@ -72,7 +75,7 @@ local function ctags_gen()
 
     on_exit = function(_, data, _) -- id, data, event
       -- log(vim.inspect(data) .. "exit")
-      if data and data.code ~= 0 then
+      if data and data ~= 0 then
         return vim.notify(cmd .. ' failed ' .. tostring(data), vim.lsp.log_levels.ERROR)
       else
         vim.notify('ctags generated')
@@ -108,10 +111,10 @@ local function ctags_symbols()
 
   local ft = vim.o.ft
   local result = symbols_to_items(items)
-  log(result)
   if next(result) == nil then
     return vim.notify('no symbols found')
   end
+  log(result[1])
   local opt = {
     api = ' ',
     ft = ft,

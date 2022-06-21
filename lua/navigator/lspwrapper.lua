@@ -145,18 +145,20 @@ end
 function M.call_sync(method, params, opts, handler)
   params = params or {}
   opts = opts or {}
-  local results_lsp, err = lsp.buf_request_sync(0, method, params, opts.timeout or vim.g.navtator_timeout or 1000)
+  log(method, params)
+  local results_lsp, err = lsp.buf_request_sync(opts.bufnr or 0, method, params, opts.timeout or 1000)
 
-  handler(err, extract_result(results_lsp), { method = method }, nil)
+  return handler(err, extract_result(results_lsp), { method = method, no_show = opts.no_show }, nil)
 end
 
-function M.call_async(method, params, handler)
+function M.call_async(method, params, handler, bufnr)
   params = params or {}
   local callback = function(...)
     util.show(...)
     handler(...)
   end
-  return lsp.buf_request(0, method, params, callback)
+  bufnr = bufnr or 0
+  return lsp.buf_request(bufnr, method, params, callback)
   -- results_lsp, canceller
 end
 

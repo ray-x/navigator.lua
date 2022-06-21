@@ -63,11 +63,13 @@ local key_maps = {
 }
 
 local commands = {
-  [[command!  -nargs=* Nctags lua require("navigator.ctags").ctags({<f-args>})]],
+  [[command!  -nargs=* Nctags lua require("navigator.ctags").ctags(<f-args>)]],
   "command! -nargs=0 LspLog lua require'navigator.lspclient.config'.open_lsp_log()",
   "command! -nargs=0 LspRestart lua require'navigator.lspclient.config'.reload_lsp()",
   "command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>",
   "command! -nargs=0 LspKeymaps lua require'navigator.lspclient.mapping'.get_keymaps_help()<CR>",
+  "command! -nargs=0 LspSymbols lua require'navigator.symbols'.side_panel()<CR>",
+  "command! -nargs=0 TSymbols lua require'navigator.treesitter'.side_panel()<CR>",
 }
 
 local key_maps_help = {}
@@ -179,7 +181,7 @@ local function set_mapping(lsp_info)
     elseif string.find(value.func, 'format') then
       fmtkey = value.key
     end
-    log('binding', k, f)
+    trace('binding', k, f)
     set_keymap(m, k, f, opts)
   end
 
@@ -279,12 +281,12 @@ function M.setup(user_opts)
   local client = user_opts.client or {}
   local cap = client.server_capabilities or vim.lsp.protocol.make_client_capabilities()
 
-  log('lsp cap:', cap)
+  log('lsp cap:', cap.codeActionProvider)
 
-  if cap.call_hierarchy or cap.callHierarchyProvider then
-    vim.lsp.handlers['callHierarchy/incomingCalls'] = require('navigator.hierarchy').incoming_calls_handler
-    vim.lsp.handlers['callHierarchy/outgoingCalls'] = require('navigator.hierarchy').outgoing_calls_handler
-  end
+  -- if cap.call_hierarchy or cap.callHierarchyProvider then
+  --   vim.lsp.handlers['callHierarchy/incomingCalls'] = require('navigator.hierarchy').incoming_calls_handler
+  --   vim.lsp.handlers['callHierarchy/outgoingCalls'] = require('navigator.hierarchy').outgoing_calls_handler
+  -- end
 
   vim.lsp.handlers['textDocument/references'] = require('navigator.reference').reference_handler
   -- vim.lsp.handlers["textDocument/codeAction"] = require"navigator.codeAction".code_action_handler

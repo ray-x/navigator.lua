@@ -71,6 +71,9 @@ function M.io_read(filename, total)
   return content
 end
 
+function M.rm_file(filename)
+  return os.remove(filename)
+end
 
 function M.file_exists(name)
   local f = io.open(name, "r")
@@ -417,9 +420,9 @@ function M.mk_handler(fn)
 end
 
 function M.partial(func, arg)
-  return (M.mk_handler(function(...)
+  return function(...)
     return func(arg, ...)
-  end))
+  end
 end
 
 function M.empty(t)
@@ -443,7 +446,7 @@ function M.encoding(client)
   end
   local oe = client.offset_encoding
   if oe == nil then
-    return 'utf-16'
+    return 'utf-8'
   end
   if type(oe) == 'table' then
     return oe[1]
@@ -463,6 +466,16 @@ end
 
 function M.info(msg)
   vim.notify('INF: ' .. msg, vim.lsp.log_levels.INFO)
+end
+
+function M.range_inside(outer, inner)
+  if outer == nil or inner == nil then
+    return false
+  end
+  if outer.start == nil or outer['end'] == nil or inner.start == nil or inner['end'] == nil then
+    return false
+  end
+  return outer.start.line <= inner.start.line and outer['end'].line >= inner['end'].line
 end
 
 return M

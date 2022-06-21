@@ -110,7 +110,6 @@ end
 --- This function copy from treesitter/refactor/navigation.lua
 local function get_definitions(bufnr)
   local local_nodes = ts_locals.get_locals(bufnr)
-
   -- Make sure the nodes are unique.
   local nodes_set = {}
   for _, loc in ipairs(local_nodes) do
@@ -291,8 +290,12 @@ local function get_all_nodes(bufnr, filter, summary)
     vim.notify('get_all_node invalide bufnr', vim.lsp.log_levels.WARN)
   end
   summary = summary or false
+  local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
   if not parsers.has_parser() then
-    vim.notify('ts not loaded', vim.lsp.log_levels.Debug)
+    if not require('navigator.lspclient.clients').ft_disabled(ft) then
+      vim.notify('ts not loaded ' .. ft, vim.lsp.log_levels.Debug)
+    end
+    return {}
   end
 
   local path_sep = require('navigator.util').path_sep()
@@ -311,7 +314,7 @@ local function get_all_nodes(bufnr, filter, summary)
     ['arrow_function'] = true,
     ['type'] = true,
     ['class'] = true,
-    ['var'] = true,
+    -- ['var'] = true,
     ['struct'] = true,
     ['method'] = true,
   }
@@ -327,17 +330,31 @@ local function get_all_nodes(bufnr, filter, summary)
   -- Step 2 find correct completions
   local length = 10
   local parents = {} -- stack of nodes a clever algorithm from treesiter refactor @Santos Gallegos
+  local loaded_symbol = {}
   for _, def in ipairs(get_definitions(bufnr)) do
     local n = #parents
     for i = 1, n do
       local index = n + 1 - i
       local parent_def = parents[index]
+      log(parent_def.type, parent_def.node:type(), vim.treesitter.get_node_text(parent_def.node, bufnr))
+      log(def.node:type(), vim.treesitter.get_node_text(def.node, bufnr))
       if
         ts_utils.is_parent(parent_def.node, def.node)
-        or (containers[parent_def.type] and ts_utils.is_parent(parent_def.node:parent(), def.node))
+        or (
+          containers[parent_def.type]
+          and (
+            ts_utils.is_parent(parent_def.node:parent(), def.node)
+            or (
+              parent_def.node:parent():type():find('dot_index')
+              and ts_utils.is_parent(parent_def.node:parent():parent(), def.node)
+            )
+          )
+        )
       then
+        log('is parent', i, index)
         break
       else
+        log('leave node', i, index)
         parents[index] = nil
       end
     end
@@ -351,6 +368,10 @@ local function get_all_nodes(bufnr, filter, summary)
 
       if filter ~= nil and not filter[item.type] then
         trace(item.type, item.kind)
+        goto continue
+      end
+
+      if item.type == 'associated' then
         goto continue
       end
       local tsdata = node.def
@@ -369,19 +390,39 @@ local function get_all_nodes(bufnr, filter, summary)
       if is_func then
         -- hack for lua and maybe other language aswell
         local parent = tsdata:parent()
-        if parent ~= nil and parent:type() == 'function_name' or parent:type() == 'function_name_field' then
+        if parent ~= nil then
+          log(parent:type(), vim.treesitter.get_node_text(parent, bufnr), item.node_text, item.type)
+        end
+        if
+          parent ~= nil
+          and (
+            parent:type() == 'function_name'
+            -- or parent:type() == 'function'
+            -- or parent:type() == 'function_declaration' -- this bring in too much info
+            or parent:type() == 'method_name'
+            or parent:type() == 'function_name_field'
+          )
+        then
+          -- replace function name
           item.node_text = vim.treesitter.get_node_text(parent, bufnr)
+          local cut = item.node_text:find('[\n\r]')
+          if cut then
+            item.node_text = item.node_text:sub(1, cut - 1)
+          end
           log(parent:type(), item.node_text)
         end
       end
 
       trace(item.node_text, item.kind, item.type)
       if scope ~= nil then
-        -- it is strange..
         if not is_func and summary then
+          log(item.node_text, item.type)
           goto continue
         end
         item.node_scope = ts_utils.node_to_lsp_range(scope)
+      end
+      if item.node_text == '_' then
+        goto continue
       end
       if summary then
         if item.node_scope ~= nil then
@@ -394,7 +435,6 @@ local function get_all_nodes(bufnr, filter, summary)
             tsdata:type(),
             item.node_text,
             item.kind,
-            item.node_text,
             'range',
             item.node_scope.start.line,
             item.node_scope['end'].line
@@ -405,10 +445,9 @@ local function get_all_nodes(bufnr, filter, summary)
 
       item.range = ts_utils.node_to_lsp_range(tsdata)
       local start_line_node, _, _ = tsdata:start()
-      if item.node_text == '_' then
-        goto continue
-      end
-      item.full_text = vim.trim(api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1] or '')
+
+      local line_text = api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1] or ''
+      item.full_text = vim.trim(line_text)
 
       item.full_text = item.full_text:gsub('%s*[%[%(%{]*%s*$', '')
       item.uri = uri
@@ -423,7 +462,23 @@ local function get_all_nodes(bufnr, filter, summary)
         indent = string.rep('  ', #parents - 1) .. ' '
       end
       item.indent = indent
-      item.indent_level = #parents
+      item.indent_level = #parents -- maybe use real indent level ?
+      if item.indent_level <= 1 then
+        local sp = string.match(line_text, '(%s*)')
+        log(line_text, #sp)
+        if sp then
+          local indent_level = #sp / (vim.o.shiftwidth or 4) + 1
+          item.indent_level = math.max(item.indent_level, indent_level)
+        end
+      end
+      if #parents > 0 then
+        log(parents[1].type, vim.treesitter.get_node_text(parents[1].node, bufnr))
+        if parents[2] then
+          log(parents[2].type, vim.treesitter.get_node_text(parents[2].node, bufnr))
+        end
+      else
+        log('root node')
+      end
       if #all_nodes >= 1 then
         all_nodes[#all_nodes].next_indent_level = #parents
       end
@@ -432,7 +487,13 @@ local function get_all_nodes(bufnr, filter, summary)
       if #item.text > length then
         length = #item.text
       end
-      table.insert(all_nodes, item)
+      if
+        loaded_symbol[item.node_text .. item.kind] == nil
+        or not util.range_inside(loaded_symbol[item.node_text .. item.kind], item.node_scope)
+      then
+        table.insert(all_nodes, item)
+        loaded_symbol[item.node_text .. item.kind] = item.node_scope
+      end
       ::continue::
     end
   end
@@ -446,8 +507,12 @@ local function get_all_nodes(bufnr, filter, summary)
 end
 
 function M.buf_func(bufnr)
+  local ft = vim.api.nvim_buf_get_option(bufnr, 'buftype')
+  if vim.api.nvim_buf_get_option(bufnr, 'buftype') == 'nofile' then
+    return
+  end
   if not ok or ts_locals == nil then
-    error('treesitter not loaded')
+    error('treesitter not loaded: ' .. ft)
     return
   end
 
@@ -492,15 +557,33 @@ function M.buf_func(bufnr)
   return all_nodes, width
 end
 
-function M.buf_ts()
+function M.all_ts_nodes(bufnr)
   if ts_locals == nil then
     error('treesitter not loaded')
     return
   end
 
-  local bufnr = api.nvim_get_current_buf()
+  local bufnr = bufnr or api.nvim_get_current_buf()
   local all_nodes, width = get_all_nodes(bufnr)
+  return all_nodes, width
+end
 
+function M.side_panel()
+  Panel = require('guihua.panel')
+  local bufnr = api.nvim_get_current_buf()
+  local p = Panel:new({
+    header = 'treesitter',
+    render = function(b)
+      log('render for ', bufnr, b)
+      return require('navigator.treesitter').all_ts_nodes(b)
+    end,
+  })
+  p:open(true)
+end
+
+function M.buf_ts()
+  local all_nodes, width = M.all_ts_nodes()
+  local bufnr = api.nvim_get_current_buf()
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
   local listview = gui.new_list_view({
     items = all_nodes,
@@ -512,7 +595,7 @@ function M.buf_ts()
     width = width + 10,
     api = _NgConfigValues.icons.treesitter_defult,
   })
-  return  listview, all_nodes, width
+  return listview, all_nodes, width
 end
 
 M.get_all_nodes = get_all_nodes
