@@ -393,9 +393,8 @@ local function get_all_nodes(bufnr, filter, summary)
           parent ~= nil
           and (
             parent:type() == 'function_name'
-            or parent:type() == 'function'
-            or parent:type() == 'function_declaration'
-            or parent:type() == 'dot_index_expression'
+            -- or parent:type() == 'function'
+            -- or parent:type() == 'function_declaration'
             or parent:type() == 'method_name'
             or parent:type() == 'function_name_field'
           )
@@ -460,9 +459,13 @@ local function get_all_nodes(bufnr, filter, summary)
       end
       item.indent = indent
       item.indent_level = #parents -- maybe use real indent level ?
-      if #parents <= 1 then
-        local indent_level = string.match(line_text, '(%s*)') / (vim.o.shiftwidth or 4)
-        item.indent_level = math.max(item.indent_level, indent_level)
+      if item.indent_level <= 1 then
+        local sp = string.match(line_text, '(%s*)')
+        log(line_text, #sp)
+        if sp then
+          local indent_level = #sp / (vim.o.shiftwidth or 4)
+          item.indent_level = math.max(item.indent_level, indent_level)
+        end
       end
       if #parents > 0 then
         log(parents[1].type, vim.treesitter.get_node_text(parents[1].node, bufnr))
