@@ -24,7 +24,25 @@ end
 
 local util = lspconfig.util
 local config = require('navigator').config_values()
-
+local disabled_ft = {
+  'NvimTree',
+  'guihua',
+  'clap_input',
+  'clap_spinner',
+  'vista',
+  'vista_kind',
+  'TelescopePrompt',
+  'guihua_rust',
+  'csv',
+  'txt',
+  'defx',
+  'packer',
+  'gitcommit',
+  'windline',
+  'notify',
+  'nofile',
+  '',
+}
 -- local cap = vim.lsp.protocol.make_client_capabilities()
 local on_attach = require('navigator.lspclient.attach').on_attach
 -- gopls["ui.completion.usePlaceholders"] = true
@@ -708,6 +726,14 @@ local function get_cfg(client)
   end
 end
 
+local function ft_disabled(ft)
+  for i = 1, #disabled_ft do
+    if ft == disabled_ft[i] then
+      return true
+    end
+  end
+end
+
 local function setup(user_opts, cnt)
   user_opts = user_opts or {}
   local ft = vim.bo.filetype
@@ -744,28 +770,10 @@ local function setup(user_opts, cnt)
     log('navigator was loaded for ft', ft, bufnr)
     return
   end
-  local disable_ft = {
-    'NvimTree',
-    'guihua',
-    'clap_input',
-    'clap_spinner',
-    'vista',
-    'vista_kind',
-    'TelescopePrompt',
-    'guihua_rust',
-    'csv',
-    'txt',
-    'defx',
-    'packer',
-    'gitcommit',
-    'windline',
-    'notify',
-  }
-  for i = 1, #disable_ft do
-    if ft == disable_ft[i] then
-      trace('navigator disabled for ft or it is loaded', ft)
-      return
-    end
+
+  if ft_disabled(ft) then
+    trace('navigator disabled for ft or it is loaded', ft)
+    return
   end
   if _NgConfigValues.lsp.servers then
     add_servers(_NgConfigValues.lsp.servers)
@@ -840,4 +848,12 @@ local function on_filetype()
   setup({ bufnr = bufnr })
 end
 
-return { setup = setup, get_cfg = get_cfg, lsp = servers, add_servers = add_servers, on_filetype = on_filetype }
+return {
+  setup = setup,
+  get_cfg = get_cfg,
+  lsp = servers,
+  add_servers = add_servers,
+  on_filetype = on_filetype,
+  disabled_ft = disabled_ft,
+  ft_disabled = ft_disabled,
+}

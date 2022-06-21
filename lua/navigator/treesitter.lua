@@ -290,8 +290,12 @@ local function get_all_nodes(bufnr, filter, summary)
     vim.notify('get_all_node invalide bufnr', vim.lsp.log_levels.WARN)
   end
   summary = summary or false
+  local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
   if not parsers.has_parser() then
-    vim.notify('ts not loaded', vim.lsp.log_levels.Debug)
+    if not require('navigator.lspclient.clients').ft_disabled(ft) then
+      vim.notify('ts not loaded ' .. ft, vim.lsp.log_levels.Debug)
+    end
+    return {}
   end
 
   local path_sep = require('navigator.util').path_sep()
@@ -394,7 +398,7 @@ local function get_all_nodes(bufnr, filter, summary)
           and (
             parent:type() == 'function_name'
             -- or parent:type() == 'function'
-            -- or parent:type() == 'function_declaration'
+            -- or parent:type() == 'function_declaration' -- this bring in too much info
             or parent:type() == 'method_name'
             or parent:type() == 'function_name_field'
           )
@@ -463,7 +467,7 @@ local function get_all_nodes(bufnr, filter, summary)
         local sp = string.match(line_text, '(%s*)')
         log(line_text, #sp)
         if sp then
-          local indent_level = #sp / (vim.o.shiftwidth or 4)
+          local indent_level = #sp / (vim.o.shiftwidth or 4) + 1
           item.indent_level = math.max(item.indent_level, indent_level)
         end
       end
@@ -504,7 +508,7 @@ end
 
 function M.buf_func(bufnr)
   local ft = vim.api.nvim_buf_get_option(bufnr, 'buftype')
-  if vim.api.nvim_buf_get_option(bufnr, 'buftype') ~= 'nofile' then
+  if vim.api.nvim_buf_get_option(bufnr, 'buftype') == 'nofile' then
     return
   end
   if not ok or ts_locals == nil then
@@ -568,6 +572,7 @@ function M.side_panel()
   Panel = require('guihua.panel')
   local bufnr = api.nvim_get_current_buf()
   local p = Panel:new({
+    header = 'treesitter',
     render = function(b)
       log('render for ', bufnr, b)
       return require('navigator.treesitter').all_ts_nodes(b)

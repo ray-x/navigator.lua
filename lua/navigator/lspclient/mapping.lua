@@ -63,11 +63,13 @@ local key_maps = {
 }
 
 local commands = {
-  [[command!  -nargs=* Nctags lua require("navigator.ctags").ctags({<f-args>})]],
+  [[command!  -nargs=* Nctags lua require("navigator.ctags").ctags(<f-args>)]],
   "command! -nargs=0 LspLog lua require'navigator.lspclient.config'.open_lsp_log()",
   "command! -nargs=0 LspRestart lua require'navigator.lspclient.config'.reload_lsp()",
   "command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>",
   "command! -nargs=0 LspKeymaps lua require'navigator.lspclient.mapping'.get_keymaps_help()<CR>",
+  "command! -nargs=0 LspSymbols lua require'navigator.symbols'.side_panel()<CR>",
+  "command! -nargs=0 TSymbols lua require'navigator.treesitter'.side_panel()<CR>",
 }
 
 local key_maps_help = {}

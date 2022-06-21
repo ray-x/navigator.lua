@@ -71,6 +71,9 @@ function M.io_read(filename, total)
   return content
 end
 
+function M.rm_file(filename)
+  return os.remove(filename)
+end
 
 function M.file_exists(name)
   local f = io.open(name, "r")

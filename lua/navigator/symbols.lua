@@ -151,7 +151,6 @@ function M.side_panel()
       if ft == 'nofile' or ft == 'guihua' or ft == 'prompt' then
         return
       end
-      print(ft)
       local params = vim.lsp.util.make_range_params()
       local sync_req = require('navigator.lspwrapper').call_sync
       return sync_req(

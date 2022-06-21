@@ -5,7 +5,9 @@
 
 - A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
 
-- Fuzzy search & build ctags symbols
+- ctags fuzzy search & build ctags symbols
+
+-
 
 - [![a short intro of navigator](https://user-images.githubusercontent.com/1681295/147378905-51eede5f-e36d-48f4-9799-ae562949babe.jpeg)](https://youtu.be/P1kd7Y8AatE)
 
@@ -94,7 +96,9 @@ variable is:
 
 - ccls call hierarchy (Non-standard `ccls/call` API) supports
 
-- Syntax folding based on treesitter or LSP_fold folding algorithm. (It behaves similar to vs-code)
+- Syntax folding based on treesitter or LSP_fold folding algorithm. (It behaves similar to vs-code); comment folding
+
+- Treesitter symbols sidebar, LSP document symbole sidebar. Both with preview and folding
 
 - Fully support LSP CodeAction, CodeLens, CodeLens action. Help you improve code quality.
 
@@ -672,6 +676,13 @@ Pls check the first part of README
 Using treesitter and LSP to view the symbol definition
 
 ![image](https://user-images.githubusercontent.com/1681295/139771978-bbc970a5-be9f-42cf-8942-3477485bd89c.png)
+
+### Sidebar, folding, outline
+Treesitter outline and Diagnostics
+<img width="708" alt="image" src="https://user-images.githubusercontent.com/1681295/174791609-0023e68f-f1f4-4335-9ea2-d2360e9f0bfd.png">
+<img width="733" alt="image" src="https://user-images.githubusercontent.com/1681295/174804579-26f87fbf-426b-46d0-a7a3-a5aab69c032f.png">
+
+
 
 ### GUI and multigrid support
 
