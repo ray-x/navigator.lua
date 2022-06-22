@@ -596,28 +596,37 @@ You can delegate the lsp server setup to lsp_installer with `server:setup{opts}`
 Here is an example [init_lsp_installer.lua](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
 
 
-### Integration with other lsp plugins (e.g. rust-tools, go.nvim)
+### Integration with other lsp plugins (e.g. rust-tools, go.nvim, clangd extension)
 There are lots of plugins provides lsp support
 go.nvim allow you either hook gopls from go.nvim or from navigator and it can export the lsp setup from go.nvim.
 
-rust-tools allow you to setup on_attach from config server
+rust-tools and clangd allow you to setup on_attach from config server
 Here is an example to setup rust with rust-tools
 
 ```lua
 require'navigator'.setup({
   lsp = {
-    disable_lsp = { "rust_analyzer" }, -- will not run rust_analyzer setup from navigator
+    disable_lsp = { "rust_analyzer", "clangd" }, -- will not run rust_analyzer setup from navigator
   }
 })
 
 require('rust-tools').setup({
   server = {
     on_attach = function(_, _)
-      require('navigator.mappings').setup() -- setup navigator keymaps here,
+      require('navigator.lspclient.mapping').setup() -- setup navigator keymaps here,
       -- otherwise, you can define your own commands to call navigator functions
     end,
   }
 })
+
+require("clangd_extensions").setup {
+  server = {
+    on_attach = function(_, _)
+      require('navigator.lspclient.mapping').setup() -- setup navigator keymaps here,
+      -- otherwise, you can define your own commands to call navigator functions
+    end,
+  }
+}
 
 ```
 
