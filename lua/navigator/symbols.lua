@@ -98,7 +98,7 @@ M.document_symbol_handler = function(err, result, ctx)
         child.uri = uri
         child.lnum = child.range.start.line + 1
         child.detail = c.detail or ''
-        child.indent_level = 2
+        child.indent_level = item.indent_level + 1
         child.text = '   ' .. ckind .. '' .. child.name .. ' ' .. child.detail
         table.insert(locations, child)
       end
