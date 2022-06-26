@@ -185,7 +185,6 @@ if _NgConfigValues.debug_console_output then
 end
 
 M._log = require('guihua.log').new(default_config, true)
-print('log instance', vim.inspect(M._log))
 if _NgConfigValues.debug then
   -- add log to you lsp.log
 
@@ -195,8 +194,6 @@ if _NgConfigValues.debug then
   M.error = M._log.error
   M.log = M.info
 else
-  print(vim.inspect(debug.traceback()))
-  print('log disabled', _NgConfigValues.debug)
   M.log = function(...)
     return { ... }
   end
