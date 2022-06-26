@@ -113,12 +113,66 @@ local function get_definitions(bufnr)
   -- Make sure the nodes are unique.
   local nodes_set = {}
   for _, loc in ipairs(local_nodes) do
+    trace(loc)
     if loc.definition then
       ts_locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
         -- lua doesn't compare tables by value,
         -- use the value from byte count instead.
-        local _, _, start = node:start()
+        local k, l, start = node:start()
+        trace(node, match)
+        trace(k, l, start, node:parent(), node:parent():start(), node:parent():type())
+
+        if node and node:parent() and string.find(node:parent():type(), 'parameter_declaration') then
+          log('parameter_declaration skip')
+          return
+        end
         nodes_set[start] = { node = node, type = match or '' }
+      end)
+    end
+
+    if loc.method then -- for go
+      ts_locals.recurse_local_nodes(loc.method, function(def, node, full_match, match)
+        local k, l, start = node:start()
+
+        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
+        if node:type() == 'field_identifier' and nodes_set[start] == nil then
+          nodes_set[start] = { node = node, type = 'method' }
+        end
+      end)
+    end
+    if loc.interface then -- for go using interface can output full method definition
+      ts_locals.recurse_local_nodes(loc.interface, function(def, node, full_match, match)
+        local k, l, start = node:start()
+        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
+        if nodes_set[start] == nil then
+          nodes_set[start] = { node = node, type = match or '' }
+        end
+      end)
+    end
+    if loc.reference then -- for go
+      ts_locals.recurse_local_nodes(loc.reference, function(def, node, full_match, match)
+        local k, l, start = node:start()
+        local p1, p1t = '', ''
+        local p2, p2t = '', ''
+        if node:parent() and node:parent():parent() then
+          p1 = node:parent()
+          p1t = node:parent():type()
+          p2 = node:parent():parent()
+          p2t = node:parent():parent():type()
+        end
+        trace(k, l, start, def, node, full_match, match, p1t, p1, node:parent():start(), node:parent():type(), p2, p2t)
+        if nodes_set[start] == nil then
+          if -- qualified_type : e.g. io.Reader inside interface
+            node:parent()
+            and node:parent():parent()
+            and node:type() == 'type_identifier'
+            and node:parent():type() == 'qualified_type'
+            and string.find(node:parent():parent():type(), 'interface')
+          then
+            log('add node', node)
+            nodes_set[start] = { node = node, type = match or 'field' }
+          end
+        end
       end)
     end
   end
@@ -277,7 +331,8 @@ local function get_all_nodes(bufnr, filter, summary)
 
   local result = lru:get(hash)
   if result ~= nil and result.ftime == ftime then
-    log('get data from cache')
+    trace('get data from cache', ftime, result)
+
     return result.nodes, result.length
   end
 
@@ -367,19 +422,21 @@ local function get_all_nodes(bufnr, filter, summary)
       item.type = node.type
 
       if filter ~= nil and not filter[item.type] then
-        trace(item.type, item.kind)
+        trace('skipped', item.type, item.kind)
         goto continue
       end
 
       if item.type == 'associated' then
+        trace('skipped', item.type, item.kind)
         goto continue
       end
       local tsdata = node.def
 
       if node.def == nil then
+        trace('skipped', item.type, item.kind)
         goto continue
       end
-      item.node_text = vim.treesitter.get_node_text(tsdata, bufnr)
+      item.node_text = vim.treesitter.get_node_text(tsdata, bufnr) or ''
       local scope, is_func
 
       if summary then
@@ -416,12 +473,12 @@ local function get_all_nodes(bufnr, filter, summary)
       trace(item.node_text, item.kind, item.type)
       if scope ~= nil then
         if not is_func and summary then
-          log(item.node_text, item.type)
+          log('skipped', item.node_text, item.type)
           goto continue
         end
         item.node_scope = ts_utils.node_to_lsp_range(scope)
       end
-      if item.node_text == '_' then
+      if item.node_text and vim.trim(item.node_text) == '_' then
         goto continue
       end
       if summary then
@@ -571,14 +628,18 @@ end
 function M.side_panel()
   Panel = require('guihua.panel')
   local bufnr = api.nvim_get_current_buf()
-  local p = Panel:new({
+  local panel = Panel:new({
     header = 'treesitter',
     render = function(b)
+      local ft = vim.api.nvim_buf_get_option(b, 'buftype')
       log('render for ', bufnr, b)
+      if ft == 'nofile' or ft == 'guihua' then
+        b = bufnr
+      end
       return require('navigator.treesitter').all_ts_nodes(b)
     end,
   })
-  p:open(true)
+  panel:open(true)
 end
 
 function M.buf_ts()

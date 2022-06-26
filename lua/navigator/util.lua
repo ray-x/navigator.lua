@@ -76,7 +76,7 @@ function M.rm_file(filename)
 end
 
 function M.file_exists(name)
-  local f = io.open(name, "r")
+  local f = io.open(name, 'r')
   if f ~= nil then
     io.close(f)
     return true
@@ -184,16 +184,19 @@ if _NgConfigValues.debug_console_output then
   default_config.use_file = false
 end
 
+M._log = require('guihua.log').new(default_config, true)
+print('log instance', vim.inspect(M._log))
 if _NgConfigValues.debug then
-  M._log = require('guihua.log').new(default_config, true)
-
   -- add log to you lsp.log
-  M.log = M._log.info
-  M.info = M._log.info
+
   M.trace = M._log.trace
+  M.info = M._log.info
+  M.warn = M._log.warn
   M.error = M._log.error
+  M.log = M.info
 else
-  M._log = {}
+  print(vim.inspect(debug.traceback()))
+  print('log disabled', _NgConfigValues.debug)
   M.log = function(...)
     return { ... }
   end
@@ -203,9 +206,10 @@ else
   M.trace = function(...)
     return { ... }
   end
-  M.error = function(...)
+  M.warn = function(...)
     return { ... }
   end
+  M.error = M._log.error
 end
 
 function M.fmt(...)

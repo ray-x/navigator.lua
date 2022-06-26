@@ -153,6 +153,9 @@ local extend_config = function(opts)
   if next(opts) == nil then
     return
   end
+  if opts.debug then
+    _NgConfigValues.debug = opts.debug
+  end
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then
       warn(
