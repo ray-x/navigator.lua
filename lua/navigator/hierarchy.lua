@@ -1,6 +1,7 @@
 local gui = require('navigator.gui')
 local util = require('navigator.util')
 local log = util.log
+local trace = util.trace
 local partial = util.partial
 local lsphelper = require('navigator.lspwrapper')
 

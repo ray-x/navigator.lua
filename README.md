@@ -100,6 +100,8 @@ variable is:
 
 - Treesitter symbols sidebar, LSP document symbole sidebar. Both with preview and folding
 
+- Calltree: Display and expand Lsp incoming/outgoing calls hierarchy-tree with sidebar
+
 - Fully support LSP CodeAction, CodeLens, CodeLens action. Help you improve code quality.
 
 - LRU cache for treesitter nodes
@@ -107,6 +109,8 @@ variable is:
 - Lazy loader friendly
 
 - Multigrid support (different font and detachable)
+
+- Side panel (sidebar) and floating windows
 
 # Why a new plugin
 
@@ -697,6 +701,8 @@ Treesitter outline and Diagnostics
 <img width="708" alt="image" src="https://user-images.githubusercontent.com/1681295/174791609-0023e68f-f1f4-4335-9ea2-d2360e9f0bfd.png">
 <img width="733" alt="image" src="https://user-images.githubusercontent.com/1681295/174804579-26f87fbf-426b-46d0-a7a3-a5aab69c032f.png">
 
+Calltree (LSP call hierarchy)
+<img width="892" alt="image" src="https://user-images.githubusercontent.com/1681295/176054287-edede515-118d-458d-835a-097319ba99c3.png">
 
 
 ### GUI and multigrid support
