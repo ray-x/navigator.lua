@@ -1,7 +1,6 @@
 local gui = require('navigator.gui')
 local util = require('navigator.util')
 local log = util.log
-local trace = util.log
 local partial = util.partial
 local lsphelper = require('navigator.lspwrapper')
 
@@ -40,9 +39,10 @@ local function pick_call_hierarchy_item(call_hierarchy_items)
   return choice
 end
 
+-- convert lsp result to navigator items
 local function call_hierarchy_result_procesor(direction, err, result, ctx, config)
   math.randomseed(os.clock() * 100000000000)
-  log(direction, err, result, ctx, config)
+  trace(direction, err, ctx, config)
   trace(result)
   if not result then
     vim.notify('No call hierarchy items found', vim.lsp.log_levels.WARN)
@@ -87,20 +87,23 @@ local function call_hierarchy_result_procesor(direction, err, result, ctx, confi
     })
     table.insert(items, disp_item)
   end
-  log(items)
+  trace(items)
   return items
 end
 
 local call_hierarchy_handler_from = partial(call_hierarchy_result_procesor, 'from')
 local call_hierarchy_handler_to = partial(call_hierarchy_result_procesor, 'to')
 
+-- the handler that deal all lsp request
 hierarchy_handler = function(dir, handler, show, api, err, result, ctx, cfg)
-  log(dir, handler, api, show, err, result, ctx, cfg)
+  trace(dir, handler, api, show, err, result, ctx, cfg)
   ctx = ctx or {} -- can be nil if it is async call
   cfg = cfg or {}
+  opts = ctx.opts or {}
   vim.validate({ handler = { handler, 'function' }, show = { show, 'function' }, api = { api, 'string' } })
   local bufnr = ctx.bufnr or vim.api.nvim_get_current_buf()
   assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use lsp hierarchy')
+
   local results = handler(err, result, ctx, cfg, 'Incoming calls not found')
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr or vim.api.nvim_get_current_buf(), 'ft')
@@ -111,7 +114,14 @@ hierarchy_handler = function(dir, handler, show, api, err, result, ctx, cfg)
   -- local items = args.items
   -- local parent_node = args.node
   -- local section_id = args.section_id or 1
-  local show_args = { items = results, ft = ft, api = api, bufnr = bufnr }
+  local show_args = {
+    items = results,
+    ft = ft,
+    api = api,
+    bufnr = bufnr,
+    panel = opts.panel,
+    parent_node = opts.parent_node,
+  }
   local win = show(show_args)
   return results, win
 end
@@ -127,7 +137,6 @@ end
 
 local function display_panel(args)
   -- args = {items=results, ft=ft, api=api}
-  print('dispaly panel')
   log(args)
 
   local Panel = require('guihua.panel')
@@ -140,12 +149,14 @@ local function display_panel(args)
       return items
     end,
     fold = function(panel, node)
-      -- if node.expanded or node.expandable then
-      --   return vim.cmd('normal! za')
-      -- end
-      -- new node
+      if node.expanded ~= nil then
+        node.expanded = not node.expanded
+        vim.cmd('normal! za')
+      else
+        expand(panel, node)
+        node.expanded = true
+      end
       log('fold')
-      expand(panel, node)
       return node
     end,
   })
@@ -155,30 +166,33 @@ end
 local function expand_item(args)
   -- args = {items=results, ft=ft, api=api}
   print('dispaly panel')
-  log(args)
+  trace(args, args.parent_node)
   local panel = args.panel
   local items = args.items
-  local parent_node = args.node
+  local parent_node = args.parent_node
   local section_id = args.section_id or 1
 
   local sect
-  for _, s in pairs(panel.sections) do
+  local sectid = 1
+  for i, s in pairs(panel.sections) do
     if s.id == section_id then
-      sect = s
+      sectid = i
       break
     end
   end
-  if not sect then
-    -- no setion
-    sect = panel.sections[1]
-  end
-  local nodes = sect.nodes
-  for i, node in pairs(nodes) do
+  sect = panel.sections[sectid]
+  for i, node in pairs(sect.nodes) do
     if node.id == parent_node.id then
-      table.insert(nodes, i, args.items)
+      for j in ipairs(items) do
+        items[j].indent_level = parent_node.indent_level + 1
+        table.insert(sect.nodes, i + j, args.items[j])
+      end
+      sect.nodes[i].expanded = true
+      sect.nodes[i].expandable = false
       break
     end
   end
+  trace(panel.sections[sectid])
   -- render the panel again
   panel:redraw(false)
 end
@@ -205,8 +219,7 @@ local incoming_calls_expand = util.partial4(hierarchy_handler, 'from', call_hier
 local outgoing_calls_expand = util.partial4(hierarchy_handler, 'to', call_hierarchy_handler_to, expand_item, ' ')
 
 function expand(panel, node)
-  log(panel)
-  log(node)
+  trace(panel, node)
   local params = make_params(node.uri, {
     line = node.range.start.line,
     character = node.range.start.character,
@@ -220,7 +233,7 @@ function expand(panel, node)
   call_hierarchy(node.method, {
     params = params,
     panel = panel,
-    indent_level = node.indent_level + 1,
+    parent_node = node,
     handler = handler,
     bufnr = bufnr,
   })
@@ -233,12 +246,11 @@ call_hierarchy = function(method, opts)
   trace(method, opts)
   opts = opts or {}
   local params = opts.params or vim.lsp.util.make_position_params()
-  local handler = opts.handler -- we can pass in customer handler
   local bufnr = opts.bufnr
-  -- handler = function(err, result, ctx, cfg)
-  --   ctx.opts = opts
-  --   return handler(err, result, ctx, cfg)
-  -- end
+  local handler = function(err, result, ctx, cfg)
+    ctx.opts = opts
+    return opts.handler(err, result, ctx, cfg)
+  end
   -- log(opts, params)
   request(
     bufnr,
@@ -257,7 +269,6 @@ call_hierarchy = function(method, opts)
           item = call_hierarchy_item,
           args = {
             method = method,
-            panel = opts.panel,
           },
         }, handler, ctx.bufnr)
       else
@@ -287,4 +298,11 @@ end
 
 M.incoming_calls_handler = incoming_calls_handler
 M.outgoing_calls_handler = outgoing_calls_handler
+
+function M.calltree(args)
+  if args == '-o' then
+    return M.outgoing_calls_panel()
+  end
+  M.incoming_calls_panel()
+end
 return M

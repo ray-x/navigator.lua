@@ -671,6 +671,12 @@ You can override the above highlight to fit your current colorscheme
 | ------------ | ------------------------- |
 | LspToggleFmt | toggle lsp auto format    |
 | LspKeymaps   | show LSP releated keymaps |
+| Nctags {args}      | show ctags symbols, args: -g regen ctags |
+| LspRestart   | reload lsp |
+| LspToggleFmt   | toggle lsp format |
+| LspSymbols   | document symbol in side panel |
+| TSymobls   | treesitter symbol in side panel |
+| Calltree {args} | lsp call hierarchy call tree, args: -i (incomming default), -o (outgoing) |
 
 ## Screenshots
 
