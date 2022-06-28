@@ -70,6 +70,7 @@ local commands = {
   "command! -nargs=0 LspKeymaps lua require'navigator.lspclient.mapping'.get_keymaps_help()<CR>",
   "command! -nargs=0 LspSymbols lua require'navigator.symbols'.side_panel()<CR>",
   "command! -nargs=0 TSymbols lua require'navigator.treesitter'.side_panel()<CR>",
+  "command! -nargs=* Calltree lua require'navigator.hierarchy'.calltree(<f-args>)<CR>",
 }
 
 local key_maps_help = {}

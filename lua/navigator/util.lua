@@ -426,6 +426,24 @@ function M.partial(func, arg)
   end
 end
 
+function M.partial2(func, arg1, arg2)
+  return function(...)
+    return func(arg1, arg2, ...)
+  end
+end
+
+function M.partial3(func, arg1, arg2, arg3)
+  return function(...)
+    return func(arg1, arg2, arg3, ...)
+  end
+end
+
+function M.partial4(func, arg1, arg2, arg3, arg4)
+  return function(...)
+    return func(arg1, arg2, arg3, arg4, ...)
+  end
+end
+
 function M.empty(t)
   if t == nil then
     return true
