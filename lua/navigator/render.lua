@@ -179,12 +179,13 @@ function M.prepare_for_render(items, opts)
     if #ts_report > 1 then
       space, trim = get_pads(win_width, item.text, ts_report)
       if trim then
-        item.text = string.sub(item.text, 1, opts.width - 20) .. ''
-        local _, j = string.gsub(item.text, [["]], "")
+        local ts_r = ts_report or ''
+        item.text = string.sub(item.text, 1, math.max(1, opts.width - math.max(20, #ts_r)))
+        local _, j = string.gsub(item.text, [["]], '')
         if j % 2 == 1 then
           item.text = item.text .. '"'
         end
-        _, j = string.gsub(item.text, [[']], "")
+        _, j = string.gsub(item.text, [[']], '')
         if j % 2 == 1 then
           item.text = item.text .. [[']]
         end

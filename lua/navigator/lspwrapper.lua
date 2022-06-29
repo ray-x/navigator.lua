@@ -162,7 +162,7 @@ function M.call_async(method, params, handler, bufnr)
   -- results_lsp, canceller
 end
 
-local function ts_functions(uri)
+local function ts_functions(uri, optional)
   local unload_bufnr
   local ts_enabled, _ = pcall(require, 'nvim-treesitter.locals')
   if not ts_enabled or not TS_analysis_enabled then
@@ -187,6 +187,9 @@ local function ts_functions(uri)
       ts_nodes_time:delete(uri)
     end
   end
+  if optional then
+    return
+  end
   local unload = false
   if not api.nvim_buf_is_loaded(bufnr) then
     trace('! load buf !', uri, bufnr)
@@ -206,7 +209,7 @@ local function ts_functions(uri)
   return funcs, unload_bufnr
 end
 
-local function ts_definition(uri, range)
+local function ts_definition(uri, range, optional)
   local unload_bufnr
   local ts_enabled, _ = pcall(require, 'nvim-treesitter.locals')
   if not ts_enabled or not TS_analysis_enabled then
@@ -223,6 +226,9 @@ local function ts_definition(uri, range)
   if tsnodes and modified <= ftime then
     log('ts def from cache')
     return tsnodes
+  end
+  if optional then
+    return
   end
   local ts_def = require('navigator.treesitter').find_definition
   local bufnr = vim.uri_to_bufnr(uri)
@@ -314,6 +320,13 @@ end
 --   log(locations, second_part)
 -- end
 
+local function ts_optional(i, unload_buf_size)
+  if unload_buf_size then
+    return unload_buf_size > _NgConfigValues.treesitter_analysis_max_num
+  end
+  return i > _NgConfigValues.treesitter_analysis_max_num
+end
+
 function M.locations_to_items(locations, ctx)
   ctx = ctx or {}
   local max_items = ctx.max_items or 100000 --
@@ -353,14 +366,14 @@ function M.locations_to_items(locations, ctx)
     local proj_file = item.uri:find(cwd) or is_win or i < 30
     local unload, def
     if TS_analysis_enabled and proj_file then
-      funcs, unload = ts_functions(item.uri)
+      funcs, unload = ts_functions(item.uri, ts_optional(i, #unload_bufnrs))
 
       if unload then
         table.insert(unload_bufnrs, unload)
       end
       if not uri_def[item.uri] then
         -- find def in file
-        def, unload = ts_definition(item.uri, item.range)
+        def, unload = ts_definition(item.uri, item.range, ts_optional(i, #unload_bufnrs))
         if def and def.start then
           uri_def[item.uri] = def
           if def.start then -- find for the 1st time
@@ -421,7 +434,7 @@ function M.locations_to_items(locations, ctx)
   vim.cmd([[set eventignore-=FileType]])
 
   trace(items)
-  return items, width + 24, second_part -- TODO handle long line?
+  return items, width + 30, second_part -- TODO handle long line?
 end
 
 function M.symbol_to_items(locations)

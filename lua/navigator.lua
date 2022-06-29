@@ -28,6 +28,7 @@ _NgConfigValues = {
   end,
   ts_fold = false,
   treesitter_analysis = true, -- treesitter variable context
+  treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help

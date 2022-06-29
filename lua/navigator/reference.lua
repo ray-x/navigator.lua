@@ -14,9 +14,9 @@ local ref_view = function(err, locations, ctx, cfg)
   local truncate = cfg and cfg.truncate or 20
   local opts = {}
   trace('arg1', err, ctx, locations)
-  trace(locations)
+  log(#locations, locations[1])
   if ctx.combine then
-    -- wait for both request
+    -- wait for both reference and definition LSP request
     if ctx.results == nil then
       return
     end
@@ -29,7 +29,7 @@ local ref_view = function(err, locations, ctx, cfg)
     if _NgConfigValues.debug then
       local logctx = { results = {} }
       logctx = vim.tbl_extend('keep', logctx, ctx)
-      log(logctx, 'result size', #ctx.results, 'item', ctx.results[1])
+      log(logctx, 'result size', 'def', #ctx.results.definitions, 'ref', #ctx.results.references)
     end
     if definitions.error and references.error then
       vim.notify('lsp ref callback error' .. vim.inspect(ctx.result), vim.lsp.log_levels.WARN)
@@ -115,11 +115,13 @@ local ref_view = function(err, locations, ctx, cfg)
     if vim.tbl_isempty(second_part) then
       return
     end
+    ctx.max_items = #second_part
     local items2 = locations_to_items(second_part, ctx)
 
     vim.list_extend(thread_items, items2)
 
     local data = require('navigator.render').prepare_for_render(thread_items, opts)
+    log('thread data size', #data)
     listview.ctrl:on_data_update(data)
     if nv_ref_async then
       vim.loop.close(nv_ref_async)
