@@ -121,7 +121,7 @@ local function def_preview(timeout_ms)
     relative = 'cursor',
     style = 'minimal',
     ft = filetype,
-    rect = { width = width, height = #definition + 3 },
+    rect = { width = width, height = #definition + 3, pos_y = 2 },
     data = definition,
     enter = true,
     border = _NgConfigValues.border or 'shadow',
