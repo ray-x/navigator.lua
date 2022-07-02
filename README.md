@@ -257,8 +257,8 @@ require'navigator'.setup({
   -- end,
   -- The attach code will apply to all LSP clients
 
-  default_mapping = true,  -- set to false if you will remap every key
-  keymaps = {{key = "gK", func = "declaration()"}}, -- a list of key maps
+  default_mapping = true,  -- set to false if you will remap every key or if you using old version of nvim-
+  keymaps = {{key = "gK", func = vim.lsp.declaration, doc = 'declaration'}}, -- a list of key maps
   -- this kepmap gK will override "gD" mapping function declaration()  in default kepmap
   -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
