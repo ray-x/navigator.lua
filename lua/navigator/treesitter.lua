@@ -26,7 +26,6 @@ local trace = function(...) end
 if vim.fn.has('nvim-0.7') == 1 then
   local trace = require('navigator.util').trace
 end
-trace = log
 
 local get_icon = function(kind)
   if kind == nil or _NgConfigValues.icons.match_kinds[kind] == nil then
