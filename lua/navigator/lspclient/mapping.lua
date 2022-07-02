@@ -24,7 +24,7 @@ local key_maps = {
   { key = 'gr', func = require('navigator.reference').async_ref, doc = 'async_ref' },
   { key = '<Leader>gr', func = require('navigator.reference').reference, doc = 'reference' }, -- reference deprecated
   { mode = 'i', key = '<M-k>', func = vim.lsp.signature_help, doc = 'signature_help' },
-  { key = '<c-k>', func = 'signature_help()' },
+  { key = '<c-k>', func = vim.lsp.buf.signature_help, doc = 'signature_help' },
   { key = 'g0', func = require('navigator.symbols').document_symbols, doc = 'document_symbols' },
   { key = 'gW', func = require('navigator.workspace').workspace_symbol_live, doc = 'workspace_symbol_live' },
   { key = '<c-]>', func = require('navigator.definition').definition, doc = 'definition' },
@@ -180,7 +180,7 @@ local function set_mapping(lsp_info)
   local fmtkey, rfmtkey
   for _, value in pairs(key_maps) do
     if type(value.func) == 'string' then -- deprecated will remove when 0.8 is out
-      vim.notify('keymap config updated: func should be a function')
+      vim.notify('keymap config updated: ' .. value.key .. ' func ' .. value.func .. ' should be a function')
       local f = '<Cmd>lua vim.lsp.buf.' .. value.func .. '<CR>'
       if string.find(value.func, 'require') or string.find(value.func, 'vim.') then
         f = '<Cmd>lua ' .. value.func .. '<CR>'
