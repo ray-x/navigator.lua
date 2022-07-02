@@ -448,7 +448,7 @@ local function get_all_nodes(bufnr, filter, summary)
         -- hack for lua and maybe other language aswell
         local parent = tsdata:parent()
         if parent ~= nil then
-          log(parent:type(), vim.treesitter.get_node_text(parent, bufnr):sub(1, 30), item.node_text, item.type)
+          trace(parent:type(), vim.treesitter.get_node_text(parent, bufnr):sub(1, 30), item.node_text, item.type)
         end
         if
           parent ~= nil
