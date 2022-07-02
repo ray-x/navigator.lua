@@ -271,7 +271,7 @@ require'navigator'.setup({
   signature_help_cfg = nil, -- if you would like to init ray-x/lsp_signature plugin in navigator, and pass in your own config to signature help
   icons = {
     -- Code action
-    code_action_icon = "🏏",
+    code_action_icon = "🏏", -- note: need terminal support, for those not support unicode, might crash
     -- Diagnostics
     diagnostic_head = '🐛',
     diagnostic_head_severity_1 = "🈲",
