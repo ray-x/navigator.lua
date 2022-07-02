@@ -22,7 +22,10 @@ local M = {}
 local cwd = vim.loop.cwd()
 local log = require('navigator.util').log
 local lerr = require('navigator.util').error
-local trace = require('navigator.util').trace
+local trace = function(...) end
+if vim.fn.has('nvim-0.7') == 1 then
+  local trace = require('navigator.util').trace
+end
 
 local get_icon = function(kind)
   if kind == nil or _NgConfigValues.icons.match_kinds[kind] == nil then
@@ -447,8 +450,8 @@ local function get_all_nodes(bufnr, filter, summary)
       if is_func then
         -- hack for lua and maybe other language aswell
         local parent = tsdata:parent()
-        if parent ~= nil then
-          log(parent:type(), vim.treesitter.get_node_text(parent, bufnr):sub(1, 30), item.node_text, item.type)
+        if parent ~= nil and _NgConfigValues.debug == 'trace' then -- for github action failure
+          trace(parent:type(), vim.treesitter.get_node_text(parent, bufnr):sub(1, 30), item.node_text, item.type)
         end
         if
           parent ~= nil

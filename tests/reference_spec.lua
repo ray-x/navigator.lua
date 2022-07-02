@@ -67,6 +67,11 @@ describe('should run lsp reference', function()
       border = 'none',
     })
 
+    if vim.fn.has('nvim-0.7') then
+      _NgConfigValues.treesitter_analysis = true
+    else
+      _NgConfigValues.treesitter_analysis = false
+    end
     -- allow gopls start
     for i = 1, 10 do
       vim.wait(400, function() end)
@@ -107,6 +112,12 @@ describe('should run lsp reference', function()
       debug_console_output = true,
       border = 'none',
     })
+
+    if vim.fn.has('nvim-0.7') then
+      _NgConfigValues.treesitter_analysis = true
+    else
+      _NgConfigValues.treesitter_analysis = false
+    end
 
     _NgConfigValues.debug_console_output = true
 
@@ -169,6 +180,12 @@ describe('should run lsp reference', function()
       border = 'none',
     })
 
+
+    if vim.fn.has('nvim-0.7') then
+      _NgConfigValues.treesitter_analysis = true
+    else
+      _NgConfigValues.treesitter_analysis = false
+    end
     _NgConfigValues.debug_console_output = true
 
     vim.bo.filetype = 'go'
