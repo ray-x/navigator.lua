@@ -10,23 +10,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             url: https://github.com/neovim/neovim/releases/download/nightly/nvim-linux64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-20.04
-            url: https://github.com/neovim/neovim/releases/download/v0.5.1/nvim-linux64.tar.gz
+          - os: ubuntu-22.04
+            url: https://github.com/neovim/neovim/releases/download/v0.7.2/nvim-linux64.tar.gz
             manager: sudo snap
             packages: go
-          - os: ubuntu-20.04
-            url: https://github.com/neovim/neovim/releases/download/v0.6.0/nvim-linux64.tar.gz
+          - os: ubuntu-22.04
+            url: https://github.com/neovim/neovim/releases/download/v0.6.1/nvim-linux64.tar.gz
             manager: sudo snap
             packages: go
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: "^1.17.2" # The Go version to download (if necessary) and use.
+          go-version: "^1.18.1" # The Go version to download (if necessary) and use.
       - run: date +%F > todays-date
       - name: Restore cache for today's nightly.
         uses: actions/cache@v2
@@ -42,7 +42,7 @@ jobs:
             mkdir -p _neovim
             curl -sL ${{ matrix.url }} | tar xzf - --strip-components=1 -C "${PWD}/_neovim"
           }
-          GO111MODULE=on go get golang.org/x/tools/gopls@latest
+          GO111MODULE=on go install golang.org/x/tools/gopls@latest
 
           mkdir -p ~/.local/share/nvim/site/pack/vendor/start
           git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim

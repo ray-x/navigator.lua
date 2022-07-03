@@ -1,6 +1,6 @@
-local log = require('navigator.util').log
-local trace = require('navigator.util').trace
-
+local util = require('navigator.util')
+local log = util.log
+local trace = util.trace
 local event_hdlrs = {
   { ev = 'BufWritePre', func = [[require "navigator.diagnostics".set_diag_loclist()]] },
   { ev = 'CursorHold', func = 'document_highlight()' },
@@ -8,26 +8,34 @@ local event_hdlrs = {
   { ev = 'CursorMoved', func = 'clear_references()' },
 }
 
+if vim.lsp.buf.format == nil then
+  vim.lsp.buf.format = vim.lsp.buf.formatting
+end
+
+if vim.diagnostic == nil then
+  util.error('Please update nvim to 0.6.1+')
+end
 local double = { '╔', '═', '╗', '║', '╝', '═', '╚', '║' }
 local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
 -- TODO https://github.com/neovim/neovim/pull/16591 use vimkeymap.set/del
 -- LuaFormatter off
 local key_maps = {
-  { key = 'gr', func = "require('navigator.reference').reference()" },
-  { key = 'Gr', func = "require('navigator.reference').async_ref()" },
+  { key = 'gr', func = "require('navigator.reference').async_ref()" },
+  { key = '<Leader>gr', func = "require('navigator.reference').reference()" }, -- reference deprecated
   { mode = 'i', key = '<M-k>', func = 'signature_help()' },
   { key = '<c-k>', func = 'signature_help()' },
   { key = 'g0', func = "require('navigator.symbols').document_symbols()" },
-  { key = 'gW', func = "require('navigator.workspace').workspace_symbol()" },
+  { key = 'gW', func = "require('navigator.workspace').workspace_symbol_live()" },
   { key = '<c-]>', func = "require('navigator.definition').definition()" },
   { key = 'gd', func = "require('navigator.definition').definition()" },
   { key = 'gD', func = "declaration({ border = 'rounded', max_width = 80 })" },
   { key = 'gp', func = "require('navigator.definition').definition_preview()" },
   { key = '<Leader>gt', func = "require('navigator.treesitter').buf_ts()" },
   { key = '<Leader>gT', func = "require('navigator.treesitter').bufs_ts()" },
+  { key = '<Leader>ct', func = "require('navigator.ctags').ctags()" },
   { key = 'K', func = 'hover({ popup_opts = { border = single, max_width = 80 }})' },
   { key = '<Space>ca', mode = 'n', func = "require('navigator.codeAction').code_action()" },
-  { key = '<Space>cA', mode = 'v', func = 'range_code_action()' },
+  { key = '<Space>ca', mode = 'v', func = "require('navigator.codeAction').range_code_action()" },
   -- { key = '<Leader>re', func = 'rename()' },
   { key = '<Space>rn', func = "require('navigator.rename').rename()" },
   { key = '<Leader>gi', func = 'incoming_calls()' },
@@ -39,6 +47,7 @@ local key_maps = {
   { key = '<Leader>dt', func = "require('navigator.diagnostics').toggle_diagnostics()" },
   { key = ']d', func = "diagnostic.goto_next({ border = 'rounded', max_width = 80})" },
   { key = '[d', func = "diagnostic.goto_prev({ border = 'rounded', max_width = 80})" },
+  { key = ']O', func = 'diagnostic.set_loclist()' },
   { key = ']r', func = "require('navigator.treesitter').goto_next_usage()" },
   { key = '[r', func = "require('navigator.treesitter').goto_previous_usage()" },
   { key = '<C-LeftMouse>', func = 'definition()' },
@@ -46,10 +55,21 @@ local key_maps = {
   { key = '<Leader>k', func = "require('navigator.dochighlight').hi_symbol()" },
   { key = '<Space>wa', func = "require('navigator.workspace').add_workspace_folder()" },
   { key = '<Space>wr', func = "require('navigator.workspace').remove_workspace_folder()" },
-  { key = '<Space>ff', func = 'formatting()', mode = 'n' },
+  { key = '<Space>ff', func = 'format({async = true})', mode = 'n' },
   { key = '<Space>ff', func = 'range_formatting()', mode = 'v' },
   { key = '<Space>wl', func = "require('navigator.workspace').list_workspace_folders()" },
   { key = '<Space>la', mode = 'n', func = "require('navigator.codelens').run_action()" },
+}
+
+local commands = {
+  [[command!  -nargs=* Nctags lua require("navigator.ctags").ctags(<f-args>)]],
+  "command! -nargs=0 LspLog lua require'navigator.lspclient.config'.open_lsp_log()",
+  "command! -nargs=0 LspRestart lua require'navigator.lspclient.config'.reload_lsp()",
+  "command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>",
+  "command! -nargs=0 LspKeymaps lua require'navigator.lspclient.mapping'.get_keymaps_help()<CR>",
+  "command! -nargs=0 LspSymbols lua require'navigator.symbols'.side_panel()<CR>",
+  "command! -nargs=0 TSymbols lua require'navigator.treesitter'.side_panel()<CR>",
+  "command! -nargs=* Calltree lua require'navigator.hierarchy'.calltree(<f-args>)<CR>",
 }
 
 local key_maps_help = {}
@@ -61,22 +81,28 @@ local ccls_mappings = {
   { key = '<Leader>go', func = "require('navigator.cclshierarchy').outgoing_calls()" },
 }
 
-local check_cap = function(cap)
+local check_cap = function(opts)
   -- log(vim.lsp.buf_get_clients(0))
   local fmt, rfmt, ccls
-  if cap and cap.document_formatting then
+  local cap = opts.cap
+  if cap == nil then
+    if opts.client and opts.client.server_capabilities then
+      cap = opts.client.server_capabilities
+    end
+  end
+  if cap and cap.documentFormattingProvider then
     fmt = true
   end
-  if cap and cap.document_range_formatting then
+  if cap and cap.documentRangeFormattingProvider then
     rfmt = true
   end
   for _, value in pairs(vim.lsp.buf_get_clients(0)) do
     trace(value)
-    if value ~= nil and value.resolved_capabilities == nil then
-      if value.resolved_capabilities.document_formatting then
+    if value ~= nil and value.server_capabilities == nil then
+      if value.server_capabilities.documentFormattingProvider then
         fmt = true
       end
-      if value.resolved_capabilities.document_range_formatting then
+      if value.server_capabilities.documentRangeFormattingProvider then
         rfmt = true
       end
 
@@ -89,13 +115,23 @@ local check_cap = function(cap)
   return fmt, rfmt, ccls
 end
 
-local function set_mapping(user_opts)
-  log('setup mapping')
-  local opts = { noremap = true, silent = true }
-  user_opts = user_opts or {}
+local function set_cmds(_)
+  for _, value in pairs(commands) do
+    vim.cmd(value)
+  end
+end
 
+-- should works for both 1)attach from known lsp client or from a disabled lsp client
+local function set_mapping(lsp_attach_info)
+  local opts = { noremap = true, silent = true }
+  vim.validate({
+    lsp_attach_info = { lsp_attach_info, 'table' },
+  })
+  if _NgConfigValues.debug then
+    log('setup mapping for client', lsp_attach_info.client.name, lsp_attach_info.client.cmd)
+  end
   local user_key = _NgConfigValues.keymaps or {}
-  local bufnr = user_opts.bufnr or 0
+  local bufnr = lsp_attach_info.bufnr or 0
 
   local function del_keymap(...)
     vim.api.nvim_buf_del_keymap(bufnr, ...)
@@ -107,7 +143,7 @@ local function set_mapping(user_opts)
   -- local function buf_set_option(...)
   --   vim.api.nvim_buf_set_option(bufnr, ...)
   -- end
-  local doc_fmt, range_fmt, ccls = check_cap(user_opts.cap)
+  local doc_fmt, range_fmt, ccls = check_cap(lsp_attach_info)
 
   if ccls then
     vim.list_extend(key_maps, ccls_mappings)
@@ -134,25 +170,23 @@ local function set_mapping(user_opts)
   local fmtkey, rfmtkey
   for _, value in pairs(key_maps) do
     local f = '<Cmd>lua vim.lsp.buf.' .. value.func .. '<CR>'
-    if string.find(value.func, 'require') then
+    if string.find(value.func, 'require') or string.find(value.func, 'vim.') then
       f = '<Cmd>lua ' .. value.func .. '<CR>'
     elseif string.find(value.func, 'diagnostic') then
       local diagnostic = '<Cmd>lua vim.'
-      if vim.lsp.diagnostic ~= nil then
-        diagnostic = '<Cmd>lua vim.lsp.'
-      end
+      diagnostic = '<Cmd>lua vim.'
       f = diagnostic .. value.func .. '<CR>'
-    elseif string.find(value.func, 'vim.') then
-      f = '<Cmd>lua ' .. value.func .. '<CR>'
+      -- elseif string.find(value.func, 'vim.') then
+      --   f = '<Cmd>lua ' .. value.func .. '<string.find(value.func, 'vim.')CR>'
     end
     local k = value.key
     local m = value.mode or 'n'
     if string.find(value.func, 'range_formatting') then
       rfmtkey = value.key
-    elseif string.find(value.func, 'formatting') then
+    elseif string.find(value.func, 'format') then
       fmtkey = value.key
     end
-    log('binding', k, f)
+    trace('binding', k, f)
     set_keymap(m, k, f, opts)
   end
 
@@ -166,24 +200,25 @@ local function set_mapping(user_opts)
     vim.cmd([[
       aug NavigatorAuFormat
         au!
-        autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting()
+        autocmd BufWritePre <buffer> lua vim.lsp.buf.format({async = true})
       aug END
      ]])
   elseif fmtkey then
     del_keymap('n', fmtkey)
   end
-  if user_opts.cap and user_opts.cap.document_range_formatting then
-    log('formatting enabled', user_opts.cap)
+
+  if lsp_attach_info.cap and lsp_attach_info.cap.document_range_formatting then
+    log('formatting enabled', lsp_attach_info.cap)
   end
 
   if not range_fmt and rfmtkey then
     del_keymap('v', rfmtkey)
   end
 
-  log('enable format ', doc_fmt, range_fmt)
+  log('enable format ', doc_fmt, range_fmt, _NgConfigValues.lsp.format_on_save)
 end
 
-local function autocmd(user_opts)
+local function autocmd()
   vim.api.nvim_exec(
     [[
             aug NavigatorDocHlAu
@@ -240,17 +275,26 @@ M.toggle_lspformat = function(on)
   end
 end
 
-function M.setup(user_opts)
-  user_opts = user_opts or _NgConfigValues
-  set_mapping(user_opts)
+function M.setup(attach_opts)
+  if not attach_opts or not attach_opts.client then
+    vim.notify(
+      'please call require"navigator.mapping".setup({bufnr=bufnr, client=client}) inside on_attach(client,bufnr)',
+      vim.lsp.log_levels.WARN
+    )
+  end
+  attach_opts = attach_opts or { bufnr = 0, client = {}, cap = {} }
+  set_mapping(attach_opts)
+  set_cmds(attach_opts)
 
-  autocmd(user_opts)
-  set_event_handler(user_opts)
+  autocmd()
+  set_event_handler(attach_opts)
 
-  local cap = user_opts.cap or vim.lsp.protocol.make_client_capabilities()
-  log('lsp cap:', cap)
+  local client = attach_opts.client or {}
+  local cap = client.server_capabilities or vim.lsp.protocol.make_client_capabilities()
 
-  if cap.call_hierarchy or cap.callHierarchy then
+  log('lsp cap:', cap.codeActionProvider)
+
+  if cap.call_hierarchy or cap.callHierarchyProvider then
     vim.lsp.handlers['callHierarchy/incomingCalls'] = require('navigator.hierarchy').incoming_calls_handler
     vim.lsp.handlers['callHierarchy/outgoingCalls'] = require('navigator.hierarchy').outgoing_calls_handler
   end
@@ -259,7 +303,7 @@ function M.setup(user_opts)
   -- vim.lsp.handlers["textDocument/codeAction"] = require"navigator.codeAction".code_action_handler
   vim.lsp.handlers['textDocument/definition'] = require('navigator.definition').definition_handler
 
-  if cap.declaration then
+  if cap.declarationProvider then
     vim.lsp.handlers['textDocument/declaration'] = require('navigator.definition').declaration_handler
   end
 
@@ -286,8 +330,12 @@ function M.setup(user_opts)
     })
   end
 
-  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = single })
-  if cap.document_formatting then
+  local border_style = single
+  if _NgConfigValues.border == 'double' then
+    border_style = double
+  end
+  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = border_style })
+  if cap.documentFormattingProvider then
     log('formatting enabled setup hdl')
     vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl
   end

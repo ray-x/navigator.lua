@@ -3,8 +3,11 @@
 -- Some of function copied from https://github.com/RishabhRD/nvim-lsputils
 local M = { log_path = vim.lsp.get_log_path() }
 -- local is_windows = uv.os_uname().version:match("Windows")
-
-local nvim_0_6
+local guihua = require('guihua.util')
+local nvim_0_6_1
+local nvim_0_8
+local vfn = vim.fn
+local api = vim.api
 
 M.path_sep = function()
   local is_win = vim.loop.os_uname().sysname:find('Windows')
@@ -41,10 +44,10 @@ function M.get_data_from_file(filename, startLine)
   end
   local uri = 'file:///' .. filename
   local bufnr = vim.uri_to_bufnr(uri)
-  if not vim.api.nvim_buf_is_loaded(bufnr) then
-    vim.fn.bufload(bufnr)
+  if not api.nvim_buf_is_loaded(bufnr) then
+    vfn.bufload(bufnr)
   end
-  local data = vim.api.nvim_buf_get_lines(bufnr, startLine, startLine + 8, false)
+  local data = api.nvim_buf_get_lines(bufnr, startLine, startLine + 8, false)
   if data == nil or vim.tbl_isempty(data) then
     startLine = nil
   else
@@ -56,6 +59,29 @@ function M.get_data_from_file(filename, startLine)
     end
   end
   return { data = data, line = displayLine }
+end
+
+function M.io_read(filename, total)
+  local f = io.open(filename, 'r')
+  if f == nil then
+    return nil
+  end
+  local content = f:read('*a') -- *a or *all reads the whole file
+  f:close()
+  return content
+end
+
+function M.rm_file(filename)
+  return os.remove(filename)
+end
+
+function M.file_exists(name)
+  local f = io.open(name, 'r')
+  if f ~= nil then
+    io.close(f)
+    return true
+  end
+  return false
 end
 
 M.merge = function(t1, t2)
@@ -76,9 +102,9 @@ M.map = function(modes, key, result, options)
 
   for i = 1, #modes do
     if buffer then
-      vim.api.nvim_buf_set_keymap(0, modes[i], key, result, options)
+      api.nvim_buf_set_keymap(0, modes[i], key, result, options)
     else
-      vim.api.nvim_set_keymap(modes[i], key, result, options)
+      api.nvim_set_keymap(modes[i], key, result, options)
     end
   end
 end
@@ -113,7 +139,13 @@ end
 
 function M.get_relative_path(base_path, my_path)
   local base_data = getDir(base_path)
+  if base_data == nil then
+    return
+  end
   local my_data = getDir(my_path)
+  if my_data == nil then
+    return
+  end
   local base_len = #base_data
   local my_len = #my_data
 
@@ -151,13 +183,31 @@ if _NgConfigValues.debug_console_output then
   default_config.use_console = true
   default_config.use_file = false
 end
-M._log = require('guihua.log').new(default_config, true)
 
--- add log to you lsp.log
-M.log = M._log.info
-M.info = M._log.info
-M.trace = M._log.trace
-M.error = M._log.error
+M._log = require('guihua.log').new(default_config, true)
+if _NgConfigValues.debug then
+  -- add log to you lsp.log
+
+  M.trace = M._log.trace
+  M.info = M._log.info
+  M.warn = M._log.warn
+  M.error = M._log.error
+  M.log = M.info
+else
+  M.log = function(...)
+    return { ... }
+  end
+  M.info = function(...)
+    return { ... }
+  end
+  M.trace = function(...)
+    return { ... }
+  end
+  M.warn = function(...)
+    return { ... }
+  end
+  M.error = M._log.error
+end
 
 function M.fmt(...)
   M._log.fmt_info(...)
@@ -251,7 +301,7 @@ function M.split2(s, sep)
 
   sep = sep or ' '
   local pattern = string.format('([^%s]+)', sep)
-  string.gsub(s, pattern, function(c)
+  _ = string.gsub(s, pattern, function(c)
     fields[#fields + 1] = c
   end)
 
@@ -278,30 +328,18 @@ function M.trim_and_pad(txt)
 end
 
 M.open_file = function(filename)
-  vim.api.nvim_command(string.format('e! %s', filename))
+  api.nvim_command(string.format('e! %s', filename))
 end
 
-M.open_file_at = function(filename, line, col, split)
-  if split == nil then
-    -- code
-    vim.api.nvim_command(string.format('e! +%s %s', line, filename))
-  elseif split == 'v' then
-    vim.api.nvim_command(string.format('vsp! +%s %s', line, filename))
-  elseif split == 's' then
-    vim.api.nvim_command(string.format('sp! +%s %s', line, filename))
-  end
-  -- vim.api.nvim_command(string.format("e! %s", filename))
-  col = col or 1
-  vim.fn.cursor(line, col)
-end
+M.open_file_at = guihua.open_file_at
 
-function M.exists(var)
-  for k, _ in pairs(_G) do
-    if k == var then
-      return true
-    end
-  end
-end
+-- function M.exists(var)
+--   for k, _ in pairs(_G) do
+--     if k == var then
+--       return true
+--     end
+--   end
+-- end
 
 local exclude_ft = { 'scrollbar', 'help', 'NvimTree' }
 function M.exclude(fname)
@@ -317,7 +355,6 @@ end
 
 -- name space search
 local nss
-local api = vim.api
 local bufs
 
 function M.set_virt_eol(bufnr, lnum, chunks, priority, id)
@@ -355,40 +392,56 @@ function M.get_current_winid()
   return api.nvim_get_current_win()
 end
 
-function M.nvim_0_6()
-  if nvim_0_6 ~= nil then
-    return nvim_0_6
+function M.nvim_0_6_1()
+  if nvim_0_6_1 ~= nil then
+    return nvim_0_6_1
   end
-  if debug.getinfo(vim.lsp.handlers.signature_help).nparams == 4 then
-    nvim_0_6 = true
-  else
-    nvim_0_6 = false
+  nvim_0_6_1 = vfn.has('nvim-0.6.1') == 1
+  if nvim_0_6_1 == false then
+    M.warn('Please use navigator 0.3 version for neovim version < 0.6.1')
   end
-  return nvim_0_6
+  return nvim_0_6_1
+end
+
+function M.nvim_0_8()
+  if nvim_0_8 ~= nil then
+    return nvim_0_8
+  end
+  nvim_0_8 = vfn.has('nvim-0.8') == 1
+  if nvim_0_8 == false then
+    M.log('Please use navigator 0.4 version for neovim version < 0.8')
+  end
+  return nvim_0_8
 end
 
 function M.mk_handler(fn)
   return function(...)
-    local config_or_client_id = select(4, ...)
-    local is_new = M.nvim_0_6()
-    if is_new then
-      return fn(...)
-    else
-      local err = select(1, ...)
-      local method = select(2, ...)
-      local result = select(3, ...)
-      local client_id = select(4, ...)
-      local bufnr = select(5, ...)
-      local config = select(6, ...)
-      return fn(err, result, { method = method, client_id = client_id, bufnr = bufnr }, config)
-    end
+    return fn(...)
   end
 end
 
 function M.partial(func, arg)
-  return (M.mk_handler(function(...)
+  return function(...)
     return func(arg, ...)
-  end))
+  end
+end
+
+function M.partial2(func, arg1, arg2)
+  return function(...)
+    return func(arg1, arg2, ...)
+  end
+end
+
+function M.partial3(func, arg1, arg2, arg3)
+  return function(...)
+    return func(arg1, arg2, arg3, ...)
+  end
+end
+
+function M.partial4(func, arg1, arg2, arg3, arg4)
+  return function(...)
+    return func(arg1, arg2, arg3, arg4, ...)
+  end
 end
 
 function M.empty(t)
@@ -403,18 +456,19 @@ function M.empty(t)
 end
 
 function M.encoding(client)
-  if type(client) ~= 'table' then
-    if client == nil then
-      client = 1
-    end
-    client = vim.lsp.get_client_by_id(client)
+  if client == nil then
+    client = 1
+  end
+
+  if type(client) == 'number' then
+    client = vim.lsp.get_client_by_id(client) or {}
   end
   local oe = client.offset_encoding
   if oe == nil then
     return 'utf-8'
   end
   if type(oe) == 'table' then
-    oe = oe[1] or 'utf-8'
+    return oe[1]
   end
   return oe
 end
@@ -422,15 +476,25 @@ end
 -- alternatively: use  vim.notify("namespace does not exist or is anonymous", vim.log.levels.ERROR)
 
 function M.warn(msg)
-  vim.api.nvim_echo({ { 'WRN: ' .. msg, 'WarningMsg' } }, true, {})
+  vim.notify('WRN: ' .. msg, vim.lsp.log_levels.WARN)
 end
 
 function M.error(msg)
-  vim.api.nvim_echo({ { 'ERR: ' .. msg, 'ErrorMsg' } }, true, {})
+  vim.notify('ERR: ' .. msg, vim.lsp.log_levels.EROR)
 end
 
 function M.info(msg)
-  vim.api.nvim_echo({ { 'Info: ' .. msg } }, true, {})
+  vim.notify('INF: ' .. msg, vim.lsp.log_levels.INFO)
+end
+
+function M.range_inside(outer, inner)
+  if outer == nil or inner == nil then
+    return false
+  end
+  if outer.start == nil or outer['end'] == nil or inner.start == nil or inner['end'] == nil then
+    return false
+  end
+  return outer.start.line <= inner.start.line and outer['end'].line >= inner['end'].line
 end
 
 return M

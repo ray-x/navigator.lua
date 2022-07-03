@@ -1,8 +1,13 @@
 # Navigator
+- Source code analysis and navigate tool
 
 - Easy code navigation, view diagnostic errors, see relationships of functions, variables
 
 - A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
+
+- ctags fuzzy search & build ctags symbols
+
+-
 
 - [![a short intro of navigator](https://user-images.githubusercontent.com/1681295/147378905-51eede5f-e36d-48f4-9799-ae562949babe.jpeg)](https://youtu.be/P1kd7Y8AatE)
 
@@ -91,7 +96,11 @@ variable is:
 
 - ccls call hierarchy (Non-standard `ccls/call` API) supports
 
-- Syntax folding based on treesitter folding algorithm. (It behaves similar to vs-code)
+- Syntax folding based on treesitter or LSP_fold folding algorithm. (It behaves similar to vs-code); comment folding
+
+- Treesitter symbols sidebar, LSP document symbole sidebar. Both with preview and folding
+
+- Calltree: Display and expand Lsp incoming/outgoing calls hierarchy-tree with sidebar
 
 - Fully support LSP CodeAction, CodeLens, CodeLens action. Help you improve code quality.
 
@@ -100,6 +109,8 @@ variable is:
 - Lazy loader friendly
 
 - Multigrid support (different font and detachable)
+
+- Side panel (sidebar) and floating windows
 
 # Why a new plugin
 
@@ -116,7 +127,7 @@ I'd like to go beyond what the system is offering.
 
 # Install
 
-Require nvim-0.5.0 (a.k.a nightly)
+Require nvim-0.6.1 or above, nightly (0.8) prefered
 
 You can remove your lspconfig setup and use this plugin.
 The plugin depends on lspconfig and [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(migrate from [romgrk's project](romgrk/fzy-lua-native)).
@@ -127,14 +138,18 @@ Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
 Plug 'ray-x/navigator.lua'
 ```
 
-Note: Highly recommened: 'nvim-treesitter/nvim-treesitter'
+Note: Highly recommend: 'nvim-treesitter/nvim-treesitter'
 
 Packer
 
 ```lua
-
-use {'ray-x/navigator.lua', requires = {'ray-x/guihua.lua', run = 'cd lua/fzy && make'}}
-
+use({
+    'ray-x/navigator.lua',
+    requires = {
+        { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
+        { 'neovim/nvim-lspconfig' },
+    },
+})
 ```
 
 ## Setup
@@ -247,6 +262,8 @@ require'navigator'.setup({
   -- this kepmap gK will override "gD" mapping function declaration()  in default kepmap
   -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
+  treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
+  -- this value prevent slow in large projects, e.g. found 100000 reference in a project
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil or 100 to disable it
 
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
@@ -262,6 +279,8 @@ require'navigator'.setup({
   },
   lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   lsp = {
+    enable = true,   -- skip lsp setup if disabled make sure add require('navigator.lspclient.mapping').setup() in you
+    -- own on_attach
     code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     format_on_save = true, -- set to false to disable lsp code format on save (if you are using prettier/efm/formater etc)
@@ -271,6 +290,12 @@ require'navigator'.setup({
     -- to disable all default config and use your own lsp setup set
     -- disable_lsp = 'all'
     -- Default {}
+    diagnostic = {
+      underline = true,
+      virtual_text = true, -- show virtual for diagnostic message
+      update_in_insert = false, -- update diagnostic message in insert mode
+    },
+
     diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- experimental:  diagnostic status in scroll bar area; set to false to disable the diagnostic sign,
     -- for other style, set to {'╍', 'ﮆ'} or {'-', '='}
     diagnostic_virtual_text = true,  -- show virtual for diagnostic message
@@ -281,6 +306,11 @@ require'navigator'.setup({
       filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetypes
     },
+    ctags ={
+      cmd = 'ctags',
+      tagfile = 'tags'
+      options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number'
+    }
     gopls = {   -- gopls setting
       on_attach = function(client, bufnr)  -- on_attach for gopls
         -- your special on attach here
@@ -317,7 +347,8 @@ local servers = {
   "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
   "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
   "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
-  "r_language_server", "rust_analyzer", "terraformls", "svelte", "texlab", "clojure_lsp", "elixirls"
+  "r_language_server", "rust_analyzer", "terraformls", "svelte", "texlab", "clojure_lsp", "elixirls",
+  "sourcekit", "fsautocomplete", "vls", "hls"
 }
 
 ```
@@ -389,8 +420,8 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 
 | mode | key             | function                                                   |
 | ---- | --------------- | ---------------------------------------------------------- |
-| n    | gr              | show reference and context                                 |
-| n    | Gr              | async references, definitions and context (experiential)   |
+| n    | gr              | async references, definitions and context                  |
+| n    | \<Leader>gr     | show reference and context                                 |
 | i    | \<m-k\>         | signature help                                             |
 | n    | \<c-k\>         | signature help                                             |
 | n    | gW              | workspace symbol                                           |
@@ -403,10 +434,12 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | g\<LeftMouse\>  | implementation                                             |
 | n    | \<Leader>gt     | treesitter document symbol                                 |
 | n    | \<Leader\>gT    | treesitter symbol for all open buffers                     |
+| n    | \<Leader\> ct   | ctags symbol search                                        |
+| n    | \<Leader\> cg   | ctags symbol generate                                      |
 | n    | K               | hover doc                                                  |
 | n    | \<Space\>ca     | code action (when you see 🏏 )                             |
 | n    | \<Space\>la     | code lens action (when you see a codelens indicator)       |
-| v    | \<Space\>cA     | range code action (when you see 🏏 )                       |
+| v    | \<Space\>ca     | range code action (when you see 🏏 )                       |
 | n    | \<Space\>rn     | rename with floating window                                |
 | n    | \<Leader\>re    | rename (lsp default)                                       |
 | n    | \<Leader\>gi    | hierarchy incoming calls                                   |
@@ -479,7 +512,33 @@ lsp_installer = true
 
 In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
 
-Alternatively, Navigator can be used to startup the server installed by lsp-installer. Please do not call `server:setup{opts}` from lsp installer
+example:
+```lua
+      use({
+        'williamboman/nvim-lsp-installer',
+        config = function()
+          local lsp_installer = require('nvim-lsp-installer')
+          lsp_installer.setup{}
+        end,
+      })
+      use({
+        'ray-x/navigator.lua',
+        config = function()
+          require('navigator').setup({
+            debug = true,
+            lsp_installer = true,
+            keymaps = { { key = 'gR', func = "require('navigator.reference').async_ref()" } },
+          })
+        end,
+      })
+
+```
+
+Please refer to [lsp_installer_config](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
+for more info
+
+
+Alternatively, Navigator can be used to startup the server installed by lsp-installer.
 as it will override the navigator setup
 
 To start LSP installed by lsp_installer, please use following setups
@@ -538,6 +597,47 @@ require'navigator'.setup({
 
 ```
 
+Use lsp_installer configs
+You can delegate the lsp server setup to lsp_installer with `server:setup{opts}`
+Here is an example [init_lsp_installer.lua](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
+
+
+### Integration with other lsp plugins (e.g. rust-tools, go.nvim, clangd extension)
+There are lots of plugins provides lsp support
+go.nvim allow you either hook gopls from go.nvim or from navigator and it can export the lsp setup from go.nvim.
+
+rust-tools and clangd allow you to setup on_attach from config server
+Here is an example to setup rust with rust-tools
+
+```lua
+require'navigator'.setup({
+  lsp = {
+    disable_lsp = { "rust_analyzer", "clangd" }, -- will not run rust_analyzer setup from navigator
+  }
+})
+
+require('rust-tools').setup({
+  server = {
+    on_attach = function(client, bufnr)
+      require('navigator.lspclient.mapping').setup({client=client, bufnr=bufnr}) -- setup navigator keymaps here,
+      -- otherwise, you can define your own commands to call navigator functions
+    end,
+  }
+})
+
+require("clangd_extensions").setup {
+  server = {
+    on_attach = function(client, bufnr)
+      require('navigator.lspclient.mapping').setup({client=client, bufnr=bufnr}) -- setup navigator keymaps here,
+      -- otherwise, you can define your own commands to call navigator functions
+    end,
+  }
+}
+
+```
+
+
+
 ## Usage
 
 Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box.
@@ -577,6 +677,12 @@ You can override the above highlight to fit your current colorscheme
 | ------------ | ------------------------- |
 | LspToggleFmt | toggle lsp auto format    |
 | LspKeymaps   | show LSP releated keymaps |
+| Nctags {args}      | show ctags symbols, args: -g regen ctags |
+| LspRestart   | reload lsp |
+| LspToggleFmt   | toggle lsp format |
+| LspSymbols   | document symbol in side panel |
+| TSymobls   | treesitter symbol in side panel |
+| Calltree {args} | lsp call hierarchy call tree, args: -i (incomming default), -o (outgoing) |
 
 ## Screenshots
 
@@ -591,6 +697,14 @@ Pls check the first part of README
 Using treesitter and LSP to view the symbol definition
 
 ![image](https://user-images.githubusercontent.com/1681295/139771978-bbc970a5-be9f-42cf-8942-3477485bd89c.png)
+
+### Sidebar, folding, outline
+Treesitter outline and Diagnostics
+<img width="708" alt="image" src="https://user-images.githubusercontent.com/1681295/174791609-0023e68f-f1f4-4335-9ea2-d2360e9f0bfd.png">
+<img width="733" alt="image" src="https://user-images.githubusercontent.com/1681295/174804579-26f87fbf-426b-46d0-a7a3-a5aab69c032f.png">
+
+Calltree (Expandable LSP call hierarchy)
+<img width="769" alt="image" src="https://user-images.githubusercontent.com/1681295/176998572-e39fc968-4c8c-475d-b3b8-fb7991663646.png">
 
 ### GUI and multigrid support
 
@@ -754,7 +868,7 @@ end
 # Errors and Bug Reporting
 
 - Please double check your setup and check if minium setup works or not
-- It should works for 0.5.1, neovim 0.6.x prefered.
+- It should works for 0.6.1, neovim 0.7.x prefered.
 - Check console output
 - Check `LspInfo` and treesitter status with `checkhealth`
 - Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log

@@ -1,7 +1,6 @@
 local M = {}
 
 local util = require('navigator.util')
-local nvim_0_6 = util.nvim_0_6()
 
 local gutil = require('guihua.util')
 local lsp = require('vim.lsp')
@@ -75,7 +74,8 @@ end
 
 function M.symbols_to_items(result)
   local locations = {}
-  -- log(result)
+  result = result or {}
+  log(#result)
   for i = 1, #result do
     local item = result[i].location
     if item ~= nil and item.range ~= nil then
@@ -87,8 +87,9 @@ function M.symbols_to_items(result)
       if kind ~= nil then
         item.text = kind .. ': ' .. item.text
       end
-      item.filename = vim.uri_to_fname(item.uri)
-
+      if not item.filename then
+        item.filename = vim.uri_to_fname(item.uri)
+      end
       item.display_filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
       if item.range == nil or item.range.start == nil then
         log('range not set', result[i], item)
@@ -122,7 +123,8 @@ function M.check_capabilities(feature, client_id)
 
   local supported_client = false
   for _, client in pairs(clients) do
-    supported_client = client.resolved_capabilities[feature]
+    -- supported_client = client.resolved_capabilities[feature]
+    supported_client = client.server_capabilities[feature]
     if supported_client then
       break
     end
@@ -143,26 +145,24 @@ end
 function M.call_sync(method, params, opts, handler)
   params = params or {}
   opts = opts or {}
-  local results_lsp, err = lsp.buf_request_sync(0, method, params, opts.timeout or vim.g.navtator_timeout or 1000)
+  log(method, params)
+  local results_lsp, err = lsp.buf_request_sync(opts.bufnr or 0, method, params, opts.timeout or 1000)
 
-  if nvim_0_6() then
-    handler(err, extract_result(results_lsp), { method = method }, nil)
-  else
-    handler(err, method, extract_result(results_lsp), nil, nil)
-  end
+  return handler(err, extract_result(results_lsp), { method = method, no_show = opts.no_show }, nil)
 end
 
-function M.call_async(method, params, handler)
+function M.call_async(method, params, handler, bufnr)
   params = params or {}
   local callback = function(...)
     util.show(...)
     handler(...)
   end
-  return lsp.buf_request(0, method, params, callback)
+  bufnr = bufnr or 0
+  return lsp.buf_request(bufnr, method, params, callback)
   -- results_lsp, canceller
 end
 
-local function ts_functions(uri)
+local function ts_functions(uri, optional)
   local unload_bufnr
   local ts_enabled, _ = pcall(require, 'nvim-treesitter.locals')
   if not ts_enabled or not TS_analysis_enabled then
@@ -187,6 +187,9 @@ local function ts_functions(uri)
       ts_nodes_time:delete(uri)
     end
   end
+  if optional then
+    return
+  end
   local unload = false
   if not api.nvim_buf_is_loaded(bufnr) then
     trace('! load buf !', uri, bufnr)
@@ -206,7 +209,7 @@ local function ts_functions(uri)
   return funcs, unload_bufnr
 end
 
-local function ts_definition(uri, range)
+local function ts_definition(uri, range, optional)
   local unload_bufnr
   local ts_enabled, _ = pcall(require, 'nvim-treesitter.locals')
   if not ts_enabled or not TS_analysis_enabled then
@@ -223,6 +226,9 @@ local function ts_definition(uri, range)
   if tsnodes and modified <= ftime then
     log('ts def from cache')
     return tsnodes
+  end
+  if optional then
+    return
   end
   local ts_def = require('navigator.treesitter').find_definition
   local bufnr = vim.uri_to_bufnr(uri)
@@ -263,6 +269,10 @@ end
 
 local function order_locations(locations)
   table.sort(locations, function(i, j)
+    if i == nil or j == nil or i.uri == nil or j.uri == nil then
+      -- log(i, j)
+      return false
+    end
     if i.uri == j.uri then
       if i.range and i.range.start then
         return i.range.start.line < j.range.start.line
@@ -294,20 +304,27 @@ local function slice_locations(locations, max_items)
   return first_part, second_part
 end
 
-local function test_locations()
-  local locations = {
-    { uri = '1', range = { start = { line = 1 } } },
-    { uri = '2', range = { start = { line = 2 } } },
-    { uri = '2', range = { start = { line = 3 } } },
-    { uri = '1', range = { start = { line = 3 } } },
-    { uri = '1', range = { start = { line = 4 } } },
-    { uri = '3', range = { start = { line = 4 } } },
-    { uri = '3', range = { start = { line = 4 } } },
-  }
-  local second_part
-  order_locations(locations)
-  local locations, second_part = slice_locations(locations, 3)
-  log(locations, second_part)
+-- local function test_locations()
+--   local locations = {
+--     { uri = '1', range = { start = { line = 1 } } },
+--     { uri = '2', range = { start = { line = 2 } } },
+--     { uri = '2', range = { start = { line = 3 } } },
+--     { uri = '1', range = { start = { line = 3 } } },
+--     { uri = '1', range = { start = { line = 4 } } },
+--     { uri = '3', range = { start = { line = 4 } } },
+--     { uri = '3', range = { start = { line = 4 } } },
+--   }
+--   local second_part
+--   order_locations(locations)
+--   local locations, second_part = slice_locations(locations, 3)
+--   log(locations, second_part)
+-- end
+
+local function ts_optional(i, unload_buf_size)
+  if unload_buf_size then
+    return unload_buf_size > _NgConfigValues.treesitter_analysis_max_num
+  end
+  return i > _NgConfigValues.treesitter_analysis_max_num
 end
 
 function M.locations_to_items(locations, ctx)
@@ -337,9 +354,9 @@ function M.locations_to_items(locations, ctx)
   for i, loc in ipairs(locations) do
     local funcs = nil
     local item = lsp.util.locations_to_items({ loc }, enc)[1]
-    -- log(item)
     item.range = locations[i].range or locations[i].targetRange
     item.uri = locations[i].uri or locations[i].targetUri
+    item.definition = locations[i].definition
 
     if is_win then
       log(item.uri) -- file:///C:/path/to/file
@@ -349,14 +366,14 @@ function M.locations_to_items(locations, ctx)
     local proj_file = item.uri:find(cwd) or is_win or i < 30
     local unload, def
     if TS_analysis_enabled and proj_file then
-      funcs, unload = ts_functions(item.uri)
+      funcs, unload = ts_functions(item.uri, ts_optional(i, #unload_bufnrs))
 
       if unload then
         table.insert(unload_bufnrs, unload)
       end
       if not uri_def[item.uri] then
         -- find def in file
-        def, unload = ts_definition(item.uri, item.range)
+        def, unload = ts_definition(item.uri, item.range, ts_optional(i, #unload_bufnrs))
         if def and def.start then
           uri_def[item.uri] = def
           if def.start then -- find for the 1st time
@@ -416,7 +433,8 @@ function M.locations_to_items(locations, ctx)
 
   vim.cmd([[set eventignore-=FileType]])
 
-  return items, width + 24, second_part -- TODO handle long line?
+  trace(items)
+  return items, width + 30, second_part -- TODO handle long line?
 end
 
 function M.symbol_to_items(locations)
@@ -430,6 +448,9 @@ function M.symbol_to_items(locations)
   table.sort(locations, function(i, j)
     if i.definition then
       return true
+    end
+    if j.definition then
+      return false
     end
     if i.uri == j.uri then
       if i.range and i.range.start then
@@ -458,7 +479,7 @@ end
 function M.request(method, hdlr) -- e.g  textDocument/reference
   local bufnr = vim.api.nvim_get_current_buf()
   local ref_params = vim.lsp.util.make_position_params()
-  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
+  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _)
     client.request(method, ref_params, hdlr, bufnr)
   end)
 end

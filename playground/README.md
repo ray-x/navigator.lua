@@ -12,13 +12,14 @@ most used plugins for programmer.
 - luasnip
 - aurora (colorscheme used in the screenshot)
 
-There also three folder `js`, `go`, `py`. Those folder have some basic source code you can play with.
+There are three folders `js`, `go`, `py`. Those folders have some basic source code you can play with.
+The init will install the plugins in ``/tmp/nvim`` folder. It will not affect your current setup.
 
 ## Install LSP
 
 The playground has js, py, go folder, so you can install either one your self in your PATH.
 If you want to try lua, Please check sumneko setup in init.lua make sure it pointed to correct path. By default it
-potint to ~/github/sumneko
+potint to ~/github/sumneko if not existed in your PATH.
 
 ## run init.lua
 

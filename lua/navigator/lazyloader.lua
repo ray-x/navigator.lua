@@ -22,10 +22,16 @@ return {
           loader(plugin)
         end
       end
+    else
+      loader = function(plugin)
+        local cmd = 'packadd ' .. plugin
+        vim.cmd(cmd)
+      end
     end
 
     if _NgConfigValues.lsp_installer == true then
-      local has_lspinst, lspinst = pcall(require, 'lsp_installer')
+      vim.cmd('packadd nvim-lsp-installer')
+      local has_lspinst, lspinst = pcall(require, 'nvim-lsp-installer')
       log('lsp_installer installed', has_lspinst)
       if has_lspinst then
         lspinst.setup()
@@ -51,7 +57,7 @@ return {
       local lazy_plugins = {}
       lazy_plugins[plugin_name] = path
       loader = require('packer').loader
-      for plugin, url in pairs(lazy_plugins) do
+      for plugin, _ in pairs(lazy_plugins) do
         if packer_plugins[plugin] and packer_plugins[plugin].loaded == false then
           -- log("loading ", plugin)
           pcall(loader, plugin)

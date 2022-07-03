@@ -1,8 +1,7 @@
 -- https://github.com/wention/dotfiles/blob/master/.config/nvim/lua/config/lsp.lua
 -- https://github.com/lukas-reineke/dotfiles/blob/master/vim/lua/lsp/handlers.lua
-local mk_handler = require('navigator.util').mk_handler
 return {
-  format_hdl = mk_handler(function(err, result, ctx, cfg) -- FIXME: bufnr is nil
+  format_hdl = function(err, result, ctx, _) -- FIXME: bufnr is nil
     if err ~= nil or result == nil then
       return
     end
@@ -31,5 +30,5 @@ return {
         -- end
       end
     end, 100)
-  end),
+  end,
 }

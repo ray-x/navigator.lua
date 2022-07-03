@@ -1,9 +1,9 @@
-local util = require('navigator.util')
-local log = util.log
-local trace = util.trace
-local uv = vim.loop
-local empty = util.empty
-local warn = util.warn
+-- todo allow config passed in
+local ng_util = require('navigator.util')
+local log = ng_util.log
+local trace = ng_util.trace
+local empty = ng_util.empty
+local warn = ng_util.warn
 _NG_Loaded = {}
 
 _LoadedFiletypes = {}
@@ -24,7 +24,25 @@ end
 
 local util = lspconfig.util
 local config = require('navigator').config_values()
-
+local disabled_ft = {
+  'NvimTree',
+  'guihua',
+  'clap_input',
+  'clap_spinner',
+  'vista',
+  'vista_kind',
+  'TelescopePrompt',
+  'guihua_rust',
+  'csv',
+  'txt',
+  'defx',
+  'packer',
+  'gitcommit',
+  'windline',
+  'notify',
+  'nofile',
+  '',
+}
 -- local cap = vim.lsp.protocol.make_client_capabilities()
 local on_attach = require('navigator.lspclient.attach').on_attach
 -- gopls["ui.completion.usePlaceholders"] = true
@@ -46,15 +64,13 @@ local luadevcfg = {
 
 local luadev = {}
 require('navigator.lazyloader').load('lua-dev.nvim', 'folke/lua-dev.nvim')
+if _NgConfigValues.lsp_installer then
+  require('navigator.lazyloader').load('nvim-lsp-installer', 'williamboman/nvim-lsp-installer')
+end
 local ok, l = pcall(require, 'lua-dev')
 if ok and l then
   luadev = l.setup(luadevcfg)
 end
-
-local path = vim.split(package.path, ';')
-
-table.insert(path, 'lua/?.lua')
-table.insert(path, 'lua/?/init.lua')
 
 local function add(lib)
   for _, p in pairs(vim.fn.expand(lib, false, true)) do
@@ -113,17 +129,17 @@ local setups = {
 
   elixirls = {
     on_attach = on_attach,
-    filetypes = { 'elixir', 'eelixir'},
-    cmd = {'elixir-ls'},
+    filetypes = { 'elixir', 'eelixir' },
+    cmd = { 'elixir-ls' },
     message_level = vim.lsp.protocol.MessageType.error,
     settings = {
       elixirLS = {
-        dialyzerEnabled = true, fetchDeps = false
-      }
+        dialyzerEnabled = true,
+        fetchDeps = false,
+      },
     },
     root_dir = function(fname)
-      return util.root_pattern('mix.exs', '.git')(fname)
-        or util.path.dirname(fname)
+      return util.root_pattern('mix.exs', '.git')(fname) or util.path.dirname(fname)
     end,
   },
 
@@ -182,9 +198,10 @@ local setups = {
       '--cross-file-rename',
     },
     filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
-    on_attach = function(client)
-      client.resolved_capabilities.document_formatting = true
-      on_attach(client)
+    on_attach = function(client, bufnr)
+      client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
+        or true
+      on_attach(client, bufnr)
     end,
   },
   rust_analyzer = {
@@ -205,8 +222,8 @@ local setups = {
   },
   sqls = {
     filetypes = { 'sql' },
-    on_attach = function(client, bufnr)
-      client.resolved_capabilities.execute_command = true
+    on_attach = function(client, _)
+      client.server_capabilities.executeCommandProvider = client.server_capabilities.documentFormattingProvider or true
       highlight.diagnositc_config_sign()
       require('sqls').setup({ picker = 'telescope' }) -- or default
     end,
@@ -232,8 +249,6 @@ local setups = {
         runtime = {
           -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
           version = 'LuaJIT',
-          -- Setup your lua path
-          path = vim.split(package.path, ';'),
         },
         diagnostics = {
           enable = true,
@@ -291,6 +306,14 @@ local setups = {
   omnisharp = {
     cmd = { 'omnisharp', '--languageserver', '--hostPID', tostring(vim.fn.getpid()) },
   },
+  terraformls = {
+    filetypes = { 'terraform', 'tf' },
+  },
+
+  sourcekit = {
+    cmd = { 'sourcekit-lsp' },
+    filetypes = { 'swift' }, -- This is recommended if you have separate settings for clangd.
+  },
 }
 
 setups.sumneko_lua = vim.tbl_deep_extend('force', luadev, setups.sumneko_lua)
@@ -333,7 +356,13 @@ local servers = {
   'svelte',
   'texlab',
   'clojure_lsp',
-  'elixirls'
+  'elixirls',
+  'sourcekit',
+  'fsautocomplete',
+  'vls',
+  'hls',
+  'tflint',
+  'terraform_lsp',
 }
 
 local lsp_installer_servers = {}
@@ -359,16 +388,8 @@ local ng_default_cfg = {
   flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
 }
 
-local configs = {}
-
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded)
-  -- if _NG_LSPCfgSetup ~= true then
-  -- log(lspconfig_setup)
-  -- lspconfig_setup(cfg)
-  -- _NG_LSPCfgSetup = true
-  -- end
-
   log(ft, client, loaded)
   trace(cfg)
   if lspconfig[client] == nil then
@@ -377,7 +398,9 @@ local function load_cfg(ft, client, cfg, loaded)
   end
 
   local lspft = lspconfig[client].document_config.default_config.filetypes
+  local additional_ft = setups[client] and setups[client].filetypes or {}
   local cmd = cfg.cmd
+  vim.list_extend(lspft, additional_ft)
 
   local should_load = false
   if lspft ~= nil and #lspft > 0 then
@@ -396,10 +419,10 @@ local function load_cfg(ft, client, cfg, loaded)
       return
     end
 
-    for _, c in pairs(loaded) do
-      if client == c then
+    for k, c in pairs(loaded) do
+      if client == k then
         -- loaded
-        trace(client, 'already been loaded for', ft, loaded)
+        log(client, 'already been loaded for', ft, loaded, c)
         return
       end
     end
@@ -414,16 +437,30 @@ local function load_cfg(ft, client, cfg, loaded)
     -- log(lspconfig.available_servers())
     -- force reload with config
     lspconfig[client].setup(cfg)
-    vim.defer_fn(function()
-      vim.cmd([[doautocmd FileType ]] .. ft)
-    end, 100)
     log(client, 'loading for', ft)
   end
   -- need to verify the lsp server is up
 end
 
-local function update_capabilities()
+local function setup_fmt(client, enabled)
+  if not require('navigator.util').nvim_0_8() then
+    if enabled == false then
+      client.resolved_capabilities.document_formatting = enabled
+    else
+      client.resolved_capabilities.document_formatting = client.resolved_capabilities.document_formatting or enabled
+    end
+  end
 
+  if enabled == false then
+    client.server_capabilities.documentFormattingProvider = false
+  else
+    client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
+      or enabled
+  end
+end
+
+local function update_capabilities()
+  trace(vim.o.ft, 'lsp startup')
   local capabilities = vim.lsp.protocol.make_client_capabilities()
   capabilities.textDocument.completion.completionItem.snippetSupport = true
   capabilities.textDocument.completion.completionItem.preselectSupport = true
@@ -431,36 +468,36 @@ local function update_capabilities()
   capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
   capabilities.textDocument.completion.completionItem.deprecatedSupport = true
   capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
-  -- capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
+  capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
   capabilities.textDocument.completion.completionItem.resolveSupport = {
     properties = { 'documentation', 'detail', 'additionalTextEdits' },
   }
   capabilities.workspace.configuration = true
   return capabilities
-
 end
 
 -- run setup for lsp clients
+
+local loaded = {}
 local function lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
-  local clients = vim.lsp.get_active_clients() or {}
 
-  local loaded = {}
   local capabilities = update_capabilities()
 
-  for _, client in ipairs(clients) do
-    if client ~= nil then
-      table.insert(loaded, client.name)
-    end
-  end
   for _, lspclient in ipairs(servers) do
+    local clients = vim.lsp.get_active_clients() or {}
+    for _, client in ipairs(clients) do
+      if client ~= nil then
+        loaded[client.name] = client.id
+      end
+    end
     -- check should load lsp
 
     if type(lspclient) == 'table' then
       if lspclient.name then
         lspclient = lspclient.name
       else
-        warn('incorrect set for lspclient', vim.inspect(lspclient))
+        warn('incorrect set for lspclient' .. vim.inspect(lspclient))
         goto continue
       end
     end
@@ -477,22 +514,18 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
     end
 
-    if _NG_Loaded[lspclient] then
-      log('client loaded', lspclient)
-    end
-
     if vim.tbl_contains(config.lsp.disable_lsp or {}, lspclient) then
       log('disable lsp', lspclient)
       goto continue
     end
 
     local default_config = {}
-    log(lspclient)
     if lspconfig[lspclient] == nil then
       vim.notify(
         'lspclient' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
         vim.lsp.log_levels.WARN
       )
+      log('lspclient', lspclient, 'not supported')
       goto continue
     end
 
@@ -505,15 +538,18 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     default_config = vim.tbl_deep_extend('force', default_config, ng_default_cfg)
     local cfg = setups[lspclient] or {}
+
     cfg = vim.tbl_deep_extend('keep', cfg, default_config)
     -- filetype disabled
     if not vim.tbl_contains(cfg.filetypes or {}, ft) then
       trace('ft', ft, 'disabled for', lspclient)
+
       goto continue
     end
 
     local disable_fmt = false
 
+    log(lspclient)
     -- if user provides override values
     cfg.capabilities = capabilities
     log(lspclient, config.lsp.disable_format_cap)
@@ -526,19 +562,17 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if user_lsp_opts[lspclient] ~= nil then
       -- log(lsp_opts[lspclient], cfg)
       cfg = vim.tbl_deep_extend('force', cfg, user_lsp_opts[lspclient])
-      if config.combined_attach == nil then
-        cfg.on_attach = function(client, bufnr)
-          on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
-        end
-      end
+      -- if config.combined_attach == nil then
+      --   setup_fmt(client, enable_fmt)
+      -- end
       if config.combined_attach == 'mine' then
         if config.on_attach == nil then
           error('on attach not provided')
         end
         cfg.on_attach = function(client, bufnr)
           config.on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+
+          setup_fmt(client, enable_fmt)
           require('navigator.lspclient.mapping').setup({
             client = client,
             bufnr = bufnr,
@@ -550,7 +584,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         cfg.on_attach = function(client, bufnr)
           on_attach(client, bufnr)
           config.on_attach(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+          setup_fmt(client, enable_fmt)
           require('navigator.lspclient.mapping').setup({
             client = client,
             bufnr = bufnr,
@@ -560,7 +594,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
       if config.combined_attach == 'both' then
         cfg.on_attach = function(client, bufnr)
-          client.resolved_capabilities.document_formatting = enable_fmt
+          setup_fmt(client, enable_fmt)
+
           if config.on_attach and type(config.on_attach) == 'function' then
             config.on_attach(client, bufnr)
           end
@@ -588,7 +623,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     else
       cfg.on_attach = function(client, bufnr)
         on_attach(client, bufnr)
-        client.resolved_capabilities.document_formatting = enable_fmt
+
+        setup_fmt(client, enable_fmt)
       end
     end
 
@@ -597,21 +633,37 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if has_lspinst and _NgConfigValues.lsp_installer then
       local installed, installer_cfg = require('nvim-lsp-installer.servers').get_server(lspconfig[lspclient].name)
 
-      log('lsp installer server config' .. lspconfig[lspclient].name , installer_cfg)
+      log('lsp installer server config ' .. lspconfig[lspclient].name, installer_cfg)
       if installed and installer_cfg then
-        log('options', installer_cfg:get_default_options())
-        -- if cfg.cmd / {lsp_server_name, arg} not present or lsp_server_name is not in PATH
-        if vim.fn.empty(cfg.cmd) == 1 or vim.fn.executable(cfg.cmd[1] or '') == 0 then
-          cfg.cmd = { installer_cfg.root_dir .. path_sep .. installer_cfg.name }
+        local paths = installer_cfg:get_default_options().cmd_env.PATH
+        paths = vim.split(paths, ':')
+        if vim.fn.empty(cfg.cmd) == 1 then
+          cfg.cmd = { installer_cfg.name }
+        end
+
+        if vim.fn.executable(cfg.cmd[1]) == 0 then
+          for _, path in ipairs(paths) do
+            log(path)
+            if vim.fn.isdirectory(path) == 1 and string.find(path, installer_cfg.root_dir) then
+              cfg.cmd[1] = path .. path_sep .. cfg.cmd[1]
+              log(cfg.cmd)
+              break
+            end
+          end
           log('update cmd', cfg.cmd)
+        else
+          log('cmd installed', cfg.cmd)
         end
       end
     end
 
     if vim.fn.executable(cfg.cmd[1]) == 0 then
-      vim.notify('lsp server not installed in path ' .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)
+      log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)
     end
 
+    if _NG_Loaded[lspclient] then
+      log('client loaded ?', lspclient)
+    end
     load_cfg(ft, lspclient, cfg, loaded)
 
     _NG_Loaded[lspclient] = true
@@ -629,7 +681,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end, 1000)
       log('null-ls loading')
       _NG_Loaded['null-ls'] = true
-      configs['null-ls'] = cfg
+      setups['null-ls'] = cfg
     end
   end
 
@@ -648,13 +700,19 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       lspconfig.efm.setup(cfg)
       log('efm loading')
       _NG_Loaded['efm'] = true
-      configs['efm'] = cfg
+      setups['efm'] = cfg
     end
   end
 
   if not retry or ft == nil then
     return
   end
+end
+
+-- append lsps to servers
+local function add_servers(lsps)
+  vim.validate({ lsps = { lsps, 't' } })
+  vim.list_extend(servers, lsps)
 end
 
 local function get_cfg(client)
@@ -668,78 +726,76 @@ local function get_cfg(client)
   end
 end
 
-local function setup(user_opts)
-  local ft = vim.bo.filetype
+local function ft_disabled(ft)
+  for i = 1, #disabled_ft do
+    if ft == disabled_ft[i] then
+      return true
+    end
+  end
+end
 
+local function setup(user_opts, cnt)
+  user_opts = user_opts or {}
+  local ft = vim.bo.filetype
   local bufnr = user_opts.bufnr or vim.api.nvim_get_current_buf()
+  if ft == '' or ft == nil then
+    log('nil filetype, callback')
+    local ext = vim.fn.expand('%:e')
+    if ext ~= '' then
+      cnt = cnt or 0
+      local opts = vim.deepcopy(user_opts)
+      if cnt > 3 then
+        log('failed to load filetype, skip')
+        return
+      else
+        cnt = cnt + 1
+      end
+      vim.defer_fn(function()
+        log('defer_fn', ext, ft)
+        setup(opts, cnt)
+      end, 200)
+      return
+    else
+      log('no filetype, no ext return')
+      return
+    end
+  end
   local uri = vim.uri_from_bufnr(bufnr)
 
   if uri == 'file://' or uri == 'file:///' then
     log('skip loading for ft ', ft, uri)
     return
   end
-  log(user_opts)
-  log(uri)
-  if _LoadedFiletypes[ft .. tostring(bufnr)] then
-    log('navigator was loaded for ft', ft)
+  if _LoadedFiletypes[ft .. tostring(bufnr)] == true then
+    log('navigator was loaded for ft', ft, bufnr)
     return
   end
-  local disable_ft = {
-    'NvimTree',
-    'guihua',
-    'clap_input',
-    'clap_spinner',
-    'vista',
-    'vista_kind',
-    'TelescopePrompt',
-    'guihua_rust',
-    'csv',
-    'txt',
-    'defx',
-    'packer',
-    'gitcommit',
-  }
-  for i = 1, #disable_ft do
-    if ft == disable_ft[i] or _LoadedFiletypes[ft] then
-      trace('navigator disabled for ft or it is loaded', ft)
-      return
-    end
+
+  if ft_disabled(ft) then
+    trace('navigator disabled for ft or it is loaded', ft)
+    return
+  end
+  if _NgConfigValues.lsp.servers then
+    add_servers(_NgConfigValues.lsp.servers)
+    _NgConfigValues.lsp.servers = nil
   end
 
-  if user_opts ~= nil then
-    log('navigator user setup', user_opts)
-  else
-    user_opts = {}
-  end
   trace(debug.traceback())
 
   local clients = vim.lsp.buf_get_clients(bufnr)
   for key, client in pairs(clients) do
-    if client.name ~= "null_ls" and client.name ~= "efm" then
-      if vim.tbl_contains(client.filetypes, vim.o.ft) then
+    if client.name ~= 'null_ls' and client.name ~= 'efm' then
+      if vim.tbl_contains(client.filetypes or {}, vim.o.ft) then
         log('client already loaded', client.name)
       end
     end
   end
 
-  _LoadedFiletypes[ft] = true
-  user_opts = vim.list_extend(user_opts, config) -- incase setup was triggered from autocmd
+  user_opts = vim.tbl_extend('keep', user_opts, config) -- incase setup was triggered from autocmd
 
-  if ft == nil then
-    ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
-  end
-
-  if ft == nil or ft == '' then
-    log('nil filetype, callback')
-    vim.cmd([[e]])
-    vim.defer_fn(function()
-      setup(user_opts)
-    end, 200)
-    return
-  end
+  log('running lsp setup', ft, bufnr)
   local retry = true
 
-  trace('setup', user_opts)
   log('loading for ft ', ft, uri)
   highlight.diagnositc_config_sign()
   highlight.add_highlight()
@@ -762,17 +818,12 @@ local function setup(user_opts)
 
   lsp_startup(ft, retry, lsp_opts)
 
-  --- if code line enabled
-  if _NgConfigValues.lsp.code_lens then
+  --- if code lens enabled
+  if _NgConfigValues.lsp.code_lens_action.enable then
     require('navigator.codelens').setup()
   end
 
-end
-
--- append lsps to servers
-local function add_servers(lsps)
-  vim.validate({ lsps = { lsps, 't' } })
-  vim.list_extend(servers, lsps)
+  -- _LoadedFiletypes[ft .. tostring(bufnr)] = true -- may prevent lsp config when reboot lsp
 end
 
 local function on_filetype()
@@ -794,7 +845,15 @@ local function on_filetype()
   if empty(wids) then
     log('buf not shown return')
   end
-  setup({bufnr=bufnr})
+  setup({ bufnr = bufnr })
 end
 
-return { setup = setup, get_cfg = get_cfg, lsp = servers, add_servers = add_servers, on_filetype = on_filetype }
+return {
+  setup = setup,
+  get_cfg = get_cfg,
+  lsp = servers,
+  add_servers = add_servers,
+  on_filetype = on_filetype,
+  disabled_ft = disabled_ft,
+  ft_disabled = ft_disabled,
+}

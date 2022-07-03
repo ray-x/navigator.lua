@@ -2,7 +2,7 @@ local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
 local code_action = {}
-local gui = require('navigator.gui')
+-- local gui = require('navigator.gui')
 local config = require('navigator').config_values()
 local api = vim.api
 
@@ -52,20 +52,24 @@ local function _update_sign(line)
   if code_action[winid] == nil then
     code_action[winid] = {}
   end
-  if code_action[winid].lightbulb_line ~= 0 then
+  -- only show code action on the current line, remove all others
+  if code_action[winid].lightbulb_line and code_action[winid].lightbulb_line > 0 then
     vim.fn.sign_unplace(sign_group, { id = code_action[winid].lightbulb_line, buffer = '%' })
+
+    log('sign removed', line)
   end
 
   if line then
     -- log("updatasign", line, sign_group, sign_name)
-    vim.fn.sign_place(
+    local id = vim.fn.sign_place(
       line,
       sign_group,
       sign_name,
       '%',
       { lnum = line + 1, priority = config.lsp.code_action.sign_priority }
     )
-    code_action[winid].lightbulb_line = line
+    code_action[winid].lightbulb_line = id
+    log('sign updated', id)
   end
 end
 
@@ -74,6 +78,14 @@ local need_check_diagnostic = { ['python'] = true }
 
 function code_action:render_action_virtual_text(line, diagnostics)
   return function(err, actions, context)
+    trace(actions, context)
+    if context and context.client_id then
+      local cname = vim.lsp.get_active_clients({ id = context.client_id })[1].name
+      if cname == 'null-ls' and _NgConfigValues.lsp.disable_nulls_codeaction_sign then
+        return
+      end
+    end
+    -- if nul-ls enabled, some of the lsp may not send valid code action,
     if actions == nil or type(actions) ~= 'table' or vim.tbl_isempty(actions) then
       -- no actions cleanup
       if config.lsp.code_action.virtual_text then
@@ -84,12 +96,13 @@ function code_action:render_action_virtual_text(line, diagnostics)
       end
     else
       trace(err, line, diagnostics, actions, context)
+
       if config.lsp.code_action.sign then
         if need_check_diagnostic[vim.bo.filetype] then
           if next(diagnostics) == nil then
+            -- no diagnostic, no code action sign..
             _update_sign(nil)
           else
-            -- no diagnostic, no code action sign..
             _update_sign(line)
           end
         else
@@ -138,9 +151,16 @@ local code_action_req = function(_call_back_fn, diagnostics)
   vim.lsp.buf_request(0, 'textDocument/codeAction', params, callback)
 end
 
+local function sort_select(action_tuples, opts, on_user_choice)
+  -- table.sort(action_tuples, function(a, b)
+  --   return a[1] > b[1]
+  -- end)
+  require('guihua.gui').select(action_tuples, opts, on_user_choice)
+end
+
 code_action.code_action = function()
   local original_select = vim.ui.select
-  vim.ui.select = require('guihua.gui').select
+  vim.ui.select = sort_select
 
   log('codeaction')
 
@@ -153,15 +173,26 @@ end
 code_action.range_code_action = function(startpos, endpos)
   local context = {}
   context.diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
-  local params = util.make_given_range_params(startpos, endpos)
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  startpos = startpos or api.nvim_buf_get_mark(bufnr, '<')
+  endpos = endpos or api.nvim_buf_get_mark(bufnr, '>')
+  log(startpos, endpos)
+  local params = vim.lsp.util.make_given_range_params(startpos, endpos)
   params.context = context
 
   local original_select = vim.ui.select
   vim.ui.select = require('guihua.gui').select
 
+  local original_input = vim.ui.input
+  vim.ui.input = require('guihua.input').input
   vim.lsp.buf.range_code_action(context, startpos, endpos)
   vim.defer_fn(function()
     vim.ui.select = original_select
+  end, 1000)
+
+  vim.defer_fn(function()
+    vim.ui.input = original_input
   end, 1000)
 end
 

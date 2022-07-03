@@ -9,19 +9,13 @@ local trace = require('guihua.log').trace
 -- trace = log
 local error = util.error
 local path_sep = require('navigator.util').path_sep()
-local mk_handler = require('navigator.util').mk_handler
 local path_cur = require('navigator.util').path_cur()
 local empty = util.empty
-diagnostic_list[vim.bo.filetype] = {}
-local function clear_diag_VT(bufnr) -- important for clearing out when no more errors
-  log(bufnr, _NG_VT_DIAG_NS)
-  if bufnr == nil or _NG_VT_DIAG_NS == nil then
-    return
-  end
 
-  vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
-  _NG_VT_DIAG_NS = nil
+if not util.nvim_0_6_1() then
+  util.warn('Navigator 0.4+ only support nvim-0.6+, please use Navigator 0.3.x or a newer version of neovim')
 end
+diagnostic_list[vim.bo.filetype] = {}
 
 local diag_map = {}
 if vim.diagnostic then
@@ -32,6 +26,25 @@ if vim.diagnostic then
     Hint = vim.diagnostic.severity.Hint,
   }
 end
+
+local diagnostic_cfg = {
+  -- Enable underline, use default values
+  underline = _NgConfigValues.lsp.diagnostic.underline,
+  -- Enable virtual
+  -- Use a function to dynamically turn signs off
+  -- and on, using buffer local variables
+  signs = true,
+  update_in_insert = _NgConfigValues.lsp.diagnostic.update_in_insert or false,
+  severity_sort = _NgConfigValues.lsp.diagnostic.severity_sort,
+  float = {
+    focusable = false,
+    style = 'minimal',
+    border = 'rounded',
+    source = 'always',
+    header = '',
+    prefix = '',
+  },
+}
 
 local function get_count(bufnr, level)
   if vim.diagnostic ~= nil then
@@ -145,7 +158,7 @@ local function error_marker(result, ctx, config)
     if not vim.tbl_isempty(pos) then
       vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
     end
-    for i, s in pairs(pos) do
+    for _, s in pairs(pos) do
       local hl = 'ErrorMsg'
       if type(s.severity) == 'number' then
         if s.severity == 2 then
@@ -180,8 +193,9 @@ local update_err_marker_async = function()
   return debounce(400, error_marker)
 end
 
-local diag_hdlr = mk_handler(function(err, result, ctx, config)
+local diag_hdlr = function(err, result, ctx, config)
   require('navigator.lspclient.highlight').diagnositc_config_sign()
+  config = config or diagnostic_cfg
   if err ~= nil then
     log(err, config, result)
     return
@@ -203,19 +217,14 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     trace('diagnostic', result.diagnostics, ctx, config)
   end
 
-  if util.nvim_0_6() then
-    trace(err, result, ctx, config)
-    vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
-  else
-    log('old version of lsp nvim 050')
-    vim.lsp.diagnostic.on_publish_diagnostics(err, _, result, ctx.client_id, _, config)
-  end
+  trace(err, result, ctx, config)
+  vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   local uri = result.uri
 
   local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
 
   if empty(result.diagnostics) and diag_cnt > 0 then
-    log('no result? ', diag_cnt)
+    trace('no result? ', diag_cnt)
     return
   end
   -- trace("diag: ", mode, result, ctx, config)
@@ -295,39 +304,38 @@ local diag_hdlr = mk_handler(function(err, result, ctx, config)
     vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
     _NG_VT_DIAG_NS = nil
   end
-end)
-
-local diag_hdlr_async = function()
-  local debounce = require('navigator.debounce').debounce_trailing
-  return debounce(100, diag_hdlr)
 end
+
+-- local diag_hdlr_async = function()
+--   local debounce = require('navigator.debounce').debounce_trailing
+--   return debounce(100, diag_hdlr)
+-- end
 
 local M = {}
-local diagnostic_cfg = {
-  -- Enable underline, use default values
-  underline = true,
-  -- Enable virtual text, override spacing to 3  (prevent overlap)
-  virtual_text = {
-      spacing = 3,
-      prefix = _NgConfigValues.icons.icons and _NgConfigValues.icons.diagnostic_virtual_text or "" },
-  -- Use a function to dynamically turn signs off
-  -- and on, using buffer local variables
-  signs = true,
-  update_in_insert = _NgConfigValues.lsp.diagnostic_update_in_insert or false,
-  severity_sort = { reverse = true },
-}
 
-if _NgConfigValues.lsp.diagnostic_virtual_text == false then
-  diagnostic_cfg.virtual_text = false
+diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
+if type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' then
+  diagnostic_cfg.virtual_text.prefix = _NgConfigValues.icons.diagnostic_virtual_text
 end
-
 -- vim.lsp.handlers["textDocument/publishDiagnostics"]
 M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
 
+vim.diagnostic.config(diagnostic_cfg)
+
+local function clear_diag_VT(bufnr) -- important for clearing out when no more errors
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  log(bufnr, _NG_VT_DIAG_NS)
+  if _NG_VT_DIAG_NS == nil then
+    return
+  end
+
+  vim.api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
+  _NG_VT_DIAG_NS = nil
+end
+
 M.hide_diagnostic = function()
   if _NG_VT_DIAG_NS then
-    vim.api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
-    _NG_VT_DIAG_NS = nil
+    clear_diag_VT()
   end
 end
 
@@ -342,8 +350,6 @@ end
 
 M.show_buf_diagnostics = function()
   if diagnostic_list[vim.bo.filetype] ~= nil then
-    -- log(diagnostic_list[vim.bo.filetype])
-    -- vim.fn.setqflist({}, " ", {title = "LSP", items = diagnostic_list[vim.bo.filetype]})
     local results = diagnostic_list[vim.bo.filetype]
     local display_items = {}
     for _, client_items in pairs(results) do
@@ -360,8 +366,13 @@ M.show_buf_diagnostics = function()
         api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head .. ' Diagnostic ',
         enable_preview_edit = true,
       })
+      if listview == nil then
+        return log('nil listview')
+      end
       trace('new buffer', listview.bufnr)
-      vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
+      if listview.bufnr then
+        vim.api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
+      end
     end
   end
 end
@@ -374,14 +385,15 @@ M.set_diag_loclist = function()
     log('great, no errors!')
     return
   end
-  local clients = vim.lsp.buf_get_clients(0)
+
+  local clients = vim.lsp.buf_get_clients(bufnr)
   local cfg = { open = diag_cnt > 0 }
   for _, client in pairs(clients) do
     cfg.client_id = client['id']
     break
   end
 
-  if not vim.tbl_isempty(vim.lsp.buf_get_clients(0)) then
+  if not vim.tbl_isempty(vim.lsp.buf_get_clients(bufnr)) then
     local err_cnt = get_count(0, [[Error]])
     if err_cnt > 0 and _NgConfigValues.lsp.disply_diagnostic_qf then
       if diagnostic.set_loclist then
@@ -431,11 +443,6 @@ function M.update_err_marker()
   marker(result, { bufnr = bufnr, method = 'textDocument/publishDiagnostics' })
 end
 
--- TODO: update the marker
-if _NgConfigValues.diagnostic_scrollbar_sign then
-  vim.notify('config deprecated, set lsp.diagnostic_scrollbar_sign instead', vim.lsp.log_levels.WARN)
-end
-
 if _NgConfigValues.lsp.diagnostic_scrollbar_sign then
   vim.cmd([[autocmd WinScrolled * lua require'navigator.diagnostics'.update_err_marker()]])
 end
@@ -460,6 +467,55 @@ function M.show_diagnostics(pos)
     -- deprecated
     diagnostic.show_line_diagnostics(opt, bufnr, lnum)
   end
+end
+
+function M.treesitter_and_diag_panel()
+  local Panel = require('guihua.panel')
+
+  local ft = vim.bo.filetype
+  local results = diagnostic_list[ft]
+  log(diagnostic_list, ft)
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local p = Panel:new({
+    header = 'treesitter',
+    render = function(b)
+      log('render for ', bufnr, b)
+      return require('navigator.treesitter').all_ts_nodes(b)
+    end,
+  })
+  p:add_section({
+    header = 'diagnostic',
+    render = function(bufnr)
+      if diagnostic_list[ft] ~= nil then
+        local display_items = {}
+        for _, client_items in pairs(results) do
+          for _, items in pairs(client_items) do
+            for _, it in pairs(items) do
+              log(it)
+              table.insert(display_items, it)
+            end
+          end
+        end
+        return display_items
+      else
+        return {}
+      end
+    end,
+  })
+  p:open(true)
+end
+
+function M.config(cfg)
+  cfg = cfg or {}
+  local default_cfg = {
+    underline = true,
+    virtual_text = true,
+    signs = { _NgConfigValues.icons.diagnostic_err },
+    update_in_insert = false,
+  }
+  cfg = vim.tbl_extend('keep', cfg, default_cfg)
+  vim.diagnostic.config(cfg)
 end
 
 return M

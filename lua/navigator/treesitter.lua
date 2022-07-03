@@ -1,28 +1,31 @@
 --- Note: some of the functions/code coped from treesitter/refactor/navigation.lua and may be modified
 -- to fit in navigator.lua
-local gui = require "navigator.gui"
+local gui = require('navigator.gui')
 local fn = vim.fn
 local lru = require('navigator.lru').new(500, 1024 * 1024)
 
-local ok, ts_locals = pcall(require, "nvim-treesitter.locals")
+local ok, ts_locals = pcall(require, 'nvim-treesitter.locals')
 
 if not ok then
-  error("treesitter not installed")
+  error('treesitter not installed')
   return nil
 end
 
-local parsers = require "nvim-treesitter.parsers"
-local utils = require "nvim-treesitter.utils"
-local locals = require 'nvim-treesitter.locals'
-local ts_utils = require 'nvim-treesitter.ts_utils'
+local parsers = require('nvim-treesitter.parsers')
+local utils = require('nvim-treesitter.utils')
+local locals = require('nvim-treesitter.locals')
+local ts_utils = require('nvim-treesitter.ts_utils')
 local api = vim.api
-local util = require "navigator.util"
+local util = require('navigator.util')
 local M = {}
 
 local cwd = vim.loop.cwd()
-local log = require"navigator.util".log
-local lerr = require"navigator.util".error
-local trace = require"navigator.util".trace
+local log = require('navigator.util').log
+local lerr = require('navigator.util').error
+local trace = function(...) end
+if vim.fn.has('nvim-0.7') == 1 then
+  local trace = require('navigator.util').trace
+end
 
 local get_icon = function(kind)
   if kind == nil or _NgConfigValues.icons.match_kinds[kind] == nil then
@@ -43,7 +46,7 @@ function M.goto_definition(bufnr)
   local definition = locals.find_definition(node_at_point, bufnr)
 
   if definition ~= node_at_point then
-    log("def found:", definition:range())
+    log('def found:', definition:range())
     ts_utils.goto_node(definition)
   end
 end
@@ -53,7 +56,7 @@ local function node_is_definination(node)
     return false
   end
   local nd_type = node:parent():type()
-  local decl = {'short_var_declaration', 'short_var_declaration', 'declaration'}
+  local decl = { 'short_var_declaration', 'short_var_declaration', 'declaration' }
 
   if vim.tbl_contains(decl, nd_type) then
     return true
@@ -69,25 +72,24 @@ local function node_is_definination(node)
   end
 
   return false
-
 end
 
 -- use lsp range to find def
 function M.find_definition(range, bufnr)
   if not range or not range.start then
-    lerr("find_def incorrect range", range)
+    lerr('find_def incorrect range', range)
     return
   end
   bufnr = bufnr or api.nvim_get_current_buf()
   local parser = parsers.get_parser(bufnr)
-  local symbolpos = {range.start.line, range.start.character} -- +1 or not?
+  local symbolpos = { range.start.line, range.start.character } -- +1 or not?
   local root = ts_utils.get_root_for_position(range.start.line, range.start.character, parser)
   if not root then
     return
   end
   local node_at_point = root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1], symbolpos[2])
   if not node_at_point then
-    lerr("no node at cursor")
+    lerr('no node at cursor')
     return
   end
 
@@ -95,15 +97,15 @@ function M.find_definition(range, bufnr)
   if definition ~= node_at_point then -- NOTE: it may not worksfor some of languages. if def not found, ts
     -- returns current node. if your node is def, then it also return self... then I have no idea weather it is
     -- def or not
-    trace("info: def found:", definition:range(), definition:type())
+    trace('info: def found:', definition:range(), definition:type())
     local r, c = definition:range()
-    return {start = {line = r, character = c}}
+    return { start = { line = r, character = c } }
   elseif node_is_definination(node_at_point) then
-    trace("declaraction here ", definition:type())
+    trace('declaraction here ', definition:type())
     local r, c = definition:range()
-    return {start = {line = r, character = c}}
+    return { start = { line = r, character = c } }
   else
-    trace("error: def not found in ", bufnr, definition:range(), definition:type(), definition:parent():type())
+    trace('error: def not found in ', bufnr, definition:range(), definition:type(), definition:parent():type())
   end
 end
 
@@ -111,16 +113,69 @@ end
 --- This function copy from treesitter/refactor/navigation.lua
 local function get_definitions(bufnr)
   local local_nodes = ts_locals.get_locals(bufnr)
-
   -- Make sure the nodes are unique.
   local nodes_set = {}
   for _, loc in ipairs(local_nodes) do
+    trace(loc)
     if loc.definition then
       ts_locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
         -- lua doesn't compare tables by value,
         -- use the value from byte count instead.
-        local _, _, start = node:start()
-        nodes_set[start] = {node = node, type = match or ""}
+        local k, l, start = node:start()
+        trace(node, match)
+        trace(k, l, start, node:parent(), node:parent():start(), node:parent():type())
+
+        if node and node:parent() and string.find(node:parent():type(), 'parameter_declaration') then
+          log('parameter_declaration skip')
+          return
+        end
+        nodes_set[start] = { node = node, type = match or '' }
+      end)
+    end
+
+    if loc.method then -- for go
+      ts_locals.recurse_local_nodes(loc.method, function(def, node, full_match, match)
+        local k, l, start = node:start()
+
+        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
+        if node:type() == 'field_identifier' and nodes_set[start] == nil then
+          nodes_set[start] = { node = node, type = 'method' }
+        end
+      end)
+    end
+    if loc.interface then -- for go using interface can output full method definition
+      ts_locals.recurse_local_nodes(loc.interface, function(def, node, full_match, match)
+        local k, l, start = node:start()
+        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
+        if nodes_set[start] == nil then
+          nodes_set[start] = { node = node, type = match or '' }
+        end
+      end)
+    end
+    if loc.reference then -- for go
+      ts_locals.recurse_local_nodes(loc.reference, function(def, node, full_match, match)
+        local k, l, start = node:start()
+        local p1, p1t = '', ''
+        local p2, p2t = '', ''
+        if node:parent() and node:parent():parent() then
+          p1 = node:parent()
+          p1t = node:parent():type()
+          p2 = node:parent():parent()
+          p2t = node:parent():parent():type()
+        end
+        trace(k, l, start, def, node, full_match, match, p1t, p1, node:parent():start(), node:parent():type(), p2, p2t)
+        if nodes_set[start] == nil then
+          if -- qualified_type : e.g. io.Reader inside interface
+            node:parent()
+            and node:parent():parent()
+            and node:type() == 'type_identifier'
+            and node:parent():type() == 'qualified_type'
+            and string.find(node:parent():parent():type(), 'interface')
+          then
+            log('add node', node)
+            nodes_set[start] = { node = node, type = match or 'field' }
+          end
+        end
       end)
     end
   end
@@ -140,7 +195,7 @@ local function prepare_node(node, kind)
   local matches = {}
   kind = kind or node.type
   if node.node then
-    table.insert(matches, {kind = get_icon(kind), def = node.node, type = kind})
+    table.insert(matches, { kind = get_icon(kind), def = node.node, type = kind })
   else
     for name, item in pairs(node) do
       vim.list_extend(matches, prepare_node(item, name))
@@ -150,9 +205,7 @@ local function prepare_node(node, kind)
 end
 
 local function get_scope(type, source)
-  local sbl, sbc, sel, sec = source:range()
   local current = source
-  local result = current
   local next = ts_utils.get_next_node(source)
   local parent = current:parent()
   trace(source:type(), source:range(), parent)
@@ -170,7 +223,7 @@ local function get_scope(type, source)
 
     -- for C++
     local n = source
-    for i = 1, 4, 1 do
+    for _ = 1, 4, 1 do
       if n == nil or n:parent() == nil then
         break
       end
@@ -182,8 +235,8 @@ local function get_scope(type, source)
     return parent, true
   end
 
-  if type == "var" and next ~= nil then
-    if next:type() == "function" or next:type() == "arrow_function" or next:type() == "function_definition" then
+  if type == 'var' and next ~= nil then
+    if next:type() == 'function' or next:type() == 'arrow_function' or next:type() == 'function_definition' then
       trace(current:type(), current:range())
       return next, true
     elseif parent:type() == 'function_declaration' then
@@ -196,7 +249,7 @@ local function get_scope(type, source)
     -- M.fun1 = function() end
     -- lets work up and see next node, lua
     local n = source
-    for i = 1, 4, 1 do
+    for _ = 1, 4, 1 do
       if n == nil or n:parent() == nil then
         break
       end
@@ -208,10 +261,9 @@ local function get_scope(type, source)
     end
   end
 
-  if source:type() == "type_identifier" then
+  if source:type() == 'type_identifier' then
     return source:parent(), true
   end
-
 end
 
 local function get_smallest_context(source)
@@ -229,10 +281,10 @@ local function get_smallest_context(source)
   -- if source:type() == "identifier" then return get_var_context(source) end
 end
 
-local lsp_reference = require"navigator.dochighlight".goto_adjent_reference
+local lsp_reference = require('navigator.dochighlight').goto_adjent_reference
 
 function M.goto_adjacent_usage(bufnr, delta)
-  local opt = {forward = true}
+  local opt = { forward = true }
   -- log(delta)
   if delta < 0 then
     opt.forward = false
@@ -269,7 +321,7 @@ local function key(fname, filter)
 end
 
 local function get_all_nodes(bufnr, filter, summary)
-  local fname = vim.fn.expand("%:p:f")
+  local fname = vim.fn.expand('%:p:f')
   local uri = vim.uri_from_fname(fname)
   if bufnr ~= 0 then
     uri = vim.uri_from_bufnr(bufnr)
@@ -282,7 +334,8 @@ local function get_all_nodes(bufnr, filter, summary)
 
   local result = lru:get(hash)
   if result ~= nil and result.ftime == ftime then
-    log("get data from cache")
+    trace('get data from cache', ftime, result)
+
     return result.nodes, result.length
   end
 
@@ -292,31 +345,36 @@ local function get_all_nodes(bufnr, filter, summary)
 
   trace(bufnr, filter, summary)
   if not bufnr then
-    vim.notify("get_all_node invalide bufnr", vim.lsp.log_levels.WARN)
+    vim.notify('get_all_node invalide bufnr', vim.lsp.log_levels.WARN)
   end
   summary = summary or false
+  local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
   if not parsers.has_parser() then
-    vim.notify("ts not loaded", vim.lsp.log_levels.WARN)
+    if not require('navigator.lspclient.clients').ft_disabled(ft) then
+      vim.notify('ts not loaded ' .. ft, vim.lsp.log_levels.Debug)
+    end
+    return {}
   end
 
-  local path_sep = require"navigator.util".path_sep()
-  local path_cur = require"navigator.util".path_cur()
+  local path_sep = require('navigator.util').path_sep()
+  local path_cur = require('navigator.util').path_cur()
   local display_filename = fname:gsub(cwd .. path_sep, path_cur, 1)
 
   local all_nodes = {}
   -- Support completion-nvim customized label map
-  local customized_labels = vim.g.completion_customize_lsp_label or {}
+  -- local customized_labels = vim.g.completion_customize_lsp_label or {}
 
   -- Force some types to act like they are parents
   -- instead of neighbors of the next nodes.
   local containers = {
-    ["function"] = true,
-    ["local_function"] = true,
-    ["arrow_function"] = true,
-    ["type"] = true,
-    ["class"] = true,
-    ["struct"] = true,
-    ["method"] = true
+    ['function'] = true,
+    ['local_function'] = true,
+    ['arrow_function'] = true,
+    ['type'] = true,
+    ['class'] = true,
+    -- ['var'] = true,
+    ['struct'] = true,
+    ['method'] = true,
   }
 
   -- check and load buff
@@ -330,15 +388,31 @@ local function get_all_nodes(bufnr, filter, summary)
   -- Step 2 find correct completions
   local length = 10
   local parents = {} -- stack of nodes a clever algorithm from treesiter refactor @Santos Gallegos
+  local loaded_symbol = {}
   for _, def in ipairs(get_definitions(bufnr)) do
     local n = #parents
     for i = 1, n do
       local index = n + 1 - i
       local parent_def = parents[index]
-      if ts_utils.is_parent(parent_def.node, def.node)
-          or (containers[parent_def.type] and ts_utils.is_parent(parent_def.node:parent(), def.node)) then
+      log(parent_def.type, parent_def.node:type(), vim.treesitter.get_node_text(parent_def.node, bufnr))
+      log(def.node:type(), vim.treesitter.get_node_text(def.node, bufnr))
+      if
+        ts_utils.is_parent(parent_def.node, def.node)
+        or (
+          containers[parent_def.type]
+          and (
+            ts_utils.is_parent(parent_def.node:parent(), def.node)
+            or (
+              parent_def.node:parent():type():find('dot_index')
+              and ts_utils.is_parent(parent_def.node:parent():parent(), def.node)
+            )
+          )
+        )
+      then
+        log('is parent', i, index)
         break
       else
+        log('leave node', i, index)
         parents[index] = nil
       end
     end
@@ -351,15 +425,21 @@ local function get_all_nodes(bufnr, filter, summary)
       item.type = node.type
 
       if filter ~= nil and not filter[item.type] then
-        trace(item.type, item.kind)
+        trace('skipped', item.type, item.kind)
+        goto continue
+      end
+
+      if item.type == 'associated' then
+        trace('skipped', item.type, item.kind)
         goto continue
       end
       local tsdata = node.def
 
       if node.def == nil then
+        trace('skipped', item.type, item.kind)
         goto continue
       end
-      item.node_text = ts_utils.get_node_text(tsdata, bufnr)[1]
+      item.node_text = vim.treesitter.get_node_text(tsdata, bufnr) or ''
       local scope, is_func
 
       if summary then
@@ -370,19 +450,39 @@ local function get_all_nodes(bufnr, filter, summary)
       if is_func then
         -- hack for lua and maybe other language aswell
         local parent = tsdata:parent()
-        if parent ~= nil and parent:type() == 'function_name' or parent:type() == 'function_name_field' then
-          item.node_text = ts_utils.get_node_text(parent, bufnr)[1]
+        if parent ~= nil and _NgConfigValues.debug == 'trace' then -- for github action failure
+          trace(parent:type(), vim.treesitter.get_node_text(parent, bufnr):sub(1, 30), item.node_text, item.type)
+        end
+        if
+          parent ~= nil
+          and (
+            parent:type() == 'function_name'
+            -- or parent:type() == 'function'
+            -- or parent:type() == 'function_declaration' -- this bring in too much info
+            or parent:type() == 'method_name'
+            or parent:type() == 'function_name_field'
+          )
+        then
+          -- replace function name
+          item.node_text = vim.treesitter.get_node_text(parent, bufnr)
+          local cut = item.node_text:find('[\n\r]')
+          if cut then
+            item.node_text = item.node_text:sub(1, cut - 1)
+          end
           log(parent:type(), item.node_text)
         end
       end
 
       trace(item.node_text, item.kind, item.type)
       if scope ~= nil then
-        -- it is strange..
         if not is_func and summary then
+          log('skipped', item.node_text, item.type)
           goto continue
         end
         item.node_scope = ts_utils.node_to_lsp_range(scope)
+      end
+      if item.node_text and vim.trim(item.node_text) == '_' then
+        goto continue
       end
       if summary then
         if item.node_scope ~= nil then
@@ -390,18 +490,24 @@ local function get_all_nodes(bufnr, filter, summary)
         end
 
         if item.node_scope then
-          trace(item.type, tsdata:type(), item.node_text, item.kind, item.node_text, "range",
-                item.node_scope.start.line, item.node_scope['end'].line) -- set to log if need to trace result
+          trace(
+            item.type,
+            tsdata:type(),
+            item.node_text,
+            item.kind,
+            'range',
+            item.node_scope.start.line,
+            item.node_scope['end'].line
+          ) -- set to log if need to trace result
         end
         goto continue
       end
 
       item.range = ts_utils.node_to_lsp_range(tsdata)
       local start_line_node, _, _ = tsdata:start()
-      if item.node_text == "_" then
-        goto continue
-      end
-      item.full_text = vim.trim(api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1] or "")
+
+      local line_text = api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1] or ''
+      item.full_text = vim.trim(line_text)
 
       item.full_text = item.full_text:gsub('%s*[%[%(%{]*%s*$', '')
       item.uri = uri
@@ -411,45 +517,76 @@ local function get_all_nodes(bufnr, filter, summary)
       item.lnum, item.col, _ = def.node:start()
       item.lnum = item.lnum + 1
       item.col = item.col + 1
-      local indent = ""
+      local indent = ''
       if #parents > 1 then
-        indent = string.rep("  ", #parents - 1) .. " "
+        indent = string.rep('  ', #parents - 1) .. ' '
+      end
+      item.indent = indent
+      item.indent_level = #parents -- maybe use real indent level ?
+      if item.indent_level <= 1 then
+        local sp = string.match(line_text, '(%s*)')
+        log(line_text, #sp)
+        if sp then
+          local indent_level = #sp / (vim.o.shiftwidth or 4) + 1
+          item.indent_level = math.max(item.indent_level, indent_level)
+        end
+      end
+      if #parents > 0 then
+        log(parents[1].type, vim.treesitter.get_node_text(parents[1].node, bufnr))
+        if parents[2] then
+          log(parents[2].type, vim.treesitter.get_node_text(parents[2].node, bufnr))
+        end
+      else
+        log('root node')
+      end
+      if #all_nodes >= 1 then
+        all_nodes[#all_nodes].next_indent_level = #parents
       end
 
-      item.text = string.format(" %s %s%-10s\t %s", item.kind, indent, item.node_text, item.full_text)
+      item.text = string.format(' %s %s%-10s\t %s', item.kind, indent, item.node_text, item.full_text)
       if #item.text > length then
         length = #item.text
       end
-      table.insert(all_nodes, item)
+      if
+        loaded_symbol[item.node_text .. item.kind] == nil
+        or not util.range_inside(loaded_symbol[item.node_text .. item.kind], item.node_scope)
+      then
+        table.insert(all_nodes, item)
+        loaded_symbol[item.node_text .. item.kind] = item.node_scope
+      end
       ::continue::
     end
   end
   trace(all_nodes)
-  local nd = {nodes = all_nodes, ftime = vim.fn.getftime(fname), length = length}
+  local nd = { nodes = all_nodes, ftime = vim.fn.getftime(fname), length = length }
   lru:set(hash, nd)
   if should_unload then
-    vim.api.nvim_buf_delete(bufnr, {unload = true})
+    vim.api.nvim_buf_delete(bufnr, { unload = true })
   end
   return all_nodes, length
 end
 
 function M.buf_func(bufnr)
+  local ft = vim.api.nvim_buf_get_option(bufnr, 'buftype')
+  if vim.api.nvim_buf_get_option(bufnr, 'buftype') == 'nofile' then
+    return
+  end
   if not ok or ts_locals == nil then
-    error("treesitter not loaded")
+    error('treesitter not loaded: ' .. ft)
     return
   end
 
   bufnr = bufnr or api.nvim_get_current_buf()
 
   local all_nodes, width = get_all_nodes(bufnr, {
-    ["function"] = true,
-    ["var"] = true,
-    ["method"] = true,
-    ["class"] = true,
-    ["type"] = true
+    ['function'] = true,
+    ['var'] = true,
+    ['method'] = true,
+    ['class'] = true,
+    ['type'] = true,
   }, true)
   if #all_nodes < 1 then
-    trace("no node found for ", bufnr) -- set to log
+    trace('no node found for ', bufnr) -- set to log
     return
   end
 
@@ -478,34 +615,59 @@ function M.buf_func(bufnr)
   end
 
   return all_nodes, width
-
 end
 
-function M.buf_ts()
+function M.all_ts_nodes(bufnr)
   if ts_locals == nil then
-    error("treesitter not loaded")
+    error('treesitter not loaded')
     return
   end
 
-  local bufnr = api.nvim_get_current_buf()
+  bufnr = bufnr or api.nvim_get_current_buf()
   local all_nodes, width = get_all_nodes(bufnr)
+  return all_nodes, width
+end
 
-  local ft = vim.api.nvim_buf_get_option(bufnr, "ft")
-  gui.new_list_view({
+function M.side_panel()
+  Panel = require('guihua.panel')
+  local bufnr = api.nvim_get_current_buf()
+  local panel = Panel:new({
+    header = 'treesitter',
+    render = function(b)
+      local ft = vim.api.nvim_buf_get_option(b, 'buftype')
+      log('render for ', bufnr, b)
+      if ft == 'nofile' or ft == 'guihua' then
+        b = bufnr
+      end
+      return require('navigator.treesitter').all_ts_nodes(b)
+    end,
+    scope = 'node_scope'
+  })
+  panel:open(true)
+end
+
+function M.buf_ts()
+  local all_nodes, width = M.all_ts_nodes()
+  local bufnr = api.nvim_get_current_buf()
+  local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
+  local listview = gui.new_list_view({
     items = all_nodes,
     prompt = true,
     ft = ft,
     rawdata = true,
+    height = 0.62,
+    preview_height = 0.12,
     width = width + 10,
-    api = _NgConfigValues.icons.treesitter_defult
+    api = _NgConfigValues.icons.treesitter_defult,
   })
+  return listview, all_nodes, width
 end
 
 M.get_all_nodes = get_all_nodes
 
 function M.bufs_ts()
   if ts_locals == nil then
-    error("treesitter not loaded")
+    error('treesitter not loaded')
     return
   end
   local bufs = vim.api.nvim_list_bufs()
@@ -528,13 +690,15 @@ function M.bufs_ts()
   if #ts_opened > 1 then
     trace(ts_opened)
 
-    local ft = vim.api.nvim_buf_get_option(0, "ft")
+    local ft = vim.api.nvim_buf_get_option(0, 'ft')
     gui.new_list_view({
       items = ts_opened,
       prompt = true,
       ft = ft,
+      height = 0.62,
+      preview_height = 0.12,
       width = max_length + 10,
-      api = _NgConfigValues.icons.treesitter_defult
+      api = _NgConfigValues.icons.treesitter_defult,
     })
   end
 end
@@ -543,7 +707,7 @@ local function node_in_range(parser, range)
   for _, child in pairs(parser._children) do
     if child:contains(range) then
       local result = node_in_range(child, range)
-      if not vim.tbl_contains({vim.bo.filetype}, result:lang()) then
+      if not vim.tbl_contains({ vim.bo.filetype }, result:lang()) then
         -- log("not correct tree embedded or comment?", result:lang())
         return parser
       end
@@ -564,7 +728,7 @@ function M.get_node_at_line(lnum)
     lnum = cursor[1]
   end
   local first_non_whitespace_col = fn.match(fn.getline(lnum), '\\S')
-  local range = {lnum - 1, first_non_whitespace_col, lnum - 1, first_non_whitespace_col}
+  local range = { lnum - 1, first_non_whitespace_col, lnum - 1, first_non_whitespace_col }
 
   -- Get the language tree with nodes inside the given range
   local root = parsers.get_parser()
@@ -578,7 +742,7 @@ function M.get_node_at_line(lnum)
   return node
 end
 
-local usage_namespace = vim.api.nvim_create_namespace("nvim-treesitter-usages")
+local usage_namespace = vim.api.nvim_create_namespace('nvim-treesitter-usages')
 
 function M.highlight_usages(bufnr)
   M.clear_usage_highlights(bufnr)
@@ -595,12 +759,12 @@ function M.highlight_usages(bufnr)
 
   for _, usage_node in ipairs(usages) do
     if usage_node ~= node_at_point then
-      ts_utils.highlight_node(usage_node, bufnr, usage_namespace, "TSDefinitionUsage")
+      ts_utils.highlight_node(usage_node, bufnr, usage_namespace, 'TSDefinitionUsage')
     end
   end
 
   if def_node ~= node_at_point then
-    ts_utils.highlight_node(def_node, bufnr, usage_namespace, "TSDefinition")
+    ts_utils.highlight_node(def_node, bufnr, usage_namespace, 'TSDefinition')
   end
 end
 
@@ -610,7 +774,7 @@ end
 
 function M.get_node_at_pos(pos, parser)
   -- local cursor = api.nvim_win_get_cursor(winnr or 0)
-  local cursor_range = {pos[1], pos[2]}
+  local cursor_range = { pos[1], pos[2] }
 
   log(cursor_range)
   local root = ts_utils.get_root_for_position(unpack(cursor_range), parser)
@@ -651,7 +815,6 @@ function M.get_node_scope(node)
   end
 
   return sr, sc, er, ec
-
 end
 
 return M

@@ -5,10 +5,10 @@ local gui = require('navigator.gui')
 local log = util.log
 local TextView = require('guihua.textview')
 -- callback for lsp definition, implementation and declaration handler
-local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
+local definition_hdlr = function(err, locations, ctx, _)
   -- log(locations)
   if err ~= nil then
-    vim.notify('Defination: ', tostring(err) .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
+    vim.notify('Defination: ' .. tostring(err) .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
     return
   end
   if type(locations) == 'number' then
@@ -31,7 +31,7 @@ local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
   else
     vim.lsp.util.jump_to_location(locations, oe)
   end
-end)
+end
 
 local function get_symbol()
   local currentWord = vim.fn.expand('<cword>')
@@ -39,7 +39,7 @@ local function get_symbol()
 end
 
 local function def_preview(timeout_ms)
-  assert(#vim.lsp.buf_get_clients() > 0, 'Must have a client running')
+  assert(next(vim.lsp.buf_get_clients(0)), 'Must have a client running')
   local method = 'textDocument/definition'
   local params = vim.lsp.util.make_position_params()
   local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)
@@ -85,6 +85,9 @@ local function def_preview(timeout_ms)
     local ts = require('navigator.treesitter')
     local root = parsers.get_parser(bufnr)
     log(range)
+    if ts == nil then
+      return
+    end
     local def_node = ts.get_node_at_pos({ range['start'].line, range['start'].character }, root)
 
     local sr, _, er, _ = ts.get_node_scope(def_node)
@@ -105,7 +108,7 @@ local function def_preview(timeout_ms)
   end
   local width = 40
   local maxwidth = math.floor(vim.fn.winwidth(0) * 4 / 5)
-  for key, value in pairs(definition) do
+  for _, value in pairs(definition) do
     -- log(key, value, width)
     width = math.max(width, #value + 4)
     width = math.min(maxwidth, width)
@@ -118,7 +121,7 @@ local function def_preview(timeout_ms)
     relative = 'cursor',
     style = 'minimal',
     ft = filetype,
-    rect = { width = width, height = #definition + 3 },
+    rect = { width = width, height = #definition + 3, pos_y = 2 },
     data = definition,
     enter = true,
     border = _NgConfigValues.border or 'shadow',
@@ -143,8 +146,9 @@ local def = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
   local ref_params = vim.lsp.util.make_position_params()
-  vim.lsp.for_each_buffer_client(bufnr, function(client, client_id, _bufnr)
-    if client.resolved_capabilities.goto_definition then
+  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
+    -- if client.resolved_capabilities.goto_definition then
+    if client.server_capabilities.definitionProvider then
       client.request('textDocument/definition', ref_params, definition_hdlr, _bufnr)
     end
   end)

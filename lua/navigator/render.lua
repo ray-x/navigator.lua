@@ -1,16 +1,16 @@
-local log = require"guihua.log".info
-local trace = require"guihua.log".trace
+local log = require('guihua.log').info
+local trace = require('guihua.log').trace
 local M = {}
-local clone = require'guihua.util'.clone
+local clone = require('guihua.util').clone
 local function filename(url)
   if url == nil then
     return ''
   end
-  return url:match("^.+/(.+)$") or url
+  return url:match('^.+/(.+)$') or url
 end
 
 local function extension(url)
-  local ext = url:match("^.+(%..+)$") or "txt"
+  local ext = url:match('^.+(%..+)$') or 'txt'
   return string.sub(ext, 2)
 end
 
@@ -38,7 +38,6 @@ local function get_pads(win_width, text, postfix)
       i = i + rem * 10
       -- log(i)
     end
-
   end
 
   if i > 3 then
@@ -52,40 +51,32 @@ end
 function M.prepare_for_render(items, opts)
   opts = opts or {}
   if items == nil or #items < 1 then
-    vim.notify("no item found or empty fields", vim.lsp.log_levels.INFO)
+    vim.notify('no item found or empty fields', vim.lsp.log_levels.INFO)
     return
   end
   local item = clone(items[1])
-  local display_items = {item}
+  local display_items = { item }
   local last_summary_idx = 1
   local total_ref_in_file = 1
   local total = opts.total
-  local icon = " "
-  local lspapi = opts.api or "∑"
+  local icon = ' '
+  local lspapi = opts.api or '∑'
 
-  local ok, devicons = pcall(require, "nvim-web-devicons")
+  local ok, devicons = pcall(require, 'nvim-web-devicons')
   if ok then
     local fn = filename(items[1].filename)
     local ext = extension(fn)
     icon = devicons.get_icon(fn, ext) or icon
   end
-  local call_by_presented = false
-  local width = 100
-  opts.width = opts.width or width
+  -- local call_by_presented = false
+  opts.width = opts.width or 100
   local win_width = opts.width -- buf
-
-  for i = 1, #items do
-    if items[i].call_by and #items[i].call_by > 0 then
-      call_by_presented = true
-    end
-  end
-  -- log(items[1])
 
   for i = 1, #items do
     local space
     local trim
     local lspapi_display = lspapi
-    items[i].symbol_name = items[i].symbol_name or "" -- some LSP API does not have range for this
+    items[i].symbol_name = items[i].symbol_name or '' -- some LSP API does not have range for this
 
     local fn = display_items[last_summary_idx].filename
     local dfn = items[i].display_filename
@@ -98,18 +89,23 @@ function M.prepare_for_render(items, opts)
     display_items[last_summary_idx].filename_only = true
     -- trace(items[i], items[i].filename, last_summary_idx, display_items[last_summary_idx].filename)
     -- TODO refact display_filename generate part
-    if items[i].filename == fn then
+    if items[i].filename == fn or opts.hide_filename then
       space, trim = get_pads(opts.width, icon .. ' ' .. dfn, lspapi_display .. ' 14 of 33 ')
       if trim and opts.width > 50 and #dfn > opts.width - 20 then
         local fn1 = string.sub(dfn, 1, opts.width - 50)
         local fn2 = string.sub(dfn, #dfn - 10, #dfn)
-        display_items[last_summary_idx].display_filename = fn1 .. "" .. fn2
+        display_items[last_summary_idx].display_filename = fn1 .. '' .. fn2
         space = '  '
         -- log("trim", fn1, fn2)
       end
-      local api_disp = string.format("%s  %s%s%s %i", icon,
-                                     display_items[last_summary_idx].display_filename, space,
-                                     lspapi_display, total_ref_in_file)
+      local api_disp = string.format(
+        '%s  %s%s%s %i',
+        icon,
+        display_items[last_summary_idx].display_filename,
+        space,
+        lspapi_display,
+        total_ref_in_file
+      )
 
       if total then
         api_disp = api_disp .. ' of: ' .. tostring(total)
@@ -118,20 +114,17 @@ function M.prepare_for_render(items, opts)
       display_items[last_summary_idx].text = api_disp
       total_ref_in_file = total_ref_in_file + 1
     else
-
       lspapi_display = lspapi
       item = clone(items[i])
 
-      space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename,
-                             lspapi_display .. ' 12 of 33')
+      space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename, lspapi_display .. ' 12 of 33')
       if trim and opts.width > 52 and #item.display_filename > opts.width - 20 then
-        item.display_filename = string.sub(item.display_filename, 1, opts.width - 52) .. ""
-                                    .. string.sub(item.display_filename,
-                                                  #item.display_filename - 10,
-                                                  #item.display_filename)
+        item.display_filename = string.sub(item.display_filename, 1, opts.width - 52)
+          .. ''
+          .. string.sub(item.display_filename, #item.display_filename - 10, #item.display_filename)
         space = '  '
       end
-      item.text = string.format("%s  %s%s%s 1", icon, item.display_filename, space, lspapi_display)
+      item.text = string.format('%s  %s%s%s 1', icon, item.display_filename, space, lspapi_display)
 
       trace(item.text)
       table.insert(display_items, item)
@@ -140,14 +133,17 @@ function M.prepare_for_render(items, opts)
     end
     -- content of code lines
     item = clone(items[i])
-    item.text = require'navigator.util'.trim_and_pad(item.text)
-    item.text = string.format("%4i: %s", item.lnum, item.text)
-    local ts_report = ""
+    item.text = require('navigator.util').trim_and_pad(item.text)
+    item.text = string.format('%4i: %s', item.lnum, item.text)
+    local ts_report = ''
     if item.lhs then
       ts_report = _NgConfigValues.icons.value_changed
     end
 
+    -- log(item.text, item.symbol_name, item.uri)
+    -- log(item.text)
     if item.definition then
+      log('definition', item)
       ts_report = ts_report .. _NgConfigValues.icons.value_definition .. ' '
     end
     local header_len = #ts_report + 4 -- magic number 2
@@ -155,7 +151,7 @@ function M.prepare_for_render(items, opts)
 
     item.text = item.text:gsub('%s*[%[%(%{]*%s*$', '')
     if item.call_by ~= nil and #item.call_by > 0 then
-      trace("call_by:", #item.call_by)
+      trace('call_by:', #item.call_by)
       for _, value in pairs(item.call_by) do
         if value.node_text then
           local txt = value.node_text:gsub('%s*[%[%(%{]*%s*$', '')
@@ -183,15 +179,26 @@ function M.prepare_for_render(items, opts)
     if #ts_report > 1 then
       space, trim = get_pads(win_width, item.text, ts_report)
       if trim then
-        item.text = string.sub(item.text, 1, opts.width - 20) .. ""
+        local ts_r = ts_report or ''
+        item.text = string.sub(item.text, 1, math.max(1, opts.width - math.max(20, #ts_r)))
+        local _, j = string.gsub(item.text, [["]], '')
+        if j % 2 == 1 then
+          item.text = item.text .. '"'
+        end
+        _, j = string.gsub(item.text, [[']], '')
+        if j % 2 == 1 then
+          item.text = item.text .. [[']]
+        end
+        item.text = item.text .. ''
+        -- let check if there are unmatched "/'
       end
       if #space + #item.text + #ts_report >= win_width then
         if #item.text + #ts_report > win_width then
-          trace("exceeding", #item.text, #ts_report, win_width)
+          trace('exceeding', #item.text, #ts_report, win_width)
           space = '   '
         else
           local remain = win_width - #item.text - #ts_report
-          trace("remain", remain)
+          trace('remain', remain)
           space = string.rep(' ', remain)
         end
       end

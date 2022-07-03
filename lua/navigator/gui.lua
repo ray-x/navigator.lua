@@ -8,11 +8,11 @@ local api = vim.api
 local active_list_view -- only one listview at a time
 
 function M.new_list_view(opts)
-  log(opts)
+  -- log(opts)
   local config = require('navigator').config_values()
 
   if active_list_view ~= nil then
-    log(active_list_view)
+    trace(active_list_view)
     local winnr = active_list_view.win
     local bufnr = active_list_view.buf
 
@@ -23,38 +23,38 @@ function M.new_list_view(opts)
   end
   local items = opts.items
 
-  opts.min_width = opts.min_width or 0.3
-  opts.min_height = opts.min_height or 0.3
-
-  opts.height_ratio = config.height
-  opts.width_ratio = config.width
-  opts.preview_height_ratio = _NgConfigValues.preview_height or 0.3
-  opts.preview_lines = _NgConfigValues.preview_lines
+  opts.height_ratio = opts.height or config.height
+  opts.width_ratio = opts.height or config.width
+  opts.preview_height_ratio = opts.preview_height or config.preview_height
+  opts.preview_lines = config.preview_lines
   if opts.rawdata then
     opts.data = items
   else
     opts.data = require('navigator.render').prepare_for_render(items, opts)
   end
-  opts.border = _NgConfigValues.border or 'shadow'
+  opts.border = config.border or 'shadow'
+  if vim.fn.hlID('TelescopePromptBorder') > 0 then
+    opts.border_hl = 'TelescopePromptBorder'
+  end
   if not items or vim.tbl_isempty(items) then
     log('empty data return')
     return
   end
 
-  opts.transparency = _NgConfigValues.transparency
-  if #items >= _NgConfigValues.lines_show_prompt then
+  opts.transparency = config.transparency
+  if #items >= config.lines_show_prompt then
     opts.prompt = true
   end
 
-  opts.external = _NgConfigValues.external
-  opts.preview_lines_before = 3
-  log(opts)
+  opts.external = config.external
+  opts.preview_lines_before = 4
+  if _NgConfigValues.debug then
+    local logopts = { items = {}, data = {} }
+    logopts = vim.tbl_deep_extend('keep', logopts, opts)
+    log(logopts)
+  end
   active_list_view = require('guihua.gui').new_list_view(opts)
   return active_list_view
-end
-
-function M.select(items, opts, on_choice)
-  return
 end
 
 return M

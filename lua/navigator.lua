@@ -27,14 +27,15 @@ _NgConfigValues = {
     -- your on_attach will be called at end of navigator on_attach
   end,
   ts_fold = false,
-  -- code_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
-  -- code_lens_action_prompt = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
   treesitter_analysis = true, -- treesitter variable context
+  treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
   signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
+  ctags = { cmd = 'ctags', tagfile = '.tags' },
   lsp = {
+    enable = true, -- if disabled make sure add require('navigator.lspclient.mapping').setup() in you on_attach
     code_action = {
       enable = true,
       sign = true,
@@ -49,10 +50,16 @@ _NgConfigValues = {
       virtual_text = true,
       virtual_text_icon = true,
     },
+    diagnostic = {
+      underline = true,
+      virtual_text = { spacing = 3, source = true }, -- show virtual for diagnostic message
+      update_in_insert = false, -- update diagnostic message in insert mode
+      severity_sort = { reverse = true },
+    },
     format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+    disable_nulls_codeaction_sign = true, -- do not show nulls codeactions (as it will alway has a valid action)
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = {}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
-    code_lens = false,
     -- only want to enable one lsp server
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
     diagnostic_load_files = false, -- lsp diagnostic errors list may contains uri that not opened yet set to true
@@ -94,6 +101,15 @@ _NgConfigValues = {
     -- Values
     value_changed = '📝',
     value_definition = '🐶🍡', -- it is easier to see than 🦕
+    side_panel = {
+      section_separator = '',
+      line_num_left = '',
+      line_num_right = '',
+      inner_node = '├○',
+      outer_node = '╰○',
+      bracket_left = '⟪',
+      bracket_right = '⟫',
+    },
     -- Treesitter
     match_kinds = {
       var = ' ', -- "👹", -- Vampaire
@@ -104,18 +120,15 @@ _NgConfigValues = {
       namespace = '🚀',
       type = ' ',
       field = '🏈',
+      module = '📦',
+      flag = '🎏',
     },
     treesitter_defult = '🌲',
+    doc_symbols = '',
   },
 }
 
-vim.cmd("command! -nargs=0 LspLog lua require'navigator.lspclient.config'.open_lsp_log()")
-vim.cmd("command! -nargs=0 LspRestart lua require'navigator.lspclient.config'.reload_lsp()")
-vim.cmd("command! -nargs=0 LspToggleFmt lua require'navigator.lspclient.mapping'.toggle_lspformat()<CR>")
-vim.cmd("command! -nargs=0 LspKeymaps lua require'navigator.lspclient.mapping'.get_keymaps_help()<CR>")
-
 M.deprecated = function(cfg)
-  local warn = require('navigator.util').warn
   if cfg.code_action_prompt then
     warn('code_action_prompt moved to lsp.code_action')
   end
@@ -125,6 +138,10 @@ M.deprecated = function(cfg)
 
   if cfg.lsp ~= nil and cfg.lsp.disable_format_ft ~= nil and cfg.lsp.disable_format_ft ~= {} then
     warn('disable_format_ft renamed to disable_format_cap')
+  end
+
+  if cfg.lsp ~= nil and cfg.lsp.code_lens == true then
+    warn('code_lens moved to lsp.code_lens_action')
   end
 
   if cfg.lspinstall ~= nil then
@@ -137,9 +154,8 @@ local extend_config = function(opts)
   if next(opts) == nil then
     return
   end
-  if opts.lsp and opts.lsp.servers then
-    require('navigator.lspclient.clients').add_servers(opts.lsp.servers)
-    opts.lsp.server = nil
+  if opts.debug then
+    _NgConfigValues.debug = opts.debug
   end
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then
@@ -185,7 +201,7 @@ local extend_config = function(opts)
               if key == 'lsp' then
                 local lsp = require('navigator.lspclient.clients').lsp
                 if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' and k ~= 'null-ls' then
-                  info(string.format('[] extend LSP support for  %s ', k))
+                  info(string.format('[] extend LSP support for  %s %s ', key, k))
                 end
               elseif key == 'keymaps' then
                 info('keymap override')
@@ -215,31 +231,42 @@ M.config_values = function()
 end
 
 M.setup = function(cfg)
+  cfg = cfg or {}
   extend_config(cfg)
 
   vim.cmd([[autocmd FileType,BufEnter * lua require'navigator.lspclient.clients'.on_filetype()]]) -- BufWinEnter BufNewFile,BufRead ?
-  -- local log = require"navigator.util".log
-  -- log(debug.traceback())
-  -- log(cfg, _NgConfigValues)
-  -- print("loading navigator")
   require('navigator.lazyloader').init()
   require('navigator.lspclient.clients').setup(_NgConfigValues)
-  -- keymaps should be added to on_attach. in case on_attach is not called
-  -- require('navigator.lspclient.mapping').setup(_NgConfigValues)
+
   require('navigator.reference')
   require('navigator.definition')
   require('navigator.hierarchy')
   require('navigator.implementation')
 
-  -- log("navigator loader")
-
-  -- vim.cmd("autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4")
+  cfg.lsp = cfg.lsp or _NgConfigValues.lsp
+  if cfg.lsp.enable then
+    require('navigator.diagnostics').config(cfg.lsp.diagnostic)
+  end
   if not _NgConfigValues.loaded then
     _NgConfigValues.loaded = true
   end
 
   if _NgConfigValues.ts_fold == true then
-    require('navigator.foldts').on_attach()
+    local ok, _ = pcall(require, 'nvim-treesitter')
+    if ok then
+      require('navigator.foldts').on_attach()
+    end
+  end
+
+  local _start_client = vim.lsp.start_client
+  vim.lsp.start_client = function(lsp_config)
+    -- add highlight for Lspxxx
+    require('navigator.dochighlight').documentHighlight()
+    require('navigator.lspclient.highlight').add_highlight()
+    require('navigator.lspclient.highlight').diagnositc_config_sign()
+    -- require('navigator.lspclient.mapping').setup()
+    require('navigator.lspclient.lspkind').init()
+    return _start_client(lsp_config)
   end
 end
 

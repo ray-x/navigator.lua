@@ -10,7 +10,7 @@ local sumneko_root_path = vim.fn.expand('$HOME') .. '/github/sumneko/lua-languag
 local sumneko_binary = vim.fn.expand('$HOME') .. '/github/sumneko/lua-language-server/bin/macOS/lua-language-server'
 
 local lua_cfg = {
-  cmd = { sumneko_binary, '-E', sumneko_root_path .. '/main.lua' },
+  -- cmd = { sumneko_binary, '-E', sumneko_root_path .. '/main.lua' },
   settings = {
     Lua = {
       runtime = { version = 'LuaJIT', path = vim.split(package.path, ';') },
@@ -18,6 +18,10 @@ local lua_cfg = {
     },
   },
 }
+
+if vim.fn.executable('lua-language-server') == 0 then
+  lua_cfg.cmd = { sumneko_binary, '-E', sumneko_root_path .. '/main.lua' }
+end
 
 local function load_plugins()
   require('packer').startup({
@@ -38,7 +42,7 @@ local function load_plugins()
       use({ 'ray-x/aurora' })
       use({
         'ray-x/navigator.lua',
-        -- '~/github/navigator.lua',
+        -- '~/github/ray-x/navigator.lua',
         requires = { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
         config = function()
           require('navigator').setup({

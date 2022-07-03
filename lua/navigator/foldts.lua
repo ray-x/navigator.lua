@@ -1,6 +1,7 @@
 -- NOTE: this file is a modified version of fold.lua from nvim-treesitter
 
 local log = require('navigator.util').log
+local trace = require('navigator.util').trace
 local api = vim.api
 local tsutils = require('nvim-treesitter.ts_utils')
 local query = require('nvim-treesitter.query')
@@ -16,15 +17,14 @@ function M.on_attach()
   -- M.update_folds()
 end
 
-function _G.custom_fold_text()
+function NG_custom_fold_text()
   local line = vim.fn.getline(vim.v.foldstart)
   local line_count = vim.v.foldend - vim.v.foldstart + 1
   -- log("" .. line .. " // " .. line_count .. " lines")
   return ' ⚡' .. line .. ': ' .. line_count .. ' lines'
 end
 
-vim.opt.foldtext = custom_fold_text()
-
+vim.opt.foldtext = NG_custom_fold_text()
 vim.opt.fillchars = { eob = '-', fold = ' ' }
 
 vim.opt.viewoptions:remove('options')
@@ -38,13 +38,13 @@ function M.setup_fold()
   api.nvim_command('augroup FoldingCommand')
   api.nvim_command('autocmd! * <buffer>')
   api.nvim_command('augroup end')
-  vim.opt.foldtext = 'v:lua.custom_fold_text()'
+  vim.opt.foldtext = 'v:lua.NG_custom_fold_text()'
   vim.opt.fillchars = { eob = '-', fold = ' ' }
   vim.opt.viewoptions:remove('options')
 
   local current_window = api.nvim_get_current_win()
   api.nvim_win_set_option(current_window, 'foldmethod', 'expr')
-  api.nvim_win_set_option(current_window, 'foldexpr', 'folding#foldexpr()')
+  api.nvim_win_set_option(current_window, 'foldexpr', 'folding#ngfoldexpr()')
 end
 
 -- This is cached on buf tick to avoid computing that multiple times
@@ -61,7 +61,7 @@ local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
   local parser = parsers.get_parser(bufnr)
 
   if not parser then
-    warn('treesitter parser not loaded')
+    log('treesitter parser not loaded')
     return {}
   end
 
@@ -148,12 +148,12 @@ local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
         levels[lnum + 1] = tostring(trimmed_level)
       else
         -- if levels[lnum + 1] == nil then
-          levels[lnum + 1] = tostring(trimmed_level + 1)
+        levels[lnum + 1] = tostring(trimmed_level + 1)
         -- end
       end
     end
   end
-  log(levels)
+  trace(levels)
 
   return levels
 end)

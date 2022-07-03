@@ -5,18 +5,13 @@ local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
 
-local diagnostic_map = function(bufnr)
-  local opts = { noremap = true, silent = true }
-  api.nvim_buf_set_keymap(bufnr, 'n', ']O', ':lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-end
-
 local M = {}
 
 M.on_attach = function(client, bufnr)
   bufnr = bufnr or 0
 
   if bufnr == 0 then
-    vim.notify('no bufnr provided from LSP ', client.name)
+    vim.notify('no bufnr provided from LSP ' .. client.name, vim.log.levels.DEBUG)
   end
   local uri = vim.uri_from_bufnr(bufnr)
 
@@ -29,7 +24,6 @@ M.on_attach = function(client, bufnr)
 
   trace(client)
 
-  diagnostic_map(bufnr)
   -- add highlight for Lspxxx
   require('navigator.lspclient.highlight').add_highlight()
   require('navigator.lspclient.highlight').diagnositc_config_sign()
@@ -38,10 +32,9 @@ M.on_attach = function(client, bufnr)
   require('navigator.lspclient.mapping').setup({
     client = client,
     bufnr = bufnr,
-    cap = client.resolved_capabilities,
   })
 
-  if client.resolved_capabilities.document_highlight then
+  if client.server_capabilities.documentHighlightProvider == true then
     require('navigator.dochighlight').documentHighlight()
   end
 
@@ -53,15 +46,25 @@ M.on_attach = function(client, bufnr)
     log(client.name, 'customized attach for all clients')
     config.on_attach(client, bufnr)
   end
-  if config.lsp and config.lsp[client.name] and config.lsp[client.name].on_attach ~= nil then
-    log('lsp client specific attach for', client.name)
-    config.lsp[client.name].on_attach(client, bufnr)
+  if config.lsp and config.lsp[client.name] then
+    if type(config.lsp[client.name]) == 'function' then
+      local attach = config.lsp[client.name]().on_attach
+      if attach then
+        attach(client, bufnr)
+      end
+    elseif config.lsp[client.name].on_attach ~= nil then
+      log(client.name, 'customized attach for this client')
+      log('lsp client specific attach for', client.name)
+      config.lsp[client.name].on_attach(client, bufnr)
+    end
   end
 
   if _NgConfigValues.lsp.code_action.enable then
-    if client.resolved_capabilities.code_action then
-      log('code action enabled for client', client.resolved_capabilities.code_action)
+    if client.server_capabilities.codeActionProvider and client.name ~= 'null-ls' then
+      log('code action enabled for client', client.server_capabilities.codeActionProvider)
+      api.nvim_command('augroup NCodeAction')
       vim.cmd([[autocmd CursorHold,CursorHoldI <buffer> lua require'navigator.codeAction'.code_action_prompt()]])
+      api.nvim_command('augroup end')
     end
   end
 end
