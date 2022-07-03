@@ -112,7 +112,7 @@ describe('should run lsp reference', function()
       win, items, width = require('navigator.reference').reference_handler(nil, 'textDocument/references', result, 1, 1)
     end
 
-    print('win', vim.inspect(win))
+    -- print('win', vim.inspect(win))
     print('items', vim.inspect(items))
     eq(win.ctrl.data[1].display_filename, './interface.go')
     eq(win.ctrl.data[2].range.start.line, 14)
@@ -134,7 +134,7 @@ describe('should run lsp reference', function()
     else
       win, items, width = require('navigator.reference').reference_handler(nil, 'textDocument/references', result, 1, 1)
     end
-    print('win', vim.inspect(win))
+    -- print('win', vim.inspect(win))
     print('items', vim.inspect(items))
     -- eq(win.ctrl.data, "./interface.go")
     eq(win.ctrl.data[1].display_filename, './interface.go')
