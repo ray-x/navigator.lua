@@ -1,13 +1,8 @@
 local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
-<<<<<<< HEAD
 local api = vim.api
 
-||||||| 91d1366
-
-=======
->>>>>>> master
 local event_hdlrs = {
   { ev = 'BufWritePre', func = require('navigator.diagnostics').set_diag_loclist },
   { ev = { 'CursorHold', 'CursorHoldI' }, func = vim.lsp.buf.document_highlight },
