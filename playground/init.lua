@@ -47,6 +47,8 @@ local function load_plugins()
         config = function()
           require('navigator').setup({
             lsp_signature_help = true,
+            debug = true,
+            keymaps = { { key = 'gK', func = vim.lsp.buf.definition, doc = 'definition' } },
           })
         end,
       })
