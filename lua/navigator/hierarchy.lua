@@ -253,7 +253,7 @@ call_hierarchy = function(method, opts)
     return opts.handler(err, result, ctx, cfg)
   end
   -- log(opts, params)
-  request(
+  return request(
     bufnr,
     'textDocument/prepareCallHierarchy',
     params,
@@ -299,6 +299,8 @@ end
 
 M.incoming_calls_handler = incoming_calls_handler
 M.outgoing_calls_handler = outgoing_calls_handler
+-- for testing
+M._call_hierarchy = call_hierarchy
 
 function M.calltree(args)
   if args == '-o' then
