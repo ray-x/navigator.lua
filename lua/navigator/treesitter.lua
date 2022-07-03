@@ -623,7 +623,7 @@ function M.all_ts_nodes(bufnr)
     return
   end
 
-  local bufnr = bufnr or api.nvim_get_current_buf()
+  bufnr = bufnr or api.nvim_get_current_buf()
   local all_nodes, width = get_all_nodes(bufnr)
   return all_nodes, width
 end
