@@ -5,7 +5,9 @@ local function warn(msg)
 end
 
 local function info(msg)
-  vim.api.nvim_echo({ { 'Info: ' .. msg } }, true, {})
+  if _NgConfigValues.debug then
+    vim.api.nvim_echo({ { 'Info: ' .. msg } }, true, {})
+  end
 end
 
 _NgConfigValues = {
@@ -16,7 +18,7 @@ _NgConfigValues = {
   preview_lines = 40, -- total lines in preview screen
   preview_lines_before = 5, -- lines before the highlight line
   default_mapping = true,
-  keymaps = {}, -- e.g keymaps={{key = "GR", func = "references()"}, } this replace gr default mapping
+  keymaps = {}, -- e.g keymaps={{key = "GR", func = vim.lsp.buf.references}, } this replace gr default mapping
   external = nil, -- true: enable for goneovim multigrid otherwise false
 
   border = 'single', -- border style, can be one of 'none', 'single', 'double', "shadow"
@@ -204,7 +206,7 @@ local extend_config = function(opts)
                   info(string.format('[] extend LSP support for  %s %s ', key, k))
                 end
               elseif key == 'keymaps' then
-                info('keymap override')
+                info('keymap override', v)
                 -- skip key check and allow mapping to handle that
               else
                 warn(string.format('[] Key %s %s not valid', key, k))
