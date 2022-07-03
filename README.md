@@ -618,8 +618,8 @@ require'navigator'.setup({
 
 require('rust-tools').setup({
   server = {
-    on_attach = function(_, _)
-      require('navigator.lspclient.mapping').setup() -- setup navigator keymaps here,
+    on_attach = function(client, bufnr)
+      require('navigator.lspclient.mapping').setup({client=client, bufnr=bufnr}) -- setup navigator keymaps here,
       -- otherwise, you can define your own commands to call navigator functions
     end,
   }
@@ -627,8 +627,8 @@ require('rust-tools').setup({
 
 require("clangd_extensions").setup {
   server = {
-    on_attach = function(_, _)
-      require('navigator.lspclient.mapping').setup() -- setup navigator keymaps here,
+    on_attach = function(client, bufnr)
+      require('navigator.lspclient.mapping').setup({client=client, bufnr=bufnr}) -- setup navigator keymaps here,
       -- otherwise, you can define your own commands to call navigator functions
     end,
   }
@@ -703,9 +703,8 @@ Treesitter outline and Diagnostics
 <img width="708" alt="image" src="https://user-images.githubusercontent.com/1681295/174791609-0023e68f-f1f4-4335-9ea2-d2360e9f0bfd.png">
 <img width="733" alt="image" src="https://user-images.githubusercontent.com/1681295/174804579-26f87fbf-426b-46d0-a7a3-a5aab69c032f.png">
 
-Calltree (LSP call hierarchy)
-<img width="892" alt="image" src="https://user-images.githubusercontent.com/1681295/176054287-edede515-118d-458d-835a-097319ba99c3.png">
-
+Calltree (Expandable LSP call hierarchy)
+<img width="769" alt="image" src="https://user-images.githubusercontent.com/1681295/176998572-e39fc968-4c8c-475d-b3b8-fb7991663646.png">
 
 ### GUI and multigrid support
 

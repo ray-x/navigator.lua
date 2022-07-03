@@ -4,12 +4,12 @@ local util = require('navigator.util')
 local gutil = require('guihua.util')
 local lsphelper = require('navigator.lspwrapper')
 local symbols_to_items = lsphelper.symbols_to_items
--- local rename_prompt = 'Rename -> '
+local vfn = vim.fn
 
 M.add_workspace_folder = function()
   util.log(vim.ui.input)
   local input = require('guihua.floating').input
-  input({ prompt = 'Workspace To Add: ', default = vim.fn.expand('%:p:h') }, function(inputs)
+  input({ prompt = 'Workspace To Add: ', default = vfn.expand('%:p:h') }, function(inputs)
     vim.lsp.buf.add_workspace_folder(inputs)
   end)
 end
@@ -35,7 +35,7 @@ end
 
 function M.workspace_symbol_live()
   local height = _NgConfigValues.height or 0.4
-  height = math.floor(height * vim.fn.winheight('%'))
+  height = math.floor(height * vfn.winheight('%'))
   local width = _NgConfigValues.width or 0.7
   width = math.floor(width * vfn.winwidth('%'))
   local bufnr = vim.api.nvim_get_current_buf()

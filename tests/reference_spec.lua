@@ -44,94 +44,59 @@ describe('should run lsp reference', function()
       uri = 'file://' .. cur_dir .. '/tests/fixtures/interface_test.go',
     },
   }
+  local status = require('plenary.reload').reload_module('navigator')
+  status = require('plenary.reload').reload_module('guihua')
+  status = require('plenary.reload').reload_module('lspconfig')
 
-  it('should show references', function()
-    local status = require('plenary.reload').reload_module('navigator')
-    local status = require('plenary.reload').reload_module('guihua')
-    local status = require('plenary.reload').reload_module('lspconfig')
+  vim.cmd([[packadd navigator.lua]])
+  vim.cmd([[packadd guihua.lua]])
+  local path = cur_dir .. '/tests/fixtures/interface.go' -- %:p:h ? %:p
+  local cmd = " silent exe 'e " .. path .. "'"
+  vim.cmd(cmd)
+  vim.cmd([[cd %:p:h]])
+  local bufn = vim.fn.bufnr('')
+  -- require'lspconfig'.gopls.setup {}
+  require('navigator').setup({
+    debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
+    icons = { code_action_icon = 'A ' },
+    width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
+    height = 0.3, -- max list window height, 0.3 by default
+    preview_height = 0.35, -- max height of preview windows
+    border = 'none',
+  })
 
-    vim.cmd([[packadd navigator.lua]])
-    vim.cmd([[packadd guihua.lua]])
-    local path = cur_dir .. '/tests/fixtures/interface.go' -- %:p:h ? %:p
-    local cmd = " silent exe 'e " .. path .. "'"
-    vim.cmd(cmd)
-    vim.cmd([[cd %:p:h]])
-    local bufn = vim.fn.bufnr('')
-    -- require'lspconfig'.gopls.setup {}
-    require('navigator').setup({
-      debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
-      icons = { code_action_icon = 'A ' },
-      width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
-      height = 0.3, -- max list window height, 0.3 by default
-      preview_height = 0.35, -- max height of preview windows
-      border = 'none',
-    })
+  if vim.fn.has('nvim-0.7') then
+    _NgConfigValues.treesitter_analysis = true
+  else
+    _NgConfigValues.treesitter_analysis = false
+  end
+  -- allow gopls start
 
-    if vim.fn.has('nvim-0.7') then
-      _NgConfigValues.treesitter_analysis = true
-    else
-      _NgConfigValues.treesitter_analysis = false
-    end
-    -- allow gopls start
-    for i = 1, 10 do
-      vim.wait(400, function() end)
-      local clients = vim.lsp.get_active_clients()
-      print('lsp clients: ', #clients)
-      if #clients > 0 then
+  for _ = 1, 20 do
+    vim.wait(400, function() end)
+    local found = false
+    for _, client in ipairs(vim.lsp.get_active_clients()) do
+      if client.name == 'gopls' then
+        found = true
         break
       end
     end
-
+    if found then
+      break
+    end
+  end
+  it('should show references', function()
     vim.fn.setpos('.', { bufn, 15, 4, 0 }) -- width
 
     vim.bo.filetype = 'go'
-    -- vim.lsp.buf.references()
+    vim.lsp.buf.references()
     eq(1, 1)
   end)
   it('reference handler should return items', function()
-    local status = require('plenary.reload').reload_module('navigator')
-    local status = require('plenary.reload').reload_module('guihua')
-    vim.cmd([[packadd navigator.lua]])
-    vim.cmd([[packadd guihua.lua]])
-    local path = cur_dir .. '/tests/fixtures/interface.go' -- %:p:h ? %:p
-    print(path)
-    local cmd = " silent exe 'e " .. path .. "'"
-    vim.cmd(cmd)
-    -- vim.cmd([[cd %:p:h]])
-    local bufn = vim.fn.bufnr('')
-
     vim.fn.setpos('.', { bufn, 15, 4, 0 }) -- width
 
-    vim.bo.filetype = 'go'
-    require('navigator').setup({
-      debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
-      icons = { code_action_icon = 'A ' },
-      width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
-      height = 0.3, -- max list window height, 0.3 by default
-      preview_height = 0.35, -- max height of preview windows
-      debug_console_output = true,
-      border = 'none',
-    })
-
-    if vim.fn.has('nvim-0.7') then
-      _NgConfigValues.treesitter_analysis = true
-    else
-      _NgConfigValues.treesitter_analysis = false
-    end
-
-    _NgConfigValues.debug_console_output = true
 
     vim.bo.filetype = 'go'
-    -- allow gopls start
-    for i = 1, 10 do
-      vim.wait(400, function() end)
-      local clients = vim.lsp.get_active_clients()
-      print('clients ', #clients)
-      if #clients > 0 then
-        break
-      end
-    end
-
     -- allow gopls start
     vim.wait(200, function() end)
 
@@ -156,50 +121,6 @@ describe('should run lsp reference', function()
     -- eq(width, 60)
   end)
   it('reference handler should return items with thread', function()
-    local status = require('plenary.reload').reload_module('navigator')
-    local status = require('plenary.reload').reload_module('guihua')
-    vim.cmd([[packadd navigator.lua]])
-    vim.cmd([[packadd guihua.lua]])
-    local path = cur_dir .. '/tests/fixtures/interface.go' -- %:p:h ? %:p
-    print(path)
-    local cmd = "silent exe 'e " .. path .. "'"
-    vim.cmd(cmd)
-    vim.cmd([[cd %:p:h]])
-    local bufn = vim.fn.bufnr('')
-
-    vim.fn.setpos('.', { bufn, 15, 4, 0 }) -- width
-
-    vim.bo.filetype = 'go'
-    require('navigator').setup({
-      debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
-      icons = { code_action_icon = 'A ' },
-      width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
-      height = 0.3, -- max list window height, 0.3 by default
-      preview_height = 0.35, -- max height of preview windows
-      debug_console_output = true,
-      border = 'none',
-    })
-
-
-    if vim.fn.has('nvim-0.7') then
-      _NgConfigValues.treesitter_analysis = true
-    else
-      _NgConfigValues.treesitter_analysis = false
-    end
-    _NgConfigValues.debug_console_output = true
-
-    vim.bo.filetype = 'go'
-    -- allow gopls start
-    for i = 1, 10 do
-      vim.wait(400, function() end)
-      local clients = vim.lsp.get_active_clients()
-      print('clients ', #clients)
-      if #clients > 0 then
-        break
-      end
-    end
-
-    -- allow gopls start
     vim.wait(200, function() end)
 
     local win, items, width
@@ -213,7 +134,6 @@ describe('should run lsp reference', function()
     else
       win, items, width = require('navigator.reference').reference_handler(nil, 'textDocument/references', result, 1, 1)
     end
-
     print('win', vim.inspect(win))
     print('items', vim.inspect(items))
     -- eq(win.ctrl.data, "./interface.go")

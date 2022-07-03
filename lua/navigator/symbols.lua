@@ -146,6 +146,7 @@ function M.side_panel()
   local Panel = require('guihua.panel')
   local buf = vim.api.nvim_get_current_buf()
   local p = Panel:new({
+    scope = 'range',
     render = function(bufnr)
       local ft = vim.api.nvim_buf_get_option(bufnr, 'buftype')
       if ft == 'nofile' or ft == 'guihua' or ft == 'prompt' then

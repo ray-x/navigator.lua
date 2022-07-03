@@ -1,8 +1,13 @@
 local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
+<<<<<<< HEAD
 local api = vim.api
 
+||||||| 91d1366
+
+=======
+>>>>>>> master
 local event_hdlrs = {
   { ev = 'BufWritePre', func = require('navigator.diagnostics').set_diag_loclist },
   { ev = { 'CursorHold', 'CursorHoldI' }, func = vim.lsp.buf.document_highlight },
@@ -132,12 +137,17 @@ local function set_cmds(_)
   end
 end
 
-local function set_mapping(lsp_info)
+-- should works for both 1)attach from known lsp client or from a disabled lsp client
+local function set_mapping(lsp_attach_info)
   local opts = { noremap = true, silent = true }
-  lsp_info = lsp_info or {}
-  log('setup mapping', lsp_info.client.name, lsp_info.client.cmd)
+  vim.validate({
+    lsp_attach_info = { lsp_attach_info, 'table' },
+  })
+  if _NgConfigValues.debug then
+    log('setup mapping for client', lsp_attach_info.client.name, lsp_attach_info.client.cmd)
+  end
   local user_key = _NgConfigValues.keymaps or {}
-  local bufnr = lsp_info.bufnr or 0
+  local bufnr = lsp_attach_info.bufnr or 0
 
   local function del_keymap(mode, key, ...)
     local ks = vim.api.nvim_buf_get_keymap(bufnr, mode)
@@ -153,7 +163,7 @@ local function set_mapping(lsp_info)
   -- local function buf_set_option(...)
   --   vim.api.nvim_buf_set_option(bufnr, ...)
   -- end
-  local doc_fmt, range_fmt, ccls = check_cap(lsp_info)
+  local doc_fmt, range_fmt, ccls = check_cap(lsp_attach_info)
 
   if ccls then
     vim.list_extend(key_maps, ccls_mappings)
@@ -243,8 +253,8 @@ local function set_mapping(lsp_info)
     del_keymap('n', fmtkey)
   end
 
-  if lsp_info.cap and lsp_info.cap.document_range_formatting then
-    log('formatting enabled', lsp_info.cap)
+  if lsp_attach_info.cap and lsp_attach_info.cap.document_range_formatting then
+    log('formatting enabled', lsp_attach_info.cap)
   end
 
   if not range_fmt and rfmtkey then
@@ -318,15 +328,21 @@ M.toggle_lspformat = function(on)
   end
 end
 
-function M.setup(user_opts)
-  user_opts = user_opts or _NgConfigValues
-  set_mapping(user_opts)
-  set_cmds(user_opts)
+function M.setup(attach_opts)
+  if not attach_opts or not attach_opts.client then
+    vim.notify(
+      'please call require"navigator.mapping".setup({bufnr=bufnr, client=client}) inside on_attach(client,bufnr)',
+      vim.lsp.log_levels.WARN
+    )
+  end
+  attach_opts = attach_opts or { bufnr = 0, client = {}, cap = {} }
+  set_mapping(attach_opts)
+  set_cmds(attach_opts)
 
   autocmd()
-  set_event_handler(user_opts)
+  set_event_handler(attach_opts)
 
-  local client = user_opts.client or {}
+  local client = attach_opts.client or {}
   local cap = client.server_capabilities or vim.lsp.protocol.make_client_capabilities()
 
   log('lsp cap:', cap.codeActionProvider)
