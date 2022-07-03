@@ -618,8 +618,8 @@ require'navigator'.setup({
 
 require('rust-tools').setup({
   server = {
-    on_attach = function(_, _)
-      require('navigator.lspclient.mapping').setup() -- setup navigator keymaps here,
+    on_attach = function(client, bufnr)
+      require('navigator.lspclient.mapping').setup({client=client, bufnr=bufnr}) -- setup navigator keymaps here,
       -- otherwise, you can define your own commands to call navigator functions
     end,
   }
@@ -627,8 +627,8 @@ require('rust-tools').setup({
 
 require("clangd_extensions").setup {
   server = {
-    on_attach = function(_, _)
-      require('navigator.lspclient.mapping').setup() -- setup navigator keymaps here,
+    on_attach = function(client, bufnr)
+      require('navigator.lspclient.mapping').setup({client=client, bufnr=bufnr}) -- setup navigator keymaps here,
       -- otherwise, you can define your own commands to call navigator functions
     end,
   }
