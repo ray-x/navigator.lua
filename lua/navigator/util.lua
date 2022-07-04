@@ -172,41 +172,45 @@ function M.get_relative_path(base_path, my_path)
   return data
 end
 
+M.log = function(...)
+  return { ... }
+end
+M.info = function(...)
+  return { ... }
+end
+M.trace = function(...)
+  return { ... }
+end
+M.warn = function(...)
+  return { ... }
+end
+M.error = function(...)
+  print(...)
+end
+
 local level = 'error'
-if _NgConfigValues.debug == true then
-  level = 'info'
-elseif _NgConfigValues.debug == 'trace' then
-  level = 'trace'
-end
-local default_config = { use_console = false, use_file = true, level = level }
-if _NgConfigValues.debug_console_output then
-  default_config.use_console = true
-  default_config.use_file = false
-end
 
-M._log = require('guihua.log').new(default_config, true)
-if _NgConfigValues.debug then
-  -- add log to you lsp.log
+function M.setup()
+  if _NgConfigValues.debug == true then
+    level = 'info'
+  elseif _NgConfigValues.debug == 'trace' then
+    level = 'trace'
+  end
+  local default_config = { use_console = false, use_file = true, level = level }
+  if _NgConfigValues.debug_console_output then
+    default_config.use_console = true
+    default_config.use_file = false
+  end
 
-  M.trace = M._log.trace
-  M.info = M._log.info
-  M.warn = M._log.warn
-  M.error = M._log.error
-  M.log = M.info
-else
-  M.log = function(...)
-    return { ... }
+  M._log = require('guihua.log').new(default_config, true)
+  if _NgConfigValues.debug then
+    -- add log to you lsp.log
+    M.trace = M._log.trace
+    M.info = M._log.info
+    M.warn = M._log.warn
+    M.error = M._log.error
+    M.log = M.info
   end
-  M.info = function(...)
-    return { ... }
-  end
-  M.trace = function(...)
-    return { ... }
-  end
-  M.warn = function(...)
-    return { ... }
-  end
-  M.error = M._log.error
 end
 
 function M.fmt(...)

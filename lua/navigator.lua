@@ -159,6 +159,8 @@ local extend_config = function(opts)
   if opts.debug then
     _NgConfigValues.debug = opts.debug
   end
+  -- enable logs
+  require('navigator.util').setup()
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then
       warn(
@@ -246,7 +248,8 @@ M.setup = function(cfg)
   require('navigator.implementation')
 
   cfg.lsp = cfg.lsp or _NgConfigValues.lsp
-  if cfg.lsp.enable then
+
+  if _NgConfigValues.lsp.enable then
     require('navigator.diagnostics').config(cfg.lsp.diagnostic)
   end
   if not _NgConfigValues.loaded then

@@ -27,24 +27,7 @@ if vim.diagnostic then
   }
 end
 
-local diagnostic_cfg = {
-  -- Enable underline, use default values
-  underline = _NgConfigValues.lsp.diagnostic.underline,
-  -- Enable virtual
-  -- Use a function to dynamically turn signs off
-  -- and on, using buffer local variables
-  signs = true,
-  update_in_insert = _NgConfigValues.lsp.diagnostic.update_in_insert or false,
-  severity_sort = _NgConfigValues.lsp.diagnostic.severity_sort,
-  float = {
-    focusable = false,
-    style = 'minimal',
-    border = 'rounded',
-    source = 'always',
-    header = '',
-    prefix = '',
-  },
-}
+local diagnostic_cfg
 
 local function get_count(bufnr, level)
   if vim.diagnostic ~= nil then
@@ -312,15 +295,41 @@ end
 -- end
 
 local M = {}
+function M.setup()
+  if diagnostic_cfg ~= nil and diagnostic_cfg.float ~= nil then
+    return
+  end
+  diagnostic_cfg = {
+    -- Enable underline, use default values
+    underline = _NgConfigValues.lsp.diagnostic.underline,
+    -- Enable virtual
+    -- Use a function to dynamically turn signs off
+    -- and on, using buffer local variables
+    signs = true,
+    update_in_insert = _NgConfigValues.lsp.diagnostic.update_in_insert or false,
+    severity_sort = _NgConfigValues.lsp.diagnostic.severity_sort,
+    float = {
+      focusable = false,
+      style = 'minimal',
+      border = 'rounded',
+      source = 'always',
+      header = '',
+      prefix = '',
+    },
+  }
+  diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
+  if type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' then
+    diagnostic_cfg.virtual_text.prefix = _NgConfigValues.icons.diagnostic_virtual_text
+  end
+  -- vim.lsp.handlers["textDocument/publishDiagnostics"]
+  M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
 
-diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
-if type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' then
-  diagnostic_cfg.virtual_text.prefix = _NgConfigValues.icons.diagnostic_virtual_text
+  vim.diagnostic.config(diagnostic_cfg)
+
+  if _NgConfigValues.lsp.diagnostic_scrollbar_sign then
+    vim.cmd([[autocmd WinScrolled * lua require'navigator.diagnostics'.update_err_marker()]])
+  end
 end
--- vim.lsp.handlers["textDocument/publishDiagnostics"]
-M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
-
-vim.diagnostic.config(diagnostic_cfg)
 
 local function clear_diag_VT(bufnr) -- important for clearing out when no more errors
   bufnr = bufnr or vim.api.nvim_get_current_buf()
@@ -443,10 +452,6 @@ function M.update_err_marker()
   marker(result, { bufnr = bufnr, method = 'textDocument/publishDiagnostics' })
 end
 
-if _NgConfigValues.lsp.diagnostic_scrollbar_sign then
-  vim.cmd([[autocmd WinScrolled * lua require'navigator.diagnostics'.update_err_marker()]])
-end
-
 function M.get_line_diagnostic()
   local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
   return diagnostic.get(vim.api.nvim_get_current_buf(), { lnum = lnum })
@@ -507,7 +512,9 @@ function M.treesitter_and_diag_panel()
 end
 
 function M.config(cfg)
+  M.setup()
   cfg = cfg or {}
+  log('diag config', cfg)
   local default_cfg = {
     underline = true,
     virtual_text = true,

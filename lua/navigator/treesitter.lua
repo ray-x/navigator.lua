@@ -351,7 +351,8 @@ local function get_all_nodes(bufnr, filter, summary)
   local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
   if not parsers.has_parser() then
     if not require('navigator.lspclient.clients').ft_disabled(ft) then
-      vim.notify('ts not loaded ' .. ft, vim.lsp.log_levels.Debug)
+      -- vim.notify('ts not loaded ' .. ft, vim.lsp.log_levels.Debug)
+      log('ts not loaded ' .. ft)
     end
     return {}
   end
