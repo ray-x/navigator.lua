@@ -34,7 +34,7 @@ local key_maps = {
   { key = '<Leader>gt', func = require('navigator.treesitter').buf_ts, doc = 'buf_ts' },
   { key = '<Leader>gT', func = require('navigator.treesitter').bufs_ts, doc = 'bufs_ts' },
   { key = '<Leader>ct', func = require('navigator.ctags').ctags, doc = 'ctags' },
-  { key = 'K', func = vim.lsp.hover, doc = 'hover' },
+  { key = 'K', func = vim.lsp.buf.hover, doc = 'hover' },
   { key = '<Space>ca', mode = 'n', func = require('navigator.codeAction').code_action, doc = 'code_action' },
   {
     key = '<Space>ca',
