@@ -30,11 +30,6 @@ vim.opt.fillchars = { eob = '-', fold = ' ' }
 vim.opt.viewoptions:remove('options')
 
 function M.setup_fold()
-  if not parsers.has_parser() then
-    vim.notify('treesitter folding not enabled for current file', vim.lsp.log_levels.WARN)
-    return
-  end
-  log('setup treesitter folding')
   api.nvim_command('augroup FoldingCommand')
   api.nvim_command('autocmd! * <buffer>')
   api.nvim_command('augroup end')
@@ -43,6 +38,12 @@ function M.setup_fold()
   vim.opt.viewoptions:remove('options')
 
   local current_window = api.nvim_get_current_win()
+  if not parsers.has_parser() then
+    api.nvim_win_set_option(current_window, 'foldmethod', 'indent')
+    log('fallback to indent folding')
+    return
+  end
+  log('setup treesitter folding')
   api.nvim_win_set_option(current_window, 'foldmethod', 'expr')
   api.nvim_win_set_option(current_window, 'foldexpr', 'folding#ngfoldexpr()')
 end
