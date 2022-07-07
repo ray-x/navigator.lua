@@ -48,6 +48,17 @@ function M.setup_fold()
   api.nvim_win_set_option(current_window, 'foldexpr', 'folding#ngfoldexpr()')
 end
 
+local function get_fold_level(levels, lnum)
+  local prev_l = levels[lnum]
+  local prev_ln
+  if prev_l:find('>') then
+    prev_ln = tonumber(prev_l:sub(2))
+  else
+    prev_ln = tonumber(prev_l)
+  end
+  return prev_ln
+end
+
 -- This is cached on buf tick to avoid computing that multiple times
 -- Especially not for every line in the file when `zx` is hit
 local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
@@ -103,27 +114,39 @@ local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
       prev_stop = stop
     end
   end
+  trace(start_counts)
+  trace(stop_counts)
 
   local levels = {}
   local current_level = 0
 
   -- We now have the list of fold opening and closing, fill the gaps and mark where fold start
+  local pre_node
   for lnum = 0, api.nvim_buf_line_count(bufnr) do
     local node, _ = get_node_at_line(lnum + 1)
-    -- log(lnum, node:type())
     local comment = node:type() == 'comment'
 
+    local next_node, _ = get_node_at_line(lnum + 1)
+    local next_comment = node and node:type() == 'comment'
     local last_trimmed_level = trim_level(current_level)
     current_level = current_level + (start_counts[lnum] or 0)
     local trimmed_level = trim_level(current_level)
-    current_level = current_level - (stop_counts[lnum] or 0)
-    local next_trimmed_level = trim_level(current_level)
+    local current_level2 = current_level - (stop_counts[lnum] or 0)
+    local next_trimmed_level = trim_level(current_level2)
 
+    trace(lnum, node:type(), node, last_trimmed_level, trimmed_level, next_trimmed_level)
     if comment then
-      if lnum == 0 or levels[lnum] == tostring(trimmed_level) then
-        levels[lnum + 1] = '>' .. tostring(trimmed_level + 1) -- allow comment fold independtly
-      else
-        levels[lnum + 1] = tostring(trimmed_level + 1) -- allow comment fold independtly
+      trace('comment node', trimmed_level)
+      -- if trimmed_level == 0 then
+      --   trimmed_level = 1
+      -- end
+
+      levels[lnum + 1] = tostring(trimmed_level + 2)
+      if pre_node and pre_node:type() ~= 'comment' then
+        levels[lnum + 1] = '>' .. tostring(trimmed_level + 2)
+      end
+      if next_node and next_node:type() ~= 'comment' then
+        levels[lnum + 1] = tostring(trimmed_level + 1)
       end
     else
       -- Determine if it's the start/end of a fold
@@ -134,28 +157,59 @@ local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
       --  ( \n ( \n ) \n ( \n ) \n )
       -- If it did have such a mechansim, (trimmed_level - last_trimmed_level)
       -- would be the correct number of starts to pass on.
-      levels[lnum + 1] = tostring(trimmed_level)
-
       if trimmed_level - last_trimmed_level > 0 then
-        levels[lnum + 1] = tostring(trimmed_level) -- hack
-        levels[lnum + 2] = '>' .. tostring(trimmed_level + 1) -- dirty hack
-      elseif trimmed_level - next_trimmed_level > 0 then
+        if levels[lnum + 1] ~= '>' .. tostring(trimmed_level) then
+          levels[lnum + 1] = tostring(trimmed_level) -- hack do not fold current line as it is first in fold range
+        end
+        levels[lnum + 2] = '>' .. tostring(trimmed_level + 1) -- dirty hack fold start from next line
+        trace('fold start')
+      elseif trimmed_level - next_trimmed_level > 0 then -- last line in fold range
         -- Ending marks tend to confuse vim more than it helps, particularly when
         -- the fold level changes by at least 2; we can uncomment this if
         -- vim's behavior gets fixed.
-        if lnum ~= 0 then
-          levels[lnum] = tostring(trimmed_level + 1)
+
+        trace('fold end')
+        if levels[lnum + 1] then
+          trace('already set reset as fold is ending', levels[lnum + 1])
+          levels[lnum + 1] = tostring(trimmed_level + 1)
+        else
+          local prev_ln = get_fold_level(levels, lnum) - 1
+          if prev_ln == 0 then
+            prev_ln = 1
+          end
+          levels[lnum + 1] = tostring(prev_ln)
         end
-        levels[lnum + 1] = tostring(trimmed_level)
+        --   levels[lnum + 1] = tostring(trimmed_level + 1)
+        -- else
+        current_level = current_level - 1
       else
-        -- if levels[lnum + 1] == nil then
-        levels[lnum + 1] = tostring(trimmed_level + 1)
-        -- end
+        trace('same')
+        if pre_node and pre_node:type() == 'comment' then
+          local prev_ln = get_fold_level(levels, lnum) - 1
+          levels[lnum + 1] = tostring(prev_ln)
+        else
+          local n = math.max(trimmed_level, 1)
+          if lnum > 1 then
+            if levels[lnum + 1] then
+              trace('already set', levels[lnum + 1])
+            else
+              local prev_l = levels[lnum]
+              if prev_l:find('>') then
+                levels[lnum + 1] = prev_l:sub(2)
+              else
+                levels[lnum + 1] = prev_l
+              end
+            end
+          else
+            levels[lnum + 1] = tostring(n)
+          end
+        end
       end
+      trace(levels)
     end
+    pre_node = node
   end
   trace(levels)
-
   return levels
 end)
 
@@ -177,7 +231,7 @@ function M.get_fold_indic(lnum)
   end
   local levels = folds_levels(buf) or {}
 
-  -- log(lnum, levels[lnum]) -- TODO: comment it out in master
+  -- trace(lnum, levels[lnum]) -- TODO: comment it out in master
   return levels[lnum] or '0'
 end
 
