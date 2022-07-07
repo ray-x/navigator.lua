@@ -525,7 +525,7 @@ function M.dedup(locations)
     end
   end
   for i = #del, 1, -1 do
-    locations = table.remove(locations, del[i])
+    table.remove(locations, del[i])
   end
   return locations
 end
