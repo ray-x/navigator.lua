@@ -59,6 +59,35 @@ local ref_view = function(err, locations, ctx, cfg)
     end
     err = nil
     trace(locations)
+    -- lets de-dup first 10 elements. some lsp does not recognize definition and reference difference
+    local m = 10
+    if 10 > #locations then
+      m = #locations
+    end
+
+    local dict = {}
+    local del = {}
+    for i = 1, m, 1 do
+      local value = locations[i]
+      if not value.range then
+        break
+      end
+      local key = (value.range.uri or value.targetUri or "") .. ':' .. tostring(value.range.start.line) .. ':' .. tostring(value.range.start.character)
+      .. ':' .. tostring(value.range['end'].line) .. ':' .. tostring(value.range['end'].character)
+      if dict[key] == nil then
+        dict[key] = i
+      else
+        local j = dict[key]
+        if not locations[j].definition then
+          del[#del] = i
+        else
+          del[#del] = j
+        end
+      end
+    end
+    for i = #del, 1, -1 do
+      table.remove(locations, del[i])
+    end
   end
   -- log("num", num)
   -- log("bfnr", bufnr)
