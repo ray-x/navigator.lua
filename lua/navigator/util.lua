@@ -491,6 +491,45 @@ function M.info(msg)
   vim.notify('INF: ' .. msg, vim.lsp.log_levels.INFO)
 end
 
+function M.dedup(locations)
+  local m = 10
+  if m > #locations then
+    m = #locations
+  end
+  local dict = {}
+  local del = {}
+  for i = 1, m, 1 do
+    local value = locations[i]
+    local range = value.range or value.originSelectionRange or value.targetRange
+    if not range then
+      break
+    end
+    local key = (range.uri or value.targetUri or '')
+      .. ':'
+      .. tostring(range.start.line)
+      .. ':'
+      .. tostring(range.start.character)
+      .. ':'
+      .. tostring(range['end'].line)
+      .. ':'
+      .. tostring(range['end'].character)
+    if dict[key] == nil then
+      dict[key] = i
+    else
+      local j = dict[key]
+      if not locations[j].definition then
+        table.insert(del, i)
+      else
+        table.insert(del, j)
+      end
+    end
+  end
+  for i = #del, 1, -1 do
+    locations = table.remove(locations, del[i])
+  end
+  return locations
+end
+
 function M.range_inside(outer, inner)
   if outer == nil or inner == nil then
     return false

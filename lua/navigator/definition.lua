@@ -3,6 +3,7 @@ local lsphelper = require('navigator.lspwrapper')
 local locations_to_items = lsphelper.locations_to_items
 local gui = require('navigator.gui')
 local log = util.log
+local trace = util.trace
 local TextView = require('guihua.textview')
 -- callback for lsp definition, implementation and declaration handler
 local definition_hdlr = function(err, locations, ctx, _)
@@ -21,6 +22,10 @@ local definition_hdlr = function(err, locations, ctx, _)
   end
 
   local oe = require('navigator.util').encoding(ctx.client_id)
+
+  locations = util.dedup(locations)
+  log(locations)
+  log("found " .. #locations .. " locations")
   if vim.tbl_islist(locations) then
     if #locations > 1 then
       local items = locations_to_items(locations)
