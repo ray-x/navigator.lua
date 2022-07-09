@@ -72,11 +72,11 @@ variable is:
 
 - Async request with lsp.buf_request for reference search
 
-- Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?)
+- Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?). Also as LSP trying to hide details behind, Treesitter allows you to access all AST  semantics.
 
 - FZY search with either native C (if gcc installed) or Lua-JIT
 
-- LSP multiple symbol highlight/marker and hop between document references
+- LSP multiple symbols highlight/marker and hop between document references
 
 - Preview definination/references
 
@@ -96,7 +96,7 @@ variable is:
 
 - ccls call hierarchy (Non-standard `ccls/call` API) supports
 
-- Syntax folding based on treesitter or LSP_fold folding algorithm. (It behaves similar to vs-code); comment folding
+- Syntax folding based on treesitter or LSP_fold folding algorithm. (It behaves similar to vs-code); dedicated comment folding.
 
 - Treesitter symbols sidebar, LSP document symbole sidebar. Both with preview and folding
 
@@ -284,6 +284,7 @@ require'navigator'.setup({
     code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     format_on_save = true, -- set to false to disable lsp code format on save (if you are using prettier/efm/formater etc)
+    format_options = {async=false}, -- async: disable by default, the option used in vim.lsp.buf.format({async={true|false}, name = 'xxx'})
     disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
     disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     -- only want to enable one lsp server
@@ -820,11 +821,14 @@ Codelens for C++/ccls. Symbol reference
 
 ### VS-code style folding with treesitter
 
+Folding is using a hacked version of treesitter folding.
+
 #### folding function
 
 ![image](https://user-images.githubusercontent.com/1681295/148491596-6cd6c507-c157-4536-b8c4-dc969436763a.png)
 
 #### folding comments
+Multiline comments can be folded as it is treated as a block
 
 ![image](https://user-images.githubusercontent.com/1681295/148491845-5ffb18ea-f05d-4229-aec3-aa635b3de814.png)
 
