@@ -74,6 +74,10 @@ _NgConfigValues = {
       -- filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetype
     },
+    ['lua-dev'] = { -- navigator can use lua-dev settings to setup sumneko_lua
+      -- your setting for lua-dev here
+      -- navigator will setup lua-dev
+    },
     sumneko_lua = {
       -- sumneko_root_path = sumneko_root_path,
       -- sumneko_binary = sumneko_binary,
@@ -209,7 +213,7 @@ local extend_config = function(opts)
                   info(string.format('[] extend LSP support for  %s %s ', key, k))
                 end
               elseif key == 'keymaps' then
-                info('keymap override', v)
+                info('keymap override' .. vim.inspect(v))
                 -- skip key check and allow mapping to handle that
               else
                 warn(string.format('[] Key %s %s not valid', key, k))
