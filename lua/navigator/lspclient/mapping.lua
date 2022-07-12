@@ -133,6 +133,7 @@ local function set_cmds(_)
 end
 
 -- should works for both 1)attach from known lsp client or from a disabled lsp client
+-- executed in on_attach context
 local function set_mapping(lsp_attach_info)
   local opts = { noremap = true, silent = true }
   vim.validate({
@@ -184,6 +185,9 @@ local function set_mapping(lsp_attach_info)
   end
   local fmtkey, rfmtkey
   for _, value in pairs(key_maps) do
+    if value.doc then
+      vim.notify('doc field no longer supported in navigator mapping, use desc instead')
+    end
     if type(value.func) == 'string' then -- deprecated will remove when 0.8 is out
       vim.notify('keymap config updated: ' .. value.key .. ' func ' .. value.func .. ' should be a function')
       local f = '<Cmd>lua vim.lsp.buf.' .. value.func .. '<CR>'
@@ -250,6 +254,7 @@ local function set_mapping(lsp_attach_info)
       group = gn,
       buffer = bufnr,
       callback = function()
+        trace('format' .. vim.inspect(fopts))
         vim.lsp.buf.format(fopts)
       end,
     })
