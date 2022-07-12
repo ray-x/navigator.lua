@@ -41,14 +41,23 @@ local function load_plugins()
       use({ 'ray-x/lsp_signature.nvim' })
       use({ 'ray-x/aurora' })
       use({
-        'ray-x/navigator.lua',
-        -- '~/github/ray-x/navigator.lua',
+        -- 'ray-x/navigator.lua',
+        '~/github/ray-x/navigator.lua',
         requires = { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
         config = function()
           require('navigator').setup({
-            lsp_signature_help = true,
             debug = true,
-            keymaps = { { key = 'gK', func = vim.lsp.buf.definition, doc = 'definition' } },
+            keymaps = {
+              { key = 'gK', func = vim.lsp.buf.definition, doc = 'definition' },
+              {
+                key = '<leader>ld',
+                func = require('navigator.diagnostics').show_buf_diagnostics,
+                desc = 'show_buf_diagnostics',
+              },
+            },
+            icons = {
+              diagnostic_virtual_text = '',
+            },
           })
         end,
       })
