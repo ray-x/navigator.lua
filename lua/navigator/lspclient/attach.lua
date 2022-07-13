@@ -4,7 +4,7 @@ local lsp = require('vim.lsp')
 local util = require('navigator.util')
 local log = util.log
 local trace = util.trace
-
+_NG_Attached = {}
 local M = {}
 
 M.on_attach = function(client, bufnr)
@@ -23,6 +23,7 @@ M.on_attach = function(client, bufnr)
   log('attaching: ', bufnr, client.name, uri)
 
   trace(client)
+  _NG_Attached[client.name] = true
 
   -- add highlight for Lspxxx
   require('navigator.lspclient.highlight').add_highlight()
