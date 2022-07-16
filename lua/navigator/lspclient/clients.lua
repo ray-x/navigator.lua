@@ -65,7 +65,7 @@ local luadevcfg = {
 local luadev = {}
 local user_luadev = _NgConfigValues.lsp['lua-dev']
 if user_luadev then
-   luadev = vim.tbl_deep_extend('force', luadev, user_luadev)
+  luadev = vim.tbl_deep_extend('force', luadev, user_luadev)
 end
 require('navigator.lazyloader').load('lua-dev.nvim', 'folke/lua-dev.nvim')
 if _NgConfigValues.lsp_installer then
@@ -123,7 +123,7 @@ local setups = {
   clojure_lsp = {
     root_dir = function(fname)
       return util.root_pattern('deps.edn', 'build.boot', 'project.clj', 'shadow-cljs.edn', 'bb.edn', '.git')(fname)
-        or util.path.dirname(fname)
+          or util.path.dirname(fname)
     end,
     on_attach = on_attach,
     filetypes = { 'clojure', 'edn' },
@@ -204,7 +204,7 @@ local setups = {
     filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
     on_attach = function(client, bufnr)
       client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
-        or true
+          or true
       on_attach(client, bufnr)
     end,
   },
@@ -393,8 +393,8 @@ local ng_default_cfg = {
 }
 
 -- check and load based on file type
-local function load_cfg(ft, client, cfg, loaded)
-  log(ft, client, loaded)
+local function load_cfg(ft, client, cfg, loaded, starting)
+  log(ft, client, loaded, starting)
   trace(cfg)
   if lspconfig[client] == nil then
     log('not supported by nvim', client)
@@ -431,6 +431,22 @@ local function load_cfg(ft, client, cfg, loaded)
       end
     end
 
+    local clients = vim.lsp.buf_get_clients(0)
+    for _, c in pairs(clients or {}) do
+      log("lsp start up in progress client", client, c.name)
+      if c.name == client then
+        return
+      end
+    end
+
+    if starting and (starting.cnt or 0) > 0 then
+      log("lsp start up in progress", starting)
+      return vim.defer_fn(function()
+        load_cfg(ft, client, cfg, loaded, { cnt = starting.cnt - 1 })
+      end,
+        200)
+    end
+
     if lspconfig[client] == nil then
       error('client ' .. client .. ' not supported')
       return
@@ -440,8 +456,18 @@ local function load_cfg(ft, client, cfg, loaded)
     log('lspconfig setup')
     -- log(lspconfig.available_servers())
     -- force reload with config
-    lspconfig[client].setup(cfg)
-    log(client, 'loading for', ft)
+    -- lets have a guard here
+    if not _NG_Loaded[client] then
+      log(client, 'loading for', ft, cfg)
+      log(lspconfig[client])
+      lspconfig[client].setup(cfg)
+      vim.defer_fn(function()
+        vim.cmd([[doautocmd Filetype]])
+      end, 40)
+    else
+      vim.cmd([[doautocmd Filetype]])
+    end
+    _NG_Loaded[client] = true
   end
   -- need to verify the lsp server is up
 end
@@ -459,7 +485,7 @@ local function setup_fmt(client, enabled)
     client.server_capabilities.documentFormattingProvider = false
   else
     client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
-      or enabled
+        or enabled
   end
 end
 
@@ -555,7 +581,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     log(lspclient)
     -- if user provides override values
-    cfg.capabilities = capabilities
+    -- cfg.capabilities = capabilities
     log(lspclient, config.lsp.disable_format_cap)
     if vim.tbl_contains(config.lsp.disable_format_cap or {}, lspclient) then
       log('fileformat disabled for ', lspclient)
@@ -666,11 +692,14 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     if _NG_Loaded[lspclient] then
-      log('client loaded ?', lspclient)
+      log('client loaded ?', lspclient, _NG_Loaded[lspclient])
     end
-    load_cfg(ft, lspclient, cfg, loaded)
+    local starting = {}
+    if _NG_Loaded[lspclient] == true then
+      starting = { cnt = 1 }
+    end
 
-    _NG_Loaded[lspclient] = true
+    load_cfg(ft, lspclient, cfg, loaded, starting)
     -- load_cfg(ft, lspclient, {}, loaded)
     ::continue::
   end
@@ -843,6 +872,13 @@ local function on_filetype()
     return
   end
 
+  if _NG_Loaded[ft] and _NG_Loaded[ft] > 1  then
+    log('navigator was loaded for ft', ft, bufnr)
+    return
+  end
+
+  _NG_Loaded[ft] = _NG_Loaded[ft] and _NG_Loaded[ft] + 1 or 1   -- do not hook and trigger filetype event multiple times
+  -- as setup will send  filetype event as well
   log(uri)
 
   local wids = vim.fn.win_findbuf(bufnr)
