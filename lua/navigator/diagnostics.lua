@@ -408,7 +408,7 @@ M.set_diag_loclist = function()
       if diagnostic.set_loclist then
         diagnostic.set_loclist(cfg)
       else
-        cfg.namespaces = diagnostic.get_namespace(nil)
+        cfg.namespaces = diagnostic.get_namespaces()
         diagnostic.setloclist(cfg)
       end
     else
