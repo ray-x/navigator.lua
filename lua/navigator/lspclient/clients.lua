@@ -872,12 +872,23 @@ local function on_filetype()
     return
   end
 
-  if _NG_Loaded[ft] and _NG_Loaded[ft] > 1  then
+  log (_NG_Loaded)
+  if _NG_Loaded[ft] then
     log('navigator was loaded for ft', ft, bufnr)
     return
   end
 
-  _NG_Loaded[ft] = _NG_Loaded[ft] and _NG_Loaded[ft] + 1 or 1   -- do not hook and trigger filetype event multiple times
+  -- on_filetype should only be trigger only once for each time
+  if _NG_Loaded[ft] ~= nil and type(_NG_Loaded[ft] == 'number')  then
+    _NG_Loaded[ft] = _NG_Loaded[ft] + 1   -- do not hook and trigger filetype event multiple times
+  end
+  if _NG_Loaded[ft] == true then
+    _NG_Loaded = 1 -- record the count
+  end
+  if _NG_Loaded[ft] and _NG_Loaded[ft] > 1 then
+    return
+  end
+
   -- as setup will send  filetype event as well
   log(uri)
 
@@ -886,6 +897,7 @@ local function on_filetype()
     log('buf not shown return')
   end
   setup({ bufnr = bufnr })
+  _NG_Loaded[ft] = 1
 end
 
 return {
