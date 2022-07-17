@@ -47,7 +47,7 @@ function M.workspace_symbol_live()
   local ListView = require('guihua.listview')
   local opt = {
     api = ' ',
-    bg = 'GHListDark',
+    bg = 'GuihuaListDark',
     data = data,
     items = data,
     enter = true,

@@ -477,14 +477,14 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 
 ### Colors/Highlight:
 
-You can override default highlight GHListDark (listview) and GHTextViewDark (code view) and GHListHl (select item)
+You can override default highlight GuihuaListDark (listview) and GuihuaTextViewDark (code view) and GuihuaListHl (select item)
 
 e.g.
 
 ```vim
-hi default GHTextViewDark guifg=#e0d8f4 guibg=#332e55
-hi default GHListDark guifg=#e0d8f4 guibg=#103234
-hi default GHListHl guifg=#e0d8f4 guibg=#404254
+hi default GuihuaTextViewDark guifg=#e0d8f4 guibg=#332e55
+hi default GuihuaListDark guifg=#e0d8f4 guibg=#103234
+hi default GuihuaListHl guifg=#e0d8f4 guibg=#404254
 ```
 
 There are other Lsp highlight been used in this plugin, e.g LspReferenceRead/Text/Write are used for document highlight,
@@ -667,7 +667,7 @@ Highlight I am using:
 - LspReferenceRead, LspReferenceText and LspReferenceWrite are used for `autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()`
   That is where you saw the current symbol been highlighted.
 
-- GHListDark and GHTextViewDark is used for floating listvew and TextView. They are be based on current background
+- GuihuaListDark and GuihuaTextViewDark is used for floating listvew and TextView. They are be based on current background
   (Normal) and PmenuSel
 
 - In future, I will use NormalFloat for floating view. But ATM, most of colorscheme does not define NormalFloat

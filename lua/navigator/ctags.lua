@@ -118,7 +118,7 @@ local function ctags_symbols()
   local opt = {
     api = ' ',
     ft = ft,
-    bg = 'GHListDark',
+    bg = 'GuihuaListDark',
     data = result,
     items = result,
     enter = true,
