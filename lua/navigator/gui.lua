@@ -35,6 +35,8 @@ function M.new_list_view(opts)
   opts.border = config.border or 'shadow'
   if vim.fn.hlID('TelescopePromptBorder') > 0 then
     opts.border_hl = 'TelescopePromptBorder'
+  else
+    opts.border_hl = 'FloatBorder'
   end
   if not items or vim.tbl_isempty(items) then
     log('empty data return')
