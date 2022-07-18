@@ -403,6 +403,7 @@ local function load_cfg(ft, client, cfg, loaded, starting)
 
   local lspft = lspconfig[client].document_config.default_config.filetypes
   local additional_ft = setups[client] and setups[client].filetypes or {}
+  local bufnr = vim.api.nvim_get_current_buf()
   local cmd = cfg.cmd
   vim.list_extend(lspft, additional_ft)
 
@@ -422,12 +423,18 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       log('lsp not installed for client', client, cmd)
       return
     end
+    _NG_Loaded = _NG_loaded or {}
 
     for k, c in pairs(loaded) do
       if client == k then
         -- loaded
         log(client, 'already been loaded for', ft, loaded, c)
-        return
+        if _NG_Loaded[bufnr] and _NG_loaded[bufnr] < 2 then
+          log('doautocmd filetype')
+          vim.cmd('doautocmd FileType')
+          _NG_loaded[bufnr] = (_NG_loaded[bufnr] or 0 )+ 1
+          return
+        end
       end
     end
 
@@ -435,6 +442,7 @@ local function load_cfg(ft, client, cfg, loaded, starting)
     for _, c in pairs(clients or {}) do
       log("lsp start up in progress client", client, c.name)
       if c.name == client then
+        _NG_Loaded[bufnr] = 100
         return
       end
     end
@@ -462,9 +470,11 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       log(lspconfig[client])
       lspconfig[client].setup(cfg)
       vim.defer_fn(function()
+        log('send filetype event')
         vim.cmd([[doautocmd Filetype]])
       end, 40)
     else
+      log('send filetype event')
       vim.cmd([[doautocmd Filetype]])
     end
     _NG_Loaded[client] = true
@@ -873,20 +883,17 @@ local function on_filetype()
   end
 
   log (_NG_Loaded)
-  if _NG_Loaded[ft] then
+  if _NG_Loaded[bufnr] and type(_NG_Loaded[bufnr]) == 'number' and _NG_Loaded[bufnr] > 1 then
     log('navigator was loaded for ft', ft, bufnr)
     return
   end
 
-  -- on_filetype should only be trigger only once for each time
-  if _NG_Loaded[ft] ~= nil and type(_NG_Loaded[ft] == 'number')  then
-    _NG_Loaded[ft] = _NG_Loaded[ft] + 1   -- do not hook and trigger filetype event multiple times
+  -- on_filetype should only be trigger only once for each bufnr
+  if _NG_Loaded[bufnr] ~= nil and type(_NG_Loaded[bufnr] == 'number')  then
+    _NG_Loaded[bufnr] = _NG_Loaded[bufnr] + 1   -- do not hook and trigger filetype event multiple times
   end
-  if _NG_Loaded[ft] == true then
+  if _NG_Loaded[bufnr] == true then
     _NG_Loaded = 1 -- record the count
-  end
-  if _NG_Loaded[ft] and _NG_Loaded[ft] > 1 then
-    return
   end
 
   -- as setup will send  filetype event as well
@@ -897,7 +904,7 @@ local function on_filetype()
     log('buf not shown return')
   end
   setup({ bufnr = bufnr })
-  _NG_Loaded[ft] = 1
+  _NG_Loaded[bufnr] = 1
 end
 
 return {
