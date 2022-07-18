@@ -423,16 +423,18 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       log('lsp not installed for client', client, cmd)
       return
     end
-    _NG_Loaded = _NG_loaded or {}
+    if _NG_Loaded == nil then
+      return log('_NG_Loaded not set')
+    end
 
     for k, c in pairs(loaded) do
       if client == k then
         -- loaded
         log(client, 'already been loaded for', ft, loaded, c)
-        if _NG_Loaded[bufnr] and _NG_loaded[bufnr] < 2 then
+        if _NG_Loaded[bufnr] and _NG_Loaded[bufnr] < 2 then
           log('doautocmd filetype')
           vim.cmd('doautocmd FileType')
-          _NG_loaded[bufnr] = (_NG_loaded[bufnr] or 0 )+ 1
+          _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0 )+ 1
           return
         end
       end
