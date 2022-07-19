@@ -4,6 +4,7 @@ local log = ng_util.log
 local trace = ng_util.trace
 local empty = ng_util.empty
 local warn = ng_util.warn
+local vfn = vim.fn
 _NG_Loaded = {}
 
 _LoadedFiletypes = {}
@@ -77,7 +78,7 @@ if ok and l then
 end
 
 local function add(lib)
-  for _, p in pairs(vim.fn.expand(lib, false, true)) do
+  for _, p in pairs(vfn.expand(lib, false, true)) do
     p = vim.loop.fs_realpath(p)
     if p then
       library[p] = true
@@ -89,19 +90,19 @@ end
 add('$VIMRUNTIME')
 
 -- add your config
--- local home = vim.fn.expand("$HOME")
-add(vim.fn.stdpath('config'))
+-- local home = vfn.expand("$HOME")
+add(vfn.stdpath('config'))
 
 -- add plugins it may be very slow to add all in path
--- if vim.fn.isdirectory(home .. "/.config/share/nvim/site/pack/packer") then
+-- if vfn.isdirectory(home .. "/.config/share/nvim/site/pack/packer") then
 --   add(home .. "/.local/share/nvim/site/pack/packer/opt/*")
 --   add(home .. "/.local/share/nvim/site/pack/packer/start/*")
 -- end
 
-library[vim.fn.expand('$VIMRUNTIME/lua')] = true
-library[vim.fn.expand('$VIMRUNTIME/lua/vim')] = true
-library[vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true
--- [vim.fn.expand("~/repos/nvim/lua")] = true
+library[vfn.expand('$VIMRUNTIME/lua')] = true
+library[vfn.expand('$VIMRUNTIME/lua/vim')] = true
+library[vfn.expand('$VIMRUNTIME/lua/vim/lsp')] = true
+-- [vfn.expand("~/repos/nvim/lua")] = true
 
 -- TODO remove onece PR #944 merged to lspconfig
 local path_sep = require('navigator.util').path_sep()
@@ -308,7 +309,7 @@ local setups = {
     },
   },
   omnisharp = {
-    cmd = { 'omnisharp', '--languageserver', '--hostPID', tostring(vim.fn.getpid()) },
+    cmd = { 'omnisharp', '--languageserver', '--hostPID', tostring(vfn.getpid()) },
   },
   terraformls = {
     filetypes = { 'terraform', 'tf' },
@@ -419,7 +420,7 @@ local function load_cfg(ft, client, cfg, loaded, starting)
     end
 
     trace('lsp for client', client, cfg)
-    if cmd == nil or #cmd == 0 or vim.fn.executable(cmd[1]) == 0 then
+    if cmd == nil or #cmd == 0 or vfn.executable(cmd[1]) == 0 then
       log('lsp not installed for client', client, cmd)
       return
     end
@@ -431,10 +432,12 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       if client == k then
         -- loaded
         log(client, 'already been loaded for', ft, loaded, c)
-        if _NG_Loaded[bufnr] and _NG_Loaded[bufnr] < 2 then
+        if not _NG_Loaded[bufnr] or _NG_Loaded[bufnr] < 4 then
           log('doautocmd filetype')
-          vim.cmd('doautocmd FileType')
-          _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0 )+ 1
+          vim.defer_fn(function()
+            vim.cmd('doautocmd FileType')
+            _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0 ) + 1
+          end, 100)
           return
         end
       end
@@ -471,15 +474,22 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       log(client, 'loading for', ft, cfg)
       log(lspconfig[client])
       lspconfig[client].setup(cfg)
+      _NG_Loaded[client] = true
       vim.defer_fn(function()
         log('send filetype event')
         vim.cmd([[doautocmd Filetype]])
-      end, 40)
+        _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0 )+ 1
+      end, 400)
     else
       log('send filetype event')
-      vim.cmd([[doautocmd Filetype]])
+      if not _NG_Loaded[bufnr] or _NG_Loaded[bufnr] < 4 then
+          log('doautocmd filetype')
+          vim.defer_fn(function()
+            vim.cmd('doautocmd FileType')
+            _NG_Loaded[bufnr] = (_NG_Loaded[bufnr] or 0 ) + 1
+          end, 100)
+      end
     end
-    _NG_Loaded[client] = true
   end
   -- need to verify the lsp server is up
 end
@@ -684,14 +694,14 @@ local function lsp_startup(ft, retry, user_lsp_opts)
           return load_cfg(ft, lspclient, cfg, loaded)
         end
         paths = vim.split(paths, ':')
-        if vim.fn.empty(cfg.cmd) == 1 then
+        if vfn.empty(cfg.cmd) == 1 then
           cfg.cmd = { installer_cfg.name }
         end
 
-        if vim.fn.executable(cfg.cmd[1]) == 0 then
+        if vfn.executable(cfg.cmd[1]) == 0 then
           for _, path in ipairs(paths) do
             log(path)
-            if vim.fn.isdirectory(path) == 1 and string.find(path, installer_cfg.root_dir) then
+            if vfn.isdirectory(path) == 1 and string.find(path, installer_cfg.root_dir) then
               cfg.cmd[1] = path .. path_sep .. cfg.cmd[1]
               log(cfg.cmd)
               break
@@ -704,7 +714,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
     end
 
-    if vim.fn.executable(cfg.cmd[1]) == 0 then
+    if vfn.executable(cfg.cmd[1]) == 0 then
       log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)
     end
 
@@ -790,7 +800,7 @@ local function setup(user_opts, cnt)
   local bufnr = user_opts.bufnr or vim.api.nvim_get_current_buf()
   if ft == '' or ft == nil then
     log('nil filetype, callback')
-    local ext = vim.fn.expand('%:e')
+    local ext = vfn.expand('%:e')
     if ext ~= '' then
       cnt = cnt or 0
       local opts = vim.deepcopy(user_opts)
@@ -906,7 +916,7 @@ local function on_filetype()
   -- as setup will send  filetype event as well
   log(uri)
 
-  local wids = vim.fn.win_findbuf(bufnr)
+  local wids = vfn.win_findbuf(bufnr)
   if empty(wids) then
     log('buf not shown return')
   end
