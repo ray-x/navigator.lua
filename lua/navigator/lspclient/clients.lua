@@ -677,7 +677,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
       log('lsp installer server config ' .. lspconfig[lspclient].name, installer_cfg)
       if installed and installer_cfg then
-        local paths = installer_cfg:get_default_options().cmd_env.PATH
+        local paths = installer_cfg:get_default_options().cmd_env and installer_cfg:get_default_options().cmd_env.PATH
+        if not paths then
+          -- for some reason lspinstaller does not install the binary, check default PATH
+          log('lsp installer does not install the lsp in its path, fallback')
+          return load_cfg(ft, lspclient, cfg, loaded)
+        end
         paths = vim.split(paths, ':')
         if vim.fn.empty(cfg.cmd) == 1 then
           cfg.cmd = { installer_cfg.name }
