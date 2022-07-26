@@ -72,6 +72,13 @@ require('navigator.lazyloader').load('lua-dev.nvim', 'folke/lua-dev.nvim')
 if _NgConfigValues.lsp_installer then
   require('navigator.lazyloader').load('nvim-lsp-installer', 'williamboman/nvim-lsp-installer')
 end
+
+
+if _NgConfigValues.mason then
+  require('navigator.lazyloader').load('mason.nvim', 'williamboman/mason.nvim')
+  require('navigator.lazyloader').load('mason-lspconfig.nvim', 'williamboman/mason-lspconfig.nvim')
+end
+
 local ok, l = pcall(require, 'lua-dev')
 if ok and l then
   luadev = l.setup(luadevcfg)
@@ -372,6 +379,7 @@ local servers = {
 
 local lsp_installer_servers = {}
 local has_lspinst = false
+local has_mason = false
 
 if config.lsp_installer == true then
   has_lspinst, _ = pcall(require, 'nvim-lsp-installer')
@@ -384,6 +392,19 @@ if config.lsp_installer == true then
   end
   log(lsp_installer_servers)
 end
+
+if config.mason == true then
+  has_mason, _ = pcall(require, 'mason-lspconfig')
+  if has_mason then
+    local srvs=require'mason-lspconfig'.get_installed_servers()
+    log('lsp_installered servers', srvs)
+    if #srvs > 0 then
+      lsp_installer_servers = srvs
+    end
+  end
+  log(lsp_installer_servers)
+end
+
 if config.lsp.disable_lsp == 'all' then
   config.lsp.disable_lsp = servers
 end
@@ -713,6 +734,35 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         end
       end
     end
+    if has_mason and _NgConfigValues.mason then
+      local servers = require'mason-lspconfig'.get_installed_servers()
+      if not vim.tbl_contains(servers, lspconfig[lspclient].name) then
+        log('mason server not installed', lspconfig[lspclient].name)
+        return
+      end
+     local pkg_name = require "mason-lspconfig.mappings.server".lspconfig_to_package[lspconfig[lspclient].name]
+     local pkg = require "mason-registry".get_package(pkg_name)
+
+
+      log('lsp installer server config ' .. lspconfig[lspclient].name, pkg)
+      if pkg then
+        local path = pkg:get_install_path()
+        if not path then
+          -- for some reason lspinstaller does not install the binary, check default PATH
+          log('lsp installer does not install the lsp in its path, fallback')
+          return load_cfg(ft, lspclient, cfg, loaded)
+        end
+
+        cfg.cmd = cfg.cmd or {}
+        cfg.cmd[1] = path .. path_sep .. pkg.name
+        if vfn.executable(cfg.cmd[1]) == 0 then
+          log('failed to find cmd', cfg.cmd[1])
+        else
+          log('cmd installed', cfg.cmd)
+        end
+      end
+    end
+
 
     if vfn.executable(cfg.cmd[1]) == 0 then
       log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)

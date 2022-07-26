@@ -278,6 +278,7 @@ require'navigator'.setup({
     -- refer to lua/navigator.lua for more icons setups
   },
   lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
+  mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
   lsp = {
     enable = true,   -- skip lsp setup if disabled make sure add require('navigator.lspclient.mapping').setup() in you
     -- own on_attach
@@ -502,18 +503,18 @@ The plugin can be loaded lazily (packer `opt = true` ), And it will check if opt
 
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
-## Integrat with lsp_installer (williamboman/nvim-lsp-installer)
+## Integrat with mason (williamboman/mason.nvim)  or lsp_installer (williamboman/nvim-lsp-installer, deprecated)
 
-If you are using lsp_installer and would like to use the lsp servers installed by lsp_installer. Please set
+If you are using mason or lsp_installer and would like to use the lsp servers installed by lsp_installer. Please set
 
 ```lua
-lsp_installer = true
-
+lsp_installer = true  --lsp_installer users, deprecated
+mason = true -- mason user
 ```
 
 In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
 
-example:
+lsp-installer example:
 ```lua
       use({
         'williamboman/nvim-lsp-installer',
@@ -526,14 +527,40 @@ example:
         'ray-x/navigator.lua',
         config = function()
           require('navigator').setup({
-            debug = true,
             lsp_installer = true,
-            keymaps = { { key = 'gR', func = "require('navigator.reference').async_ref()" } },
           })
         end,
       })
 
 ```
+for mason
+```lua
+      use("williamboman/mason.nvim")
+      use({
+        "williamboman/mason-lspconfig.nvim",
+        config = function()
+          require("mason").setup()
+          require("mason-lspconfig").setup({})
+        end,
+      })
+
+      use({
+        "ray-x/navigator.lua",
+        requires = {
+          { "ray-x/guihua.lua", run = "cd lua/fzy && make" },
+          { "neovim/nvim-lspconfig" },
+          { "nvim-treesitter/nvim-treesitter" },
+        },
+        config = function()
+          require("navigator").setup({
+            mason = true,
+          })
+        end,
+      })
+
+```
+
+
 
 Please refer to [lsp_installer_config](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
 for more info

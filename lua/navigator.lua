@@ -86,6 +86,7 @@ _NgConfigValues = {
     servers = {}, -- you can add additional lsp server so navigator will load the default for you
   },
   lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
+  mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
   icons = {
     icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
     -- Code action
