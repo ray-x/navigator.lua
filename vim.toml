@@ -1,5 +1,5 @@
 [selene]
-base = "lua51"
+base = "lua52"
 name = "vim"
 
 [vim]
@@ -8,9 +8,11 @@ any = true
 [_G]
 property = true
 writable = "new-fields"
+
 [_NgConfigValues]
-property = true
-writable = "new-fields"
+any = true
+# property = true
+# writable = "full-write"
 
 [debug]
 property = true

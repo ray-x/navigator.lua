@@ -1,7 +1,7 @@
 return {
   init = function()
     local loader = nil
-    local packer_plugins = packer_plugins or nil -- suppress warnings
+    packer_plugins = packer_plugins or nil -- suppress warnings
     local log = require('navigator.util').log
     -- packer only
     if packer_plugins ~= nil then -- packer install
@@ -51,7 +51,7 @@ return {
   end,
   load = function(plugin_name, path)
     local loader = nil
-    local packer_plugins = packer_plugins or nil -- suppress warnings
+    packer_plugins = packer_plugins or nil -- suppress warnings
     -- packer only
     if packer_plugins ~= nil then -- packer install
       local lazy_plugins = {}
