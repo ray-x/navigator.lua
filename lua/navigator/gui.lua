@@ -1,6 +1,6 @@
 local M = {}
-local ListView = require('guihua.listview')
-local TextView = require('guihua.textview')
+-- local ListView = require('guihua.listview')
+-- local TextView = require('guihua.textview')
 local util = require('navigator.util')
 local log = util.log
 local trace = require('navigator.util').trace
@@ -16,7 +16,7 @@ function M.new_list_view(opts)
     local winnr = active_list_view.win
     local bufnr = active_list_view.buf
 
-    if bufnr and vim.api.nvim_buf_is_valid(bufnr) and winnr and vim.api.nvim_win_is_valid(winnr) then
+    if bufnr and api.nvim_buf_is_valid(bufnr) and winnr and api.nvim_win_is_valid(winnr) then
       log('list view already present')
       return active_list_view
     end

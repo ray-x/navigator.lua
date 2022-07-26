@@ -32,6 +32,9 @@ return {
     end, 100)
   end,
   range_foramt = function(err, result, ctx, _)
+    if err then
+      print("failed to format", vim.inspect(result), vim.inspect(ctx))
+    end
     local old_func = vim.go.operatorfunc
     _G.op_func_formatting = function()
       local start = vim.api.nvim_buf_get_mark(0, '[')

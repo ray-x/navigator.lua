@@ -491,7 +491,8 @@ function M.treesitter_and_diag_panel()
   })
   p:add_section({
     header = 'diagnostic',
-    render = function(bufnr)
+    render = function(buf)
+      log(buf, diagnostic)
       if diagnostic_list[ft] ~= nil then
         local display_items = {}
         for _, client_items in pairs(results) do

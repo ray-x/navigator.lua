@@ -1,7 +1,6 @@
 return {
   init = function()
     local loader = nil
-    packer_plugins = packer_plugins or nil -- suppress warnings
     local log = require('navigator.util').log
     -- packer only
     if packer_plugins ~= nil then -- packer install

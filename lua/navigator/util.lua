@@ -61,7 +61,7 @@ function M.get_data_from_file(filename, startLine)
   return { data = data, line = displayLine }
 end
 
-function M.io_read(filename, total)
+function M.io_read(filename)
   local f = io.open(filename, 'r')
   if f == nil then
     return nil

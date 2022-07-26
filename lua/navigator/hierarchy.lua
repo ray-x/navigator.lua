@@ -100,7 +100,7 @@ hierarchy_handler = function(dir, handler, show, api, err, result, ctx, cfg)
   trace(dir, handler, api, show, err, result, ctx, cfg)
   ctx = ctx or {} -- can be nil if it is async call
   cfg = cfg or {}
-  opts = ctx.opts or {}
+  local opts = ctx.opts or {}
   vim.validate({ handler = { handler, 'function' }, show = { show, 'function' }, api = { api, 'string' } })
   local bufnr = ctx.bufnr or vim.api.nvim_get_current_buf()
   assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use lsp hierarchy')
@@ -142,11 +142,12 @@ local function display_panel(args)
 
   local Panel = require('guihua.panel')
   local bufnr = args.bufnr or vim.api.nvim_get_current_buf()
-  local ft = args.ft or vim.api.nvim_buf_get_option(bufnr, 'buftype')
+  -- local ft = args.ft or vim.api.nvim_buf_get_option(bufnr, 'buftype')
   local items = args.items
   local p = Panel:new({
     header = args.header or 'Call Hierarchy',
-    render = function(bufnr)
+    render = function(buf)
+      log(buf)
       return items
     end,
     fold = function(panel, node)
