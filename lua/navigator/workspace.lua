@@ -19,7 +19,7 @@ M.remove_workspace_folder = function()
   local folders = vim.lsp.buf.list_workspace_folders()
 
   if #folders > 1 then
-    select(folders, { prompt = 'select workspace to delete' }, function(workspace)
+    return select(folders, { prompt = 'select workspace to delete' }, function(workspace)
       vim.lsp.buf.remove_workspace_folder(workspace)
     end)
   end

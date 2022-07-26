@@ -1,1 +1,6 @@
 std="lua52+vim"
+
+[rules]
+global_usage = "allow"
+multiple_statements = "allow"
+unused_variable = "allow"
