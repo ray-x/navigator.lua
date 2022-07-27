@@ -79,286 +79,29 @@ if _NgConfigValues.mason then
   require('navigator.lazyloader').load('mason-lspconfig.nvim', 'williamboman/mason-lspconfig.nvim')
 end
 
-local ok, l = pcall(require, 'lua-dev')
-if ok and l then
-  luadev = l.setup(luadevcfg)
-end
-
-local function add(lib)
-  for _, p in pairs(vfn.expand(lib, false, true)) do
-    p = vim.loop.fs_realpath(p)
-    if p then
-      library[p] = true
-    end
-  end
-end
-
--- add runtime
-add('$VIMRUNTIME')
-
--- add your config
--- local home = vfn.expand("$HOME")
-add(vfn.stdpath('config'))
-
--- add plugins it may be very slow to add all in path
--- if vfn.isdirectory(home .. "/.config/share/nvim/site/pack/packer") then
---   add(home .. "/.local/share/nvim/site/pack/packer/opt/*")
---   add(home .. "/.local/share/nvim/site/pack/packer/start/*")
--- end
-
-library[vfn.expand('$VIMRUNTIME/lua')] = true
-library[vfn.expand('$VIMRUNTIME/lua/vim')] = true
-library[vfn.expand('$VIMRUNTIME/lua/vim/lsp')] = true
--- [vfn.expand("~/repos/nvim/lua")] = true
-
--- TODO remove onece PR #944 merged to lspconfig
-local path_sep = require('navigator.util').path_sep()
-local strip_dir_pat = path_sep .. '([^' .. path_sep .. ']+)$'
-local strip_sep_pat = path_sep .. '$'
-local dirname = function(pathname)
-  if not pathname or #pathname == 0 then
-    return
-  end
-  local result = pathname:gsub(strip_sep_pat, ''):gsub(strip_dir_pat, '')
-  if #result == 0 then
-    return '/'
-  end
-  return result
-end
--- TODO end
-
-local setups = {
-  clojure_lsp = {
-    root_dir = function(fname)
-      return util.root_pattern('deps.edn', 'build.boot', 'project.clj', 'shadow-cljs.edn', 'bb.edn', '.git')(fname)
-          or util.path.dirname(fname)
-    end,
-    on_attach = on_attach,
-    filetypes = { 'clojure', 'edn' },
-    message_level = vim.lsp.protocol.MessageType.error,
-    cmd = { 'clojure-lsp' },
-  },
-
-  elixirls = {
-    on_attach = on_attach,
-    filetypes = { 'elixir', 'eelixir' },
-    cmd = { 'elixir-ls' },
-    message_level = vim.lsp.protocol.MessageType.error,
-    settings = {
-      elixirLS = {
-        dialyzerEnabled = true,
-        fetchDeps = false,
-      },
-    },
-    root_dir = function(fname)
-      return util.root_pattern('mix.exs', '.git')(fname) or util.path.dirname(fname)
-    end,
-  },
-
-  gopls = {
-    on_attach = on_attach,
-    -- capabilities = cap,
-    filetypes = { 'go', 'gomod', 'gohtmltmpl', 'gotexttmpl' },
-    message_level = vim.lsp.protocol.MessageType.Error,
-    cmd = {
-      'gopls', -- share the gopls instance if there is one already
-      '-remote=auto', --[[ debug options ]] --
-      -- "-logfile=auto",
-      -- "-debug=:0",
-      '-remote.debug=:0',
-      -- "-rpc.trace",
-    },
-
-    flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
-    settings = {
-      gopls = {
-        -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
-        -- flags = {allow_incremental_sync = true, debounce_text_changes = 500},
-        -- not supported
-        analyses = { unusedparams = true, unreachable = false },
-        codelenses = {
-          generate = true, -- show the `go generate` lens.
-          gc_details = true, --  // Show a code lens toggling the display of gc's choices.
-          test = true,
-          tidy = true,
-        },
-        usePlaceholders = true,
-        completeUnimported = true,
-        staticcheck = true,
-        matcher = 'fuzzy',
-        diagnosticsDelay = '500ms',
-        experimentalWatchedFileDelay = '1000ms',
-        symbolMatcher = 'fuzzy',
-        gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
-        buildFlags = { '-tags', 'integration' },
-        -- buildFlags = {"-tags", "functional"}
-      },
-    },
-    root_dir = function(fname)
-      return util.root_pattern('go.mod', '.git')(fname) or dirname(fname) -- util.path.dirname(fname)
-    end,
-  },
-  clangd = {
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
-    cmd = {
-      'clangd',
-      '--background-index',
-      '--suggest-missing-includes',
-      '--clang-tidy',
-      '--header-insertion=iwyu',
-      '--clang-tidy-checks=-*,llvm-*,clang-analyzer-*',
-      '--cross-file-rename',
-    },
-    filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
-    on_attach = function(client, bufnr)
-      client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
-          or true
-      on_attach(client, bufnr)
-    end,
-  },
-  rust_analyzer = {
-    root_dir = function(fname)
-      return util.root_pattern('Cargo.toml', 'rust-project.json', '.git')(fname) or util.path.dirname(fname)
-    end,
-    filetypes = { 'rust' },
-    message_level = vim.lsp.protocol.MessageType.error,
-    on_attach = on_attach,
-    settings = {
-      ['rust-analyzer'] = {
-        assist = { importMergeBehavior = 'last', importPrefix = 'by_self' },
-        cargo = { loadOutDirsFromCheck = true },
-        procMacro = { enable = true },
-      },
-    },
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
-  },
-  sqls = {
-    filetypes = { 'sql' },
-    on_attach = function(client, _)
-      client.server_capabilities.executeCommandProvider = client.server_capabilities.documentFormattingProvider or true
-      highlight.diagnositc_config_sign()
-      require('sqls').setup({ picker = 'telescope' }) -- or default
-    end,
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
-    settings = {
-      cmd = { 'sqls', '-config', '$HOME/.config/sqls/config.yml' },
-      -- alterantively:
-      -- connections = {
-      --   {
-      --     driver = 'postgresql',
-      --     datasourcename = 'host=127.0.0.1 port=5432 user=postgres password=password dbname=user_db sslmode=disable',
-      --   },
-      -- },
-    },
-  },
-  sumneko_lua = {
-    cmd = { 'lua-language-server' },
-    filetypes = { 'lua' },
-    on_attach = on_attach,
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
-    settings = {
-      Lua = {
-        runtime = {
-          -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-          version = 'LuaJIT',
-        },
-        diagnostics = {
-          enable = true,
-          -- Get the language server to recognize the `vim` global
-          globals = { 'vim', 'describe', 'it', 'before_each', 'after_each', 'teardown', 'pending' },
-        },
-        completion = { callSnippet = 'Both' },
-        workspace = {
-          -- Make the server aware of Neovim runtime files
-          library = library,
-          maxPreload = 2000,
-          preloadFileSize = 40000,
-        },
-        telemetry = { enable = false },
-      },
-    },
-    on_new_config = function(cfg, root)
-      local libs = vim.tbl_deep_extend('force', {}, library)
-      libs[root] = nil
-      cfg.settings.Lua.workspace.library = libs
-      return cfg
-    end,
-  },
-  pyright = {
-    on_attach = on_attach,
-    cmd = { 'pyright-langserver', '--stdio' },
-    filetypes = { 'python' },
-    flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
-    settings = {
-      python = {
-        formatting = { provider = 'black' },
-        analysis = {
-          autoSearchPaths = true,
-          useLibraryCodeForTypes = true,
-          diagnosticMode = 'workspace',
-        },
-      },
-    },
-  },
-  ccls = {
-    on_attach = on_attach,
-    init_options = {
-      compilationDatabaseDirectory = 'build',
-      root_dir = [[ util.root_pattern("compile_commands.json", "compile_flags.txt", "CMakeLists.txt", "Makefile", ".git") or util.path.dirname ]],
-      index = { threads = 2 },
-      clang = { excludeArgs = { '-frounding-math' } },
-    },
-    flags = { allow_incremental_sync = true },
-  },
-  jdtls = {
-    settings = {
-      java = { signatureHelp = { enabled = true }, contentProvider = { preferred = 'fernflower' } },
-    },
-  },
-  omnisharp = {
-    cmd = { 'omnisharp', '--languageserver', '--hostPID', tostring(vfn.getpid()) },
-  },
-  terraformls = {
-    filetypes = { 'terraform', 'tf' },
-  },
-
-  sourcekit = {
-    cmd = { 'sourcekit-lsp' },
-    filetypes = { 'swift' }, -- This is recommended if you have separate settings for clangd.
-  },
-}
-
-setups.sumneko_lua = vim.tbl_deep_extend('force', luadev, setups.sumneko_lua)
-
+local setups = require('navigator.lspclient.clients_default').defaults()
 local servers =  require('navigator.lspclient.servers')
 
 local lsp_installer_servers = {}
 local has_lspinst = false
 local has_mason = false
 
-if config.lsp_installer == true then
-  has_lspinst, _ = pcall(require, 'nvim-lsp-installer')
-  if has_lspinst then
-    local srvs = require('nvim-lsp-installer.servers').get_installed_servers()
-    log('lsp_installered servers', srvs)
-    if #srvs > 0 then
-      lsp_installer_servers = srvs
-    end
+has_lspinst, _ = pcall(require, 'nvim-lsp-installer')
+if has_lspinst then
+  local srvs = require('nvim-lsp-installer.servers').get_installed_servers()
+  if #srvs > 0 then
+    lsp_installer_servers = srvs
   end
-  log(lsp_installer_servers)
 end
 
-if config.mason == true then
-  has_mason, _ = pcall(require, 'mason-lspconfig')
-  if has_mason then
-    local srvs=require'mason-lspconfig'.get_installed_servers()
-    log('lsp_installered servers', srvs)
-    if #srvs > 0 then
-      lsp_installer_servers = srvs
-    end
+has_mason, _ = pcall(require, 'mason-lspconfig')
+if has_mason then
+  local srvs=require'mason-lspconfig'.get_installed_servers()
+  if #srvs > 0 then
+    lsp_installer_servers = srvs
   end
-  log(lsp_installer_servers)
 end
+log("lsp_installer:", lsp_installer_servers)
 
 if config.lsp.disable_lsp == 'all' then
   config.lsp.disable_lsp = servers

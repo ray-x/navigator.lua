@@ -83,3 +83,7 @@ local function sumneko_lua()
   sumneko_cfg = vim.tbl_deep_extend('force', luadev, sumneko_cfg)
   return sumneko_cfg
 end
+
+return {
+  sumneko_lua = sumneko_lua,
+}

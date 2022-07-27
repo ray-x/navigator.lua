@@ -63,9 +63,13 @@ M.on_attach = function(client, bufnr)
   if _NgConfigValues.lsp.code_action.enable then
     if client.server_capabilities.codeActionProvider and client.name ~= 'null-ls' then
       log('code action enabled for client', client.server_capabilities.codeActionProvider)
-      api.nvim_command('augroup NCodeAction')
-      vim.cmd([[autocmd CursorHold,CursorHoldI <buffer> lua require'navigator.codeAction'.code_action_prompt()]])
-      api.nvim_command('augroup end')
+      api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+        group = api.nvim_create_augroup('NGCodeActGroup', {}),
+        buffer = bufnr,
+        callback = function()
+          require('navigator.codeAction').code_action_prompt()
+        end,
+      })
     end
   end
 end

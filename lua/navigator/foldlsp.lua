@@ -28,19 +28,14 @@ function M.on_attach()
 end
 
 function M.setup_plugin()
-  api.nvim_command('augroup FoldingCommand')
-  api.nvim_command('autocmd! * <buffer>')
-  api.nvim_command("autocmd BufEnter <buffer> lua require'navigator.foldlsp'.update_folds()")
-  api.nvim_command("autocmd BufWritePost <buffer> lua require'navigator.foldlsp'.update_folds()")
-  api.nvim_command('augroup end')
-
-  -- vim.cmd([[
-  --
-  --   function! folding_nvim#foldexpr()
-  --   return luaeval(printf('require"navigator.foldlsp".get_fold_indic(%d)', v:lnum))
-  -- endfunction
-  --
-  --   ]])
+  local cmd_group = api.nvim_create_augroup('NGFoldGroup', {})
+  api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost' }, {
+    group = cmd_group,
+    pattern = '*',
+    callback = function()
+      require('navigator.foldlsp').update_folds()
+    end,
+  })
 
   local clients = vim.lsp.buf_get_clients(0)
 

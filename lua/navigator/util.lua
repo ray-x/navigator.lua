@@ -540,4 +540,18 @@ function M.range_inside(outer, inner)
   return outer.start.line <= inner.start.line and outer['end'].line >= inner['end'].line
 end
 
+function M.dirname(pathname)
+  local path_sep = require('navigator.util').path_sep()
+  local strip_dir_pat = path_sep .. '([^' .. path_sep .. ']+)$'
+  local strip_sep_pat = path_sep .. '$'
+  if not pathname or #pathname == 0 then
+    return
+  end
+  local result = pathname:gsub(strip_sep_pat, ''):gsub(strip_dir_pat, '')
+  if #result == 0 then
+    return '/'
+  end
+  return result
+end
+
 return M
