@@ -252,7 +252,7 @@ end
 local loaded = {}
 local function lsp_startup(ft, retry, user_lsp_opts)
   retry = retry or false
-
+  local path_sep = require('navigator.util').path_sep()
   local capabilities = update_capabilities()
 
   for _, lspclient in ipairs(servers) do
