@@ -251,7 +251,6 @@ M.setup = function(cfg)
     pattern = '*',
     callback = function()
       require('navigator.lspclient.clients').on_filetype()
-      M.add_highlight()
     end,
   })
   require('navigator.lazyloader').init()
