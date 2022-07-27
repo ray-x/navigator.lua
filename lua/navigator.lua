@@ -1,12 +1,13 @@
 local M = {}
+local api = vim.api
 
 local function warn(msg)
-  vim.api.nvim_echo({ { 'WRN: ' .. msg, 'WarningMsg' } }, true, {})
+  api.nvim_echo({ { 'WRN: ' .. msg, 'WarningMsg' } }, true, {})
 end
 
 local function info(msg)
   if _NgConfigValues.debug then
-    vim.api.nvim_echo({ { 'Info: ' .. msg } }, true, {})
+    api.nvim_echo({ { 'Info: ' .. msg } }, true, {})
   end
 end
 
@@ -209,7 +210,7 @@ local extend_config = function(opts)
           else
             if _NgConfigValues[key][k] == nil then
               if key == 'lsp' then
-                local lsp = require('navigator.lspclient.clients').lsp
+                local lsp = require('navigator.lspclient.servers')
                 if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' and k ~= 'null-ls' then
                   info(string.format('[] extend LSP support for  %s %s ', key, k))
                 end
@@ -244,7 +245,15 @@ M.setup = function(cfg)
   cfg = cfg or {}
   extend_config(cfg)
 
-  vim.cmd([[autocmd FileType,BufEnter * lua require'navigator.lspclient.clients'.on_filetype()]]) -- BufWinEnter BufNewFile,BufRead ?
+  local cmd_group = api.nvim_create_augroup('NGFtGroup', {})
+  api.nvim_create_autocmd({ 'FileType', 'BufEnter' }, {
+    group = cmd_group,
+    pattern = '*',
+    callback = function()
+      require('navigator.lspclient.clients').on_filetype()
+      M.add_highlight()
+    end,
+  })
   require('navigator.lazyloader').init()
   require('navigator.lspclient.clients').setup(_NgConfigValues)
 

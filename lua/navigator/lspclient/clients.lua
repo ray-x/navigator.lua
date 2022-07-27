@@ -330,52 +330,7 @@ local setups = {
 
 setups.sumneko_lua = vim.tbl_deep_extend('force', luadev, setups.sumneko_lua)
 
-local servers = {
-  'angularls',
-  'gopls',
-  'tsserver',
-  'flow',
-  'bashls',
-  'dockerls',
-  'julials',
-  'pylsp',
-  'pyright',
-  'jedi_language_server',
-  'jdtls',
-  'sumneko_lua',
-  'vimls',
-  'html',
-  'jsonls',
-  'solargraph',
-  'cssls',
-  'yamlls',
-  'clangd',
-  'ccls',
-  'sqls',
-  'denols',
-  'graphql',
-  'dartls',
-  'dotls',
-  'kotlin_language_server',
-  'nimls',
-  'intelephense',
-  'vuels',
-  'phpactor',
-  'omnisharp',
-  'r_language_server',
-  'rust_analyzer',
-  'terraformls',
-  'svelte',
-  'texlab',
-  'clojure_lsp',
-  'elixirls',
-  'sourcekit',
-  'fsautocomplete',
-  'vls',
-  'hls',
-  'tflint',
-  'terraform_lsp',
-}
+local servers =  require('navigator.lspclient.servers')
 
 local lsp_installer_servers = {}
 local has_lspinst = false
@@ -977,7 +932,6 @@ end
 return {
   setup = setup,
   get_cfg = get_cfg,
-  lsp = servers,
   add_servers = add_servers,
   on_filetype = on_filetype,
   disabled_ft = disabled_ft,
