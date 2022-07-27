@@ -31,35 +31,34 @@ function M.diagnositc_config_sign()
   M.configed = true
 end
 
+local colors = {
+  { '#aefe00', '#aede00', '#aebe00', '#4e7efe' },
+  { '#ff00e0', '#df00e0', '#af00e0', '#fedefe' },
+  { '#1000ef', '#2000df', '#2000cf', '#f0f040' },
+  { '#d8a8a3', '#c8a8a3', '#b8a8a3', '#4e2c33' },
+  { '#ffa724', '#efa024', '#dfa724', '#0040ff' },
+  { '#afdc2b', '#09dc4b', '#08d04b', '#ef4f8f' },
+}
+
 function M.add_highlight()
   -- lsp system default
-  api.nvim_command('hi! link DiagnosticUnderlineError SpellBad')
-  api.nvim_command('hi! link DiagnosticUnderlineWarning SpellRare')
-  api.nvim_command('hi! link DiagnosticUnderlineInformation SpellRare')
-  api.nvim_command('hi! link DiagnosticUnderlineHint SpellRare')
-  api.nvim_command('hi def link NGPreviewTitle Title')
-  local colors = {
-    { '#aefe00', '#aede00', '#aebe00', '#4e7efe' },
-    { '#ff00e0', '#df00e0', '#af00e0', '#fedefe' },
-    { '#1000ef', '#2000df', '#2000cf', '#f0f040' },
-    { '#d8a8a3', '#c8a8a3', '#b8a8a3', '#4e2c33' },
-    { '#ffa724', '#efa024', '#dfa724', '#0040ff' },
-    { '#afdc2b', '#09dc4b', '#08d04b', '#ef4f8f' },
-  }
+
+  api.nvim_set_hl(0, 'DiagnosticUnderlineError', { link = 'SpellBad', default = true })
+  api.nvim_set_hl(0, 'DiagnosticUnderlineWarning', { link = 'SpellRare', default = true })
+  api.nvim_set_hl(0, 'DiagnosticUnderlineInformation', { link = 'SpellRare', default = true })
+  api.nvim_set_hl(0, 'DiagnosticUnderlineHint', { link = 'SpellRare', default = true })
+  api.nvim_set_hl(0, 'NGPreviewTitle', { link = 'Title', default = true })
+  api.nvim_set_hl(0, 'LspReferenceRead', {default = true, bold = true, fg = 'yellow', bg = 'purple4'})
+  api.nvim_set_hl(0, 'LspReferenceText', {default = true, bold = true, fg = 'blue', bg = 'MidnightBlue'})
+  api.nvim_set_hl(0, 'LspReferenceWrite', {default = true, bold = true, italic = true, fg = 'red', bg = 'DarkSlateBlue'})
+
 
   for i = 1, #colors do
     for j = 1, 3 do
-      local cmd = string.format('hi! default NGHiReference_%i_%i guibg=%s guifg=%s ', i, j, colors[i][j], colors[i][4])
-      vim.cmd(cmd)
+      local  hlg = string.format('NGHiReference_%i_%i', i, j)  -- , colors[i][j], colors[i][4]
+      api.nvim_set_hl(0, hlg, {fg = colors[i][j], bg = colors[i][4], default = true})
     end
   end
-
-  vim.cmd([[
-        autocmd ColorScheme * |
-        hi default LspReferenceRead cterm=bold gui=Bold ctermbg=yellow guifg=yellow guibg=purple4 |
-        hi default LspReferenceText cterm=bold gui=Bold ctermbg=red guifg=SlateBlue guibg=MidnightBlue |
-        hi default LspReferenceWrite cterm=bold gui=Bold,Italic ctermbg=red guifg=DarkSlateBlue guibg=MistyRose
-    ]])
 end
 
 return M
