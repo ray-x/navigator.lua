@@ -54,7 +54,7 @@ function M.add_highlight()
   api.nvim_set_hl(
     0,
     'LspReferenceWrite',
-    { default = true, bold = true, italic = true, ctermfg = 'Magenta', underdouble = true }
+    { default = true, bold = true, italic = true, ctermfg = 'Magenta', underline = true }
   )
 
   for i = 1, #colors do
