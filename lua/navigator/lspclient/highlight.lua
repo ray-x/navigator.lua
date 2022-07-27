@@ -49,13 +49,9 @@ function M.add_highlight()
   api.nvim_set_hl(0, 'DiagnosticUnderlineInformation', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'DiagnosticUnderlineHint', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'NGPreviewTitle', { link = 'Title', default = true })
-  api.nvim_set_hl(0, 'LspReferenceRead', { default = true, bold = true, ctermfg = 'Yellow', underline = true })
-  api.nvim_set_hl(0, 'LspReferenceText', { default = true, bold = true, ctermfg = 'White', underline = true })
-  api.nvim_set_hl(
-    0,
-    'LspReferenceWrite',
-    { default = true, bold = true, italic = true, ctermfg = 'Magenta', underline = true }
-  )
+  api.nvim_set_hl(0, 'LspReferenceRead', { default = true, link = 'IncSearch'})
+  api.nvim_set_hl(0, 'LspReferenceText', { default = true, link = 'Visual'})
+  api.nvim_set_hl( 0, 'LspReferenceWrite', { default = true, link = 'Search'})
 
   for i = 1, #colors do
     for j = 1, 3 do
