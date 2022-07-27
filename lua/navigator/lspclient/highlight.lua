@@ -3,6 +3,7 @@ local M = {}
 -- local log = require('navigator.util').log
 local api = vim.api
 
+local cmd_group = api.nvim_create_augroup('NGHiGroup', {})
 -- lsp sign            ﮻           ﯭ                ﳀ    
 function M.diagnositc_config_sign()
   if M.configed then
@@ -48,17 +49,28 @@ function M.add_highlight()
   api.nvim_set_hl(0, 'DiagnosticUnderlineInformation', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'DiagnosticUnderlineHint', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'NGPreviewTitle', { link = 'Title', default = true })
-  api.nvim_set_hl(0, 'LspReferenceRead', {default = true, bold = true, fg = 'yellow', bg = 'purple4'})
-  api.nvim_set_hl(0, 'LspReferenceText', {default = true, bold = true, fg = 'blue', bg = 'MidnightBlue'})
-  api.nvim_set_hl(0, 'LspReferenceWrite', {default = true, bold = true, italic = true, fg = 'red', bg = 'DarkSlateBlue'})
-
+  api.nvim_set_hl(0, 'LspReferenceRead', { default = true, bold = true, ctermfg = 'Yellow', underline = true })
+  api.nvim_set_hl(0, 'LspReferenceText', { default = true, bold = true, ctermfg = 'White', underline = true })
+  api.nvim_set_hl(
+    0,
+    'LspReferenceWrite',
+    { default = true, bold = true, italic = true, ctermfg = 'Magenta', underdouble = true }
+  )
 
   for i = 1, #colors do
     for j = 1, 3 do
-      local  hlg = string.format('NGHiReference_%i_%i', i, j)  -- , colors[i][j], colors[i][4]
-      api.nvim_set_hl(0, hlg, {fg = colors[i][j], bg = colors[i][4], default = true})
+      local hlg = string.format('NGHiReference_%i_%i', i, j) -- , colors[i][j], colors[i][4]
+      api.nvim_set_hl(0, hlg, { fg = colors[i][j], bg = colors[i][4], default = true })
     end
   end
 end
+
+api.nvim_create_autocmd('ColorScheme', {
+  group = cmd_group,
+  pattern = '*',
+  callback = function()
+    M.add_highlight()
+  end,
+})
 
 return M

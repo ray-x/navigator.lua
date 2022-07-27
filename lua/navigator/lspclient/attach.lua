@@ -36,7 +36,7 @@ M.on_attach = function(client, bufnr)
   })
 
   if client.server_capabilities.documentHighlightProvider == true then
-    require('navigator.dochighlight').documentHighlight()
+    require('navigator.dochighlight').documentHighlight(bufnr)
   end
 
   require('navigator.lspclient.lspkind').init()

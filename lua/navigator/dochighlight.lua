@@ -215,17 +215,26 @@ local nav_doc_hl = function()
   end)
 end
 
-local function documentHighlight()
-  api.nvim_exec(
-    [[
-      augroup lsp_document_highlight
-        autocmd! * <buffer>
-        autocmd CursorHold,CursorHoldI <buffer> lua require('navigator.dochighlight').nav_doc_hl()
-        autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-      augroup END
-    ]],
-    false
-  )
+local function documentHighlight(bufnr)
+  bufnr = bufnr or api.nvim_get_current_buf()
+
+  local cmd_group = api.nvim_create_augroup('NGHiGroup', {})
+
+  api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+    group = cmd_group,
+    buffer = bufnr,
+    callback = function()
+      require('navigator.dochighlight').nav_doc_hl()
+    end,
+  })
+
+  api.nvim_create_autocmd({ 'CursorMoved' }, {
+    group = cmd_group,
+    buffer = bufnr,
+    callback = function()
+      vim.lsp.buf.clear_references()
+    end,
+  })
   vim.lsp.handlers['textDocument/documentHighlight'] = function(err, result, ctx)
     local bufnr = ctx.bufnr or api.nvim_get_current_buf()
     if err then
