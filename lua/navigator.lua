@@ -280,7 +280,6 @@ M.setup = function(cfg)
   local _start_client = vim.lsp.start_client
   vim.lsp.start_client = function(lsp_config)
     -- add highlight for Lspxxx
-    require('navigator.dochighlight').documentHighlight()
     require('navigator.lspclient.highlight').add_highlight()
     require('navigator.lspclient.highlight').diagnositc_config_sign()
     -- require('navigator.lspclient.mapping').setup()
