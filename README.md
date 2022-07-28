@@ -284,13 +284,17 @@ require'navigator'.setup({
     -- own on_attach
     code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
+    document_highlight = true, -- LSP reference highlight, 
+                               -- it might already supported by you setup, e.g. LunarVim
     format_on_save = true, -- set to false to disable lsp code format on save (if you are using prettier/efm/formater etc)
     format_options = {async=false}, -- async: disable by default, the option used in vim.lsp.buf.format({async={true|false}, name = 'xxx'})
     disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
+         -- If you using null-ls and want null-ls format your code
+         -- you should disable all other lsp and allow only null-ls.
     disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
-    -- only want to enable one lsp server
+    --want to enable one lsp server at a time
     -- to disable all default config and use your own lsp setup set
-    -- disable_lsp = 'all'
+    -- disable_lsp = 'all' and you may need to hook mapping.setup() in your on_attach
     -- Default {}
     diagnostic = {
       underline = true,
@@ -324,6 +328,18 @@ require'navigator'.setup({
         gopls = {gofumpt = false} -- disable gofumpt etc,
       }
     },
+    -- the lsp setup can be a function, .e.g 
+    gopls = function()
+      local go = pcall(require, "go")
+      if go then
+        local cfg = require("go.lsp").config()
+        cfg.on_attach = function(client)
+          client.server_capabilities.documentFormattingProvider = false -- efm/null-ls
+        end
+        return cfg
+      end
+    end,
+
     sumneko_lua = {
       sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
       sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",

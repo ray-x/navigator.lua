@@ -46,6 +46,7 @@ _NgConfigValues = {
       virtual_text = true,
       virtual_text_icon = true,
     },
+    document_hightlight = true, -- highlight reference a symbol
     code_lens_action = {
       enable = true,
       sign = true,

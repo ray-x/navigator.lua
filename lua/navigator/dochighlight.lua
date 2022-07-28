@@ -218,23 +218,24 @@ end
 local function documentHighlight(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
 
-  local cmd_group = api.nvim_create_augroup('NGHiGroup', {})
+  if _NgConfigValues.lsp.documentHighlight == true then
+    local cmd_group = api.nvim_create_augroup('NGHiGroup', {})
+    api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+      group = cmd_group,
+      buffer = bufnr,
+      callback = function()
+        require('navigator.dochighlight').nav_doc_hl()
+      end,
+    })
 
-  api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-    group = cmd_group,
-    buffer = bufnr,
-    callback = function()
-      require('navigator.dochighlight').nav_doc_hl()
-    end,
-  })
-
-  api.nvim_create_autocmd({ 'CursorMoved' }, {
-    group = cmd_group,
-    buffer = bufnr,
-    callback = function()
-      vim.lsp.buf.clear_references()
-    end,
-  })
+    api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+      group = cmd_group,
+      buffer = bufnr,
+      callback = function()
+        vim.lsp.buf.clear_references()
+      end,
+    })
+  end
   vim.lsp.handlers['textDocument/documentHighlight'] = function(err, result, ctx)
     local bufnr = ctx.bufnr or api.nvim_get_current_buf()
     if err then
