@@ -218,7 +218,7 @@ end
 local function documentHighlight(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
 
-  if _NgConfigValues.lsp.document_hightlight == true then
+  if _NgConfigValues.lsp.document_highlight == true then
     local cmd_group = api.nvim_create_augroup('NGHiGroup', {})
     api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
       group = cmd_group,
