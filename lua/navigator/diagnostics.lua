@@ -394,8 +394,8 @@ M.show_buf_diagnostics = function()
 end
 
 -- set loc list win
-M.set_diag_loclist = function()
-  local bufnr = api.nvim_get_current_buf()
+M.set_diag_loclist = function(bufnr)
+  bufnr = bufnr or api.nvim_get_current_buf()
   local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
   if diag_cnt == 0 then
     log('great, no errors!')

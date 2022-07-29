@@ -145,7 +145,6 @@ local handle_document_highlight = function(_, result, ctx)
     return
   end
   if type(result) ~= 'table' or vim.fn.empty(result) == 1 then
-    log('clear up', result)
     vim.lsp.util.buf_clear_references(ctx.bufnr)
     return
   end
@@ -205,11 +204,12 @@ local function cmd_nohl()
   end
 end
 
-local nav_doc_hl = function()
-  local bufnr = vim.api.nvim_get_current_buf()
+local nav_doc_hl = function(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
   local ref_params = vim.lsp.util.make_position_params()
   vim.lsp.for_each_buffer_client(bufnr, function(client, _, _)
     if client.server_capabilities.documentHighlightProvider == true then
+      trace("sending doc highlight", client.name, bufnr)
       client.request('textDocument/documentHighlight', ref_params, handle_document_highlight, bufnr)
     end
   end)
@@ -224,7 +224,7 @@ local function documentHighlight(bufnr)
       group = cmd_group,
       buffer = bufnr,
       callback = function()
-        require('navigator.dochighlight').nav_doc_hl()
+        require('navigator.dochighlight').nav_doc_hl(bufnr)
       end,
     })
 

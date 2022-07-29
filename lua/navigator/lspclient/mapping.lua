@@ -3,12 +3,6 @@ local log = util.log
 local trace = util.trace
 local api = vim.api
 
-local event_hdlrs = {
-  { ev = 'BufWritePre', func = require('navigator.diagnostics').set_diag_loclist },
-  { ev = { 'CursorHold', 'CursorHoldI' }, func = vim.lsp.buf.document_highlight },
-  { ev = 'CursorMoved', func = vim.lsp.buf.clear_references },
-}
-
 if vim.lsp.buf.format == nil then
   vim.lsp.buf.format = vim.lsp.buf.formatting
 end
@@ -282,42 +276,6 @@ local function autocmd()
   })
 end
 
-local function set_event_handler(user_opts)
-  user_opts = user_opts or {}
-  local file_types = {
-    '*.c',
-    '*.cpp',
-    '*.h',
-    '*.go',
-    '*.python',
-    '*.vim',
-    '*.sh',
-    '*.javascript',
-    '*.html',
-    '*.css',
-    '*.lua',
-    '*.typescript',
-    '*.rust',
-    '*.javascriptreact',
-    '*.typescriptreact',
-    '*.kotlin',
-    '*.php',
-    '*.dart',
-    '*.nim',
-    '*.java',
-  }
-  -- local format_files = "c,cpp,h,go,python,vim,javascript,typescript" --html,css,
-
-  local gn = api.nvim_create_augroup('nvim_nv_event_autos', {})
-  for _, value in pairs(event_hdlrs) do
-    api.nvim_create_autocmd(value.ev, {
-      group = gn,
-      pattern = file_types,
-      callback = value.func,
-    })
-  end
-end
-
 M.toggle_lspformat = function(on)
   if on == nil then
     _NgConfigValues.lsp.format_on_save = not _NgConfigValues.lsp.format_on_save
@@ -349,7 +307,6 @@ function M.setup(attach_opts)
   set_cmds(attach_opts)
 
   autocmd()
-  set_event_handler(attach_opts)
 
   local client = attach_opts.client or {}
   local cap = client.server_capabilities or vim.lsp.protocol.make_client_capabilities()
@@ -391,6 +348,14 @@ function M.setup(attach_opts)
       border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
     })
   end
+
+  api.nvim_create_autocmd({ 'BufWritePre' }, {
+    group = api.nvim_create_augroup('nvim_nv_event_autos', {}),
+    buffer = attach_opts.bufnr,
+    callback = function()
+      require('navigator.diagnostics').set_diag_loclist(attach_opts.bufnr)
+    end,
+  })
 
   local border_style = single
   if _NgConfigValues.border == 'double' then

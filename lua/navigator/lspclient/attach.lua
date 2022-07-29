@@ -36,8 +36,15 @@ M.on_attach = function(client, bufnr)
   })
 
   if client.server_capabilities.documentHighlightProvider == true then
-    require('navigator.dochighlight').documentHighlight(bufnr)
+    trace('attaching doc highlight: ', bufnr, client.name)
+    vim.defer_fn(function()
+      require('navigator.dochighlight').documentHighlight(bufnr)
+    end, 50)  -- allow a bit time for it to settle down
+  else
+    log('skip doc highlight: ', bufnr, client.name)
   end
+
+  
 
   require('navigator.lspclient.lspkind').init()
 
