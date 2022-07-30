@@ -36,7 +36,8 @@ _NgConfigValues = {
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
   signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
-  ctags = { cmd = 'ctags', tagfile = '.tags' },
+  ctags = { cmd = 'ctags', tagfile = '.tags', options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number',
+  },
   lsp = {
     enable = true, -- if disabled make sure add require('navigator.lspclient.mapping').setup() in you on_attach
     code_action = {

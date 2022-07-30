@@ -314,9 +314,9 @@ require'navigator'.setup({
     },
     ctags ={
       cmd = 'ctags',
-      tagfile = 'tags'
-      options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number'
-    }
+      tagfile = 'tags',
+      options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number',
+    },
     gopls = {   -- gopls setting
       on_attach = function(client, bufnr)  -- on_attach for gopls
         -- your special on attach here
