@@ -41,8 +41,10 @@ local ref_view = function(err, locations, ctx, cfg)
       end
       vim.list_extend(locations, definitions.result)
     end
+
     if references and references.result and #references.result > 0 then
       local refs = references.result
+      vim.list_extend(locations, refs)
       for _, value in pairs(locations) do
         local vrange = value.range or { start = { line = 0 }, ['end'] = { line = 0 } }
         for i = 1, #refs, 1 do
@@ -55,13 +57,11 @@ local ref_view = function(err, locations, ctx, cfg)
           end
         end
       end
-      vim.list_extend(locations, refs)
     end
     err = nil
     trace(locations)
     -- lets de-dup first 10 elements. some lsp does not recognize definition and reference difference
     locations = util.dedup(locations)
-
   end
   -- log("num", num)
   -- log("bfnr", bufnr)
