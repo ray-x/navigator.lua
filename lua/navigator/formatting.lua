@@ -1,5 +1,6 @@
 -- https://github.com/wention/dotfiles/blob/master/.config/nvim/lua/config/lsp.lua
 -- https://github.com/lukas-reineke/dotfiles/blob/master/vim/lua/lsp/handlers.lua
+
 return {
   format_hdl = function(err, result, ctx, _) -- FIXME: bufnr is nil
     if err ~= nil or result == nil then
@@ -31,14 +32,13 @@ return {
       end
     end, 100)
   end,
-  range_foramt = function(err, result, ctx, _)
-    if err then
-      print("failed to format", vim.inspect(result), vim.inspect(ctx))
-    end
+  range_format = function()
     local old_func = vim.go.operatorfunc
     _G.op_func_formatting = function()
+      print('formatting range')
       local start = vim.api.nvim_buf_get_mark(0, '[')
       local finish = vim.api.nvim_buf_get_mark(0, ']')
+      print(vim.inspect(start), vim.inspect(finish))
       vim.lsp.buf.range_formatting({}, start, finish)
       vim.go.operatorfunc = old_func
       _G.op_func_formatting = nil

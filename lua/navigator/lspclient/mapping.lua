@@ -61,7 +61,7 @@ local key_maps = {
   },
   { key = '<Space>ff', func = vim.lsp.buf.format, mode = 'n', desc = 'format' },
   { key = '<Space>ff', func = vim.lsp.buf.range_formatting, mode = 'v', desc = 'range format' },
-  { key = '<Space>rf', func = require('navigator.formatting').range_format, mode = 'n', desc = 'range_fmt_v' },
+  { key = '<Space>gm', func = require('navigator.formatting').range_format, mode = 'n', desc = 'range format operator e.g gmip' },
   { key = '<Space>wl', func = require('navigator.workspace').list_workspace_folders, desc = 'list_workspace_folders' },
   { key = '<Space>la', mode = 'n', func = require('navigator.codelens').run_action, desc = 'run code lens action' },
 }
@@ -177,7 +177,8 @@ local function set_mapping(lsp_attach_info)
     key_maps = _NgConfigValues.keymaps or {}
     log('setting maps to ', key_maps)
   end
-  local fmtkey, rfmtkey
+  local fmtkey, rfmtkey, nrfmtkey
+  require('navigator.formatting')
   for _, value in pairs(key_maps) do
     if value.doc then
       vim.notify('doc field no longer supported in navigator mapping, use desc instead')
@@ -211,8 +212,10 @@ local function set_mapping(lsp_attach_info)
         opts.desc = value.desc
       end
       vim.keymap.set(value.mode or 'n', value.key, value.func, opts)
-      if string.find(value.desc, 'range format') then
+      if string.find(value.desc, 'range format') and value.mode == 'v' then
         rfmtkey = value.key
+      if string.find(value.desc, 'range format') and value.mode == 'n' then
+        nrfmtkey = value.key
       elseif string.find(value.desc, 'format') then
         fmtkey = value.key
       end
@@ -264,6 +267,9 @@ local function set_mapping(lsp_attach_info)
     del_keymap('v', rfmtkey)
   end
 
+  if not range_fmt and nrfmtkey then
+    del_keymap('n', nrfmtkey)
+  end
   log('enable format ', doc_fmt, range_fmt, _NgConfigValues.lsp.format_on_save)
 end
 
