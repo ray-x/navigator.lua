@@ -61,7 +61,12 @@ local key_maps = {
   },
   { key = '<Space>ff', func = vim.lsp.buf.format, mode = 'n', desc = 'format' },
   { key = '<Space>ff', func = vim.lsp.buf.range_formatting, mode = 'v', desc = 'range format' },
-  { key = '<Space>gm', func = require('navigator.formatting').range_format, mode = 'n', desc = 'range format operator e.g gmip' },
+  {
+    key = '<Space>gm',
+    func = require('navigator.formatting').range_format,
+    mode = 'n',
+    desc = 'range format operator e.g gmip',
+  },
   { key = '<Space>wl', func = require('navigator.workspace').list_workspace_folders, desc = 'list_workspace_folders' },
   { key = '<Space>la', mode = 'n', func = require('navigator.codelens').run_action, desc = 'run code lens action' },
 }
@@ -214,14 +219,14 @@ local function set_mapping(lsp_attach_info)
       vim.keymap.set(value.mode or 'n', value.key, value.func, opts)
       if string.find(value.desc, 'range format') and value.mode == 'v' then
         rfmtkey = value.key
-      if string.find(value.desc, 'range format') and value.mode == 'n' then
-        nrfmtkey = value.key
-      elseif string.find(value.desc, 'format') then
-        fmtkey = value.key
+        if string.find(value.desc, 'range format') and value.mode == 'n' then
+          nrfmtkey = value.key
+        elseif string.find(value.desc, 'format') then
+          fmtkey = value.key
+        end
       end
     end
   end
-
   for _, val in pairs(key_maps) do
     local helper_msg = ''
     if val.desc then
