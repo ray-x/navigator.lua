@@ -205,11 +205,12 @@ local function cmd_nohl()
 end
 
 local nav_doc_hl = function(bufnr)
+  trace('nav_doc_hl', bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local ref_params = vim.lsp.util.make_position_params()
   vim.lsp.for_each_buffer_client(bufnr, function(client, _, _)
     if client.server_capabilities.documentHighlightProvider == true then
-      trace("sending doc highlight", client.name, bufnr)
+      trace('sending doc highlight', client.name, bufnr)
       client.request('textDocument/documentHighlight', ref_params, handle_document_highlight, bufnr)
     end
   end)
@@ -219,10 +220,12 @@ local function documentHighlight(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
 
   if _NgConfigValues.lsp.document_highlight == true then
-    local cmd_group = api.nvim_create_augroup('NGHiGroup', {})
+    local group_name = string.format('%s%d', 'NGHiGroup', bufnr)
+    local cmd_group = api.nvim_create_augroup(group_name, {})
     api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
       group = cmd_group,
       buffer = bufnr,
+      desc = 'document highlight',
       callback = function()
         require('navigator.dochighlight').nav_doc_hl(bufnr)
       end,
@@ -231,13 +234,15 @@ local function documentHighlight(bufnr)
     api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
       group = cmd_group,
       buffer = bufnr,
+      desc = 'clear document highlight',
       callback = function()
-        vim.lsp.buf.clear_references()
+        vim.lsp.util.buf_clear_references(bufnr)
       end,
     })
   end
+
   vim.lsp.handlers['textDocument/documentHighlight'] = function(err, result, ctx)
-    local bufnr = ctx.bufnr or api.nvim_get_current_buf()
+    local buffer = ctx.bufnr or api.nvim_get_current_buf()
     if err then
       vim.notify(err, vim.lsp.log_levels.ERROR)
       return
@@ -246,19 +251,18 @@ local function documentHighlight(bufnr)
       return
     end
     trace('dochl', result)
-    bufnr = bufnr or 0
     if type(result) ~= 'table' then
-      vim.lsp.util.buf_clear_references(bufnr)
+      vim.lsp.util.buf_clear_references(buffer)
       return
     end
     local client_id = ctx.client_id
-    vim.lsp.util.buf_clear_references(bufnr)
-    vim.lsp.util.buf_highlight_references(bufnr, result, util.encoding(client_id))
+    vim.lsp.util.buf_clear_references(buffer)
+    vim.lsp.util.buf_highlight_references(buffer, result, util.encoding(client_id))
     table.sort(result, function(a, b)
       return before(a.range, b.range)
     end)
-    references[bufnr] = result
-    add_locs(bufnr, result)
+    references[buffer] = result
+    add_locs(buffer, result)
   end
 end
 
