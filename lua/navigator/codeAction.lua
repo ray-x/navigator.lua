@@ -196,7 +196,7 @@ code_action.range_code_action = function(startpos, endpos)
   end, 1000)
 end
 
-code_action.code_action_prompt = function()
+code_action.code_action_prompt = function(bufnr)
   if special_buffers[vim.bo.filetype] then
     log('skip buffer', vim.bo.filetype)
     return

@@ -71,10 +71,10 @@ M.on_attach = function(client, bufnr)
     if client.server_capabilities.codeActionProvider and client.name ~= 'null-ls' then
       log('code action enabled for client', client.server_capabilities.codeActionProvider)
       api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-        group = api.nvim_create_augroup('NGCodeActGroup', {}),
+        group = api.nvim_create_augroup('NGCodeActGroup_'..tostring(bufnr), {}),
         buffer = bufnr,
         callback = function()
-          require('navigator.codeAction').code_action_prompt()
+          require('navigator.codeAction').code_action_prompt(bufnr)
         end,
       })
     end
