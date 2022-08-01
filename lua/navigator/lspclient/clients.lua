@@ -643,7 +643,7 @@ local function on_filetype()
     return
   end
   if uri == 'file://' or uri == 'file:///' then
-    log('skip loading for ft ', ft, uri)
+    trace('skip loading for ft ', ft, uri)
     return
   end
 

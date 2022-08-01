@@ -488,6 +488,7 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | \<Enter\>       | open preview file in nvim/Apply action                     |
 | n    | \<ESC\>         | close listview of floating window                          |
 | i/n  | \<C-e\>         | close listview of floating window                          |
+|  n   | \<C-q\>         | close listview and send results to quickfix                |
 | i/n  | \<C-b\>         | previous page in listview                                  |
 | i/n  | \<C-f\>         | next page in listview                                      |
 | i/n  | \<C-s\>         | save the modification to preview window to file            |

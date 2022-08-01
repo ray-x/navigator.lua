@@ -395,8 +395,8 @@ local function get_all_nodes(bufnr, filter, summary)
     for i = 1, n do
       local index = n + 1 - i
       local parent_def = parents[index]
-      log(parent_def.type, parent_def.node:type(), vim.treesitter.get_node_text(parent_def.node, bufnr))
-      log(def.node:type(), vim.treesitter.get_node_text(def.node, bufnr))
+      -- trace(parent_def.type, parent_def.node:type(), vim.treesitter.get_node_text(parent_def.node, bufnr))
+      -- trace(def.node:type(), vim.treesitter.get_node_text(def.node, bufnr))
       if
         ts_utils.is_parent(parent_def.node, def.node)
         or (
@@ -410,10 +410,10 @@ local function get_all_nodes(bufnr, filter, summary)
           )
         )
       then
-        log('is parent', i, index)
+        -- trace('is parent', i, index)
         break
       else
-        log('leave node', i, index)
+        -- trace('leave node', i, index)
         parents[index] = nil
       end
     end
@@ -477,7 +477,7 @@ local function get_all_nodes(bufnr, filter, summary)
       trace(item.node_text, item.kind, item.type)
       if scope ~= nil then
         if not is_func and summary then
-          log('skipped', item.node_text, item.type)
+          trace('skipped', item.node_text, item.type)
           goto continue
         end
         item.node_scope = ts_utils.node_to_lsp_range(scope)

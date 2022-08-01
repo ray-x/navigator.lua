@@ -14,7 +14,7 @@ local ref_view = function(err, locations, ctx, cfg)
   local truncate = cfg and cfg.truncate or 20
   local opts = {}
   trace('arg1', err, ctx, locations)
-  log(#locations, locations[1])
+  -- log(#locations, locations[1])
   if ctx.combine then
     -- wait for both reference and definition LSP request
     if ctx.results == nil then
@@ -45,23 +45,12 @@ local ref_view = function(err, locations, ctx, cfg)
     if references and references.result and #references.result > 0 then
       local refs = references.result
       vim.list_extend(locations, refs)
-      for _, value in pairs(locations) do
-        local vrange = value.range or { start = { line = 0 }, ['end'] = { line = 0 } }
-        for i = 1, #refs, 1 do
-          local rg = refs[i].range or {}
-          trace(value, refs[i])
-          trace(rg, vrange)
-          if rg.start.line == vrange.start.line and rg['end'].line == vrange['end'].line then
-            table.remove(refs, i)
-            break
-          end
-        end
-      end
     end
     err = nil
     trace(locations)
     -- lets de-dup first 10 elements. some lsp does not recognize definition and reference difference
     locations = util.dedup(locations)
+    trace(locations)
   end
   -- log("num", num)
   -- log("bfnr", bufnr)

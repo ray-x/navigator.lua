@@ -66,7 +66,7 @@ local function error_marker(result, ctx, config)
     end
 
     if not api.nvim_buf_is_loaded(bufnr) then
-      log('buf not loaded', bufnr)
+      trace('buf not loaded', bufnr)
       return
     end
 
@@ -187,7 +187,7 @@ local diag_hdlr = function(err, result, ctx, config)
 
   local mode = api.nvim_get_mode().mode
   if mode ~= 'n' and config.update_in_insert == false then
-    log('skip sign update in insert mode')
+    trace('skip sign update in insert mode')
   end
   local cwd = vim.loop.cwd()
   local ft = vim.bo.filetype

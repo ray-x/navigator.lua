@@ -504,7 +504,7 @@ function M.dedup(locations)
     if not range then
       break
     end
-    local key = (range.uri or value.targetUri or '')
+    local key = (value.uri or range.uri or value.targetUri or '')
       .. ':'
       .. tostring(range.start.line)
       .. ':'
@@ -524,7 +524,9 @@ function M.dedup(locations)
       end
     end
   end
+  table.sort(del)
   for i = #del, 1, -1 do
+    M.log('remove ', del[i])
     table.remove(locations, del[i])
   end
   return locations
