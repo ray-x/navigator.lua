@@ -21,7 +21,12 @@ function NG_custom_fold_text()
   local line = vim.fn.getline(vim.v.foldstart)
   local line_count = vim.v.foldend - vim.v.foldstart + 1
   -- log("" .. line .. " // " .. line_count .. " lines")
-  return ' ⚡' .. line .. ': ' .. line_count .. ' lines'
+  local ss, se = line:find('^%s*')
+  local spaces = line:sub(ss, se)
+  local tabspace = string.rep(' ', vim.o.tabstop)
+  spaces = spaces:gsub('\t', tabspace)
+  line = line:gsub('^%s*(.-)%s*$', '%1')
+  return spaces .. '⚡' .. line .. ': ' .. line_count .. ' lines'
 end
 
 vim.opt.foldtext = NG_custom_fold_text()
@@ -220,7 +225,7 @@ function M.get_fold_indic(lnum)
   local buf = api.nvim_get_current_buf()
   local shown = false
   for i = 1, vim.fn.tabpagenr('$') do
-    for key, value in pairs(vim.fn.tabpagebuflist(i)) do
+    for _, value in pairs(vim.fn.tabpagebuflist(i)) do
       if value == buf then
         shown = true
       end
