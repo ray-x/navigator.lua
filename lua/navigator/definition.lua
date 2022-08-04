@@ -74,7 +74,7 @@ local function def_preview(timeout_ms)
   local row = range.start.line
   -- in case there are comments
   row = math.max(row - 3, 1)
-  local delta = range.start.line - row + 1
+  local delta = range.start.line - row + 3
   local uri = data[1].uri or data[1].targetUri
   if not uri then
     return
@@ -85,7 +85,12 @@ local function def_preview(timeout_ms)
   end
 
   local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
-  local lines_num = 12
+
+  -- TODO: 32/64 should be an option
+  local lines_num = 64
+  if range['end'] ~= nil then
+    lines_num = math.max(lines_num, range['end'].line - range.start.line + 4)
+  end
   if ok then
     local ts = require('navigator.treesitter')
     local root = parsers.get_parser(bufnr)
@@ -97,10 +102,10 @@ local function def_preview(timeout_ms)
 
     local sr, _, er, _ = ts.get_node_scope(def_node)
     log(sr, er)
-    lines_num = math.max(lines_num, er - sr + 3) -- comments etc
+    lines_num = math.max(lines_num, er - sr + 5) -- comments etc
   end
 
-  -- TODO: 12 should be an option
+  -- TODO: 32 should be an option
   local definition = vim.api.nvim_buf_get_lines(bufnr, row, range['end'].line + lines_num, false)
   local def_line = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range.start.line + 1, false)
   for _ = 1, math.min(3, #definition), 1 do
@@ -126,7 +131,7 @@ local function def_preview(timeout_ms)
     relative = 'cursor',
     style = 'minimal',
     ft = filetype,
-    rect = { width = width, height = #definition + 3, pos_y = 2 },
+    rect = { width = width, height = math.min(#definition + 3, 16), pos_y = 2 }, -- TODO: 16 hardcoded
     data = definition,
     enter = true,
     border = _NgConfigValues.border or 'shadow',
