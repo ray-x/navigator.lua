@@ -61,21 +61,23 @@ local codelens_hdlr = function(err, result, ctx, cfg)
   end
 end
 
-function M.setup()
-  vim.cmd('highlight! link LspCodeLens LspDiagnosticsHint')
-  vim.cmd('highlight! link LspCodeLensText LspDiagnosticsInformation')
-  vim.cmd('highlight! link LspCodeLensTextSign LspDiagnosticsSignInformation')
-  vim.cmd('highlight! link LspCodeLensTextSeparator Boolean')
-
-  vim.cmd('augroup navigator.codelenses')
-  vim.cmd('  autocmd!')
-  vim.cmd("autocmd BufEnter,CursorHold,InsertLeave <buffer> lua require('navigator.codelens').refresh()")
-  vim.cmd('augroup end')
+function M.setup(bufnr)
+  vim.api.nvim_set_hl(0, 'LspCodeLens', { link = 'LspDiagnosticsHint', default = true })
+  vim.api.nvim_set_hl(0, 'LspCodeLensText', { link = 'LspDiagnosticsInformation', default = true })
+  vim.api.nvim_set_hl(0, 'LspCodeLensSign', { link = 'LspDiagnosticsInformation', default = true })
+  vim.api.nvim_set_hl(0, 'LspCodeLensSeparator', { link = 'Boolean', default = true })
+  vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI', 'InsertLeave' }, {
+    group = vim.api.nvim_create_augroup('nv__codelenses', {}),
+    buffer = bufnr or vim.api.nvim_win_get_buf(),
+    callback = function()
+      require('go.codelens').refresh()
+    end,
+  })
   local on_codelens = vim.lsp.handlers['textDocument/codeLens']
   vim.lsp.handlers['textDocument/codeLens'] = function(err, result, ctx, cfg)
     -- trace(err, result, ctx.client_id, ctx.bufnr, cfg or {})
     cfg = cfg or {}
-    ctx = ctx or { bufnr = vim.api.nvim_get_current_buf() }
+    ctx = ctx or { bufnr = bufnr or vim.api.nvim_get_current_buf() }
     on_codelens(err, result, ctx, cfg)
     codelens_hdlr(err, result, ctx, cfg)
   end

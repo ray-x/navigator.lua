@@ -628,7 +628,7 @@ local function setup(user_opts, cnt)
 
   --- if code lens enabled
   if _NgConfigValues.lsp.code_lens_action.enable then
-    require('navigator.codelens').setup()
+    require('navigator.codelens').setup(bufnr)
   end
 
   -- _LoadedFiletypes[ft .. tostring(bufnr)] = true -- may prevent lsp config when reboot lsp
@@ -658,7 +658,7 @@ local function on_filetype()
     _NG_Loaded[bufnr] = _NG_Loaded[bufnr] + 1   -- do not hook and trigger filetype event multiple times
   end
   if _NG_Loaded[bufnr] == true then
-    _NG_Loaded = 1 -- record the count
+    _NG_Loaded[bufnr] = 1 -- record the count
   end
 
   -- as setup will send  filetype event as well
