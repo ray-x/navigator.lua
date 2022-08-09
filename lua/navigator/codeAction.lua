@@ -152,17 +152,19 @@ local code_action_req = function(_call_back_fn, diagnostics)
 end
 
 local function sort_select(action_tuples, opts, on_user_choice)
-  -- table.sort(action_tuples, function(a, b)
-  --   return a[1] > b[1]
-  -- end)
+  if action_tuples ~= nil and action_tuples[1][2] ~= nil and action_tuples[1][2].command then
+    table.sort(action_tuples, function(a, b)
+      return a[1] > b[1]
+    end)
+  end
+
+  trace(action_tuples)
   require('guihua.gui').select(action_tuples, opts, on_user_choice)
 end
 
 code_action.code_action = function()
   local original_select = vim.ui.select
   vim.ui.select = sort_select
-
-  log('codeaction')
 
   vim.lsp.buf.code_action()
   vim.defer_fn(function()
