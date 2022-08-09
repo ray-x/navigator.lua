@@ -70,7 +70,7 @@ function M.setup(bufnr)
     group = vim.api.nvim_create_augroup('nv__codelenses', {}),
     buffer = bufnr or vim.api.nvim_win_get_buf(),
     callback = function()
-      require('go.codelens').refresh()
+      require('navigator.codelens').refresh()
     end,
   })
   local on_codelens = vim.lsp.handlers['textDocument/codeLens']
