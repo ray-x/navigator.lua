@@ -1,3 +1,4 @@
 selene.toml
 lua/navigator.lua.bak
 tests/fixtures/tests
+doc/tags
