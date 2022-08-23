@@ -58,7 +58,10 @@ local function error_marker(result, ctx, config)
     if bufnr == nil then
       bufnr = vim.uri_to_bufnr(result.uri)
     end
-    local fname = api.nvim_buf_get_name(bufnr)
+    local success, fname = pcall(api.nvim_buf_get_name, bufnr)
+    if not success then
+      return
+    end
     local uri = vim.uri_from_fname(fname)
     if uri ~= result.uri then
       log('not same buf', ctx, result.uri, bufnr, vim.fn.bufnr())
