@@ -116,7 +116,7 @@ describe('should run lsp reference', function()
     print('items', vim.inspect(items))
     eq(win.ctrl.data[1].display_filename, './tests/fixtures/interface.go')
     eq(win.ctrl.data[2].range.start.line, 14)
-    eq(items[1].display_filename, './interface.go')
+    eq(items[1].display_filename, './tests/fixtures/interface.go')
 
     -- eq(width, 60)
   end)
