@@ -42,6 +42,7 @@ local disabled_ft = {
   'windline',
   'notify',
   'nofile',
+  'help',
   '',
 }
 -- local cap = vim.lsp.protocol.make_client_capabilities()

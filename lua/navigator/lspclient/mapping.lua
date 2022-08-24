@@ -216,6 +216,7 @@ local function set_mapping(lsp_attach_info)
       if value.desc then
         opts.desc = value.desc
       end
+      opts.buffer = bufnr
       vim.keymap.set(value.mode or 'n', value.key, value.func, opts)
       if string.find(value.desc, 'range format') and value.mode == 'v' then
         rfmtkey = value.key
