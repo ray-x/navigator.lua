@@ -117,7 +117,8 @@ local function def_preview(timeout_ms)
     end
   end
   local width = 40
-  local maxwidth = math.floor(vim.fn.winwidth(0) * 4 / 5)
+
+  local maxwidth = math.floor( vim.api.nvim_get_option('columns') * 0.8)
   for _, value in pairs(definition) do
     -- log(key, value, width)
     width = math.max(width, #value + 4)

@@ -37,7 +37,7 @@ function M.workspace_symbol_live()
   local height = _NgConfigValues.height or 0.4
   height = math.floor(height * vfn.winheight('%'))
   local width = _NgConfigValues.width or 0.7
-  width = math.floor(width * vfn.winwidth('%'))
+  width = math.floor(vim.api.nvim_get_option('columns') * width)
   local bufnr = vim.api.nvim_get_current_buf()
   local ft = vim.o.ft
   local data = { { text = 'input the symbol name to start fuzzy search' } }

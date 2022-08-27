@@ -89,7 +89,7 @@ local function ctags_symbols()
   local height = _NgConfigValues.height or 0.4
   local width = _NgConfigValues.width or 0.7
   height = math.floor(height * vfn.winheight('%'))
-  width = math.floor(width * vfn.winwidth('%'))
+  width = math.floor(vim.api.nvim_get_option('columns') * width)
   local items = {}
   local ctags_file = _NgConfigValues.ctags.tagfile
   if not util.file_exists(ctags_file) then

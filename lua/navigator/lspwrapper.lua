@@ -19,7 +19,7 @@ cwd = gutil.add_pec(cwd)
 local ts_nodes = require('navigator.lru').new(1000, 1024 * 1024)
 local ts_nodes_time = require('navigator.lru').new(1000)
 local TS_analysis_enabled = require('navigator').config_values().treesitter_analysis
-
+local nts = require('navigator.treesitter')
 -- extract symbol from range
 function M.get_symbol(text, range)
   if range == nil then
@@ -169,7 +169,7 @@ local function ts_functions(uri, optional)
     lerr('ts not enabled')
     return nil
   end
-  local ts_func = require('navigator.treesitter').buf_func
+  local ts_func = nts.buf_func
   local bufnr = vim.uri_to_bufnr(uri)
   local x = os.clock()
   trace(ts_nodes)
@@ -230,7 +230,7 @@ local function ts_definition(uri, range, optional)
   if optional then
     return
   end
-  local ts_def = require('navigator.treesitter').find_definition
+  local ts_def = nts.find_definition
   local bufnr = vim.uri_to_bufnr(uri)
   local x = os.clock()
   trace(ts_nodes)
@@ -252,6 +252,7 @@ local function ts_definition(uri, range, optional)
 end
 
 local function find_ts_func_by_range(funcs, range)
+  log(funcs, range)
   if funcs == nil or range == nil then
     return nil
   end
@@ -352,7 +353,6 @@ function M.locations_to_items(locations, ctx)
 
   local unload_bufnrs = {}
   for i, loc in ipairs(locations) do
-    local funcs = nil
     local item = lsp.util.locations_to_items({ loc }, enc)[1]
     item.range = locations[i].range or locations[i].targetRange
     item.uri = locations[i].uri or locations[i].targetUri
@@ -363,13 +363,25 @@ function M.locations_to_items(locations, ctx)
       log(cwd)
     end
     -- only load top 30 file.
-    local proj_file = item.uri:find(cwd) or is_win or i < 30
+    local proj_file = item.uri:find(cwd) or is_win or i < _NgConfigValues.treesitter_analysis_max_num
     local unload, def
+    local context = ''
     if TS_analysis_enabled and proj_file then
-      funcs, unload = ts_functions(item.uri, ts_optional(i, #unload_bufnrs))
+      local ts_context = nts.ref_context
 
+      local bufnr = vim.uri_to_bufnr(item.uri)
+      if not api.nvim_buf_is_loaded(bufnr) then
+        log('! load buf !', item.uri, bufnr)
+        vim.fn.bufload(bufnr)
+        unload = bufnr
+      end
+      context = ts_context({ bufnr = bufnr, pos = item.range }) or ''
+      log(context)
+
+      -- TODO: unload buffers
       if unload then
         table.insert(unload_bufnrs, unload)
+        unload = nil
       end
       if not uri_def[item.uri] then
         -- find def in file
@@ -410,7 +422,7 @@ function M.locations_to_items(locations, ctx)
     item.filename = assert(vim.uri_to_fname(item.uri))
     local filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
     item.display_filename = filename or item.filename
-    item.call_by = find_ts_func_by_range(funcs, item.range)
+    item.call_by = context -- find_ts_func_by_range(funcs, item.range)
     item.rpath = util.get_relative_path(cwd, item.filename)
     width = math.max(width, #item.text)
     item.symbol_name = M.get_symbol(item.text, item.range)

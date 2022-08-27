@@ -23,6 +23,7 @@ local cwd = vim.loop.cwd()
 local log = require('navigator.util').log
 local lerr = require('navigator.util').error
 local trace = function(...) end
+trace = log
 if vim.fn.has('nvim-0.7') == 1 then
   local trace = require('navigator.util').trace
 end
@@ -109,6 +110,95 @@ function M.find_definition(range, bufnr)
   end
 end
 
+function M.get_tsnode_at_pos(pos, bufnr, ignore_injected_langs)
+  if not pos or not pos.start then
+    return
+  end
+  local cursor_range = { pos.start.line, pos.start.character }
+
+  local buf = bufnr
+  local root_lang_tree = parsers.get_parser(buf)
+  if not root_lang_tree then
+    return
+  end
+
+  local root
+  if ignore_injected_langs then
+    for _, tree in ipairs(root_lang_tree:trees()) do
+      local tree_root = tree:root()
+      if tree_root and ts_utils.is_in_node_range(tree_root, cursor_range[1], cursor_range[2]) then
+        root = tree_root
+        break
+      end
+    end
+  else
+    root = ts_utils.get_root_for_position(cursor_range[1], cursor_range[2], root_lang_tree)
+  end
+
+  if not root then
+    return
+  end
+
+  return root:named_descendant_for_range(cursor_range[1], cursor_range[2], cursor_range[1], cursor_range[2])
+end
+
+-- Trim spaces and opening brackets from end
+local transform_line = function(line)
+  line = line:gsub("%s*[%[%(%{]*%s*$", "")
+  line = line:gsub("function", "")
+  line = line:gsub("func%w*%s+", "")
+  if _NgConfigValues.treesitter_analysis_condense then
+    line = line:gsub("%([%a,%s]+%)", "()")
+  end
+  return line
+end
+
+function M.ref_context(opts)
+  if not parsers.has_parser() then
+    return
+  end
+  local options = opts or {}
+  -- if type(opts) == "number" then
+  --   options = { indicator_size = opts }
+  -- end
+
+  local bufnr = options.bufnr or 0
+  local pos = options.pos
+  if not pos then
+    pos = {start = vim.lsp.util.make_position_params().position}
+  end
+  local indicator_size = options.indicator_size or 100
+  local type_patterns = options.type_patterns or { "class", "function", "method" }
+  local transform_fn = options.transform_fn or transform_line
+  local separator = options.separator or "  "
+
+  local current_node = M.get_tsnode_at_pos(pos, bufnr)
+  if not current_node then
+    log('no node at pos', bufnr, pos)
+    return ""
+  end
+
+  local lines = {}
+  local expr = current_node
+
+  while expr do
+    local line = ts_utils._get_line_for_node(expr, type_patterns, transform_fn, bufnr)
+    log(line)
+    if line ~= "" and not vim.tbl_contains(lines, line) then
+      table.insert(lines, 1, line)
+    end
+    expr = expr:parent()
+  end
+
+  local text = table.concat(lines, separator)
+  local text_len = #text
+  if text_len > indicator_size then
+    return "..." .. text:sub(text_len - indicator_size, text_len)
+  end
+
+  return text
+end
+
 --- Get definitions of bufnr (unique and sorted by order of appearance).
 --- This function copy from treesitter/refactor/navigation.lua
 local function get_definitions(bufnr)
@@ -121,23 +211,23 @@ local function get_definitions(bufnr)
       ts_locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
         -- lua doesn't compare tables by value,
         -- use the value from byte count instead.
-        local k, l, start = node:start()
+        local row, col, offset = node:start()
+        local erow, ecol, end_ = node:end_()
         trace(node, match)
-        trace(k, l, start, node:parent(), node:parent():start(), node:parent():type())
+        trace(row, col, erow, offset, node:parent(), node:parent():start(), node:parent():type())
 
         if node and node:parent() and string.find(node:parent():type(), 'parameter_declaration') then
           log('parameter_declaration skip')
           return
         end
-        nodes_set[start] = { node = node, type = match or '' }
+        nodes_set[offset] = { node = node, type = match or '' }
       end)
     end
 
     if loc.method then -- for go
       ts_locals.recurse_local_nodes(loc.method, function(def, node, full_match, match)
-        local k, l, start = node:start()
-
-        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
+        local row, col, start = node:start()
+        trace(row, col, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
         if node:type() == 'field_identifier' and nodes_set[start] == nil then
           nodes_set[start] = { node = node, type = 'method' }
         end
@@ -154,16 +244,32 @@ local function get_definitions(bufnr)
     end
     if loc.reference then -- for go
       ts_locals.recurse_local_nodes(loc.reference, function(def, node, full_match, match)
-        local k, l, start = node:start()
+        local row, col, start = node:start()
         local p1, p1t = '', ''
         local p2, p2t = '', ''
+        local p3, p3t = '', ''
         if node:parent() and node:parent():parent() then
           p1 = node:parent()
           p1t = node:parent():type()
           p2 = node:parent():parent()
           p2t = node:parent():parent():type()
         end
-        trace(k, l, start, def, node, full_match, match, p1t, p1, node:parent():start(), node:parent():type(), p2, p2t)
+        if p2 and p2:parent() then
+          p3 = p2:parent()
+          p3t = p2:parent():type()
+        end
+        trace(row, col, start, def, node, full_match, match, p1t, p1, node:parent():start(), node:parent():type(), p2, p2t, p3, p3t)
+        if p1t == 'arrow_function' then
+          row, col, start = p1:start()
+          trace('arrow_function 1', row, col)
+          nodes_set[start] = { node = p1, type = p1t }
+        end
+
+        if p2t == 'arrow_function' then
+          row, col, start = p2:start()
+          trace('arrow_function 2', row, col)
+          nodes_set[start] = { node = p2, type = p2t }
+        end
         if nodes_set[start] == nil then
           if -- qualified_type : e.g. io.Reader inside interface
             node:parent()
@@ -210,7 +316,7 @@ local function get_scope(type, source)
   local parent = current:parent()
   trace(source:type(), source:range(), parent)
 
-  if type == 'method' or type == 'function' and parent ~= nil then
+  if type == 'method' or type:find('function') and parent ~= nil then
     trace(parent:type(), parent:range())
     -- a function name
     if parent:type() == 'function_name' then
@@ -345,7 +451,7 @@ local function get_all_nodes(bufnr, filter, summary)
 
   trace(bufnr, filter, summary)
   if not bufnr then
-    vim.notify('get_all_node invalide bufnr', vim.lsp.log_levels.WARN)
+    vim.notify('get_all_node invalid bufnr', vim.lsp.log_levels.WARN)
   end
   summary = summary or false
   local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
@@ -362,17 +468,13 @@ local function get_all_nodes(bufnr, filter, summary)
   local display_filename = fname:gsub(cwd .. path_sep, path_cur, 1)
 
   local all_nodes = {}
-  -- Support completion-nvim customized label map
-  -- local customized_labels = vim.g.completion_customize_lsp_label or {}
-
-  -- Force some types to act like they are parents
-  -- instead of neighbors of the next nodes.
-  local containers = {
+  local containers =  filter or {
     ['function'] = true,
     ['local_function'] = true,
     ['arrow_function'] = true,
     ['type'] = true,
     ['class'] = true,
+    ['call_expression'] = true,
     -- ['var'] = true,
     ['struct'] = true,
     ['method'] = true,
@@ -440,7 +542,10 @@ local function get_all_nodes(bufnr, filter, summary)
         trace('skipped', item.type, item.kind)
         goto continue
       end
-      item.node_text = vim.treesitter.get_node_text(tsdata, bufnr) or ''
+      local text = vim.treesitter.get_node_text(tsdata, bufnr) or ''
+      text = vim.split(text, '\n')[1] or ''
+      item.node_text = text
+      log(item.node_text)
       local scope, is_func
 
       if summary then
@@ -448,6 +553,7 @@ local function get_all_nodes(bufnr, filter, summary)
       else
         scope, is_func = get_smallest_context(tsdata)
       end
+      log(item, scope, is_func)
       if is_func then
         -- hack for lua and maybe other language aswell
         local parent = tsdata:parent()
@@ -581,6 +687,7 @@ function M.buf_func(bufnr)
 
   local all_nodes, width = get_all_nodes(bufnr, {
     ['function'] = true,
+    ['arrow_function'] = true,
     ['var'] = true,
     ['method'] = true,
     ['class'] = true,
@@ -614,6 +721,7 @@ function M.buf_func(bufnr)
       return false
     end)
   end
+  log(all_nodes)
 
   return all_nodes, width
 end

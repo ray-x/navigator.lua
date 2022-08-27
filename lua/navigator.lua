@@ -32,11 +32,15 @@ _NgConfigValues = {
   ts_fold = false,
   treesitter_analysis = true, -- treesitter variable context
   treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
+  treesitter_analysis_condense = true, -- short format of function
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
   signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
-  ctags = { cmd = 'ctags', tagfile = '.tags', options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number',
+  ctags = {
+    cmd = 'ctags',
+    tagfile = '.tags',
+    options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number',
   },
   lsp = {
     enable = true, -- if disabled make sure add require('navigator.lspclient.mapping').setup() in you on_attach

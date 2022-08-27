@@ -264,6 +264,7 @@ require'navigator'.setup({
   -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
   treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
+  treesitter_analysis_condense = true, -- condense form for treesitter analysis
   -- this value prevent slow in large projects, e.g. found 100000 reference in a project
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil or 100 to disable it
 
