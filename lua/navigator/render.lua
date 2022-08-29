@@ -170,10 +170,11 @@ function M.prepare_for_render(items, opts)
         -- let check if there are unmatched "/'
       end
       if #space + #item.text + #ts_report >= win_width then
-        if #item.text + #ts_report > win_width then
-          trace('exceeding', #item.text, #ts_report, win_width)
+        if #item.text + #ts_report >= win_width then
           space = '  '
           local len = math.max(win_width - #item.text - 4, 16)
+
+          trace('exceeding', #item.text, #ts_report, win_width, len)
           ts_report = ts_report:sub(1, len)
         else
           local remain = win_width - #item.text - #ts_report

@@ -148,7 +148,10 @@ local transform_line = function(line)
   line = line:gsub("function", "")
   line = line:gsub("func%w*%s+", "")
   if _NgConfigValues.treesitter_analysis_condense then
-    line = line:gsub("%([%a,%s]+%)", "()")
+    line = line:gsub("%([%a%.,%s%[%]%*]+%)", "()")
+    -- this is for multi return
+    line = line:gsub("%([%a%.,%s%[%]%*]+%)", "()")
+    line = line:gsub("%(%)%s*%(%)", "()")
   end
   return line
 end
@@ -158,9 +161,6 @@ function M.ref_context(opts)
     return
   end
   local options = opts or {}
-  -- if type(opts) == "number" then
-  --   options = { indicator_size = opts }
-  -- end
 
   local bufnr = options.bufnr or 0
   local pos = options.pos
