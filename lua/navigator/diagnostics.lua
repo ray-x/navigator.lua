@@ -464,24 +464,38 @@ end
 
 function M.get_line_diagnostic()
   local lnum = api.nvim_win_get_cursor(0)[1] - 1
-  return diagnostic.get(api.nvim_get_current_buf(), { lnum = lnum })
+  local diags = diagnostic.get(api.nvim_get_current_buf(), { lnum = lnum })
+
+  table.sort(diags, function(diag1, diag2)
+    return diag1.severity < diag2.severity
+  end)
+  return diags
 end
 
 function M.show_diagnostics(pos)
   local bufnr = api.nvim_get_current_buf()
-  local lnum = api.nvim_win_get_cursor(0)[1] - 1
-  local opt = { border = 'single' }
-  if diagnostic.open_float and type(diagnostic.open_float) == 'function' then
+
+  local lnum, col = unpack(api.nvim_win_get_cursor(0))
+  lnum = lnum - 1
+  local opt = { border = 'single', severity_sort = true }
+
+  if pos ~= nil and type(pos) == 'number' then
+    opt.scope = 'buffer'
+  else
     if pos == true then
       opt.scope = 'cursor'
     else
       opt.scope = 'line'
     end
-    diagnostic.open_float(bufnr, opt)
-  else
-    -- deprecated
-    diagnostic.show_line_diagnostics(opt, bufnr, lnum)
   end
+
+  local diags = M.get_line_diagnostic()
+  if diags == nil or next(diags) == nil then
+    return
+  end
+  local diag1 = diags[1]
+  opt.offset_x = -1 * (col - diag1.col)
+  diagnostic.open_float(bufnr, opt)
 end
 
 function M.treesitter_and_diag_panel()
