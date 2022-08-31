@@ -556,4 +556,17 @@ function M.dirname(pathname)
   return result
 end
 
+function M.sub_match(str)
+  local _, j = string.gsub(str, [["]], '')
+  if j % 2 == 1 then
+    str = str .. '"'
+  end
+  _, j = string.gsub(str, [[']], '')
+  if j % 2 == 1 then
+    str = str .. [[']]
+  end
+  str = str .. ''
+  return str
+end
+
 return M

@@ -1,7 +1,9 @@
-local log = require('guihua.log').info
-local trace = require('guihua.log').trace
-local M = {}
+local util = require('navigator.util')
+local log = util.log
+local trace = util.trace
 local clone = require('guihua.util').clone
+
+local M = {}
 local function filename(url)
   if url == nil then
     return ''
@@ -162,15 +164,7 @@ function M.prepare_for_render(items, opts)
       end
       if trim then
         item.text = string.sub(item.text, 1, l)
-        local _, j = string.gsub(item.text, [["]], '')
-        if j % 2 == 1 then
-          item.text = item.text .. '"'
-        end
-        _, j = string.gsub(item.text, [[']], '')
-        if j % 2 == 1 then
-          item.text = item.text .. [[']]
-        end
-        item.text = item.text .. ''
+        item.text = util.sub_match(item.text)
         -- let check if there are unmatched "/'
       end
       if #space + #item.text + #ts_report >= win_width then
