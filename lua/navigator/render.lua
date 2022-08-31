@@ -69,7 +69,7 @@ function M.prepare_for_render(items, opts)
     icon = devicons.get_icon(fn, ext) or icon
   end
   -- local call_by_presented = false
-  opts.width = opts.width or math.floor( vim.api.nvim_get_option('columns') * 0.8)
+  opts.width = opts.width or math.floor(vim.api.nvim_get_option('columns') * 0.8)
   local win_width = opts.width -- buf
 
   for i = 1, #items do
@@ -155,9 +155,13 @@ function M.prepare_for_render(items, opts)
     end
     if #ts_report > 1 then
       space, trim = get_pads(win_width, item.text, ts_report)
+
+      local l = math.max(20, opts.width - math.min(20, #ts_report))
+      if trim and #item.text < l then
+        trim = false
+      end
       if trim then
-        local ts_r = ts_report or ''
-        item.text = string.sub(item.text, 1, math.max(1, opts.width - math.max(20, #ts_r)))
+        item.text = string.sub(item.text, 1, l)
         local _, j = string.gsub(item.text, [["]], '')
         if j % 2 == 1 then
           item.text = item.text .. '"'

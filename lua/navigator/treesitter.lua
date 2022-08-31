@@ -193,7 +193,7 @@ function M.ref_context(opts)
   local text = table.concat(lines, separator)
   local text_len = #text
   if text_len > indicator_size then
-    return "..." .. text:sub(text_len - indicator_size, text_len)
+    return '' .. text:sub(text_len - indicator_size, text_len)
   end
 
   return text
