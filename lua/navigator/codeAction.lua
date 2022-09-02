@@ -188,12 +188,14 @@ code_action.range_code_action = function(startpos, endpos)
 
   local original_input = vim.ui.input
   vim.ui.input = require('guihua.input').input
-  vim.lsp.buf.range_code_action(context, startpos, endpos)
+
+  if vim.fn.has('nvim-0.8') then
+    vim.lsp.buf.code_action({context=context ,range={start = startpos, ['end'] = endpos}})
+  else
+    vim.lsp.buf.range_code_action(context, startpos, endpos)
+  end
   vim.defer_fn(function()
     vim.ui.select = original_select
-  end, 1000)
-
-  vim.defer_fn(function()
     vim.ui.input = original_input
   end, 1000)
 end
