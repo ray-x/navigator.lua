@@ -442,7 +442,6 @@ local function lsp_startup(ft, retry, user_lsp_opts)
      local pkg_name = require "mason-lspconfig.mappings.server".lspconfig_to_package[lspconfig[lspclient].name]
      local pkg = require "mason-registry".get_package(pkg_name)
 
-
       log('lsp installer server config ' .. lspconfig[lspclient].name, pkg)
       if pkg then
         local path = pkg:get_install_path()
@@ -453,7 +452,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         end
 
         cfg.cmd = cfg.cmd or {}
-        cfg.cmd[1] = path .. path_sep .. pkg.name
+        cfg.cmd[1] = vfn.stdpath('data') .. path_sep .. 'mason' .. path_sep .. 'bin' .. pkg.name
         if vfn.executable(cfg.cmd[1]) == 0 then
           log('failed to find cmd', cfg.cmd[1], "fallback")
           return load_cfg(ft, lspclient, cfg, loaded)
