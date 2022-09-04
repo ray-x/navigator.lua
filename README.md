@@ -595,7 +595,9 @@ To start LSP installed by lsp_installer, please use following setups
 require'navigator'.setup({
   -- lsp_installer = false -- default value is false
   lsp = {
-    tsserver = { cmd = {'your tsserver installed by lsp_installer'} }
+    tsserver = { cmd = {'your tsserver installed by lsp_installer or mason'} }
+    -- e.g. tsserver = { cmd = {'/home/username/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/bin/tsserver'} }
+
   }
 })
 
@@ -610,6 +612,7 @@ require'navigator'.setup({
   lsp = {
     tsserver = {
       cmd = { "/Users/username/.local/share/nvim/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio" }
+      -- or mason: cmd = { "/Users/username/.local/share/nvim/mason/packages/pyright/node_modules/pyright/index.js", "--stdio"}
     }
   }
 }

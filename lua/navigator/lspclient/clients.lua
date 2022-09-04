@@ -141,7 +141,7 @@ local function load_cfg(ft, client, cfg, loaded, starting)
 
     trace('lsp for client', client, cfg)
     if cmd == nil or #cmd == 0 or vfn.executable(cmd[1]) == 0 then
-      log('lsp not installed for client', client, cmd)
+      log('lsp not installed for client', client, cmd, "fallback")
       return
     end
     if _NG_Loaded == nil then
@@ -437,7 +437,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       local servers = require'mason-lspconfig'.get_installed_servers()
       if not vim.tbl_contains(servers, lspconfig[lspclient].name) then
         log('mason server not installed', lspconfig[lspclient].name)
-        return
+        -- return
       end
      local pkg_name = require "mason-lspconfig.mappings.server".lspconfig_to_package[lspconfig[lspclient].name]
      local pkg = require "mason-registry".get_package(pkg_name)
@@ -455,7 +455,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         cfg.cmd = cfg.cmd or {}
         cfg.cmd[1] = path .. path_sep .. pkg.name
         if vfn.executable(cfg.cmd[1]) == 0 then
-          log('failed to find cmd', cfg.cmd[1])
+          log('failed to find cmd', cfg.cmd[1], "fallback")
+          return load_cfg(ft, lspclient, cfg, loaded)
         else
           log('cmd installed', cfg.cmd)
         end
