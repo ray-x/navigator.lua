@@ -452,7 +452,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         end
 
         cfg.cmd = cfg.cmd or {}
-        cfg.cmd[1] = vfn.stdpath('data') .. path_sep .. 'mason' .. path_sep .. 'bin' .. pkg.name
+        cfg.cmd[1] = table.concat({vfn.stdpath('data'), 'mason', 'bin', pkg.name}, path_sep)
         if vfn.executable(cfg.cmd[1]) == 0 then
           log('failed to find cmd', cfg.cmd[1], "fallback")
           return load_cfg(ft, lspclient, cfg, loaded)
