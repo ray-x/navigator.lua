@@ -236,6 +236,8 @@ local diag_hdlr = function(err, result, ctx, config)
         if v.severity > 2 then
           head = _NgConfigValues.icons.diagnostic_head_severity_3
         end
+      else
+        v.severity = 2
       end
       if v.relatedInformation and v.relatedInformation[1] then
         local info = v.relatedInformation[1]
