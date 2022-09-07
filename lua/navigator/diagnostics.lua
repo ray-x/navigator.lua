@@ -226,14 +226,16 @@ local diag_hdlr = function(err, result, ctx, config)
       item.uri = uri
       -- trace(item)
       local head = _NgConfigValues.icons.diagnostic_head
-      if v.severity == 1 then
-        head = _NgConfigValues.icons.diagnostic_head_severity_1
-      end
-      if v.severity == 2 then
-        head = _NgConfigValues.icons.diagnostic_head_severity_2
-      end
-      if v.severity > 2 then
-        head = _NgConfigValues.icons.diagnostic_head_severity_3
+      if v.severity then
+        if v.severity == 1 then
+          head = _NgConfigValues.icons.diagnostic_head_severity_1
+        end
+        if v.severity == 2 then
+          head = _NgConfigValues.icons.diagnostic_head_severity_2
+        end
+        if v.severity > 2 then
+          head = _NgConfigValues.icons.diagnostic_head_severity_3
+        end
       end
       if v.relatedInformation and v.relatedInformation[1] then
         local info = v.relatedInformation[1]

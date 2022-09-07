@@ -28,6 +28,7 @@ return {
   'nimls',
   'intelephense',
   'vuels',
+  'volar',
   'phpactor',
   'omnisharp',
   'r_language_server',
