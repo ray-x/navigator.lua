@@ -71,7 +71,7 @@ local function sumneko_lua()
   local luadev = {}
   local user_luadev = _NgConfigValues.lsp['lua-dev']
   if user_luadev then
-    luadev = vim.tbl_deep_extend('force', luadev, user_luadev)
+    luadevcfg = vim.tbl_deep_extend('force', luadevcfg, user_luadev)
   end
   require('navigator.lazyloader').load('lua-dev.nvim', 'folke/lua-dev.nvim')
 
@@ -80,7 +80,7 @@ local function sumneko_lua()
     luadev = l.setup(luadevcfg)
   end
 
-  sumneko_cfg = vim.tbl_deep_extend('force', luadev, sumneko_cfg)
+  sumneko_cfg = vim.tbl_deep_extend('force', sumneko_cfg, luadev)
   return sumneko_cfg
 end
 
