@@ -660,8 +660,9 @@ COMMANDS                                                      *navigator-command
 | Nctags {args}      | show ctags symbols, args: -g regen ctags |
 | LspRestart   | reload lsp |
 | LspSymbols   | document symbol in side panel |
+| NRefPanel    |symbol reference in side panel |
 | TSymobls   | treesitter symbol in side panel |
-| CallTree {args} | lsp call hierarchy call tree, args: -i (incomming default), -o (outgoing) |
+| Calltree {args} | lsp call hierarchy call tree, args: -i (incomming default), -o (outgoing) |
 
 :LspToggleFmt                                         *:LspToggleFmt*
         Toggle lsp auto format.
@@ -682,6 +683,9 @@ COMMANDS                                                      *navigator-command
 
 :TSSymbols                                         *:TSSymbols*
         Treesitter symbol in side panel.
+
+:NRefPanel                                         *:NRefPanel*
+        Symbol reference in side panel.
 
 :Calltree [flags]                                         *:Calltree*
         Lsp call hierarchy call tree.

@@ -11,6 +11,7 @@ local locations_to_items = lsphelper.locations_to_items
 
 local M = {}
 local ref_view = function(err, locations, ctx, cfg)
+  cfg = cfg or {}
   local truncate = cfg and cfg.truncate or 20
   local opts = {}
   trace('arg1', err, ctx, locations)
@@ -78,7 +79,7 @@ local ref_view = function(err, locations, ctx, cfg)
   local thread_items = vim.deepcopy(items)
   log('splits: ', #items, #second_part)
 
-  local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
+  local ft = vim.api.nvim_buf_get_option(ctx.bufnr or 0, 'ft')
 
   local wwidth = vim.api.nvim_get_option('columns')
   local mwidth = _NgConfigValues.width
@@ -94,12 +95,22 @@ local ref_view = function(err, locations, ctx, cfg)
     api = 'Reference',
     enable_preview_edit = true,
   }
-  local listview = gui.new_list_view(opts)
+  local listview
+  if not ctx.no_show then
+    listview = gui.new_list_view(opts)
 
-  if listview == nil then
-    vim.notify('failed to create preview windows', vim.lsp.log_levels.INFO)
-    return
+    if listview == nil then
+      vim.notify('failed to create preview windows', vim.lsp.log_levels.INFO)
+      return
+    end
   end
+
+  if ctx.no_show then
+    opts.side_panel = true
+    local data = require('navigator.render').prepare_for_render(items, opts)
+    return data
+  end
+
   -- trace("update items", listview.ctrl.class)
   local nv_ref_async
   nv_ref_async = vim.loop.new_async(vim.schedule_wrap(function()
@@ -134,6 +145,9 @@ end
 local ref_hdlr = function(err, locations, ctx, cfg)
   _NgConfigValues.closer = nil
   trace(err, locations, ctx, cfg)
+  if ctx.no_show then
+    return ref_view(err, locations, ctx, cfg)
+  end
   M.async_hdlr = vim.loop.new_async(vim.schedule_wrap(function()
     ref_view(err, locations, ctx, cfg)
     if M.async_hdlr:is_active() then
@@ -208,7 +222,36 @@ local ref = function()
   end)
 end
 
+local function side_panel()
+  local Panel = require('guihua.panel')
+
+  local currentWord = vim.fn.expand('<cword>')
+  local p = Panel:new({
+    scope = 'range',
+    header = '  ' .. currentWord .. ' ref ',
+    render = function(bufnr)
+      local ft = vim.api.nvim_buf_get_option(bufnr, 'buftype')
+      if ft == 'nofile' or ft == 'guihua' or ft == 'prompt' then
+        return
+      end
+      local ref_params = vim.lsp.util.make_position_params()
+      local sync_req = require('navigator.lspwrapper').call_sync
+      return sync_req(
+        'textDocument/references',
+        ref_params,
+        { timeout = 1000, bufnr = bufnr, no_show = true },
+        vim.lsp.with(function(err, locations, ctx, cfg)
+          cfg.side_panel = true
+          return ref_hdlr(err, locations, ctx, cfg)
+        end, { no_show = true })
+      )
+    end,
+  })
+  p:open(true)
+end
+
 return {
+  side_panel = side_panel,
   reference_handler = ref_hdlr,
   reference = ref_req,
   ref_view = ref_view,

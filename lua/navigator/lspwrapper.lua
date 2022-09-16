@@ -366,7 +366,7 @@ function M.locations_to_items(locations, ctx)
     local proj_file = item.uri:find(cwd) or is_win or i < _NgConfigValues.treesitter_analysis_max_num
     local unload, def
     local context = ''
-    if TS_analysis_enabled and proj_file then
+    if TS_analysis_enabled and proj_file and not ctx.no_show then
       local ts_context = nts.ref_context
 
       local bufnr = vim.uri_to_bufnr(item.uri)
@@ -420,7 +420,13 @@ function M.locations_to_items(locations, ctx)
     end
 
     item.filename = assert(vim.uri_to_fname(item.uri))
+
     local filename = item.filename:gsub(cwd .. path_sep, path_cur, 1)
+
+    if ctx.no_show then
+      local shorten = require('guihua.util').shorten
+      filename = shorten(filename)
+    end
     item.display_filename = filename or item.filename
     item.call_by = context -- find_ts_func_by_range(funcs, item.range)
     item.rpath = util.get_relative_path(cwd, item.filename)
