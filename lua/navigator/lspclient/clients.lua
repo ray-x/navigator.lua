@@ -433,7 +433,18 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         end
       end
     end
-    if has_mason and _NgConfigValues.mason then
+
+    function mason_disabled_for(client)
+      local mdisabled = _NgConfigValues.mason_disabled_for
+      if  #mdisabled > 0 then
+        for _, disabled_client in ipairs(mdisabled) do
+          if disabled_client == client then return true end
+        end
+      end
+      return false
+    end
+
+    if has_mason and _NgConfigValues.mason and not mason_disabled_for(lspconfig[lspclient].name) then
       local servers = require'mason-lspconfig'.get_installed_servers()
       if not vim.tbl_contains(servers, lspconfig[lspclient].name) then
         log('mason server not installed', lspconfig[lspclient].name)
