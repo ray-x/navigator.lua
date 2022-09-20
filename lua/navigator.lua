@@ -94,6 +94,7 @@ _NgConfigValues = {
   },
   lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
+  mason_disabled_for = {}, -- disable mason for specified lspclients 
   icons = {
     icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
     -- Code action
