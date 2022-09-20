@@ -83,7 +83,7 @@ local ref_view = function(err, locations, ctx, cfg)
 
   local wwidth = vim.api.nvim_get_option('columns')
   local mwidth = _NgConfigValues.width
-  width = math.min(width + 30, 120, math.floor(wwidth * mwidth))
+  width = math.min(width + 30, math.floor(wwidth * mwidth))
   -- log(items)
   -- log(width)
   opts = {
