@@ -246,22 +246,41 @@ local function set_mapping(lsp_attach_info)
   -- if user_opts.cap.document_formatting then
 
   if doc_fmt and _NgConfigValues.lsp.format_on_save then
+    local fos = _NgConfigValues.lsp.format_on_save
     local gn = api.nvim_create_augroup('NavAuGroupFormat', {})
 
+    local fmt = false
+    if type(fos) == 'boolean' then
+      fmt = fos
+    end
+    if type(fos) == 'table' and (fos.enable or fos.disable) then
+      if fos.enable then
+        fmt = vim.tbl_contains(fos.enable, vim.o.ft)
+      end
+      if not fmt and fos.disable then
+        fmt = not vim.tbl_contains(fos.disable, vim.o.ft)
+      end
+    end
+    if type(fos) == 'function' then
+      fmt = fos(bufnr)
+    end
     local fopts = _NgConfigValues.lsp.format_options
 
     if not fopts.async and vim.api.nvim_buf_line_count(0) > 4000 then
       fopts.async = true
     end
 
-    api.nvim_create_autocmd({ 'BufWritePre' }, {
-      group = gn,
-      buffer = bufnr,
-      callback = function()
-        trace('format' .. vim.inspect(fopts))
-        vim.lsp.buf.format(fopts)
-      end,
-    })
+    if fmt then
+      api.nvim_create_autocmd({ 'BufWritePre' }, {
+        group = gn,
+        desc = 'auto format',
+        buffer = bufnr,
+        callback = function()
+          trace('format' .. vim.inspect(fopts))
+          vim.lsp.buf.format(fopts)
+        end,
+      })
+    end
   elseif fmtkey then
     del_keymap('n', fmtkey)
   end
@@ -285,6 +304,7 @@ local function autocmd()
 
   api.nvim_create_autocmd({ 'BufWritePre' }, {
     group = gn,
+    desc = 'doc highlight',
     callback = require('navigator.dochighlight').cmd_nohl,
   })
 end
@@ -365,6 +385,7 @@ function M.setup(attach_opts)
   api.nvim_create_autocmd({ 'BufWritePre' }, {
     group = api.nvim_create_augroup('nvim_nv_event_autos', {}),
     buffer = attach_opts.bufnr,
+    desc = 'diagnostic update',
     callback = function()
       require('navigator.diagnostics').set_diag_loclist(attach_opts.bufnr)
     end,
