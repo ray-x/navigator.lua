@@ -434,7 +434,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
     end
 
-    function mason_disabled_for(client)
+    local function mason_disabled_for(client)
       local mdisabled = _NgConfigValues.mason_disabled_for
       if  #mdisabled > 0 then
         for _, disabled_client in ipairs(mdisabled) do
@@ -450,8 +450,13 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         log('mason server not installed', lspconfig[lspclient].name)
         -- return
       end
-     local pkg_name = require "mason-lspconfig.mappings.server".lspconfig_to_package[lspconfig[lspclient].name]
-     local pkg = require "mason-registry".get_package(pkg_name)
+      local pkg_name = require "mason-lspconfig.mappings.server".lspconfig_to_package[lspconfig[lspclient].name]
+      local pkg
+      if pkg_name then
+        pkg = require "mason-registry".get_package(pkg_name)
+      else
+        log('failed to get name', lspconfig[lspclient].name, pkg_name)
+      end
 
       log('lsp installer server config ' .. lspconfig[lspclient].name, pkg)
       if pkg then
@@ -462,13 +467,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
           return load_cfg(ft, lspclient, cfg, loaded)
         end
 
-        cfg.cmd = cfg.cmd or {}
-        cfg.cmd[1] = table.concat({vfn.stdpath('data'), 'mason', 'bin', pkg.name}, path_sep)
-        if vfn.executable(cfg.cmd[1]) == 0 then
-          log('failed to find cmd', cfg.cmd[1], "fallback")
-          return load_cfg(ft, lspclient, cfg, loaded)
-        else
-          log('cmd installed', cfg.cmd)
+        local cmd
+        cmd = table.concat({vfn.stdpath('data'), 'mason', 'bin', pkg.name}, path_sep)
+        if vfn.executable(cmd) == 0 then
+          log('failed to find cmd', cmd, "fallback")
+          load_cfg(ft, lspclient, cfg, loaded)
+          goto continue
         end
       end
     end
