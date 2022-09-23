@@ -27,6 +27,8 @@ end
 local function _update_virtual_text(line, actions)
   local namespace = get_namespace()
   pcall(api.nvim_buf_clear_namespace, 0, namespace, 0, -1)
+  local bufnr = api.nvim_get_current_buf()
+  api.nvim_buf_del_extmark(bufnr, namespace, 1)
 
   if line then
     trace(line, actions)
@@ -34,7 +36,7 @@ local function _update_virtual_text(line, actions)
 
     local title = actions[1].title
     pcall(api.nvim_buf_set_extmark, 0, namespace, line, -1, {
-      virt_text = { { icon_with_indent .. title, 'LspDiagnosticsSignHint' } },
+      virt_text = { { icon_with_indent .. title, 'DiagnosticsSignHint' } },
       virt_text_pos = 'overlay',
       hl_mode = 'combine',
     })
@@ -45,7 +47,7 @@ local function _update_sign(line)
   if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
     vim.fn.sign_define(sign_name, {
       text = config.icons.code_action_icon,
-      texthl = 'LspDiagnosticsSignHint',
+      texthl = 'DiagnosticsSignHint',
     })
   end
   local winid = get_current_winid()
@@ -110,16 +112,13 @@ function code_action:render_action_virtual_text(line, diagnostics)
         end
       end
 
-      if config.lsp.code_action.virtual_text then
-        if need_check_diagnostic[vim.bo.filetype] then
-          if next(diagnostics) == nil then
-            _update_virtual_text(nil)
-          else
-            _update_virtual_text(line, actions)
-          end
-        else
-          _update_virtual_text(line, actions)
-        end
+      if not config.lsp.code_action.virtual_text then
+        return
+      end
+      if need_check_diagnostic[vim.bo.filetype] and not next(diagnostics) then
+        _update_virtual_text()
+      else
+        _update_virtual_text(line, actions)
       end
     end
   end
@@ -190,7 +189,7 @@ code_action.range_code_action = function(startpos, endpos)
   vim.ui.input = require('guihua.input').input
 
   if vim.fn.has('nvim-0.8') then
-    vim.lsp.buf.code_action({context=context ,range={start = startpos, ['end'] = endpos}})
+    vim.lsp.buf.code_action({ context = context, range = { start = startpos, ['end'] = endpos } })
   else
     vim.lsp.buf.range_code_action(context, startpos, endpos)
   end

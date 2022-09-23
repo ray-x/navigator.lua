@@ -288,7 +288,11 @@ require'navigator'.setup({
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     document_highlight = true, -- LSP reference highlight, 
                                -- it might already supported by you setup, e.g. LunarVim
-    format_on_save = true, -- set to false to disable lsp code format on save (if you are using prettier/efm/formater etc)
+    format_on_save = true, -- {true|false} set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+                           -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
+                              -- enable: a whitelist of language that will be formatted on save
+                              -- disable: a blacklist of language that will not be formatted on save
+                           -- function: function(bufnr) return true end to enable/disable lsp format on save
     format_options = {async=false}, -- async: disable by default, the option used in vim.lsp.buf.format({async={true|false}, name = 'xxx'})
     disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
          -- If you using null-ls and want null-ls format your code

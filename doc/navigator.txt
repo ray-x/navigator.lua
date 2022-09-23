@@ -294,7 +294,13 @@ Nondefault configuration example:
         -- own on_attach
         code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
         code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
-        format_on_save = true, -- set to false to disable lsp code format on save (if you are using prettier/efm/formater etc)
+
+        format_on_save = true, -- {true|false} set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+                           -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
+                           -- enable: a whitelist of language that will be formatted on save
+                           -- disable: a blacklist of language that will not be formatted on save
+                           -- function: function(bufnr) return true end to enable/disable lsp format on save
+
         disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
         disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
         -- only want to enable one lsp server

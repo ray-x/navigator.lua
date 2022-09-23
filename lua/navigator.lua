@@ -65,7 +65,11 @@ _NgConfigValues = {
       update_in_insert = false, -- update diagnostic message in insert mode
       severity_sort = { reverse = true },
     },
-    format_on_save = true, -- set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+    format_on_save = true, -- {true|false} set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
+                           -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
+                              -- enable: a whitelist of language that will be formatted on save
+                              -- disable: a blacklist of language that will not be formatted on save
+                           -- function: function(bufnr) return true end to enable/disable lsp format on save
     format_options = { async = false }, -- async: disable by default, I saw something unexpected
     disable_nulls_codeaction_sign = true, -- do not show nulls codeactions (as it will alway has a valid action)
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
