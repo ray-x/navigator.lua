@@ -259,7 +259,8 @@ local function documentHighlight(bufnr)
   vim.lsp.handlers['textDocument/documentHighlight'] = function(err, result, ctx)
     local buffer = ctx.bufnr or api.nvim_get_current_buf()
     if err then
-      vim.notify('failed to highlight symbol' .. vim.inspect(err), vim.lsp.log_levels.ERROR)
+      -- vim.notify('failed to highlight symbol' .. vim.inspect(err), vim.lsp.log_levels.ERROR, vim.lsp.log_levels.ERROR)
+      log('failed to highlight symbol', err)
       return
     end
     if not result or not result[1] or not result[1]['range'] then
