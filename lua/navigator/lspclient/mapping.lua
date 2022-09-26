@@ -307,6 +307,12 @@ local function autocmd()
     desc = 'doc highlight',
     callback = require('navigator.dochighlight').cmd_nohl,
   })
+
+  api.nvim_create_autocmd({ 'CmdlineLeave' }, {
+    group = gn,
+    desc = 'doc highlight nohl',
+    callback = require('navigator.dochighlight').cmd_nohl,
+  })
 end
 
 M.toggle_lspformat = function(on)

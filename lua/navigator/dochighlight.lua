@@ -17,7 +17,10 @@ local function add_locs(bufnr, result)
   if #result < 1 then
     return
   end
-  symbol = string.format('%s_%i_%i_%i', symbol, bufnr, result[1].range.start.line, result[1].range.start.character)
+
+  local winid = vim.fn.bufwinid(0)
+  symbol =
+    string.format('%s_%i_%i_%i_%i', symbol, bufnr, result[1].range.start.line, result[1].range.start.character, winid)
   if _NG_hi_list[symbol] == nil then
     _NG_hi_list[symbol] = { range = {} }
   end
@@ -32,23 +35,33 @@ local function add_locs(bufnr, result)
 end
 
 local function nohl()
+  local winid = vim.fn.bufwinid(0)
   for key, value in pairs(_NG_hi_list) do
     if value.hi_ids ~= nil then
+      local del = false
       for _, v in ipairs(value.hi_ids) do
         trace('delete', v)
-        vim.fn.matchdelete(v)
+        if v[2] == winid then
+          del = true
+          vim.fn.matchdelete(v[1])
+        end
       end
-      _NG_hi_list[key].hi_ids = nil
+      if del then
+        _NG_hi_list[key].hi_ids = nil
+      end
     end
   end
 end
 
+-- toggle highlight for current symbol
 local function hi_symbol()
   local symbol_wd = get_symbol()
   local symbol = _NG_current_symbol
-  if string.find(symbol, symbol_wd) == nil then
+  if string.find(symbol, symbol_wd) ~= 1 then
     vim.lsp.buf.document_highlight()
-    symbol = _NG_current_symbol
+    return vim.defer_fn(function()
+      hi_symbol()
+    end, 500)
   end
   if symbol == nil or symbol == '' then
     log('nil symbol')
@@ -60,11 +73,12 @@ local function hi_symbol()
     _NG_ref_hi_idx = 1
   end
 
+  -- if already highlighted; remove
   local range = _NG_hi_list[symbol].range or {}
   if _NG_hi_list[symbol].hi_ids ~= nil then
     for _, value in ipairs(_NG_hi_list[symbol].hi_ids) do
-      log('delete', value)
-      vim.fn.matchdelete(value)
+      log('delete', symbol, value)
+      vim.fn.matchdelete(value[1])
     end
     _NG_hi_list[symbol].hi_ids = nil
     return
@@ -82,6 +96,7 @@ local function hi_symbol()
     p = match_result:sub(1, p)
     total_match = tonumber(p)
   end
+  local winid = vim.fn.bufwinid(0)
   if total_match == totalref then -- same number as matchpos
     trace(total_match, 'use matchadd()')
     local k = range[1].kind
@@ -89,10 +104,10 @@ local function hi_symbol()
     local m = string.format('\\<%s\\>', symbol_wd)
     local r = vim.fn.matchadd(hi_name, m, 20)
     trace('hi id', m, hi_name, r)
-    table.insert(_NG_hi_list[symbol].hi_ids, r)
+    table.insert(_NG_hi_list[symbol].hi_ids, { r, winid })
     --
-    -- vim.fn.matchdelete(r)
   else
+    trace(total_match, 'use matchadd()', totalref)
     for _, value in ipairs(range) do
       local k = value.kind
       local l = value.range.start.line + 1
@@ -107,7 +122,7 @@ local function hi_symbol()
       local hi_name = string.format('NGHiReference_%i_%i', _NG_ref_hi_idx, k)
       trace(hi_name, { l, cs, w })
       local m = vim.fn.matchaddpos(hi_name, { { l, cs, w } }, 10)
-      table.insert(_NG_hi_list[symbol].hi_ids, m)
+      table.insert(_NG_hi_list[symbol].hi_ids, { m, winid })
     end
   end
 
