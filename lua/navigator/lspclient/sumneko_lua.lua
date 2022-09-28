@@ -28,7 +28,9 @@ local sumneko_cfg = {
     },
   },
   on_new_config = function(cfg, root)
-    local libs = vim.tbl_deep_extend('force', {}, library)
+    local libs = vim.schedule(function()
+      vim.tbl_deep_extend('force', {}, library)
+    end)
     libs[root] = nil
     cfg.settings.Lua.workspace.library = libs
     return cfg
