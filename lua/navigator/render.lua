@@ -119,7 +119,7 @@ function M.prepare_for_render(items, opts)
       lspapi_display = lspapi
       item = clone(items[i])
 
-      space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename, lspapi_display .. ' 12 of 33')
+      space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename, lspapi_display .. ' 12 of 34')
       if trim and opts.width > 52 and #item.display_filename > opts.width - 20 then
         item.display_filename = string.sub(item.display_filename, 1, opts.width - 52)
           .. ''
@@ -135,7 +135,11 @@ function M.prepare_for_render(items, opts)
     end
     -- content of code lines
     item = clone(items[i])
-    item.text = require('navigator.util').trim_and_pad(item.text)
+    if opts.side_panel then
+      item.text = item.text:gsub('%s+', ' ')
+    else
+      item.text = require('navigator.util').trim_and_pad(item.text)
+    end
     item.text = string.format('%4i: %s', item.lnum, item.text)
     local ts_report = ''
     if item.lhs then
@@ -146,7 +150,11 @@ function M.prepare_for_render(items, opts)
     -- log(item.text)
     if item.definition then
       log('definition', item)
-      ts_report = ts_report .. _NgConfigValues.icons.value_definition .. ' '
+      if opts.side_panel then
+        ts_report = _NgConfigValues.icons.value_definition
+      else
+        ts_report = ts_report .. _NgConfigValues.icons.value_definition .. ' '
+      end
     end
     local header_len = #ts_report + 4 -- magic number 2
     trace(ts_report, header_len)
