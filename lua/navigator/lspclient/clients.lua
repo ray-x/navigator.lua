@@ -50,30 +50,12 @@ local on_attach = require('navigator.lspclient.attach').on_attach
 -- gopls["ui.completion.usePlaceholders"] = true
 
 -- lua setup
-local library = {}
 
-local luadevcfg = {
-  library = {
-    vimruntime = true, -- runtime path
-    types = true, -- full signature, docs and completion of vim.api, vim.treesitter, vim.lsp and others
-    plugins = { 'nvim-treesitter', 'plenary.nvim' },
-  },
-  lspconfig = {
-    -- cmd = {sumneko_binary},
-    on_attach = on_attach,
-  },
-}
-
-local luadev = {}
-local user_luadev = _NgConfigValues.lsp['lua-dev']
-if user_luadev then
-  luadev = vim.tbl_deep_extend('force', luadev, user_luadev)
-end
-require('navigator.lazyloader').load('lua-dev.nvim', 'folke/lua-dev.nvim')
-if _NgConfigValues.lsp_installer then
-  require('navigator.lazyloader').load('nvim-lsp-installer', 'williamboman/nvim-lsp-installer')
+if _NgConfigValues.lsp['lua-dev'] ~= nil then
+  vim.notify('lua-dev is deprecated, please use neodev instead', vim.lsp.log_levels.WARN)
 end
 
+require('navigator.lazyloader').load('neodev.nvim', 'folke/neodev.nvim')
 
 if _NgConfigValues.mason then
   require('navigator.lazyloader').load('mason.nvim', 'williamboman/mason.nvim')

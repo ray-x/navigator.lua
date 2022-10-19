@@ -66,10 +66,10 @@ _NgConfigValues = {
       severity_sort = { reverse = true },
     },
     format_on_save = true, -- {true|false} set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
-                           -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
-                              -- enable: a whitelist of language that will be formatted on save
-                              -- disable: a blacklist of language that will not be formatted on save
-                           -- function: function(bufnr) return true end to enable/disable lsp format on save
+    -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
+    -- enable: a whitelist of language that will be formatted on save
+    -- disable: a blacklist of language that will not be formatted on save
+    -- function: function(bufnr) return true end to enable/disable lsp format on save
     format_options = { async = false }, -- async: disable by default, I saw something unexpected
     disable_nulls_codeaction_sign = true, -- do not show nulls codeactions (as it will alway has a valid action)
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
@@ -85,9 +85,9 @@ _NgConfigValues = {
       -- filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetype
     },
-    ['lua-dev'] = { -- navigator can use lua-dev settings to setup sumneko_lua
-      -- your setting for lua-dev here
-      -- navigator will setup lua-dev
+    ['neodev'] = { -- navigator can use neodev settings to setup sumneko_lua
+      -- your setting for neodev here
+      -- navigator will setup neodev
     },
     sumneko_lua = {
       -- sumneko_root_path = sumneko_root_path,
@@ -98,7 +98,7 @@ _NgConfigValues = {
   },
   lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
-  mason_disabled_for = {}, -- disable mason for specified lspclients 
+  mason_disabled_for = {}, -- disable mason for specified lspclients
   icons = {
     icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
     -- Code action

@@ -1,6 +1,8 @@
 local vfn = vim.fn
 
 local library = {}
+
+local on_attach = require('navigator.lspclient.attach').on_attach
 local sumneko_cfg = {
   cmd = { 'lua-language-server' },
   filetypes = { 'lua' },
@@ -57,32 +59,27 @@ local function sumneko_lua()
   library[vfn.expand('$VIMRUNTIME/lua/vim')] = true
   library[vfn.expand('$VIMRUNTIME/lua/vim/lsp')] = true
 
-  local on_attach = require('navigator.lspclient.attach').on_attach
   local luadevcfg = {
     library = {
-      vimruntime = true, -- runtime path
+      enabled = true, -- runtime path
+      runtime = true,
       types = true, -- full signature, docs and completion of vim.api, vim.treesitter, vim.lsp and others
       plugins = { 'nvim-treesitter', 'plenary.nvim' },
     },
-    lspconfig = {
-      -- cmd = {sumneko_binary},
-      on_attach = on_attach,
-    },
+    setup_jsonls = true,
   }
 
-  local luadev = {}
-  local user_luadev = _NgConfigValues.lsp['lua-dev']
+  local user_luadev = _NgConfigValues.lsp['neodev']
   if user_luadev then
     luadevcfg = vim.tbl_deep_extend('force', luadevcfg, user_luadev)
   end
-  require('navigator.lazyloader').load('lua-dev.nvim', 'folke/lua-dev.nvim')
+  require('navigator.lazyloader').load('neodev.nvim', 'folke/neodev.nvim')
 
-  local ok, l = pcall(require, 'lua-dev')
+  local ok, l = pcall(require, 'neodev')
   if ok and l then
-    luadev = l.setup(luadevcfg)
+    l.setup(luadevcfg)
   end
 
-  sumneko_cfg = vim.tbl_deep_extend('force', sumneko_cfg, luadev)
   return sumneko_cfg
 end
 
