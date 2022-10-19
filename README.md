@@ -699,15 +699,15 @@ Here is an example [init_lsp_installer.lua](https://github.com/ray-x/navigator.l
 There are lots of plugins provides lsp support
 * go.nvim allow you either hook gopls from go.nvim or from navigator and it can export the lsp setup from go.nvim.
 * rust-tools and clangd allow you to setup on_attach from config server
-* [lua-dev](https://github.com/folke/lua-dev.nvim) Dev setup for init.lua and plugin development. Navigator can
-extend lua setup with lua-dev. 
+* [neodev](https://github.com/folke/neodev.nvim) Dev setup for init.lua and plugin development. Navigator can
+extend lua setup with neodev. 
 Here is an example to setup rust with rust-tools
 
 ```lua
 require'navigator'.setup({
   lsp = {
     disable_lsp = { "rust_analyzer", "clangd" }, -- will not run rust_analyzer setup from navigator
-    ['lua-dev'] = { runtime_path=true }  -- any non default lua-dev setups
+    ['neodev'] = { runtime_path=true }  -- any non default neodev setups
   },
 })
 

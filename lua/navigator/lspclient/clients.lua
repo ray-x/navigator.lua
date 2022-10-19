@@ -65,15 +65,11 @@ local luadevcfg = {
 }
 
 local luadev = {}
-local user_luadev = _NgConfigValues.lsp['lua-dev']
-if user_luadev then
+local user_luadev = _NgConfigValues.lsp['neodev']
+if next(user_luadev) then
   luadev = vim.tbl_deep_extend('force', luadev, user_luadev)
 end
-require('navigator.lazyloader').load('lua-dev.nvim', 'folke/lua-dev.nvim')
-if _NgConfigValues.lsp_installer then
-  require('navigator.lazyloader').load('nvim-lsp-installer', 'williamboman/nvim-lsp-installer')
-end
-
+require('navigator.lazyloader').load('neodev.nvim', 'folke/neodev.nvim')
 
 if _NgConfigValues.mason then
   require('navigator.lazyloader').load('mason.nvim', 'williamboman/mason.nvim')
