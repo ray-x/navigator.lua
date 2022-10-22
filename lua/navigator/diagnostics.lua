@@ -406,6 +406,7 @@ M.set_diag_loclist = function(bufnr)
   local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
   if diag_cnt == 0 then
     log('great, no errors!')
+    vim.cmd('lclose')
     return
   end
 
@@ -428,6 +429,9 @@ M.set_diag_loclist = function(bufnr)
     else
       vim.cmd('lclose')
     end
+  else
+    log('no valid lsp to run diagnostic')
+    vim.cmd('lclose')
   end
 end
 

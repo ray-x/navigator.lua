@@ -47,7 +47,7 @@ local key_maps = {
   { key = '<Leader>dt', func = require('navigator.diagnostics').toggle_diagnostics, desc = 'toggle_diagnostics' },
   { key = ']d', func = vim.diagnostic.goto_next, desc = 'next diagnostics' },
   { key = '[d', func = vim.diagnostic.goto_prev, desc = 'prev diagnostics' },
-  { key = ']O', func = vim.diagnostic.set_loclist, desc = 'diagnostics set loclist' },
+  { key = ']O', func = vim.diagnostic.setloclist, desc = 'diagnostics set loclist' },
   { key = ']r', func = require('navigator.treesitter').goto_next_usage, desc = 'goto_next_usage' },
   { key = '[r', func = require('navigator.treesitter').goto_previous_usage, desc = 'goto_previous_usage' },
   { key = '<C-LeftMouse>', func = vim.lsp.buf.definition, desc = 'definition' },
