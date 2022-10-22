@@ -55,7 +55,6 @@ if _NgConfigValues.lsp['lua-dev'] ~= nil then
   vim.notify('lua-dev is deprecated, please use neodev instead', vim.lsp.log_levels.WARN)
 end
 
-require('navigator.lazyloader').load('neodev.nvim', 'folke/neodev.nvim')
 
 if _NgConfigValues.mason then
   require('navigator.lazyloader').load('mason.nvim', 'williamboman/mason.nvim')
