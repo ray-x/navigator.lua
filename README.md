@@ -282,8 +282,12 @@ require'navigator'.setup({
   lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
   lsp = {
-    enable = true,   -- skip lsp setup if disabled make sure add require('navigator.lspclient.mapping').setup() in you
-    -- own on_attach
+    enable = true,  -- skip lsp setup, and only use treesitter in navigator. 
+                    -- Use this if you are not using LSP servers, and only want to enable treesitter support. 
+                    -- If you only want to prevent navigator from touching your LSP server configs, 
+                    -- use `disable_lsp = "all"` instead. 
+                    -- If disabled, make sure add require('navigator.lspclient.mapping').setup({bufnr=bufnr, client=client}) in your
+                    -- own on_attach
     code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     document_highlight = true, -- LSP reference highlight, 
@@ -295,13 +299,15 @@ require'navigator'.setup({
                            -- function: function(bufnr) return true end to enable/disable lsp format on save
     format_options = {async=false}, -- async: disable by default, the option used in vim.lsp.buf.format({async={true|false}, name = 'xxx'})
     disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
-         -- If you using null-ls and want null-ls format your code
-         -- you should disable all other lsp and allow only null-ls.
-    disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
-    --want to enable one lsp server at a time
-    -- to disable all default config and use your own lsp setup set
-    -- disable_lsp = 'all' and you may need to hook mapping.setup() in your on_attach
-    -- Default {}
+                                                            -- If you using null-ls and want null-ls format your code
+                                                            -- you should disable all other lsp and allow only null-ls.
+    -- disable_lsp = {'pylsd', 'sqlls'},  -- prevents navigator from setting up this list of servers. 
+                                          -- if you use your own LSP setup, and don't want navigator to setup 
+                                          -- any LSP server for you, use `disable_lsp = "all"`.
+                                          -- you may need to add this to your own on_attach hook: 
+                                          -- require('navigator.lspclient.mapping').setup({bufnr=bufnr, client=client})
+                                          -- for e.g. denols and tsserver you may want to enable one lsp server at a time.
+                                          -- default value: {}
     diagnostic = {
       underline = true,
       virtual_text = true, -- show virtual for diagnostic message
@@ -309,7 +315,7 @@ require'navigator'.setup({
     },
 
     diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- experimental:  diagnostic status in scroll bar area; set to false to disable the diagnostic sign,
-    -- for other style, set to {'╍', 'ﮆ'} or {'-', '='}
+                                                 --                for other style, set to {'╍', 'ﮆ'} or {'-', '='}
     diagnostic_virtual_text = true,  -- show virtual for diagnostic message
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
     disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you  want to
