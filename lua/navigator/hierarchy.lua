@@ -52,7 +52,7 @@ local function call_hierarchy_result_procesor(direction, err, result, ctx, confi
   -- trace('call_hierarchy', result)
 
   local bufnr = ctx.bufnr or vim.api.nvim_get_current_buf()
-  assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use call hierarchy')
+  assert(next(vim.lsp.get_active_clients({buffer = bufnr})), 'Must have a client running to use call hierarchy')
   if err ~= nil then
     log('dir', direction, 'result', result, 'err', err, ctx)
     vim.notify('ERROR: ' .. err, vim.lsp.log_levels.WARN)
@@ -103,7 +103,7 @@ hierarchy_handler = function(dir, handler, show, api, err, result, ctx, cfg)
   local opts = ctx.opts or {}
   vim.validate({ handler = { handler, 'function' }, show = { show, 'function' }, api = { api, 'string' } })
   local bufnr = ctx.bufnr or vim.api.nvim_get_current_buf()
-  assert(next(vim.lsp.buf_get_clients(bufnr)), 'Must have a client running to use lsp hierarchy')
+  assert(next(vim.lsp.get_active_clients({buffer = bufnr})), 'Must have a client running to use lsp hierarchy')
 
   local results = handler(err, result, ctx, cfg, 'Incoming calls not found')
 

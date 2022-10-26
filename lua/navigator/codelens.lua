@@ -79,7 +79,7 @@ end
 M.lsp_clients = {}
 
 function M.refresh()
-  if next(vim.lsp.buf_get_clients(0)) == nil then
+  if next(vim.lsp.get_active_clients({ buffer = 0 })) == nil then
     log('Must have a client running to use lsp code action')
     return
   end
@@ -119,7 +119,7 @@ M.inline = function()
     return
   end
 
-  if next(vim.lsp.buf_get_clients(0)) == nil then
+  if next(vim.lsp.get_active_clients({buffer = 0})) == nil then
     return
   end
 

@@ -409,14 +409,14 @@ M.set_diag_loclist = function(bufnr)
     return
   end
 
-  local clients = vim.lsp.buf_get_clients(bufnr)
+  local clients = vim.lsp.get_active_clients({buffer = bufnr })
   local cfg = { open = diag_cnt > 0 }
   for _, client in pairs(clients) do
     cfg.client_id = client['id']
     break
   end
 
-  if not vim.tbl_isempty(vim.lsp.buf_get_clients(bufnr)) then
+  if not vim.tbl_isempty(vim.lsp.get_active_clients({buffer = bufnr})) then
     local err_cnt = get_count(0, [[Error]])
     if err_cnt > 0 and _NgConfigValues.lsp.disply_diagnostic_qf then
       if diagnostic.set_loclist then

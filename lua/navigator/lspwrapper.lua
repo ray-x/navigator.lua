@@ -119,7 +119,7 @@ local function extract_result(results_lsp)
 end
 
 function M.check_capabilities(feature, client_id)
-  local clients = lsp.buf_get_clients(client_id or 0)
+  local clients = lsp.get_active_clients({buffer = client_id or 0 })
 
   local supported_client = false
   for _, client in pairs(clients) do

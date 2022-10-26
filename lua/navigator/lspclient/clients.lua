@@ -145,7 +145,7 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       end
     end
 
-    local clients = vim.lsp.buf_get_clients(0)
+    local clients = vim.lsp.get_active_clients({buffer = 0 })
     for _, c in pairs(clients or {}) do
       log("lsp start up in progress client", client, c.name)
       if c.name == client then
@@ -588,7 +588,7 @@ local function setup(user_opts, cnt)
 
   trace(debug.traceback())
 
-  local clients = vim.lsp.buf_get_clients(bufnr)
+  local clients = vim.lsp.get_active_clients({buffer = bufnr})
   for key, client in pairs(clients) do
     if client.name ~= 'null_ls' and client.name ~= 'efm' then
       if vim.tbl_contains(client.filetypes or {}, vim.o.ft) then
