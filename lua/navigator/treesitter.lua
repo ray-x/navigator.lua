@@ -758,6 +758,7 @@ end
 
 function M.buf_ts()
   local all_nodes, width = M.all_ts_nodes()
+  if width and all_nodes and #all_nodes > 0 then
   local bufnr = api.nvim_get_current_buf()
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
   local listview = gui.new_list_view({
@@ -771,6 +772,7 @@ function M.buf_ts()
     api = _NgConfigValues.icons.treesitter_defult,
   })
   return listview, all_nodes, width
+  end
 end
 
 M.get_all_nodes = get_all_nodes
