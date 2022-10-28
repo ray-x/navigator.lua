@@ -93,6 +93,8 @@ M.defaults = function()
         '--suggest-missing-includes',
         '--clang-tidy',
         '--header-insertion=iwyu',
+        '--enable-config',
+        '--offset-encoding=utf-16',
         '--clang-tidy-checks=-*,llvm-*,clang-analyzer-*',
         '--cross-file-rename',
       },
