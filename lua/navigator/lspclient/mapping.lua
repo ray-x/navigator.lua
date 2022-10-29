@@ -405,7 +405,9 @@ function M.setup(attach_opts)
     border_style = double
   end
   if _NgConfigValues.lsp.hover then
-    vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = border_style })
+    vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(require('navigator.hover').handler, {
+      border = border_style,
+    })
   end
   if cap.documentFormattingProvider then
     log('formatting enabled setup hdl')
