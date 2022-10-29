@@ -28,7 +28,6 @@ local key_maps = {
   { key = '<Leader>gt', func = require('navigator.treesitter').buf_ts, desc = 'buf_ts' },
   { key = '<Leader>gT', func = require('navigator.treesitter').bufs_ts, desc = 'bufs_ts' },
   { key = '<Leader>ct', func = require('navigator.ctags').ctags, desc = 'ctags' },
-  { key = 'K', func = vim.lsp.buf.hover, desc = 'hover' },
   { key = '<Space>ca', mode = 'n', func = require('navigator.codeAction').code_action, desc = 'code_action' },
   {
     key = '<Space>ca',
@@ -71,6 +70,10 @@ local key_maps = {
   { key = '<Space>la', mode = 'n', func = require('navigator.codelens').run_action, desc = 'run code lens action' },
 }
 
+if _NgConfigValues.lsp.hover then
+  table.insert(key_maps, { key = 'K', func = vim.lsp.buf.hover, desc = 'hover' })
+end
+
 local key_maps_help = {}
 -- LuaFormatter on
 local M = {}
@@ -95,7 +98,7 @@ local check_cap = function(opts)
   if cap and cap.documentRangeFormattingProvider then
     rfmt = true
   end
-  for _, value in pairs(vim.lsp.get_active_clients({buffer = 0})) do
+  for _, value in pairs(vim.lsp.get_active_clients({ buffer = 0 })) do
     trace(value)
     if value ~= nil and value.server_capabilities == nil then
       if value.server_capabilities.documentFormattingProvider then
@@ -401,7 +404,9 @@ function M.setup(attach_opts)
   if _NgConfigValues.border == 'double' then
     border_style = double
   end
-  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = border_style })
+  if _NgConfigValues.lsp.hover then
+    vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = border_style })
+  end
   if cap.documentFormattingProvider then
     log('formatting enabled setup hdl')
     vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl

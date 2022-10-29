@@ -65,6 +65,7 @@ _NgConfigValues = {
       update_in_insert = false, -- update diagnostic message in insert mode
       severity_sort = { reverse = true },
     },
+    hover = true, -- bind hover action to keymap; there are other options e.g. noice, lspsaga provides lsp hover
     format_on_save = true, -- {true|false} set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
     -- enable: a whitelist of language that will be formatted on save
