@@ -5,11 +5,12 @@ local codelens = require('vim.lsp.codelens')
 
 local log = require('navigator.util').log
 local trace = require('navigator.util').trace
--- trace = log
+trace = log
 local lsphelper = require('navigator.lspwrapper')
 local api = vim.api
 local M = {}
 
+M.disabled = {}
 local config = require('navigator').config_values()
 local sign_name = 'NavigatorCodeLensLightBulb'
 if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
@@ -107,7 +108,6 @@ function M.run_action()
   vim.defer_fn(function()
     vim.ui.select = original_select
   end, 1000)
-
 end
 
 M.inline = function()
@@ -119,15 +119,24 @@ M.inline = function()
     return
   end
 
-  if next(vim.lsp.get_active_clients({buffer = 0})) == nil then
+  local bufnr = api.nvim_get_current_buf()
+  if next(vim.lsp.get_active_clients({ buffer = bufnr })) == nil then
+    return
+  end
+  if vim.tbl_contains(M.disabled, bufnr) then
     return
   end
 
-  local bufnr = api.nvim_get_current_buf()
   local parameter = lsp.util.make_position_params()
 
   local on_codelens = vim.lsp.handlers['textDocument/codeLens']
-  lsp.buf_request(bufnr, 'textDocument/codeLens', parameter, function(err, response, ctx, _)
+  local ids = lsp.buf_request(bufnr, 'textDocument/codeLens', parameter, function(err, response, ctx, _)
+    if err then
+      log('lsp code lens', vim.inspect(err), ctx)
+      -- lets disable code lens for this buffer
+      vim.list_extend(M.disabled, { vim.api.nvim_get_current_buf() })
+      return
+    end
     -- Clear previous highlighting
     api.nvim_buf_clear_namespace(bufnr, virtual_types_ns, 0, -1)
 
@@ -136,9 +145,12 @@ M.inline = function()
 
       on_codelens(err, response, ctx, _)
 
-      codelens_hdlr (err, response, ctx, _)
+      codelens_hdlr(err, response, ctx, _)
     end
   end)
+  if next(ids) == nil then
+    vim.list_extend(M.disabled, { vim.api.nvim_get_current_buf() })
+  end
 end
 
 return M
