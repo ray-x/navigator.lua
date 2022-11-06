@@ -5,7 +5,7 @@ local codelens = require('vim.lsp.codelens')
 
 local log = require('navigator.util').log
 local trace = require('navigator.util').trace
-trace = log
+-- trace = log
 local lsphelper = require('navigator.lspwrapper')
 local api = vim.api
 local M = {}
