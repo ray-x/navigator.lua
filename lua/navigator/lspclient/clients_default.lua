@@ -113,7 +113,6 @@ M.defaults = function()
       on_attach = on_attach,
       settings = {
         ['rust-analyzer'] = {
-          assist = { importMergeBehavior = 'last', importPrefix = 'by_self' },
           cargo = { loadOutDirsFromCheck = true },
           procMacro = { enable = true },
         },
