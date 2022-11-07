@@ -25,6 +25,7 @@ local state = {
   input_bufnr = nil,
   confirm = nil,
   oldname = nil,
+  newname = nil,
   err = nil,
 }
 local backspace = api.nvim_replace_termcodes('<bs>', true, false, true)
@@ -41,7 +42,7 @@ local function ts_symbol()
   if not ok then
     vim.notify('treesitter not installed')
     -- try best
-    return true
+    return {}
   end
 
   local bufnr = api.nvim_get_current_buf()
@@ -54,16 +55,16 @@ local function ts_symbol()
   local ts_utils = require('nvim-treesitter.ts_utils')
   local current_node = ts_utils.get_node_at_cursor()
   if not current_node then
-    return false
+    return
   end
   local start_row, _, end_row, _ = current_node:range()
   for id, _, _ in query:iter_captures(current_node, 0, start_row, end_row) do
     local name = query.captures[id]
     if name:find('builtin') or name:find('keyword') then
-      return false
+      return
     end
   end
-  return true
+  return current_node
 end
 
 local function visible(bufnr)
@@ -163,12 +164,11 @@ local function fetch_lsp_references(bufnr, lsp_params, callback)
 end
 
 local function teardown(switch_buffer)
-  state.cached_lines = nil
   state.should_fetch_references = true
+  state.cached_lines = nil
   state.oldname = nil
   state.newname = nil
   if state.input_win_id and api.nvim_win_is_valid(state.input_win_id) then
-    M.config.input_buffer.close_window()
     state.input_win_id = nil
     if switch_buffer then
       api.nvim_set_current_win(state.win_id)
@@ -194,14 +194,14 @@ local function incremental_rename_preview(opts, preview_ns, preview_buf)
   state.new_name = new_name
   vim.v.errmsg = ''
 
-  if state.input_win_id and api.nvim_win_is_valid(state.input_win_id) then
-    -- Add a space so the cursor can be placed after the last character
-    api.nvim_buf_set_lines(state.input_bufnr, 0, -1, false, { new_name .. ' ' })
-    local _, cmd_prefix_len = vim.fn.getcmdline():find('^%s*' .. M.config.cmd_name .. '%s*')
-    local cursor_pos = vim.fn.getcmdpos() - cmd_prefix_len - 1
-    -- Create a fake cursor in the input buffer
-    api.nvim_buf_add_highlight(state.input_bufnr, preview_ns, 'Visual', 0, cursor_pos, cursor_pos + 1)
-  end
+  -- if state.input_win_id and api.nvim_win_is_valid(state.input_win_id) then
+  --   -- Add a space so the cursor can be placed after the last character
+  --   api.nvim_buf_set_lines(state.input_bufnr, 0, -1, false, { new_name .. ' ' })
+  --   local _, cmd_prefix_len = vim.fn.getcmdline():find('^%s*' .. M.config.cmd_name .. '%s*')
+  --   local cursor_pos = vim.fn.getcmdpos() - cmd_prefix_len - 1
+  --   -- Create a fake cursor in the input buffer
+  --   api.nvim_buf_add_highlight(state.input_bufnr, preview_ns, 'Visual', 0, cursor_pos, cursor_pos + 1)
+  -- end
 
   if state.should_fetch_references then
     fetch_lsp_references(preview_buf, state.lsp_params, function()
@@ -306,8 +306,23 @@ local function inc_rename_execute(opts)
 end
 
 M.rename = function()
+  if _NgConfigValues.lsp.rename == 'floating-preview' then
+    return M.rename_preview()
+  end
+  if _NgConfigValues.lsp.rename == 'inplace-preview' then
+    return M.rename_inplace()
+  end
+
   local input = vim.ui.input
-  vim.ui.input = require('guihua.floating').input
+
+  local ghinput = require('guihua.input')
+  -- make sure everything was restored
+  ghinput.setup({
+    on_change = function(new_name) end,
+    on_confirm = function(new_name) end,
+    on_cancel = function() end,
+  })
+  vim.ui.input = ghinput
   vim.lsp.buf.rename()
   vim.defer_fn(function()
     vim.ui.input = input
@@ -316,6 +331,7 @@ end
 
 M.rename_preview = function()
   local input = vim.ui.input
+  state.cached_lines = {}
 
   if not ts_symbol() then
     return
@@ -359,6 +375,7 @@ end
 function M.rename_inplace(new_name, options)
   options = options or {}
 
+  state.cached_lines = {}
   rename_group = api.nvim_create_augroup('nav-rename', {})
   local bufnr = options.bufnr or api.nvim_get_current_buf()
   local clients = vim.lsp.get_active_clients({
@@ -440,14 +457,28 @@ function M.rename_inplace(new_name, options)
             local w = vim.fn.expand('<cword>')
             local curl = vfn.getline('.')
             local curc = curl:sub(vfn.col('.'), vfn.col('.'))
-            if curc:match('%s') then
-              local cur_pos = vim.fn.getpos('.')
-              cur_pos[3] = cur_pos[3] - 1
-              vfn.setpos('.', cur_pos)
-              log('move back')
-              w = vim.fn.expand('<cword>')
-              cur_pos[3] = cur_pos[3] + 1
-              vfn.setpos('.', cur_pos)
+            local node = ts_symbol()
+            if node and node:type():find('identifier') then
+              w = vim.treesitter.get_node_text(node, bufnr)
+              log(node:range(), node:type())
+            else
+              -- log(curc, node:type(), vim.treesitter.get_node_text(node, bufnr))
+              -- cursor at end of symbol
+              if curc:match('%W') and curc ~= '_' then
+                local cur_pos = vim.fn.getpos('.')
+                cur_pos[3] = cur_pos[3] - 1
+                vfn.setpos('.', cur_pos)
+                log('move back')
+
+                node = ts_symbol()
+                if node and node:type():find('identifier') then
+                  w = vim.treesitter.get_node_text(node, bufnr)
+                else
+                  w = vim.fn.expand('<cword>')
+                end
+                cur_pos[3] = cur_pos[3] + 1
+                vfn.setpos('.', cur_pos)
+              end
             end
             log(curc, w)
             incremental_rename_preview({ args = w, floating = false }, ns, bufnr)
