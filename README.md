@@ -881,7 +881,7 @@ https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9
 
 ### Symbol rename
 
-![rename](https://user-images.githubusercontent.com/1681295/141081135-55f45c2d-28c6-4475-a083-e37dfabe9afd.jpg)
+https://user-images.githubusercontent.com/1681295/200327179-0fc84660-44a8-4ee1-9631-2cc7a17b0b12.mov
 
 #### Fill struct with gopls
 
