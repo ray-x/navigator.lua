@@ -350,7 +350,8 @@ M.rename_preview = function()
   state.win_id = vim.fn.win_getid(0)
   state.lsp_params = make_position_params()
   state.preview_buf = vim.api.nvim_get_current_buf()
-  ghinput.setup({
+
+  local inputopts = {
     on_change = function(new_name)
       incremental_rename_preview({ args = new_name }, ns, state.preview_buf)
     end,
@@ -365,7 +366,11 @@ M.rename_preview = function()
       teardown(true)
       log('cancel', new_name)
     end,
-  })
+  }
+  if vim.fn.has('nvim-0.9.0') == 1 then
+    inputopts.title = 'inc rename'
+  end
+  ghinput.setup(inputopts)
   vim.ui.input = ghinput.input
 
   vim.lsp.buf.rename()
