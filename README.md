@@ -124,6 +124,7 @@ I'd like to go beyond what the system is offering.
 - [lspsaga](https://github.com/glepnir/lspsaga.nvim)
 - [fzf-lsp lsp with fzf as gui backend](https://github.com/gfanto/fzf-lsp.nvim)
 - [nvim-treesitter-textobjects](https://github.com/nvim-treesitter/nvim-treesitter-textobjects)
+- [inc-rename.nvim](https://github.com/smjonas/inc-rename.nvim)
 
 # Install
 

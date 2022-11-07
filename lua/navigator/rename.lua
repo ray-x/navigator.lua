@@ -1,3 +1,8 @@
+-- the preview and cache are copy from
+-- smjonas/inc-renamer.nvim
+-- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
+-- inplace rename are from neovim vim.lsp.buf.rename
+
 local M = {}
 local util = require('navigator.util')
 local log = util.log
@@ -6,8 +11,6 @@ local vfn = vim.fn
 
 local make_position_params = vim.lsp.util.make_position_params
 local rename_group = api.nvim_create_augroup('nav-rename', {})
-
--- local rename_prompt = 'Rename -> '
 
 M.default_config = {
   cmd_name = 'IncRename',
@@ -85,6 +88,7 @@ local function hash(a, b, c)
   return cantor(a, cantor(b, c))
 end
 
+-- a function from smjonas/inc-rename.nvim
 local function cache_lines(result)
   local cached_lines = {}
   local exists = {}
@@ -127,6 +131,8 @@ local function cache_lines(result)
 end
 
 -- Get positions of LSP reference symbols
+-- a function from smjonas/inc-rename.nvim
+-- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
 local function fetch_lsp_references(bufnr, lsp_params, callback)
   local clients = vim.lsp.get_active_clients({
     bufnr = bufnr,
@@ -163,6 +169,8 @@ local function fetch_lsp_references(bufnr, lsp_params, callback)
   end)
 end
 
+-- a function from smjonas/inc-rename.nvim
+-- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
 local function teardown(switch_buffer)
   state.should_fetch_references = true
   state.cached_lines = nil
@@ -187,21 +195,13 @@ end
 
 -- Called when the user is still typing the command or the command arguments
 -- a function from smjonas/inc-rename.nvim
+-- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
 local function incremental_rename_preview(opts, preview_ns, preview_buf)
   log(opts, preview_ns, preview_buf)
   local new_name = opts.args
 
   state.new_name = new_name
   vim.v.errmsg = ''
-
-  -- if state.input_win_id and api.nvim_win_is_valid(state.input_win_id) then
-  --   -- Add a space so the cursor can be placed after the last character
-  --   api.nvim_buf_set_lines(state.input_bufnr, 0, -1, false, { new_name .. ' ' })
-  --   local _, cmd_prefix_len = vim.fn.getcmdline():find('^%s*' .. M.config.cmd_name .. '%s*')
-  --   local cursor_pos = vim.fn.getcmdpos() - cmd_prefix_len - 1
-  --   -- Create a fake cursor in the input buffer
-  --   api.nvim_buf_add_highlight(state.input_bufnr, preview_ns, 'Visual', 0, cursor_pos, cursor_pos + 1)
-  -- end
 
   if state.should_fetch_references then
     fetch_lsp_references(preview_buf, state.lsp_params, function()
@@ -211,7 +211,7 @@ local function incremental_rename_preview(opts, preview_ns, preview_buf)
 
   if not state.cached_lines then
     log('lsp references not fetched yet')
-    return M.input_buffer ~= nil and 2
+    return
   end
 
   local function apply_highlights_fn(bufnr, line_nr, line_info)
@@ -235,7 +235,14 @@ local function incremental_rename_preview(opts, preview_ns, preview_buf)
     api.nvim_buf_set_lines(bufnr or opts.bufnr, line_nr, line_nr + 1, false, { updated_line })
 
     for _, hl_pos in ipairs(highlight_positions) do
-      api.nvim_buf_add_highlight(bufnr or opts.bufnr, preview_ns, 'Visual', line_nr, hl_pos.start_col, hl_pos.end_col)
+      api.nvim_buf_add_highlight(
+        bufnr or opts.bufnr,
+        preview_ns,
+        M.default_config.hl_group,
+        line_nr,
+        hl_pos.start_col,
+        hl_pos.end_col
+      )
     end
   end
 
@@ -246,11 +253,10 @@ local function incremental_rename_preview(opts, preview_ns, preview_buf)
   end
 
   state.preview_ns = preview_ns
-  return 2
 end
 
--- Sends a LSP rename request and optionally displays a message to the user showing
--- how many instances were renamed in how many files
+-- a function from smjonas/inc-rename.nvim
+-- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
 local function perform_lsp_rename(new_name, params)
   params = params or make_position_params()
   params.newName = new_name
@@ -379,7 +385,8 @@ M.rename_preview = function()
   vim.lsp.buf.rename()
 end
 
--- rename withou floating window
+-- rename without floating window
+-- a moodify version of neovim vim.lsp.buf.rename
 function M.rename_inplace(new_name, options)
   options = options or {}
   state.confrim = nil
