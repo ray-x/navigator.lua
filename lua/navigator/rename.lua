@@ -145,7 +145,7 @@ local function fetch_lsp_references(bufnr, lsp_params, callback)
   log(bufnr, params)
 
   vim.lsp.buf_request(bufnr, 'textDocument/references', params, function(err, result, _, _)
-    -- vim.lsp.buf_request(bufnr, 'textDocument/references', params, function(err, result, _, _)
+    log(result)
     if err then
       log('[nav-rename] Error while finding references: ' .. err.message)
       return
@@ -332,6 +332,9 @@ end
 M.rename_preview = function()
   local input = vim.ui.input
   state.cached_lines = {}
+  state.confrim = nil
+  state.should_fetch_references = true
+  state.lsp_params = make_position_params()
 
   if not ts_symbol() then
     return
@@ -379,8 +382,10 @@ end
 -- rename withou floating window
 function M.rename_inplace(new_name, options)
   options = options or {}
-
+  state.confrim = nil
+  state.should_fetch_references = true
   state.cached_lines = {}
+  state.lsp_params = make_position_params()
   rename_group = api.nvim_create_augroup('nav-rename', {})
   local bufnr = options.bufnr or api.nvim_get_current_buf()
   local clients = vim.lsp.get_active_clients({
