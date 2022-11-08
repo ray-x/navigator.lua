@@ -3,23 +3,16 @@
 -- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
 -- inplace rename are from neovim vim.lsp.buf.rename
 
-local M = {}
 local util = require('navigator.util')
 local log = util.log
 local api = vim.api
 local vfn = vim.fn
 
+local M = {
+  hl_group = 'Substitute',
+}
 local make_position_params = vim.lsp.util.make_position_params
 local rename_group = api.nvim_create_augroup('nav-rename', {})
-
-M.default_config = {
-  cmd_name = 'IncRename',
-  hl_group = 'Substitute',
-  preview_empty_name = false,
-  show_message = true,
-  input_buffer_type = nil,
-  post_hook = nil,
-}
 
 local state = {
   should_fetch_references = true,
@@ -160,6 +153,7 @@ local function fetch_lsp_references(bufnr, lsp_params, callback)
       log('[nav-rename] Nothing to rename', result)
       return
     end
+    state.total = #result
     state.cached_lines = cache_lines(result)
     state.should_fetch_references = false
     if callback then
@@ -235,14 +229,7 @@ local function incremental_rename_preview(opts, preview_ns, preview_buf)
     api.nvim_buf_set_lines(bufnr or opts.bufnr, line_nr, line_nr + 1, false, { updated_line })
 
     for _, hl_pos in ipairs(highlight_positions) do
-      api.nvim_buf_add_highlight(
-        bufnr or opts.bufnr,
-        preview_ns,
-        M.default_config.hl_group,
-        line_nr,
-        hl_pos.start_col,
-        hl_pos.end_col
-      )
+      api.nvim_buf_add_highlight(bufnr or opts.bufnr, preview_ns, M.hl_group, line_nr, hl_pos.start_col, hl_pos.end_col)
     end
   end
 
@@ -275,7 +262,7 @@ local function perform_lsp_rename(new_name, params)
     local client = vim.lsp.get_client_by_id(ctx.client_id)
     vim.lsp.util.apply_workspace_edit(result, client.offset_encoding)
 
-    if M.config and M.config.show_message then
+    if _NgConfigValues.lsp.rename.show_result then
       local changed_instances = 0
       local changed_files = 0
 
@@ -286,11 +273,13 @@ local function perform_lsp_rename(new_name, params)
       end
 
       local message = string.format(
-        'Renamed %s instance%s in %s file%s',
+        'Renamed %s instance%s %s in %s file%s \n to %s:',
         changed_instances,
         changed_instances == 1 and '' or 's',
+        state.oldname,
         changed_files,
-        changed_files == 1 and '' or 's'
+        changed_files == 1 and '' or 's',
+        new_name
       )
       vim.notify(message)
     end
@@ -420,6 +409,7 @@ function M.rename_inplace(new_name, options)
 
   -- Compute early to account for cursor movements after going async
   local cword = vim.fn.expand('<cword>')
+  state.oldname = cword
 
   ---@private
   local function get_text_at_range(range, offset_encoding)
@@ -463,7 +453,7 @@ function M.rename_inplace(new_name, options)
           return
         end
 
-        incremental_rename_preview({ args = vim.fn.expand('<cword>'), floating = false }, 0, bufnr)
+        incremental_rename_preview({ args = cword, floating = false }, 0, bufnr)
         if new_name then
           return rename(new_name)
         end
@@ -526,13 +516,6 @@ function M.rename_inplace(new_name, options)
         })
 
         vim.cmd('noautocmd startinsert')
-        -- no need
-        -- vim.ui.input(prompt_opts, function(input)
-        --   if not input or #input == 0 then
-        --     return
-        --   end
-        --   rename(input)
-        -- end)
       end, bufnr)
     else
       assert(client.supports_method('textDocument/rename'), 'Client must support textDocument/rename')

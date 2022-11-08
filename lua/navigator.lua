@@ -51,7 +51,10 @@ _NgConfigValues = {
       virtual_text = true,
       virtual_text_icon = true,
     },
-    rename = 'floating-preview', -- 'floating' | 'floating-preview' | 'inplace-preview'
+    rename = {
+      style = 'floating-preview', -- 'floating' | 'floating-preview' | 'inplace-preview'
+      show_result = true,
+    },
     document_highlight = true, -- highlight reference a symbol
     code_lens_action = {
       enable = true,
