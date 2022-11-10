@@ -301,10 +301,10 @@ local function inc_rename_execute(opts)
 end
 
 M.rename = function()
-  if _NgConfigValues.lsp.rename == 'floating-preview' then
+  if _NgConfigValues.lsp.rename.style == 'floating-preview' then
     return M.rename_preview()
   end
-  if _NgConfigValues.lsp.rename == 'inplace-preview' then
+  if _NgConfigValues.lsp.rename.style == 'inplace-preview' then
     return M.rename_inplace()
   end
 
@@ -317,7 +317,7 @@ M.rename = function()
     on_confirm = function(new_name) end,
     on_cancel = function() end,
   })
-  vim.ui.input = ghinput
+  vim.ui.input = ghinput.input
   vim.lsp.buf.rename()
   vim.defer_fn(function()
     vim.ui.input = input
