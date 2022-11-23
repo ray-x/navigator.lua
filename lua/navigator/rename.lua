@@ -314,7 +314,7 @@ M.rename = function()
   -- make sure everything was restored
   ghinput.setup({
     on_change = function(new_name) end,
-    on_confirm = function(new_name) end,
+    on_concel = function(new_name) end,
     on_cancel = function() end,
   })
   vim.ui.input = ghinput.input
@@ -405,6 +405,8 @@ function M.rename_inplace(new_name, options)
     vim.notify('[LSP] Rename, no matching language servers with rename capability.')
   end
 
+  local confirm_key = _NgConfigValues.lsp.rename.confirm
+  local cancel_key = _NgConfigValues.lsp.rename.concel
   local win = api.nvim_get_current_win()
 
   -- Compute early to account for cursor movements after going async
@@ -423,6 +425,20 @@ function M.rename_inplace(new_name, options)
     )[1]
   end
 
+  local on_finish_cb = function()
+    log('leave insert')
+
+    api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+    api.nvim_del_augroup_by_name('nav-rename')
+    vim.keymap.del({ 'i', 'n' }, confirm_key, { buffer = bufnr })
+    vim.keymap.del({ 'i', 'n' }, cancel_key, { buffer = bufnr })
+    restore_buffer()
+    if state.confirm then
+      -- lets put back
+      log('execute rename')
+      inc_rename_execute({ args = state.new_name or vim.fn.expand('<cword>'), params = params })
+    end
+  end
   local try_use_client
   try_use_client = function(idx, client)
     if not client then
@@ -458,7 +474,7 @@ function M.rename_inplace(new_name, options)
           return rename(new_name)
         end
 
-        vim.api.nvim_create_autocmd({ 'TextChangedI' }, {
+        vim.api.nvim_create_autocmd({ 'TextChangedI', 'TextChanged' }, {
           group = rename_group,
           callback = function()
             local w = vim.fn.expand('<cword>')
@@ -491,29 +507,30 @@ function M.rename_inplace(new_name, options)
             incremental_rename_preview({ args = w, floating = false }, ns, bufnr)
           end,
         })
-        vim.keymap.set('i', '<S-CR>', function()
+        vim.keymap.set({ 'i', 'n' }, confirm_key, function()
           print('done rename')
           local input = vim.fn.expand('<cword>')
           log('newname', input)
           state.confirm = true
           vim.cmd('stopinsert')
+          on_finish_cb()
         end, { buffer = bufnr })
 
-        vim.api.nvim_create_autocmd({ 'InsertLeave' }, {
-          group = rename_group,
-          callback = function()
-            log('leave insert')
-            api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-            api.nvim_del_augroup_by_name('nav-rename')
-            vim.keymap.del('i', '<S-CR>', { buffer = bufnr })
-            restore_buffer()
-            if state.confirm then
-              -- lets put back
-              log('execute rename')
-              inc_rename_execute({ args = state.new_name or vim.fn.expand('<cword>'), params = params })
-            end
-          end,
-        })
+        if cancel_key == nil or cancel_key == '' then
+          vim.api.nvim_create_autocmd({ 'InsertLeave' }, {
+            group = rename_group,
+            callback = function()
+              state.confirm = nil
+              on_finish_cb()
+            end,
+          })
+        else
+          vim.keymap.set({ 'i', 'n' }, cancel_key, function()
+            print('cancel rename')
+            state.confirm = nil
+            on_finish_cb()
+          end, { buffer = bufnr })
+        end
 
         vim.cmd('noautocmd startinsert')
       end, bufnr)

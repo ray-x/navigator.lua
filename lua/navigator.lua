@@ -54,6 +54,8 @@ _NgConfigValues = {
     rename = {
       style = 'floating-preview', -- 'floating' | 'floating-preview' | 'inplace-preview'
       show_result = true,
+      confirm = '<S-CR>',
+      cancel = '<S-ESC>',
     },
     document_highlight = true, -- highlight reference a symbol
     code_lens_action = {
