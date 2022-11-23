@@ -81,7 +81,7 @@ M.defaults = function()
         },
       },
       root_dir = function(fname)
-        return util.root_pattern('go.mod', '.git')(fname) or dirname(fname) -- util.path.dirname(fname)
+        return util.root_pattern('go.mod', '.git')(fname) or util.path.dirname(fname)
       end,
     },
     clangd = {
