@@ -624,11 +624,6 @@ local function setup(user_opts, cnt)
 
   lsp_startup(ft, retry, lsp_opts)
 
-  --- if code lens enabled
-  if _NgConfigValues.lsp.code_lens_action.enable then
-    require('navigator.codelens').setup(bufnr)
-  end
-
   -- _LoadedFiletypes[ft .. tostring(bufnr)] = true -- may prevent lsp config when reboot lsp
 end
 

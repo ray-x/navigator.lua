@@ -39,12 +39,10 @@ M.on_attach = function(client, bufnr)
     trace('attaching doc highlight: ', bufnr, client.name)
     vim.defer_fn(function()
       require('navigator.dochighlight').documentHighlight(bufnr)
-    end, 50)  -- allow a bit time for it to settle down
+    end, 50) -- allow a bit time for it to settle down
   else
     log('skip doc highlight: ', bufnr, client.name)
   end
-
-  
 
   require('navigator.lspclient.lspkind').init()
 
@@ -67,11 +65,18 @@ M.on_attach = function(client, bufnr)
     end
   end
 
+  --- if code lens enabled
+  if _NgConfigValues.lsp.code_lens_action.enable then
+    if client.server_capabilities.codeLensProvider then
+      require('navigator.codelens').setup(bufnr)
+    end
+  end
+
   if _NgConfigValues.lsp.code_action.enable then
-    if client.server_capabilities.codeActionProvider and client.name ~= 'null-ls' then
+    if client.server_capabilities.codeLensProvider and client.name ~= 'null-ls' then
       log('code action enabled for client', client.server_capabilities.codeActionProvider)
       api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-        group = api.nvim_create_augroup('NGCodeActGroup_'..tostring(bufnr), {}),
+        group = api.nvim_create_augroup('NGCodeActGroup_' .. tostring(bufnr), {}),
         buffer = bufnr,
         callback = function()
           require('navigator.codeAction').code_action_prompt(bufnr)

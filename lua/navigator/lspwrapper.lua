@@ -118,28 +118,24 @@ local function extract_result(results_lsp)
   end
 end
 
-function M.check_capabilities(feature, client_id)
-  local clients = lsp.get_active_clients({buffer = client_id or 0 })
+function M.check_capabilities(feature, bufnr)
+  local clients = lsp.get_active_clients({ buffer = bufnr or vim.api.nvim_get_current_buf() })
 
   local supported_client = false
   for _, client in pairs(clients) do
     -- supported_client = client.resolved_capabilities[feature]
     supported_client = client.server_capabilities[feature]
     if supported_client then
-      break
+      return client
     end
   end
 
-  if supported_client then
-    return true
+  if #clients == 0 then
+    log('LSP: no client attached')
   else
-    if #clients == 0 then
-      log('LSP: no client attached')
-    else
-      trace('LSP: server does not support ' .. feature)
-    end
-    return false
+    trace('LSP: server does not support ' .. feature)
   end
+  return false
 end
 
 function M.call_sync(method, params, opts, handler)

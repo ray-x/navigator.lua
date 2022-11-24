@@ -61,30 +61,34 @@ local codelens_hdlr = function(err, result, ctx, cfg)
     _update_sign(v.range.start.line)
   end
 end
+local codelens_au
 
 function M.setup(bufnr)
   log('setup for ****** ', bufnr)
-  vim.api.nvim_set_hl(0, 'LspCodeLens', { link = 'DiagnosticsHint', default = true })
-  vim.api.nvim_set_hl(0, 'LspCodeLensText', { link = 'DiagnosticsInformation', default = true })
-  vim.api.nvim_set_hl(0, 'LspCodeLensSign', { link = 'DiagnosticsInformation', default = true })
-  vim.api.nvim_set_hl(0, 'LspCodeLensSeparator', { link = 'Boolean', default = true })
-  vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI', 'InsertLeave' }, {
-    group = vim.api.nvim_create_augroup('nv__codelenses', {}),
-    buffer = bufnr or vim.api.nvim_win_get_buf(),
-    callback = function()
-      require('navigator.codelens').refresh()
-    end,
-  })
+  if codelens_au == nil then
+    vim.api.nvim_set_hl(0, 'LspCodeLens', { link = 'DiagnosticsHint', default = true })
+    vim.api.nvim_set_hl(0, 'LspCodeLensText', { link = 'DiagnosticsInformation', default = true })
+    vim.api.nvim_set_hl(0, 'LspCodeLensSign', { link = 'DiagnosticsInformation', default = true })
+    vim.api.nvim_set_hl(0, 'LspCodeLensSeparator', { link = 'Boolean', default = true })
+    codelens_au = vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI', 'InsertLeave' }, {
+      group = vim.api.nvim_create_augroup('nv__codelenses', {}),
+      buffer = bufnr or vim.api.nvim_win_get_buf(),
+      callback = function()
+        require('navigator.codelens').refresh()
+      end,
+    })
+  end
 end
 
 M.lsp_clients = {}
 
 function M.refresh()
-  if next(vim.lsp.get_active_clients({ buffer = 0 })) == nil then
+  local bufnr = vim.api.nvim_get_current_buf()
+  if next(vim.lsp.get_active_clients({ buffer = bufnr })) == nil then
     log('Must have a client running to use lsp code action')
     return
   end
-  if not lsphelper.check_capabilities('codeLensProvider') then
+  if not lsphelper.check_capabilities('codeLensProvider', bufnr) then
     return
   end
   M.inline()
