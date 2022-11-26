@@ -188,13 +188,11 @@ function M.ref_context(opts)
       table.insert(lines, 1, line)
     end
     expr = expr:parent()
+    if #line > _NgConfigValues.treesitter_analysis_depth then
+      break
+    end
   end
 
-  table.remove(lines, #lines)
-
-  if #lines < 1 then
-    return ""
-  end
   local text = table.concat(lines, separator)
   local text_len = #text
   if text_len > indicator_size then
