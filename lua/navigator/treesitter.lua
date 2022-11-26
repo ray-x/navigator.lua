@@ -190,6 +190,11 @@ function M.ref_context(opts)
     expr = expr:parent()
   end
 
+  table.remove(lines, #lines)
+
+  if #lines < 1 then
+    return ""
+  end
   local text = table.concat(lines, separator)
   local text_len = #text
   if text_len > indicator_size then
