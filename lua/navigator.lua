@@ -13,7 +13,7 @@ end
 
 _NgConfigValues = {
   debug = false, -- log output
-  width = 0.62, -- valeu of cols
+  width = 0.75, -- value of cols
   height = 0.38, -- listview height
   preview_height = 0.38,
   preview_lines = 40, -- total lines in preview screen
@@ -45,6 +45,7 @@ _NgConfigValues = {
   lsp = {
     enable = true, -- if disabled make sure add require('navigator.lspclient.mapping').setup() in you on_attach
     code_action = {
+      delay = 3000, -- how long the virtual text will be shown
       enable = true,
       sign = true,
       sign_priority = 40,

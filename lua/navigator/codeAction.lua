@@ -121,6 +121,16 @@ function code_action:render_action_virtual_text(line, diagnostics)
         _update_virtual_text(line, actions)
       end
     end
+
+    vim.defer_fn(function()
+      log('clear vt')
+      if config.lsp.code_action.virtual_text then
+        _update_virtual_text(nil)
+      end
+      if config.lsp.code_action.sign then
+        _update_sign(nil)
+      end
+    end, _NgConfigValues.lsp.code_action.delay)
   end
 end
 
@@ -133,9 +143,6 @@ local special_buffers = {
   ['markdown'] = true,
   ['text'] = true,
 }
--- local action_call_back = function (_,_)
---   return Action:action_callback()
--- end
 
 local action_virtual_call_back = function(line, diagnostics)
   return code_action:render_action_virtual_text(line, diagnostics)
@@ -157,6 +164,7 @@ local function sort_select(action_tuples, opts, on_user_choice)
     end)
   end
 
+  opts.width = config.width
   trace(action_tuples)
   require('guihua.gui').select(action_tuples, opts, on_user_choice)
 end

@@ -23,8 +23,8 @@ function M.new_list_view(opts)
   end
   local items = opts.items
 
-  opts.height_ratio = opts.height or config.height
-  opts.width_ratio = opts.height or config.width
+  opts.height_ratio = opts.height_ratio or config.height
+  opts.width_ratio = opts.width_ratio or config.width
   opts.preview_height_ratio = opts.preview_height or config.preview_height
   opts.preview_lines = config.preview_lines
   if opts.rawdata then
