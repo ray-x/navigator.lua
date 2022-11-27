@@ -142,6 +142,10 @@ M.defaults = function()
 
     pyright = {
       on_attach = on_attach,
+      -- on_init = require('navigator.lspclient.python').on_init,
+      on_init = function(client)
+        require('navigator.lspclient.python').on_init(client)
+      end,
       cmd = { 'pyright-langserver', '--stdio' },
       filetypes = { 'python' },
       flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
