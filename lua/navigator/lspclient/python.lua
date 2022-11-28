@@ -3,6 +3,7 @@ local path = util.path
 local M = {}
 local shell = vim.o.shell
 local exepath = vim.fn.exepath
+-- https://github.com/ray-x/navigator.lua/issues/247#issue-1465308677
 M.pyenv_path = function(workspace)
   -- Use activated virtualenv.
   if vim.env.VIRTUAL_ENV then
