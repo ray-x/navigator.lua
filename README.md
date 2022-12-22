@@ -1,4 +1,5 @@
 # Navigator
+
 - Source code analysis and navigate tool
 
 - Easy code navigation, view diagnostic errors, see relationships of functions, variables
@@ -7,13 +8,11 @@
 
 - ctags fuzzy search & build ctags symbols
 
--
+[![a short intro of navigator](https://user-images.githubusercontent.com/1681295/147378905-51eede5f-e36d-48f4-9799-ae562949babe.jpeg)](https://youtu.be/P1kd7Y8AatE)
 
-- [![a short intro of navigator](https://user-images.githubusercontent.com/1681295/147378905-51eede5f-e36d-48f4-9799-ae562949babe.jpeg)](https://youtu.be/P1kd7Y8AatE)
+Here are some examples:
 
-Here are some examples
-
-#### Example: Javascript closure
+## Example: Javascript closure
 
 The following screenshot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming & outgoing calls from LSP. It is designed for the symbol analysis.
 
@@ -25,11 +24,11 @@ Explanation:
 - The first reference of browser is an assignment, an emoji 📝 indicates the value is changed in this line. In many
   cases, we search for references to find out when the value changed.
 - The second reference of `browser` is inside function `displayName` and `displayName` sit inside `makeFunc`, So you
-  will see ` displayName{} <- makeFunc{}`
+  will see `displayName{} <- makeFunc{}`
 - The third similar to the second, as var browser is on the right side of '=', the value not changed in this line
   and emoji is not shown.
 
-#### Example: C++ definition
+## Example: C++ definition
 
 C++ example: search reference and definition
 ![cpp_ref](https://user-images.githubusercontent.com/1681295/119215215-8bd7a080-bb0f-11eb-82fc-8cdf1955e6e7.jpg)
@@ -37,7 +36,7 @@ You may find a 🦕 dinosaur(d) on the line of `Rectangle rect,` which means the
 
 `<- f main()` means the definition is inside function main().
 
-#### Golang struct type
+## Golang struct type
 
 Struct type references in multiple Go ﳑ files
 
@@ -52,7 +51,7 @@ variable is:
 - Defined
 - Called
 
-# Features:
+## Features
 
 - LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type. This
   also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better default setup is
@@ -72,7 +71,7 @@ variable is:
 
 - Async request with lsp.buf_request for reference search
 
-- Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?). Also as LSP trying to hide details behind, Treesitter allows you to access all AST  semantics.
+- Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?). Also as LSP trying to hide details behind, Treesitter allows you to access all AST semantics.
 
 - FZY search with either native C (if gcc installed) or Lua-JIT
 
@@ -112,11 +111,11 @@ variable is:
 
 - Side panel (sidebar) and floating windows
 
-# Why a new plugin
+## Why a new plugin
 
 I'd like to go beyond what the system is offering.
 
-# Similar projects / special mentions:
+### Similar projects / special mentions
 
 - [nvim-lsputils](https://github.com/RishabhRD/nvim-lsputils)
 - [nvim-fzy](https://github.com/mfussenegger/nvim-fzy.git)
@@ -126,7 +125,7 @@ I'd like to go beyond what the system is offering.
 - [nvim-treesitter-textobjects](https://github.com/nvim-treesitter/nvim-treesitter-textobjects)
 - [inc-rename.nvim](https://github.com/smjonas/inc-rename.nvim)
 
-# Install
+## Install
 
 Require nvim-0.6.1 or above, nightly (0.8) prefered
 
@@ -181,8 +180,6 @@ call plug#end()
 lua <<EOF
 require'navigator'.setup()
 EOF
-
-
 ```
 
 You can remove your lspconfig.lua and use the hooks of navigator.lua. As the
@@ -209,8 +206,6 @@ call plug#end()
 lua <<EOF
 require'navigator'.setup()
 EOF
-
-
 ```
 
 ## Work with nvim-cmp and nvim-autopairs
@@ -233,7 +228,6 @@ vim.cmd("autocmd FileType guihua_rust lua require('cmp').setup.buffer { enabled 
 
 ...
 }
-
 ```
 
 ## All configure options
@@ -319,8 +313,7 @@ require'navigator'.setup({
                                                  --                for other style, set to {'╍', 'ﮆ'} or {'-', '='}
     diagnostic_virtual_text = true,  -- show virtual for diagnostic message
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
-    disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you  want to
-    ignore it
+    disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you want to ignore it
     tsserver = {
       filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetypes
@@ -364,8 +357,6 @@ require'navigator'.setup({
     -- cmake = {filetypes = {'cmake', 'makefile'}, single_file_support = false},
   }
 })
-
-
 ```
 
 ### LSP clients
@@ -381,7 +372,6 @@ local servers = {
   "r_language_server", "rust_analyzer", "terraformls", "svelte", "texlab", "clojure_lsp", "elixirls",
   "sourcekit", "fsautocomplete", "vls", "hls"
 }
-
 ```
 
 Navigator will try to load avalible lsp server/client based on filetype. The clients has none default on_attach.
@@ -414,7 +404,6 @@ Alternatively, update following option in setup(if you do not want a PR):
 
 ```lua
 require'navigator'setup{lsp={servers={'cmake', 'lexls'}}}
-
 ```
 
 Above option add cmake and lexls to the default server list
@@ -430,7 +419,6 @@ require'navigator'.setup({
    pylsd={filetype={}}
   }
 })
-
 ```
 
 Or:
@@ -460,7 +448,7 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | gd              | definition                                                 |
 | n    | g0              | document symbol                                            |
 | n    | \<C-]\>         | go to definition (if multiple show listview)               |
-| n    | gp              | definition preview (show Preview)                         |
+| n    | gp              | definition preview (show Preview)                          |
 | n    | \<C-LeftMouse\> | definition                                                 |
 | n    | g\<LeftMouse\>  | implementation                                             |
 | n    | \<Leader>gt     | treesitter document symbol                                 |
@@ -501,12 +489,12 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | \<Enter\>       | open preview file in nvim/Apply action                     |
 | n    | \<ESC\>         | close listview of floating window                          |
 | i/n  | \<C-e\>         | close listview of floating window                          |
-|  n   | \<C-q\>         | close listview and send results to quickfix                |
+| n    | \<C-q\>         | close listview and send results to quickfix                |
 | i/n  | \<C-b\>         | previous page in listview                                  |
 | i/n  | \<C-f\>         | next page in listview                                      |
 | i/n  | \<C-s\>         | save the modification to preview window to file            |
 
-### Colors/Highlight:
+### Colors/Highlight
 
 You can override default highlight GuihuaListDark (listview) and GuihuaTextViewDark (code view) and GuihuaListHl (select item)
 
@@ -533,7 +521,7 @@ The plugin can be loaded lazily (packer `opt = true` ), And it will check if opt
 
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
-## Integrat with mason (williamboman/mason.nvim)  or lsp_installer (williamboman/nvim-lsp-installer, deprecated)
+## Integrate with mason (williamboman/mason.nvim) or lsp_installer (williamboman/nvim-lsp-installer, `deprecated`)
 
 If you are using mason or lsp_installer and would like to use the lsp servers installed by lsp_installer. Please set
 
@@ -545,6 +533,7 @@ mason = true -- mason user
 In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
 
 lsp-installer example:
+
 ```lua
       use({
         'williamboman/nvim-lsp-installer',
@@ -561,9 +550,10 @@ lsp-installer example:
           })
         end,
       })
-
 ```
+
 for mason
+
 ```lua
       use("williamboman/mason.nvim")
       use({
@@ -587,7 +577,6 @@ for mason
           })
         end,
       })
-
 ```
 
 Another way to setup mason is disable navigator lsp setup and using mason setup handlers, pylsp for example
@@ -627,13 +616,10 @@ Another way to setup mason is disable navigator lsp setup and using mason setup 
           })
         end,
       })
-
 ```
-
 
 Please refer to [lsp_installer_config](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
 for more info
-
 
 Alternatively, Navigator can be used to startup the server installed by lsp-installer.
 as it will override the navigator setup
@@ -641,7 +627,6 @@ as it will override the navigator setup
 To start LSP installed by lsp_installer, please use following setups
 
 ```lua
-
 require'navigator'.setup({
   -- lsp_installer = false -- default value is false
   lsp = {
@@ -650,12 +635,11 @@ require'navigator'.setup({
 
   }
 })
-
 ```
 
 example cmd setup (mac) for pyright :
 
-```
+```lua
 require'navigator'.setup({
   -- lsp_installer = false -- default value is false
 
@@ -701,12 +685,13 @@ Use lsp_installer configs
 You can delegate the lsp server setup to lsp_installer with `server:setup{opts}`
 Here is an example [init_lsp_installer.lua](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
 
-
 ### Integration with other lsp plugins (e.g. rust-tools, go.nvim, clangd extension)
+
 There are lots of plugins provides lsp support
 * go.nvim allow you either hook gopls from go.nvim or from navigator and it can export the lsp setup from go.nvim.
 * rust-tools and clangd allow you to setup on_attach from config server
 * [neodev](https://github.com/folke/neodev.nvim) Dev setup for lua development. Navigator help you setup neodev
+
 
 Here is an example to setup rust with rust-tools
 
@@ -744,8 +729,6 @@ require("clangd_extensions").setup {
 
 ```
 
-
-
 ## Usage
 
 Please refer to lua/navigator/lspclient/mapping.lua on key mappings. Should be able to work out-of-box.
@@ -765,9 +748,9 @@ e.g
 require'navigator'.setup({on_attach = function(client, bufnr) require 'illuminate'.on_attach(client)})
 ```
 
-## Highlight
+## Highlighting
 
-Highlight I am using:
+I am using:
 
 - LspReferenceRead, LspReferenceText and LspReferenceWrite are used for `autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()`
   That is where you saw the current symbol been highlighted.
@@ -781,16 +764,16 @@ You can override the above highlight to fit your current colorscheme
 
 ## commands
 
-| command      | function                  |
-| ------------ | ------------------------- |
-| LspToggleFmt | toggle lsp auto format    |
-| LspKeymaps   | show LSP releated keymaps |
-| Nctags {args}      | show ctags symbols, args: -g regen ctags |
-| LspRestart   | reload lsp |
-| LspToggleFmt   | toggle lsp format |
-| LspSymbols   | document symbol in side panel |
-| NRefPanel    | show symbol reference in side panel |
-| TSymobls   | treesitter symbol in side panel |
+| command         | function                                                                  |
+| --------------- | ------------------------------------------------------------------------- |
+| LspToggleFmt    | toggle lsp auto format                                                    |
+| LspKeymaps      | show LSP releated keymaps                                                 |
+| Nctags {args}   | show ctags symbols, args: -g regen ctags                                  |
+| LspRestart      | reload lsp                                                                |
+| LspToggleFmt    | toggle lsp format                                                         |
+| LspSymbols      | document symbol in side panel                                             |
+| NRefPanel       | show symbol reference in side panel                                       |
+| TSymobls        | treesitter symbol in side panel                                           |
 | Calltree {args} | lsp call hierarchy call tree, args: -i (incomming default), -o (outgoing) |
 
 ## Screenshots
@@ -808,6 +791,7 @@ Using treesitter and LSP to view the symbol definition
 ![image](https://user-images.githubusercontent.com/1681295/139771978-bbc970a5-be9f-42cf-8942-3477485bd89c.png)
 
 ### Sidebar, folding, outline
+
 Treesitter outline and Diagnostics
 <img width="708" alt="image" src="https://user-images.githubusercontent.com/1681295/174791609-0023e68f-f1f4-4335-9ea2-d2360e9f0bfd.png">
 <img width="733" alt="image" src="https://user-images.githubusercontent.com/1681295/174804579-26f87fbf-426b-46d0-a7a3-a5aab69c032f.png">
@@ -839,7 +823,7 @@ The key binding to navigate in the list.
 
 ![multiple_symbol_hi3](https://user-images.githubusercontent.com/1681295/120067627-f9f80680-c0bf-11eb-9216-18e5c8547f59.gif)
 
-# Current symbol highlight and jump backward/forward between symbols
+## Current symbol highlight and jump backward/forward between symbols
 
 Document highlight provided by LSP.
 Jump between symbols with treesitter (with `]r` and `[r`)
@@ -864,7 +848,7 @@ Show diagnostic in all buffers
 
 You can in place edit your code in floating window
 
-https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9778-11d0f356b38d.mov
+<https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9778-11d0f356b38d.mov>
 
 (Note: This feature only avalible in `find reference` and `find diagnostic`, You can not add/remove lines in floating window)
 
@@ -882,7 +866,7 @@ https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9
 
 ### Symbol rename
 
-https://user-images.githubusercontent.com/1681295/200327179-0fc84660-44a8-4ee1-9631-2cc7a17b0b12.mov
+<https://user-images.githubusercontent.com/1681295/200327179-0fc84660-44a8-4ee1-9631-2cc7a17b0b12.mov>
 
 #### Fill struct with gopls
 
@@ -936,13 +920,14 @@ Folding is using a hacked version of treesitter folding. (option: ts_fold)
 ![image](https://user-images.githubusercontent.com/1681295/148491596-6cd6c507-c157-4536-b8c4-dc969436763a.png)
 
 #### folding comments
+
 Multiline comments can be folded as it is treated as a block
 
 ![image](https://user-images.githubusercontent.com/1681295/148491845-5ffb18ea-f05d-4229-aec3-aa635b3de814.png)
 
-# Debug the plugin
+## Debugging the plugin
 
-One simple way to gether debug info and understand what is wrong is output the debug logs
+One simple way to gather debug info and understand what is wrong is to output the debug logs
 
 ```lua
 require'navigator'.setup({
@@ -966,24 +951,23 @@ end
 
 ```
 
-# Break changes and known issues
+## Break changes and known issues
 
 [known issues I am working on](https://github.com/ray-x/navigator.lua/issues/1)
 
-# Todo
+## Todo
 
 - The project is in the early phase, bugs expected, PRs and suggestions are welcome
 - Async (some of the requests is slow on large codebases and might be good to use co-rountine)
 - More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Did not test other languages (e.g dart, swift etc)
 - Configuration options
 
-# Errors and Bug Reporting
+## Errors and Bug Reporting
 
 - Please double check your setup and check if minium setup works or not
-- It should works for 0.6.1, neovim 0.7.x prefered.
+- It should works for 0.6.1, neovim 0.8.x prefered.
 - Check console output
 - Check `LspInfo` and treesitter status with `checkhealth`
 - Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log
-- Submit Issue with minium vimrc. Please check playground/init.lua as a vimrc template. !!!Please DONOT use a packer vimrc
-
-  that installs everything to default folder!!! Also check this repo [navigator bug report](https://github.com/fky2015/navigator.nvim-bug-report)
+- Submit Issue with minium vimrc. Please check playground/init.lua as a vimrc template. !!!Please DONOT use a packer vimrc.
+  That installs everything to default folder!!! Also check this repo [navigator bug report](https://github.com/fky2015/navigator.nvim-bug-report)
