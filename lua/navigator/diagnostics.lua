@@ -334,7 +334,7 @@ function M.setup()
     },
   }
   diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
-  if type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' then
+  if type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' and _NgConfigValues.icons.icons then
     diagnostic_cfg.virtual_text.prefix = _NgConfigValues.icons.diagnostic_virtual_text
   end
   -- vim.lsp.handlers["textDocument/publishDiagnostics"]
