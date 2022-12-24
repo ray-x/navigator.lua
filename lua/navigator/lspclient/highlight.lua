@@ -19,9 +19,12 @@ function M.diagnositc_config_sign()
     vim.fn.sign_define(sign_name, { text = icons.code_lens_action_icon, texthl = 'LspDiagnosticsSignHint' })
   end
 
+  if not icons.icons then
+    return
+  end
   local e, w, i, h = icons.diagnostic_err, icons.diagnostic_warn, icons.diagnostic_info, icons.diagnostic_hint
   local t = vim.fn.sign_getdefined('DiagnosticSignWarn')
-  if vim.tbl_isempty(t) or t[1].text == 'W ' and icons.icons == true then
+  if vim.tbl_isempty(t) or t[1].text == 'W ' then
     vim.fn.sign_define('DiagnosticSignError', { text = e, texthl = 'DiagnosticError', linehl = '', numhl = '' })
     vim.fn.sign_define('DiagnosticSignWarn', { text = w, texthl = 'DiagnosticWarn', linehl = '', numhl = '' })
     vim.fn.sign_define('DiagnosticSignInfo', { text = i, texthl = 'DiagnosticInfo', linehl = '', numhl = '' })
@@ -49,9 +52,9 @@ function M.add_highlight()
   api.nvim_set_hl(0, 'DiagnosticUnderlineInformation', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'DiagnosticUnderlineHint', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'NGPreviewTitle', { link = 'Title', default = true })
-  api.nvim_set_hl(0, 'LspReferenceRead', { default = true, link = 'IncSearch'})
-  api.nvim_set_hl(0, 'LspReferenceText', { default = true, link = 'Visual'})
-  api.nvim_set_hl( 0, 'LspReferenceWrite', { default = true, link = 'Search'})
+  api.nvim_set_hl(0, 'LspReferenceRead', { default = true, link = 'IncSearch' })
+  api.nvim_set_hl(0, 'LspReferenceText', { default = true, link = 'Visual' })
+  api.nvim_set_hl(0, 'LspReferenceWrite', { default = true, link = 'Search' })
 
   for i = 1, #colors do
     for j = 1, 3 do

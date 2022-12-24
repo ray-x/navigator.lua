@@ -239,6 +239,9 @@ local diag_hdlr = function(err, result, ctx, config)
       else
         v.severity = 2
       end
+      if not _NgConfigValues.icons.icons then
+        head = ''
+      end
       if v.relatedInformation and v.relatedInformation[1] then
         local info = v.relatedInformation[1]
         -- trace(info)
@@ -251,6 +254,11 @@ local diag_hdlr = function(err, result, ctx, config)
       end
       local bufnr1 = vim.uri_to_bufnr(uri)
       local loaded = api.nvim_buf_is_loaded(bufnr1)
+      local ic = _NgConfigValues.icons.diagnostic_head_description
+      if not _NgConfigValues.icons.icons then
+        ic = ''
+      end
+
       if _NgConfigValues.diagnostic_load_files then
         -- print('load buffers')
         if not loaded then
@@ -260,12 +268,12 @@ local diag_hdlr = function(err, result, ctx, config)
         local row = pos.line
         local line = (api.nvim_buf_get_lines(bufnr1, row, row + 1, false) or { '' })[1]
         if line ~= nil then
-          item.text = head .. line .. _NgConfigValues.icons.diagnostic_head_description .. v.message
+          item.text = head .. line .. ic .. v.message
         else
           error('diagnostic result empty line', v, row, bufnr1)
         end
       else
-        item.text = head .. _NgConfigValues.icons.diagnostic_head_description .. v.message
+        item.text = head .. ic .. v.message
       end
 
       if v.releated_msg then
@@ -409,14 +417,14 @@ M.set_diag_loclist = function(bufnr)
     return
   end
 
-  local clients = vim.lsp.get_active_clients({buffer = bufnr })
+  local clients = vim.lsp.get_active_clients({ buffer = bufnr })
   local cfg = { open = diag_cnt > 0 }
   for _, client in pairs(clients) do
     cfg.client_id = client['id']
     break
   end
 
-  if not vim.tbl_isempty(vim.lsp.get_active_clients({buffer = bufnr})) then
+  if not vim.tbl_isempty(vim.lsp.get_active_clients({ buffer = bufnr })) then
     local err_cnt = get_count(0, [[Error]])
     if err_cnt > 0 and _NgConfigValues.lsp.disply_diagnostic_qf then
       if diagnostic.set_loclist then
@@ -547,9 +555,12 @@ function M.config(cfg)
   local default_cfg = {
     underline = true,
     virtual_text = true,
-    signs = { _NgConfigValues.icons.diagnostic_err },
     update_in_insert = false,
   }
+  if _NgConfigValues.icons then
+    default_cfg.signs = { _NgConfigValues.icons.diagnostic_err }
+  end
+
   cfg = vim.tbl_extend('keep', cfg, default_cfg)
   vim.diagnostic.config(cfg)
 end
