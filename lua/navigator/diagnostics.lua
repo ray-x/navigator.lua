@@ -93,7 +93,7 @@ local function error_marker(result, ctx, config)
     -- local total_num = vim.fn.getbufinfo(vim.fn.winbufnr(winid))[1].linecount
     -- window size of current buffer
 
-    local stats = api.nvim_list_uis()[1]
+    local stats = api.nvim_list_uis()[1] or {}
     -- local wwidth = stats.width;
     local wheight = stats.height
 
