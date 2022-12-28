@@ -95,7 +95,7 @@ local function error_marker(result, ctx, config)
 
     local stats = api.nvim_list_uis()[1] or {}
     -- local wwidth = stats.width;
-    local wheight = stats.height
+    local wheight = stats.height or 0
 
     if total_num <= wheight then
       return
