@@ -234,6 +234,8 @@ local extend_config = function(opts)
                 if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' and k ~= 'null-ls' then
                   info(string.format('[] extend LSP support for  %s %s ', key, k))
                 end
+              elseif key == 'signature_help_cfg' then
+                _NgConfigValues[key][k] = v
               elseif key == 'keymaps' then
                 info('keymap override' .. vim.inspect(v))
                 -- skip key check and allow mapping to handle that
