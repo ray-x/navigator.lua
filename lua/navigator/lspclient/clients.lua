@@ -65,26 +65,10 @@ end
 local setups = require('navigator.lspclient.clients_default').defaults()
 local servers =  require('navigator.lspclient.servers')
 
-local lsp_installer_servers = {}
+local lsp_mason_servers = {}
 local has_lspinst = false
 local has_mason = false
 
-has_lspinst, _ = pcall(require, 'nvim-lsp-installer')
-if has_lspinst then
-  local srvs = require('nvim-lsp-installer.servers').get_installed_servers()
-  if #srvs > 0 then
-    lsp_installer_servers = srvs
-  end
-end
-
-has_mason, _ = pcall(require, 'mason-lspconfig')
-if has_mason then
-  local srvs=require'mason-lspconfig'.get_installed_servers()
-  if #srvs > 0 then
-    lsp_installer_servers = srvs
-  end
-end
-log("lsp_installer:", lsp_installer_servers)
 
 if config.lsp.disable_lsp == 'all' then
   config.lsp.disable_lsp = servers
@@ -384,38 +368,6 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     log('loading', lspclient, 'name', lspconfig[lspclient].name, 'has lspinst', has_lspinst)
     -- start up lsp
-    if has_lspinst and _NgConfigValues.lsp_installer then
-      local installed, installer_cfg = require('nvim-lsp-installer.servers').get_server(lspconfig[lspclient].name)
-
-      log('lsp installer server config ' .. lspconfig[lspclient].name, installer_cfg)
-      if installed and installer_cfg then
-        local paths = installer_cfg:get_default_options().cmd_env and installer_cfg:get_default_options().cmd_env.PATH
-        if not paths then
-          -- for some reason lspinstaller does not install the binary, check default PATH
-          log('lsp installer does not install the lsp in its path, fallback')
-          return load_cfg(ft, lspclient, cfg, loaded)
-        end
-        paths = vim.split(paths, ':')
-        if vfn.empty(cfg.cmd) == 1 then
-          cfg.cmd = { installer_cfg.name }
-        end
-
-        if vfn.executable(cfg.cmd[1]) == 0 then
-          for _, path in ipairs(paths) do
-            log(path)
-            if vfn.isdirectory(path) == 1 and string.find(path, installer_cfg.root_dir) then
-              cfg.cmd[1] = path .. path_sep .. cfg.cmd[1]
-              log(cfg.cmd)
-              break
-            end
-          end
-          log('update cmd', cfg.cmd)
-        else
-          log('cmd installed', cfg.cmd)
-        end
-      end
-    end
-
     local function mason_disabled_for(client)
       local mdisabled = _NgConfigValues.mason_disabled_for
       if  #mdisabled > 0 then
@@ -426,6 +378,14 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       return false
     end
 
+    has_mason, _ = pcall(require, 'mason-lspconfig')
+    if has_mason then
+      local srvs=require'mason-lspconfig'.get_installed_servers()
+      if #srvs > 0 then
+        lsp_mason_servers = srvs
+      end
+    end
+    log("lsp mason:", lsp_mason_servers)
     if has_mason and _NgConfigValues.mason and not mason_disabled_for(lspconfig[lspclient].name) then
       local servers = require'mason-lspconfig'.get_installed_servers()
       if not vim.tbl_contains(servers, lspconfig[lspclient].name) then
@@ -440,12 +400,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
         log('failed to get name', lspconfig[lspclient].name, pkg_name)
       end
 
-      log('lsp installer server config ' .. lspconfig[lspclient].name, pkg)
+      log('lsp mason server config ' .. lspconfig[lspclient].name, pkg)
       if pkg then
         local path = pkg:get_install_path()
         if not path then
           -- for some reason lspinstaller does not install the binary, check default PATH
-          log('lsp installer does not install the lsp in its path, fallback')
+          log('lsp mason does not install the lsp in its path, fallback')
           return load_cfg(ft, lspclient, cfg, loaded)
         end
 

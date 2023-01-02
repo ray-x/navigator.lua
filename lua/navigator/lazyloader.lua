@@ -9,10 +9,6 @@ return {
         ['guihua.lua'] = 'ray-x/guihua.lua',
       }
 
-      if _NgConfigValues.lsp_installer == true then
-        lazy_plugins['nvim-lsp-installer'] = 'williamboman/nvim-lsp-installer'
-      end
-
       -- packer installed
       loader = require('packer').loader
       for plugin, url in pairs(lazy_plugins) do
@@ -28,25 +24,6 @@ return {
       end
     end
 
-    if _NgConfigValues.lsp_installer == true then
-      vim.cmd('packadd nvim-lsp-installer')
-      local has_lspinst, lspinst = pcall(require, 'nvim-lsp-installer')
-      log('lsp_installer installed', has_lspinst)
-      if has_lspinst then
-        lspinst.setup()
-        local configs = require('lspconfig/configs')
-        local servers = require('nvim-lsp-installer').get_installed_servers()
-        for _, server in pairs(servers) do
-          local cfg = require('navigator.lspclient.clients').get_cfg(server)
-          local lsp_inst_cfg = configs[server]
-          if lsp_inst_cfg and lsp_inst_cfg.document_config.default_config then
-            lsp_inst_cfg = lsp_inst_cfg.document_config.default_config
-            lsp_inst_cfg = vim.tbl_deep_extend('keep', lsp_inst_cfg, cfg)
-            require('lspconfig')[server].setup(lsp_inst_cfg)
-          end
-        end
-      end
-    end
   end,
   load = function(plugin_name, path)
     local loader = nil

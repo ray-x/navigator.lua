@@ -274,7 +274,6 @@ require'navigator'.setup({
     diagnostic_head_severity_1 = "🈲",
     -- refer to lua/navigator.lua for more icons setups
   },
-  lsp_installer = false, -- set to true if you would like use the lsp installed by williamboman/nvim-lsp-installer
   mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
   lsp = {
     enable = true,  -- skip lsp setup, and only use treesitter in navigator. 
@@ -521,36 +520,16 @@ The plugin can be loaded lazily (packer `opt = true` ), And it will check if opt
 
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
-## Integrate with mason (williamboman/mason.nvim) or lsp_installer (williamboman/nvim-lsp-installer, `deprecated`)
+## Integrate with mason (williamboman/mason.nvim)
 
-If you are using mason or lsp_installer and would like to use the lsp servers installed by lsp_installer. Please set
+If you are using mason and would like to use the lsp servers installed by mason. Please set
 
 ```lua
-lsp_installer = true  --lsp_installer users, deprecated
 mason = true -- mason user
 ```
 
 In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
 
-lsp-installer example:
-
-```lua
-      use({
-        'williamboman/nvim-lsp-installer',
-        config = function()
-          local lsp_installer = require('nvim-lsp-installer')
-          lsp_installer.setup{}
-        end,
-      })
-      use({
-        'ray-x/navigator.lua',
-        config = function()
-          require('navigator').setup({
-            lsp_installer = true,
-          })
-        end,
-      })
-```
 
 for mason
 
@@ -618,19 +597,17 @@ Another way to setup mason is disable navigator lsp setup and using mason setup 
       })
 ```
 
-Please refer to [lsp_installer_config](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
-for more info
 
-Alternatively, Navigator can be used to startup the server installed by lsp-installer.
+Alternatively, Navigator can be used to startup the server installed by mason.
 as it will override the navigator setup
 
-To start LSP installed by lsp_installer, please use following setups
+To start LSP installed by mason, please use following setups
 
 ```lua
 require'navigator'.setup({
-  -- lsp_installer = false -- default value is false
+  -- mason = false -- default value is false
   lsp = {
-    tsserver = { cmd = {'your tsserver installed by lsp_installer or mason'} }
+    tsserver = { cmd = {'your tsserver installed by mason'} }
     -- e.g. tsserver = { cmd = {'/home/username/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/bin/tsserver'} }
 
   }
@@ -641,7 +618,7 @@ example cmd setup (mac) for pyright :
 
 ```lua
 require'navigator'.setup({
-  -- lsp_installer = false -- default value is false
+  -- mason = false -- default value is false
 
   lsp = {
     tsserver = {
@@ -652,38 +629,6 @@ require'navigator'.setup({
 }
 
 ```
-
-The lsp servers installed by nvim-lsp-installer is in following dir
-
-```lua
-local path = require 'nvim-lsp-installer.path'
-local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
-
-```
-
-And you can setup binary full path to this: (e.g. with gopls)
-`install_root_dir .. '/go/gopls'` So the config is
-
-```lua
-
-local path = require 'nvim-lsp-installer.path'
-local install_root_dir = path.concat {vim.fn.stdpath 'data', 'lsp_servers'}
-
-require'navigator'.setup({
-  -- lsp_installer = false -- default value is false
-
-  lsp = {
-    gopls = {
-      cmd = { install_root_dir .. '/go/gopls' }
-    }
-  }
-}
-
-```
-
-Use lsp_installer configs
-You can delegate the lsp server setup to lsp_installer with `server:setup{opts}`
-Here is an example [init_lsp_installer.lua](https://github.com/ray-x/navigator.lua/blob/master/playground/init_lsp_installer.lua)
 
 ### Integration with other lsp plugins (e.g. rust-tools, go.nvim, clangd extension)
 
