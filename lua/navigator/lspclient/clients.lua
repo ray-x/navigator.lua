@@ -377,18 +377,19 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
       return false
     end
-
-    has_mason, _ = pcall(require, 'mason-lspconfig')
-    if has_mason then
-      local srvs=require'mason-lspconfig'.get_installed_servers()
-      if #srvs > 0 then
-        lsp_mason_servers = srvs
+    if _NgConfigValues.mason then
+      has_mason, _ = pcall(require, 'mason-lspconfig')
+      if has_mason then
+        local srvs=require'mason-lspconfig'.get_installed_servers()
+        if #srvs > 0 then
+          lsp_mason_servers = srvs
+        end
       end
     end
     log("lsp mason:", lsp_mason_servers)
-    if has_mason and _NgConfigValues.mason and not mason_disabled_for(lspconfig[lspclient].name) then
-      local servers = require'mason-lspconfig'.get_installed_servers()
-      if not vim.tbl_contains(servers, lspconfig[lspclient].name) then
+    if has_mason and not mason_disabled_for(lspconfig[lspclient].name) then
+      local mason_servers = require'mason-lspconfig'.get_installed_servers()
+      if not vim.tbl_contains(mason_servers, lspconfig[lspclient].name) then
         log('mason server not installed', lspconfig[lspclient].name)
         -- return
       end
