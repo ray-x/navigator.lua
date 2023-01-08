@@ -258,6 +258,8 @@ require'navigator'.setup({
   -- this kepmap gK will override "gD" mapping function declaration()  in default kepmap
   -- please check mapping.lua for all keymaps
   treesitter_analysis = true, -- treesitter variable context
+  treesitter_navigation = true, -- bool|table false: use lsp to navigate between symbol ']r/[r', table: a list of
+  --lang using TS navigation
   treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
   treesitter_analysis_condense = true, -- condense form for treesitter analysis
   -- this value prevent slow in large projects, e.g. found 100000 reference in a project

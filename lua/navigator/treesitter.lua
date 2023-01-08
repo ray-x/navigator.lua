@@ -394,11 +394,16 @@ end
 local lsp_reference = require('navigator.dochighlight').goto_adjent_reference
 
 function M.goto_adjacent_usage(bufnr, delta)
-  local opt = { forward = true }
+  local opt = { forward = delta > 0 }
   -- log(delta)
-  if delta < 0 then
-    opt.forward = false
+
+  local en = _NgConfigValues.treesitter_navigation
+
+  if type(en) == 'table' then
+    en = vim.tbl_contains(en, vim.o.ft)
   end
+  if en == false then return lsp_reference(opt) end
+
   bufnr = bufnr or api.nvim_get_current_buf()
   local node_at_point = ts_utils.get_node_at_cursor()
   if not node_at_point then
@@ -408,6 +413,7 @@ function M.goto_adjacent_usage(bufnr, delta)
 
   local def_node, scope = ts_locals.find_definition(node_at_point, bufnr)
   local usages = ts_locals.find_usages(def_node, scope, bufnr)
+  log(usages)
 
   local index = utils.index_of(usages, node_at_point)
   if not index then

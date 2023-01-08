@@ -31,6 +31,7 @@ _NgConfigValues = {
   end,
   ts_fold = false,
   treesitter_analysis = true, -- treesitter variable context
+  treesitter_navigation = true, -- bool|table
   treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
   treesitter_analysis_condense = true, -- short format of function
   treesitter_analysis_depth = 3, -- max depth
