@@ -68,18 +68,6 @@ local function sumneko_lua()
     },
     setup_jsonls = true,
   }
-
-  local user_luadev = _NgConfigValues.lsp['neodev']
-  if user_luadev then
-    luadevcfg = vim.tbl_deep_extend('force', luadevcfg, user_luadev)
-  end
-  require('navigator.lazyloader').load('neodev.nvim', 'folke/neodev.nvim')
-
-  local ok, l = pcall(require, 'neodev')
-  if ok and l then
-    l.setup(luadevcfg)
-  end
-
   return sumneko_cfg
 end
 

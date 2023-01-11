@@ -49,20 +49,12 @@ local disabled_ft = {
 local on_attach = require('navigator.lspclient.attach').on_attach
 -- gopls["ui.completion.usePlaceholders"] = true
 
--- lua setup
-
-if _NgConfigValues.lsp['lua-dev'] ~= nil then
-  vim.notify('lua-dev is deprecated, please use neodev instead', vim.lsp.log_levels.WARN)
-end
-
-require('navigator.lazyloader').load('neodev.nvim', 'folke/neodev.nvim')
 
 if _NgConfigValues.mason then
   require('navigator.lazyloader').load('mason.nvim', 'williamboman/mason.nvim')
   require('navigator.lazyloader').load('mason-lspconfig.nvim', 'williamboman/mason-lspconfig.nvim')
 end
 
-local setups = require('navigator.lspclient.clients_default').defaults()
 local servers =  require('navigator.lspclient.servers')
 
 local lsp_mason_servers = {}
@@ -81,6 +73,8 @@ local ng_default_cfg = {
 
 -- check and load based on file type
 local function load_cfg(ft, client, cfg, loaded, starting)
+
+  local setups = require('navigator.lspclient.clients_default').defaults()
   log(ft, client, loaded, starting)
   trace(cfg)
   if lspconfig[client] == nil then
@@ -218,6 +212,7 @@ end
 
 local loaded = {}
 local function lsp_startup(ft, retry, user_lsp_opts)
+  local setups = require('navigator.lspclient.clients_default').defaults()
   retry = retry or false
   local path_sep = require('navigator.util').path_sep()
   local capabilities = update_capabilities()

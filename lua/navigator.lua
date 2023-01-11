@@ -95,10 +95,7 @@ _NgConfigValues = {
       -- filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetype
     },
-    ['neodev'] = { -- navigator can use neodev settings to setup sumneko_lua
-      -- your setting for neodev here
-      -- navigator will setup neodev
-    },
+    neodev = false,
     sumneko_lua = {
       -- sumneko_root_path = sumneko_root_path,
       -- sumneko_binary = sumneko_binary,
@@ -158,23 +155,8 @@ _NgConfigValues = {
 }
 
 M.deprecated = function(cfg)
-  if cfg.code_action_prompt then
-    warn('code_action_prompt moved to lsp.code_action')
-  end
-  if cfg.code_lens_action_prompt then
-    warn('code_lens_action_prompt moved to lsp.code_lens_action')
-  end
-
-  if cfg.lsp ~= nil and cfg.lsp.disable_format_ft ~= nil and cfg.lsp.disable_format_ft ~= {} then
-    warn('disable_format_ft renamed to disable_format_cap')
-  end
-
-  if cfg.lsp ~= nil and cfg.lsp.code_lens == true then
-    warn('code_lens moved to lsp.code_lens_action')
-  end
-
-  if cfg.lspinstall ~= nil then
-    warn('lspinstall deprecated, please use lsp-installer instead or use "lspinstall" branch')
+  if cfg.lsp ~= nil and cfg.lsp.neodev ~= false and cfg.lsp.neodev then
+    warn('neodev option deprecated, refer to README for more details')
   end
 end
 

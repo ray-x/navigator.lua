@@ -640,16 +640,26 @@ There are lots of plugins provides lsp support
 * [neodev](https://github.com/folke/neodev.nvim) Dev setup for lua development. Navigator help you setup neodev
 
 
-Here is an example to setup rust with rust-tools
+  * setup with neodev
+```lua
+use  {"folke/neodev.nvim", 
+  ft = 'lua',
+  config =  function()
+    require'neodev'.setup{}
+  end
+}
+
+use {"ray-x/navigator.lua",
+  config=function()
+    require'navigator'.setup{}
+  end
+  }
+```
+
+
+  * Here is an example to setup rust with rust-tools
 
 ```lua
-require'navigator'.setup({
-  lsp = {
-    disable_lsp = { "rust_analyzer", "clangd" }, -- will not run rust_analyzer setup from navigator
-    ['neodev'] = { runtime_path=true }  -- any non default neodev setups, if not empty, navigator will call neodev.setup
-    -- with those configures
-  },
-})
 
 require('rust-tools').setup({
   server = {
