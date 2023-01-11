@@ -123,30 +123,10 @@ local function cache_lines(result)
   return cached_lines
 end
 
--- Get positions of LSP reference symbols
--- a function from smjonas/inc-rename.nvim
--- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
 local function fetch_lsp_references(bufnr, lsp_params, callback)
-  local clients = vim.lsp.get_active_clients({
-    bufnr = bufnr,
-  })
-  clients = vim.tbl_filter(function(client)
-    return client.supports_method('textDocument/rename')
-  end, clients)
-
-  if #clients == 0 then
-    return log('[nav-rename] No active language server with rename capability')
-  end
-
-  local params = lsp_params or make_position_params()
-  params.context = { includeDeclaration = true }
-
-  log(bufnr, params)
-
-  vim.lsp.buf_request(bufnr, 'textDocument/references', params, function(err, result, _, _)
-    log(result)
+  require('navigator.reference').fetch_lsp_references(bufnr, lsp_params, function(err, result, ctx, cfg)
     if err then
-      log('[nav-rename] Error while finding references: ' .. err.message)
+      log('[nav-rename] Error while finding references: ' .. err.message, ctx, cfg)
       return
     end
     if not result or vim.tbl_isempty(result) then
@@ -159,7 +139,6 @@ local function fetch_lsp_references(bufnr, lsp_params, callback)
     if callback then
       callback()
     end
-    log(state.cached_lines)
   end)
 end
 

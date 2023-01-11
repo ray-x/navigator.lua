@@ -194,17 +194,54 @@ local async_ref = function()
   end) -- return asyncresult, canceller
 end
 
+-- Get positions of LSP reference symbols
+-- a function from smjonas/inc-rename.nvim
+-- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
+local function fetch_lsp_references(bufnr, lsp_params, callback)
+  local clients = vim.lsp.get_active_clients({
+    bufnr = bufnr,
+  })
+  clients = vim.tbl_filter(function(client)
+    return client.supports_method('textDocument/rename')
+  end, clients)
+
+  if #clients == 0 then
+    return log('[nav-rename] No active language server with rename capability')
+  end
+
+  local params = lsp_params or vim.lsp.util.make_position_params()
+  params.context = lsp_params.context or { includeDeclaration = true }
+
+  log(bufnr, params)
+
+  -- return id, closer
+  return vim.lsp.buf_request(bufnr, 'textDocument/references', params, function(err, result, ctx, cfg)
+    log(result)
+    if err then
+      log('[nav-rename] Error while finding references: ' .. err.message)
+      return
+    end
+    if not result or vim.tbl_isempty(result) then
+      log('[nav-rename] Nothing to rename', result)
+      return
+    end
+    if callback then
+      callback(err, result, ctx, cfg)
+    end
+  end)
+end
+
+
+
 local ref_req = function()
   if _NgConfigValues.closer ~= nil then
     -- do not call it twice
     _NgConfigValues.closer()
   end
-  local ref_params = vim.lsp.util.make_position_params()
-  ref_params.context = { includeDeclaration = true }
   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
   local bufnr = vim.api.nvim_get_current_buf()
   log('bufnr', bufnr)
-  local ids, closer = vim.lsp.buf_request(bufnr, 'textDocument/references', ref_params, ref_hdlr)
+  local ids, closer = fetch_lsp_references(bufnr, nil, ref_hdlr)
   log(ids)
 
   _NgConfigValues.closer = closer
@@ -252,6 +289,7 @@ end
 
 return {
   side_panel = side_panel,
+  fetch_lsp_references = fetch_lsp_references,
   reference_handler = ref_hdlr,
   reference = ref_req,
   ref_view = ref_view,
