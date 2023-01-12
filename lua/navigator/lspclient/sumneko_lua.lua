@@ -43,7 +43,7 @@ local function sumneko_lua()
         workspace = {
           -- Make the server aware of Neovim runtime files
           library = library,
-          maxPreload = 2000,
+          maxPreload = 1000,
           preloadFileSize = 40000,
         },
         telemetry = { enable = false },
