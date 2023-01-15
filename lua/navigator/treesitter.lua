@@ -767,6 +767,9 @@ end
 
 function M.buf_ts()
   local all_nodes, width = M.all_ts_nodes()
+  if vim.fn.empty(all_nodes) == 1 then
+    return vim.notify('no treesitter node found')
+  end
   local bufnr = api.nvim_get_current_buf()
   local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
   local listview = gui.new_list_view({
@@ -776,7 +779,7 @@ function M.buf_ts()
     rawdata = true,
     height = 0.62,
     preview_height = 0.12,
-    width = width + 10,
+    width = (width or 80) + 10,
     api = _NgConfigValues.icons.treesitter_defult,
   })
   return listview, all_nodes, width

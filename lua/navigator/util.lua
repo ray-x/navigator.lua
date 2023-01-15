@@ -175,28 +175,19 @@ end
 M.log = function(...)
   return { ... }
 end
-M.info = function(...)
-  return { ... }
-end
 M.trace = function(...)
   return { ... }
 end
-M.warn = function(...)
-  return { ... }
-end
-M.error = function(...)
-  print(...)
-end
 
-local level = 'error'
+local level = 'info'
 
 function M.setup()
   if _NgConfigValues.debug == true then
-    level = 'info'
+    level = 'debug'
   elseif _NgConfigValues.debug == 'trace' then
     level = 'trace'
   end
-  local default_config = { use_console = false, use_file = true, level = level }
+  local default_config = { use_console = false, use_file = true, level = level, plugin = 'navigator' }
   if _NgConfigValues.debug_console_output then
     default_config.use_console = true
     default_config.use_file = false
@@ -287,7 +278,6 @@ end
 function table.pack(...)
   return { n = select('#', ...), ... }
 end
-
 function M.show(...)
   local string = ''
 
@@ -543,7 +533,6 @@ function M.range_inside(outer, inner)
 end
 
 function M.dirname(pathname)
-  local path_sep = require('navigator.util').path_sep()
   local strip_dir_pat = path_sep .. '([^' .. path_sep .. ']+)$'
   local strip_sep_pat = path_sep .. '$'
   if not pathname or #pathname == 0 then
