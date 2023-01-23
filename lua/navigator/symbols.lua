@@ -32,7 +32,7 @@ function M.document_symbols(opts)
   params.context = { includeDeclaration = true }
   params.query = opts.prompt or ''
   vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
-    if client.server_capabilities.documentSymbolProvider then
+    if client.name ~= 'null-ls' and client.server_capabilities.documentSymbolProvider then
       client.request('textDocument/documentSymbol', params, M.document_symbol_handler, _bufnr)
     end
   end)
