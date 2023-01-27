@@ -37,7 +37,6 @@ local function _update_virtual_text(line, actions)
     local title = actions[1].title
     pcall(api.nvim_buf_set_extmark, 0, namespace, line, -1, {
       virt_text = { { icon_with_indent .. title, 'DiagnosticsSignHint' } },
-      virt_text_pos = 'overlay',
       hl_mode = 'combine',
     })
   end

@@ -148,9 +148,14 @@ local function set_mapping(lsp_attach_info)
   local user_key = _NgConfigValues.keymaps or {}
   local bufnr = lsp_attach_info.bufnr or 0
 
+  local ks = {}
   local function del_keymap(mode, key, ...)
-    local ks = vim.api.nvim_buf_get_keymap(bufnr, mode)
-    if vim.tbl_contains(ks, key) then
+    local k = ks[mode]
+    if not k then
+      ks[mode] = vim.api.nvim_buf_get_keymap(bufnr, mode)
+      k = ks[mode]
+    end
+    if vim.tbl_contains(k, key) then
       vim.api.nvim_buf_del_keymap(bufnr, mode, key, ...)
     end
   end
@@ -377,9 +382,7 @@ function M.setup(attach_opts)
 
   -- TODO: when active signature merge to neovim, remove this setup:
 
-  if
-    vim.fn.empty(_NgConfigValues.signature_help_cfg) == 0 or _NgConfigValues.lsp_signature_help
-  then
+  if vim.fn.empty(_NgConfigValues.signature_help_cfg) == 0 or _NgConfigValues.lsp_signature_help then
     log('setup signature from navigator')
     local hassig, sig = pcall(require, 'lsp_signature')
     if hassig then
