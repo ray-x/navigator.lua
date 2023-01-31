@@ -414,7 +414,9 @@ M.set_diag_loclist = function(bufnr)
   local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
   if diag_cnt == 0 then
     log('great, no errors!')
-    return
+
+   -- vim.fn.getloclist(0, {filewinid=0})
+    return vim.cmd('lclose')
   end
 
   local clients = vim.lsp.get_active_clients({ buffer = bufnr })
@@ -427,7 +429,8 @@ M.set_diag_loclist = function(bufnr)
   if not vim.tbl_isempty(vim.lsp.get_active_clients({ buffer = bufnr })) then
     local err_cnt = get_count(0, [[Error]])
     if err_cnt > 0 and _NgConfigValues.lsp.disply_diagnostic_qf then
-      if diagnostic.set_loclist then
+      if not diagnostic.set_loclist then
+        vim.notify('deprecated: please update nvim to 0.7+')
         diagnostic.set_loclist(cfg)
       else
         cfg.namespaces = diagnostic.get_namespaces()
