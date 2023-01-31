@@ -399,7 +399,7 @@ function M.setup(attach_opts)
     buffer = attach_opts.bufnr,
     desc = 'diagnostic update',
     callback = function()
-      require('navigator.diagnostics').set_diag_loclist(attach_opts.bufnr)
+      require('navigator.diagnostics').setloclist(attach_opts.bufnr)
     end,
   })
 
