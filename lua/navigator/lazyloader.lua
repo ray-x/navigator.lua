@@ -3,12 +3,13 @@ return {
     local loader = nil
     local log = require('navigator.util').log
     -- packer only
-    if packer_plugins ~= nil then -- packer install
-      local lazy_plugins = {
-        ['nvim-lspconfig'] = 'neovim/nvim-lspconfig',
-        ['guihua.lua'] = 'ray-x/guihua.lua',
-      }
-
+    local lazy_plugins = {
+      ['nvim-lspconfig'] = 'neovim/nvim-lspconfig',
+      ['guihua.lua'] = 'ray-x/guihua.lua',
+    }
+    if pcall(require, 'lazy') then
+      require('lazy').load({plugins = {'nvim-lspconfig', 'guihua.lua'}})
+    elseif vim.fn.empty(packer_plugins) == 0 then -- packer install
       -- packer installed
       loader = require('packer').loader
       for plugin, url in pairs(lazy_plugins) do
