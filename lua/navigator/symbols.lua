@@ -26,7 +26,7 @@ function M.document_symbols(opts)
     api = ' ',
   }
 
-  local bufnr = vim.api.nvim_get_current_buf()
+  local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
   vim.list_extend(lspopts, opts)
   local params = vim.lsp.util.make_position_params()
   params.context = { includeDeclaration = true }

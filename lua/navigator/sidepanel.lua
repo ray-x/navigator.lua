@@ -1,4 +1,3 @@
-local gui = require('navigator.gui')
 local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 local util = require('navigator.util')
 local log = util.log
@@ -57,18 +56,31 @@ function M.lsp_and_diag_panel()
   if ft == 'nofile' or ft == 'guihua' or ft == 'prompt' then
     return
   end
+  local lsp
   local p = Panel:new({
     header = 'symbols',
     render = function(bufnr)
       bufnr = bufnr or api.nvim_get_current_buf()
       local params = vim.lsp.util.make_range_params()
-      local sync_req = require('navigator.lspwrapper').call_sync
-      local lsp = sync_req(
-        'textDocument/documentSymbol',
-        params,
-        { timeout = 2000, bufnr = bufnr, no_show = true },
-        vim.lsp.with(require('navigator.symbols').document_symbol_handler, { no_show = true })
-      )
+      local lsp_call = require('navigator.lspwrapper').call_sync
+      if not Panel:is_open() or vim.fn.empty(lsp) == 1 then
+        lsp = lsp_call(
+          'textDocument/documentSymbol',
+          params,
+          { timeout = 2000, bufnr = bufnr, no_show = true },
+          vim.lsp.with(require('navigator.symbols').document_symbol_handler, { no_show = true })
+        )
+      else
+        lsp_call = require('navigator.lspwrapper').call_async
+        local f = function(err, result, ctx)
+          -- log(result, ctx)
+          ctx = ctx or {}
+          ctx.no_show = true
+          lsp = require('navigator.symbols').document_symbol_handler(err, result, ctx)
+          return lsp
+        end
+        lsp_call('textDocument/documentSymbol', params, f, bufnr)
+      end
       return lsp
     end,
   })

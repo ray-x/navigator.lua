@@ -755,6 +755,9 @@ Treesitter outline and Diagnostics
 <img width="708" alt="image" src="https://user-images.githubusercontent.com/1681295/174791609-0023e68f-f1f4-4335-9ea2-d2360e9f0bfd.png">
 <img width="733" alt="image" src="https://user-images.githubusercontent.com/1681295/174804579-26f87fbf-426b-46d0-a7a3-a5aab69c032f.png">
 
+The side panel is vim buffer. You can toggle folds with za/zo/zc
+
+
 Calltree (Expandable LSP call hierarchy)
 <img width="769" alt="image" src="https://user-images.githubusercontent.com/1681295/176998572-e39fc968-4c8c-475d-b3b8-fb7991663646.png">
 
@@ -913,6 +916,53 @@ end
 ## Break changes and known issues
 
 [known issues I am working on](https://github.com/ray-x/navigator.lua/issues/1)
+
+
+## API and extensions
+The plugin built on top of guihua, you can extend the plugin based on your requirements.
+e.g. A side pannel of lsp symbols and lsp diagnostics:
+
+
+```lua
+local function treesitter_and_diag_panel()
+  local Panel = require('guihua.panel')
+
+  local diag = require('navigator.diagnostics')
+  local ft = vim.bo.filetype
+  local results = diag.diagnostic_list[ft]
+  log(diag.diagnostic_list, ft)
+
+  local bufnr = api.nvim_get_current_buf()
+  local p = Panel:new({
+    header = 'treesitter',
+    render = function(b)
+      log('render for ', bufnr, b)
+      return require('navigator.treesitter').all_ts_nodes(b)
+    end,
+  })
+  p:add_section({
+    header = 'diagnostic',
+    render = function(buf)
+      log(buf, diagnostic)
+      if diag.diagnostic_list[ft] ~= nil then
+        local display_items = {}
+        for _, client_items in pairs(results) do
+          for _, items in pairs(client_items) do
+            for _, it in pairs(items) do
+              log(it)
+              table.insert(display_items, it)
+            end
+          end
+        end
+        return display_items
+      else
+        return {}
+      end
+    end,
+  })
+  p:open(true)
+end
+```
 
 ## Todo
 
