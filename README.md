@@ -729,8 +729,10 @@ You can override the above highlight to fit your current colorscheme
 | LspRestart      | reload lsp                                                                |
 | LspToggleFmt    | toggle lsp format                                                         |
 | LspSymbols      | document symbol in side panel                                             |
+| LspAndDiag      | document symbol and diagnostics in side panel                                             |
 | NRefPanel       | show symbol reference in side panel                                       |
 | TSymobls        | treesitter symbol in side panel                                           |
+| TsAndDiag        | treesitter symbol and diagnostics in side panel                                           |
 | Calltree {args} | lsp call hierarchy call tree, args: -i (incomming default), -o (outgoing) |
 
 ## Screenshots

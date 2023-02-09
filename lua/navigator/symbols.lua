@@ -40,7 +40,15 @@ end
 
 M.document_symbol_handler = function(err, result, ctx)
   if err then
-    vim.notify('failed to get document symbol' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
+    if error ~= 'timeout' then
+      vim.notify(
+        'failed to get document symbol' .. vim.inspect(ctx) .. err,
+        vim.lsp.log_levels.WARN
+      )
+    else
+      log('request timeout')
+    end
+    return
   end
   local bufnr = ctx.bufnr or 0
   local query = ' '
@@ -49,7 +57,10 @@ M.document_symbol_handler = function(err, result, ctx)
   end
 
   if not result or vim.tbl_isempty(result) then
-    vim.notify('symbol ' .. query .. ' not found for buf ' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
+    vim.notify(
+      'symbol ' .. query .. ' not found for buf ' .. vim.inspect(ctx),
+      vim.lsp.log_levels.WARN
+    )
     return
   end
   local locations = {}
@@ -131,7 +142,10 @@ M.workspace_symbol_handler = function(err, result, ctx, cfg)
   end
   if not result or vim.tbl_isempty(result) then
     log('symbol not found', ctx)
-    vim.notify('symbol' .. query .. 'not found for buf ' .. tostring(ctx.bufnr), vim.lsp.log_levels.WARN)
+    vim.notify(
+      'symbol' .. query .. 'not found for buf ' .. tostring(ctx.bufnr),
+      vim.lsp.log_levels.WARN
+    )
     return
   end
   log(result[1])
