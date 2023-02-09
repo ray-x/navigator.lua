@@ -128,6 +128,8 @@ local function set_cmds(_)
     "command! -nargs=0 TSymbols lua require'navigator.treesitter'.side_panel()<CR>",
     "command! -nargs=0 NRefPanel lua require'navigator.reference'.side_panel()<CR>",
     "command! -nargs=* Calltree lua require'navigator.hierarchy'.calltree(<f-args>)<CR>",
+    "command! -nargs=* TsDiag lua require'navigator.sidepanel'.treesitter_and_diag_panel(<f-args>)<CR>",
+    "command! -nargs=* LspDiag lua require'navigator.sidepanel'.lsp_and_diag_panel(<f-args>)<CR>",
   }
 
   for _, value in pairs(commands) do

@@ -57,7 +57,7 @@ variable is:
   also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better default setup is
   included for LSP clients.
 
-- Out of box experience. 10 lines of minimum vimrc can turn your neovim into a full-featured LSP & Treesitter powered IDE
+- Out of box experience. 10 lines of minimum init.lua can turn your neovim into a full-featured LSP & Treesitter powered IDE
 
 - UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc. It covers
   all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface

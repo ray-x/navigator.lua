@@ -1,5 +1,4 @@
 local gui = require('navigator.gui')
-local diagnostic_list = {}
 local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 -- local hide = diagnostic.hide or diagnostic.clear
 local util = require('navigator.util')
@@ -14,9 +13,10 @@ local api = vim.api
 _NG_VT_DIAG_NS = api.nvim_create_namespace('navigator_lua_diag')
 
 if not util.nvim_0_6_1() then
-  util.warn('Navigator 0.4+ only support nvim-0.6+, please use Navigator 0.3.x or a newer version of neovim')
+  util.warn(
+    'Navigator 0.4+ only support nvim-0.6+, please use Navigator 0.3.x or a newer version of neovim'
+  )
 end
-diagnostic_list[vim.bo.filetype] = {}
 
 local diag_map = {}
 if vim.diagnostic then
@@ -37,6 +37,10 @@ local function get_count(bufnr, level)
     return diagnostic.get_count(bufnr, level)
   end
 end
+
+local M = {}
+M.diagnostic_list = {}
+M.diagnostic_list[vim.bo.filetype] = {}
 
 local function error_marker(result, ctx, config)
   if
@@ -130,7 +134,8 @@ local function error_marker(result, ctx, config)
           if pos[#pos] == bar then
             bar = _NgConfigValues.lsp.diagnostic_scrollbar_sign[3]
           end
-          pos[#pos] = { line = p, sign = bar, severity = math.min(diag.severity, pos[#pos].severity) }
+          pos[#pos] =
+            { line = p, sign = bar, severity = math.min(diag.severity, pos[#pos].severity) }
         else
           table.insert(pos, {
             line = p,
@@ -194,8 +199,8 @@ local diag_hdlr = function(err, result, ctx, config)
   end
   local cwd = vim.loop.cwd()
   local ft = vim.bo.filetype
-  if diagnostic_list[ft] == nil then
-    diagnostic_list[vim.bo.filetype] = {}
+  if M.diagnostic_list[ft] == nil then
+    M.diagnostic_list[vim.bo.filetype] = {}
   end
 
   local client_id = ctx.client_id
@@ -287,11 +292,11 @@ local diag_hdlr = function(err, result, ctx, config)
       table.insert(item_list, item)
     end
     -- local old_items = vim.fn.getqflist()
-    if diagnostic_list[ft][uri] == nil then
-      diagnostic_list[ft][uri] = {}
+    if M.diagnostic_list[ft][uri] == nil then
+      M.diagnostic_list[ft][uri] = {}
     end
-    diagnostic_list[ft][uri][tostring(client_id)] = item_list
-    trace(uri, ft, diagnostic_list)
+    M.diagnostic_list[ft][uri][tostring(client_id)] = item_list
+    trace(uri, ft, M.diagnostic_list)
     if not result.uri then
       result.uri = uri
     end
@@ -310,7 +315,6 @@ end
 --   return debounce(100, diag_hdlr)
 -- end
 
-local M = {}
 function M.setup()
   if diagnostic_cfg ~= nil and diagnostic_cfg.float ~= nil then
     return
@@ -334,7 +338,9 @@ function M.setup()
     },
   }
   diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
-  if type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' and _NgConfigValues.icons.icons then
+  if
+    type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' and _NgConfigValues.icons.icons
+  then
     diagnostic_cfg.virtual_text.prefix = _NgConfigValues.icons.diagnostic_virtual_text
   end
   -- vim.lsp.handlers["textDocument/publishDiagnostics"]
@@ -380,8 +386,8 @@ M.toggle_diagnostics = function()
 end
 
 M.show_buf_diagnostics = function()
-  if diagnostic_list[vim.bo.filetype] ~= nil then
-    local results = diagnostic_list[vim.bo.filetype]
+  if M.diagnostic_list[vim.bo.filetype] ~= nil then
+    local results = M.diagnostic_list[vim.bo.filetype]
     local display_items = {}
     for _, client_items in pairs(results) do
       for _, items in pairs(client_items) do
@@ -394,7 +400,9 @@ M.show_buf_diagnostics = function()
     if #display_items > 0 then
       local listview = gui.new_list_view({
         items = display_items,
-        api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head .. ' Diagnostic ',
+        api = _NgConfigValues.icons.diagnostic_file
+          .. _NgConfigValues.icons.diagnostic_head
+          .. ' Diagnostic ',
         enable_preview_edit = true,
       })
       if listview == nil then
@@ -415,7 +423,7 @@ M.setloclist = function(bufnr)
   if diag_cnt == 0 then
     log('great, no errors!')
 
-   -- vim.fn.getloclist(0, {filewinid=0})
+    -- vim.fn.getloclist(0, {filewinid=0})
     return vim.cmd('lclose')
   end
 
@@ -506,44 +514,6 @@ function M.show_diagnostics(pos)
   local diag1 = diags[1]
   opt.offset_x = -1 * (col - diag1.col)
   diagnostic.open_float(bufnr, opt)
-end
-
-function M.treesitter_and_diag_panel()
-  local Panel = require('guihua.panel')
-
-  local ft = vim.bo.filetype
-  local results = diagnostic_list[ft]
-  log(diagnostic_list, ft)
-
-  local bufnr = api.nvim_get_current_buf()
-  local p = Panel:new({
-    header = 'treesitter',
-    render = function(b)
-      log('render for ', bufnr, b)
-      return require('navigator.treesitter').all_ts_nodes(b)
-    end,
-  })
-  p:add_section({
-    header = 'diagnostic',
-    render = function(buf)
-      log(buf, diagnostic)
-      if diagnostic_list[ft] ~= nil then
-        local display_items = {}
-        for _, client_items in pairs(results) do
-          for _, items in pairs(client_items) do
-            for _, it in pairs(items) do
-              log(it)
-              table.insert(display_items, it)
-            end
-          end
-        end
-        return display_items
-      else
-        return {}
-      end
-    end,
-  })
-  p:open(true)
 end
 
 function M.config(cfg)
