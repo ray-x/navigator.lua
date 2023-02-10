@@ -257,39 +257,41 @@ M.setup = function(cfg)
       require('navigator.lspclient.clients').on_filetype()
     end,
   })
-  require('navigator.lazyloader').init()
-  require('navigator.lspclient.clients').setup(_NgConfigValues)
+  vim.defer_fn(function()
+    require('navigator.lazyloader').init()
+    require('navigator.lspclient.clients').setup(_NgConfigValues)
 
-  require('navigator.reference')
-  require('navigator.definition')
-  require('navigator.hierarchy')
-  require('navigator.implementation')
+    require('navigator.reference')
+    require('navigator.definition')
+    require('navigator.hierarchy')
+    require('navigator.implementation')
 
-  cfg.lsp = cfg.lsp or _NgConfigValues.lsp
+    cfg.lsp = cfg.lsp or _NgConfigValues.lsp
 
-  if _NgConfigValues.lsp.enable then
-    require('navigator.diagnostics').config(cfg.lsp.diagnostic)
-  end
-  if not _NgConfigValues.loaded then
-    _NgConfigValues.loaded = true
-  end
-
-  if _NgConfigValues.ts_fold == true then
-    local ok, _ = pcall(require, 'nvim-treesitter')
-    if ok then
-      require('navigator.foldts').on_attach()
+    if _NgConfigValues.lsp.enable then
+      require('navigator.diagnostics').config(cfg.lsp.diagnostic)
     end
-  end
+    if not _NgConfigValues.loaded then
+      _NgConfigValues.loaded = true
+    end
 
-  local _start_client = vim.lsp.start_client
-  vim.lsp.start_client = function(lsp_config)
-    -- add highlight for Lspxxx
-    require('navigator.lspclient.highlight').add_highlight()
-    require('navigator.lspclient.highlight').diagnositc_config_sign()
-    -- require('navigator.lspclient.mapping').setup()
-    require('navigator.lspclient.lspkind').init()
-    return _start_client(lsp_config)
-  end
+    if _NgConfigValues.ts_fold == true then
+      local ok, _ = pcall(require, 'nvim-treesitter')
+      if ok then
+        require('navigator.foldts').on_attach()
+      end
+    end
+
+    local _start_client = vim.lsp.start_client
+    vim.lsp.start_client = function(lsp_config)
+      -- add highlight for Lspxxx
+      require('navigator.lspclient.highlight').add_highlight()
+      require('navigator.lspclient.highlight').diagnositc_config_sign()
+      -- require('navigator.lspclient.mapping').setup()
+      require('navigator.lspclient.lspkind').init()
+      return _start_client(lsp_config)
+    end
+  end, 1)
 end
 
 return M
