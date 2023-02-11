@@ -54,8 +54,13 @@ variable is:
 ## Features
 
 - LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type. This
-  also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better default setup is
-  included for LSP clients.
+  also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better LSP default enables
+    * autocompletion *(e.g. nvim-cmp), 
+    * codelens
+    * lsp folding
+    * go implementation 
+    * incoming/outgoing call and ccls call hierarchy
+    * range formatting
 
 - Out of box experience. 10 lines of minimum init.lua can turn your neovim into a full-featured LSP & Treesitter powered IDE
 
