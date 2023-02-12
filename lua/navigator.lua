@@ -96,7 +96,7 @@ _NgConfigValues = {
       -- set to {} to disable the lspclient for all filetype
     },
     neodev = false,
-    sumneko_lua = {
+    lua_ls = {
       -- sumneko_root_path = sumneko_root_path,
       -- sumneko_binary = sumneko_binary,
       -- cmd = {'lua-language-server'}
@@ -157,6 +157,9 @@ _NgConfigValues = {
 M.deprecated = function(cfg)
   if cfg.lsp ~= nil and cfg.lsp.neodev ~= false and cfg.lsp.neodev then
     warn('neodev option deprecated, refer to README for more details')
+  end
+  if cfg.lsp and cfg.lsp.sumneko_lua then
+    warn('sumneko_lua option deprecated, refer to README for more details')
   end
 end
 
@@ -234,9 +237,9 @@ local extend_config = function(opts)
       end
     end
   end
-  if _NgConfigValues.sumneko_root_path or _NgConfigValues.sumneko_binary then
-    vim.notify("Please put sumneko setup in lsp['sumneko_lua']", vim.log.levels.WARN)
-  end
+  -- if _NgConfigValues.sumneko_root_path or _NgConfigValues.sumneko_binary then
+  --   vim.notify("Please put sumneko setup in lsp['lua_ls']", vim.log.levels.WARN)
+  -- end
 
   M.deprecated(opts)
 end

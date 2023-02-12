@@ -11,7 +11,7 @@ local function add(lib)
     end
   end
 end
-local function sumneko_lua()
+local function lua_ls()
   -- add runtime
   -- add plugins it may be very slow to add all in path
   add('$VIMRUNTIME')
@@ -62,5 +62,5 @@ local function sumneko_lua()
 end
 
 return {
-  sumneko_lua = sumneko_lua,
+  lua_ls = lua_ls,
 }

@@ -564,16 +564,16 @@ local function setup(user_opts, cnt)
   local lsp_opts = user_opts.lsp or {}
 
   if vim.bo.filetype == 'lua' then
-    local slua = lsp_opts.sumneko_lua
+    local slua = lsp_opts.lua_ls
     if slua and not slua.cmd then
       if slua.sumneko_root_path and slua.sumneko_binary then
-        lsp_opts.sumneko_lua.cmd = {
+        lsp_opts.lua_ls.cmd = {
           slua.sumneko_binary,
           '-E',
           slua.sumneko_root_path .. '/main.lua',
         }
       else
-        lsp_opts.sumneko_lua.cmd = { 'lua-language-server' }
+        lsp_opts.lua_ls.cmd = { 'lua-language-server' }
       end
     end
   end

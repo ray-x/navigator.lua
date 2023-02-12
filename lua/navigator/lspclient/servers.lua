@@ -10,7 +10,7 @@ return {
   'pyright',
   'jedi_language_server',
   'jdtls',
-  'sumneko_lua',
+  'lua_ls',
   'vimls',
   'html',
   'jsonls',

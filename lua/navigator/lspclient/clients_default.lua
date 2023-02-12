@@ -188,7 +188,7 @@ M.defaults = function()
     },
   }
 
-  setups.sumneko_lua = require('navigator.lspclient.sumneko_lua').sumneko_lua()
+  setups.lua_ls = require('navigator.lspclient.lua_ls').lua_ls()
   return setups
 end
 
