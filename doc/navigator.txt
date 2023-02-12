@@ -126,7 +126,7 @@ FEATURES:                                                    *navigator-features
 *   Luv async thread and tasks
 *   Edit your code in preview window
 *   Async request with lsp.buf_request for reference search
-*   Treesitter symbol search. It is handy for large files (Some of LSP e.g. sumneko_lua, there is a 100kb file size limitation?)
+*   Treesitter symbol search. It is handy for large files (Some of LSP e.g. lua_ls, there is a 100kb file size limitation?)
 *   FZY search with either native C (if gcc installed) or Lua-JIT
 *   LSP multiple symbol highlight/marker and hop between document references
 *   Preview definination/references
@@ -301,7 +301,7 @@ Nondefault configuration example:
                            -- disable: a blacklist of language that will not be formatted on save
                            -- function: function(bufnr) return true end to enable/disable lsp format on save
 
-        disable_format_cap = {"sqls", "sumneko_lua", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
+        disable_format_cap = {"sqls", "lua_ls", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
         disable_lsp = {'pylsd', 'sqlls'}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
         -- only want to enable one lsp server
         -- to disable all default config and use your own lsp setup set
@@ -338,7 +338,7 @@ Nondefault configuration example:
             gopls = {gofumpt = false} -- disable gofumpt etc,
           }
         },
-        sumneko_lua = {
+        lua_ls = {
           sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
           sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
         },
@@ -357,7 +357,7 @@ Built clients:
 >
     local servers = {
       "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
-      "jedi_language_server", "jdtls", "sumneko_lua", "vimls", "html", "jsonls", "solargraph", "cssls",
+      "jedi_language_server", "jdtls", "lua_ls", "vimls", "html", "jsonls", "solargraph", "cssls",
       "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
       "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
       "r_language_server", "rust_analyzer", "terraformls", "svelte", "texlab", "clojure_lsp", "elixirls",
@@ -375,7 +375,7 @@ Other than above setup, additional none default setup are used for following lsp
 *   clangd
 *   rust_analyzer
 *   sqls
-*   sumneko_lua
+*   lua_ls
 *   pyright
 *   ccls
 
