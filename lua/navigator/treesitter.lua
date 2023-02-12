@@ -15,6 +15,11 @@ local parsers = require('nvim-treesitter.parsers')
 local utils = require('nvim-treesitter.utils')
 local locals = require('nvim-treesitter.locals')
 local ts_utils = require('nvim-treesitter.ts_utils')
+local is_in_node_range = vim.treesitter.is_in_node_range
+if not is_in_node_range then
+  is_in_node_range = ts_utils.is_in_node_range
+end
+
 local api = vim.api
 local util = require('navigator.util')
 local M = {}
@@ -126,7 +131,7 @@ function M.get_tsnode_at_pos(pos, bufnr, ignore_injected_langs)
   if ignore_injected_langs then
     for _, tree in ipairs(root_lang_tree:trees()) do
       local tree_root = tree:root()
-      if tree_root and vim.treesitter.is_in_node_range(tree_root, cursor_range[1], cursor_range[2]) then
+      if tree_root and is_in_node_range(tree_root, cursor_range[1], cursor_range[2]) then
         root = tree_root
         break
       end
