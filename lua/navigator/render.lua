@@ -53,7 +53,7 @@ end
 function M.prepare_for_render(items, opts)
   opts = opts or {}
   if items == nil or #items < 1 then
-    vim.notify('no item found or empty fields', vim.lsp.log_levels.INFO)
+    vim.notify('no item found or empty fields', vim.log.levels.INFO)
     return
   end
   local item = clone(items[1])

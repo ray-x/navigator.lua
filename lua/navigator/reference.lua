@@ -33,7 +33,7 @@ local ref_view = function(err, locations, ctx, cfg)
       log(logctx, 'result size', 'def', #ctx.results.definitions, 'ref', #ctx.results.references)
     end
     if definitions.error and references.error then
-      vim.notify('lsp ref callback error' .. vim.inspect(ctx.result), vim.lsp.log_levels.WARN)
+      vim.notify('lsp ref callback error' .. vim.inspect(ctx.result), vim.log.levels.WARN)
     end
     locations = {}
     if definitions and definitions.result then
@@ -58,7 +58,7 @@ local ref_view = function(err, locations, ctx, cfg)
   if err ~= nil then
     vim.notify(
       'lsp ref callback error' .. vim.inspect(err) .. vim.inspect(ctx) .. vim.inspect(locations),
-      vim.lsp.log_levels.WARN
+      vim.log.levels.WARN
     )
     log('ref callback error, lsp may not ready', err, ctx, vim.inspect(locations))
     return
@@ -66,11 +66,11 @@ local ref_view = function(err, locations, ctx, cfg)
   if type(locations) ~= 'table' then
     log(locations)
     log('ctx', ctx)
-    vim.notify('incorrect setup' .. vim.inspect(locations), vim.lsp.log_levels.WARN)
+    vim.notify('incorrect setup' .. vim.inspect(locations), vim.log.levels.WARN)
     return
   end
   if locations == nil or vim.tbl_isempty(locations) then
-    vim.notify('References not found', vim.lsp.log_levels.INFO)
+    vim.notify('References not found', vim.log.levels.INFO)
     return
   end
 
@@ -100,7 +100,7 @@ local ref_view = function(err, locations, ctx, cfg)
     listview = gui.new_list_view(opts)
 
     if listview == nil then
-      vim.notify('failed to create preview windows', vim.lsp.log_levels.INFO)
+      vim.notify('failed to create preview windows', vim.log.levels.INFO)
       return
     end
   end

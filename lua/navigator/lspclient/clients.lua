@@ -18,7 +18,7 @@ local has_lsp, lspconfig = pcall(require, 'lspconfig')
 if not has_lsp then
   return {
     setup = function()
-      vim.notify('loading lsp config failed LSP may not working correctly', vim.lsp.log_levels.WARN)
+      vim.notify('loading lsp config failed LSP may not working correctly', vim.log.levels.WARN)
     end,
   }
 end
@@ -256,7 +256,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if lspconfig[lspclient] == nil then
       vim.notify(
         'lspclient' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
-        vim.lsp.log_levels.WARN
+        vim.log.levels.WARN
       )
       log('lspclient', lspclient, 'not supported')
       goto continue
@@ -265,7 +265,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if lspconfig[lspclient].document_config and lspconfig[lspclient].document_config.default_config then
       default_config = lspconfig[lspclient].document_config.default_config
     else
-      vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.lsp.log_levels.WARN)
+      vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.log.levels.WARN)
       goto continue
     end
 
@@ -349,7 +349,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
           client.notify(
             'workspace/didChangeConfiguration',
             { settings = client.config.settings },
-            vim.lsp.log_levels.WARN
+            vim.log.levels.WARN
           )
         end
       end
@@ -417,7 +417,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
 
     if vfn.executable(cfg.cmd[1]) == 0 then
-      log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.lsp.log_levels.WARN)
+      log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.log.levels.WARN)
     end
 
     if _NG_Loaded[lspclient] then

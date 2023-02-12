@@ -6,7 +6,7 @@ M.defaults = function()
   if not has_lsp then
     return {
       setup = function()
-        vim.notify('loading lsp config failed LSP may not working correctly', vim.lsp.log_levels.WARN)
+        vim.notify('loading lsp config failed LSP may not working correctly', vim.log.levels.WARN)
       end,
     }
   end

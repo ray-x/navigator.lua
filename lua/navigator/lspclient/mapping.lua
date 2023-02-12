@@ -389,12 +389,12 @@ M.toggle_lspformat = function(on)
   end
   if _NgConfigValues.lsp.format_on_save then
     if on == nil then
-      vim.notify('format on save true', vim.lsp.log_levels.INFO)
+      vim.notify('format on save true', vim.log.levels.INFO)
     end
     vim.cmd([[set eventignore-=BufWritePre]])
   else
     if on == nil then
-      vim.notify('format on save false', vim.lsp.log_levels.INFO)
+      vim.notify('format on save false', vim.log.levels.INFO)
     end
     vim.cmd([[set eventignore+=BufWritePre]])
   end
@@ -404,7 +404,7 @@ function M.setup(attach_opts)
   if not attach_opts or not attach_opts.client then
     vim.notify(
         'please call require"navigator.mapping".setup({bufnr=bufnr, client=client}) inside on_attach(client,bufnr)',
-        vim.lsp.log_levels.WARN
+        vim.log.levels.WARN
     )
   end
   attach_opts = attach_opts or { bufnr = 0, client = {}, cap = {} }

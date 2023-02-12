@@ -330,7 +330,7 @@ function M.locations_to_items(locations, ctx)
   local client_id = ctx.client_id or 1
   local enc = util.encoding(client_id)
   if not locations or vim.tbl_isempty(locations) then
-    vim.notify('list not avalible', vim.lsp.log_levels.WARN)
+    vim.notify('list not avalible', vim.log.levels.WARN)
     return
   end
   local width = 4
@@ -453,7 +453,7 @@ end
 
 function M.symbol_to_items(locations)
   if not locations or vim.tbl_isempty(locations) then
-    vim.notify('list not avalible', vim.lsp.log_levels.WARN)
+    vim.notify('list not avalible', vim.log.levels.WARN)
     return
   end
 

@@ -461,13 +461,13 @@ local function get_all_nodes(bufnr, filter, summary)
 
   trace(bufnr, filter, summary)
   if not bufnr then
-    vim.notify('get_all_node invalid bufnr', vim.lsp.log_levels.WARN)
+    vim.notify('get_all_node invalid bufnr', vim.log.levels.WARN)
   end
   summary = summary or false
   local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
   if not parsers.has_parser() then
     if not require('navigator.lspclient.clients').ft_disabled(ft) then
-      -- vim.notify('ts not loaded ' .. ft, vim.lsp.log_levels.Debug)
+      -- vim.notify('ts not loaded ' .. ft, vim.log.levels.Debug)
       log('ts not loaded ' .. ft)
     end
     return {}

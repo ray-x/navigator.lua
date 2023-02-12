@@ -46,7 +46,7 @@ local function call_hierarchy_result_procesor(direction, err, result, ctx, confi
   trace(direction, err, ctx, config)
   trace(result)
   if not result then
-    vim.notify('No call hierarchy items found', vim.lsp.log_levels.WARN)
+    vim.notify('No call hierarchy items found', vim.log.levels.WARN)
     return
   end
   -- trace('call_hierarchy', result)
@@ -55,7 +55,7 @@ local function call_hierarchy_result_procesor(direction, err, result, ctx, confi
   assert(next(vim.lsp.get_active_clients({buffer = bufnr})), 'Must have a client running to use call hierarchy')
   if err ~= nil then
     log('dir', direction, 'result', result, 'err', err, ctx)
-    vim.notify('ERROR: ' .. err, vim.lsp.log_levels.WARN)
+    vim.notify('ERROR: ' .. err, vim.log.levels.WARN)
     return
   end
 

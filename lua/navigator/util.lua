@@ -470,15 +470,15 @@ end
 -- alternatively: use  vim.notify("namespace does not exist or is anonymous", vim.log.levels.ERROR)
 
 function M.warn(msg)
-  vim.notify('WRN: ' .. msg, vim.lsp.log_levels.WARN)
+  vim.notify('WRN: ' .. msg, vim.log.levels.WARN)
 end
 
 function M.error(msg)
-  vim.notify('ERR: ' .. msg, vim.lsp.log_levels.EROR)
+  vim.notify('ERR: ' .. msg, vim.log.levels.EROR)
 end
 
 function M.info(msg)
-  vim.notify('INF: ' .. msg, vim.lsp.log_levels.INFO)
+  vim.notify('INF: ' .. msg, vim.log.levels.INFO)
 end
 
 function M.dedup(locations)

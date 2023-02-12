@@ -46,7 +46,7 @@ local signature_handler = function(err, result, ctx, config)
     log("config nil")
   end
   if err then
-    vim.notify("signature help error: ".. vim.inspect(err) .. vim.inspect(result), ctx, config, vim.lsp.log_levels.WARN)
+    vim.notify("signature help error: ".. vim.inspect(err) .. vim.inspect(result), ctx, config, vim.log.levels.WARN)
   end
   config = config or {}
   if config.border == nil then

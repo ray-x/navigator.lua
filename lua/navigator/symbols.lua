@@ -43,7 +43,7 @@ M.document_symbol_handler = function(err, result, ctx)
     if error ~= 'timeout' then
       vim.notify(
         'failed to get document symbol' .. vim.inspect(ctx) .. err,
-        vim.lsp.log_levels.WARN
+        vim.log.levels.WARN
       )
     else
       log('request timeout')
@@ -59,7 +59,7 @@ M.document_symbol_handler = function(err, result, ctx)
   if not result or vim.tbl_isempty(result) then
     vim.notify(
       'symbol ' .. query .. ' not found for buf ' .. vim.inspect(ctx),
-      vim.lsp.log_levels.WARN
+      vim.log.levels.WARN
     )
     return
   end
@@ -134,7 +134,7 @@ end
 M.workspace_symbol_handler = function(err, result, ctx, cfg)
   trace(err, result, ctx, cfg)
   if err then
-    vim.notify('failed to get workspace symbol' .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
+    vim.notify('failed to get workspace symbol' .. vim.inspect(ctx), vim.log.levels.WARN)
   end
   local query = ' '
   if ctx.params and ctx.params.query then
@@ -144,7 +144,7 @@ M.workspace_symbol_handler = function(err, result, ctx, cfg)
     log('symbol not found', ctx)
     vim.notify(
       'symbol' .. query .. 'not found for buf ' .. tostring(ctx.bufnr),
-      vim.lsp.log_levels.WARN
+      vim.log.levels.WARN
     )
     return
   end

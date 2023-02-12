@@ -16,7 +16,7 @@ local function call_hierarchy_handler(direction, err, result, ctx, cfg, error_me
   assert(next(vim.lsp.get_active_clients()), 'Must have a client running to use lsp_tags')
   if err ~= nil then
     log('hierarchy error', ctx, 'dir', direction, 'result', result, 'err', err)
-    vim.notify('ERROR: ' .. error_message, vim.lsp.log_levels.WARN)
+    vim.notify('ERROR: ' .. error_message, vim.log.levels.WARN)
     return
   end
   -- log(funcs)

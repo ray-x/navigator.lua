@@ -9,7 +9,7 @@ local TextView = require('guihua.textview')
 local definition_hdlr = function(err, locations, ctx, _)
   -- log(locations)
   if err ~= nil then
-    vim.notify('Defination: ' .. tostring(err) .. vim.inspect(ctx), vim.lsp.log_levels.WARN)
+    vim.notify('Defination: ' .. tostring(err) .. vim.inspect(ctx), vim.log.levels.WARN)
     return
   end
   if type(locations) == 'number' then
@@ -50,7 +50,7 @@ local function def_preview(timeout_ms)
   local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)
 
   if result == nil or vim.tbl_isempty(result) then
-    vim.notify('No result found: ' .. method, vim.lsp.log_levels.WARN)
+    vim.notify('No result found: ' .. method, vim.log.levels.WARN)
     return nil
   end
 
@@ -65,7 +65,7 @@ local function def_preview(timeout_ms)
   end
 
   if vim.tbl_isempty(data) then
-    vim.notify('No result found: ' .. method, vim.lsp.log_levels.WARN)
+    vim.notify('No result found: ' .. method, vim.log.levels.WARN)
     return nil
   end
 

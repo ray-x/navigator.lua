@@ -76,7 +76,7 @@ local function ctags_gen()
     on_exit = function(_, data, _) -- id, data, event
       -- log(vim.inspect(data) .. "exit")
       if data and data ~= 0 then
-        return vim.notify(cmd .. ' failed ' .. tostring(data), vim.lsp.log_levels.ERROR)
+        return vim.notify(cmd .. ' failed ' .. tostring(data), vim.log.levels.ERROR)
       else
         vim.notify('ctags generated')
       end

@@ -124,22 +124,26 @@ local function cache_lines(result)
 end
 
 local function fetch_lsp_references(bufnr, lsp_params, callback)
-  require('navigator.reference').fetch_lsp_references(bufnr, lsp_params, function(err, result, ctx, cfg)
-    if err then
-      log('[nav-rename] Error while finding references: ' .. err.message, ctx, cfg)
-      return
+  require('navigator.reference').fetch_lsp_references(
+    bufnr,
+    lsp_params,
+    function(err, result, ctx, cfg)
+      if err then
+        log('[nav-rename] Error while finding references: ' .. err.message, ctx, cfg)
+        return
+      end
+      if not result or vim.tbl_isempty(result) then
+        log('[nav-rename] Nothing to rename', result)
+        return
+      end
+      state.total = #result
+      state.cached_lines = cache_lines(result)
+      state.should_fetch_references = false
+      if callback then
+        callback()
+      end
     end
-    if not result or vim.tbl_isempty(result) then
-      log('[nav-rename] Nothing to rename', result)
-      return
-    end
-    state.total = #result
-    state.cached_lines = cache_lines(result)
-    state.should_fetch_references = false
-    if callback then
-      callback()
-    end
-  end)
+  )
 end
 
 -- a function from smjonas/inc-rename.nvim
@@ -208,7 +212,14 @@ local function incremental_rename_preview(opts, preview_ns, preview_buf)
     api.nvim_buf_set_lines(bufnr or opts.bufnr, line_nr, line_nr + 1, false, { updated_line })
 
     for _, hl_pos in ipairs(highlight_positions) do
-      api.nvim_buf_add_highlight(bufnr or opts.bufnr, preview_ns, M.hl_group, line_nr, hl_pos.start_col, hl_pos.end_col)
+      api.nvim_buf_add_highlight(
+        bufnr or opts.bufnr,
+        preview_ns,
+        M.hl_group,
+        line_nr,
+        hl_pos.start_col,
+        hl_pos.end_col
+      )
     end
   end
 
@@ -229,12 +240,12 @@ local function perform_lsp_rename(new_name, params)
 
   vim.lsp.buf_request(0, 'textDocument/rename', params, function(err, result, ctx, _)
     if err and err.message then
-      vim.notify('[nav-rename] Error while renaming: ' .. err.message, vim.lsp.log_levels.ERROR)
+      vim.notify('[nav-rename] Error while renaming: ' .. err.message, vim.log.levels.ERROR)
       return
     end
 
     if not result or vim.tbl_isempty(result) then
-      set_error('[nav-rename] Nothing renamed', vim.lsp.log_levels.WARN)
+      set_error('[nav-rename] Nothing renamed', vim.log.levels.WARN)
       return
     end
 
@@ -270,7 +281,10 @@ end
 
 local function inc_rename_execute(opts)
   if vim.v.errmsg ~= '' then
-    log('[nav-rename] An error occurred in the preview function.' .. vim.v.errmsg, vim.lsp.log_levels.ERROR)
+    log(
+      '[nav-rename] An error occurred in the preview function.' .. vim.v.errmsg,
+      vim.log.levels.ERROR
+    )
   elseif state.err then
     log(state.err.msg, state.err.level)
   end
@@ -428,7 +442,8 @@ function M.rename_inplace(new_name, options)
     ---@private
     local function rename(name)
       params.newName = name
-      local handler = client.handlers['textDocument/rename'] or vim.lsp.handlers['textDocument/rename']
+      local handler = client.handlers['textDocument/rename']
+        or vim.lsp.handlers['textDocument/rename']
       client.request('textDocument/rename', params, function(...)
         handler(...)
         try_use_client(next(clients, idx))
@@ -442,7 +457,8 @@ function M.rename_inplace(new_name, options)
           if next(clients, idx) then
             try_use_client(next(clients, idx))
           else
-            local msg = err and ('Error on prepareRename: ' .. (err.message or '')) or 'Nothing to rename'
+            local msg = err and ('Error on prepareRename: ' .. (err.message or ''))
+              or 'Nothing to rename'
             vim.notify(msg, vim.log.levels.INFO)
           end
           return
@@ -514,7 +530,10 @@ function M.rename_inplace(new_name, options)
         vim.cmd('noautocmd startinsert')
       end, bufnr)
     else
-      assert(client.supports_method('textDocument/rename'), 'Client must support textDocument/rename')
+      assert(
+        client.supports_method('textDocument/rename'),
+        'Client must support textDocument/rename'
+      )
       if new_name then
         rename(new_name)
         return
