@@ -154,7 +154,7 @@ M.workspace_symbol_handler = function(err, result, ctx, cfg)
   log(items[1])
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
-  gui.new_list_view({ items = items, prompt = true, ft = ft, rowdata = true, api = ' ' , title = 'Workspace Symbols''})
+  gui.new_list_view({ items = items, prompt = true, ft = ft, rowdata = true, api = ' ' , title = 'Workspace Symbols'})
 end
 
 function M.side_panel()
