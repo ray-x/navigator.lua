@@ -404,6 +404,7 @@ M.show_buf_diagnostics = function()
           .. _NgConfigValues.icons.diagnostic_head
           .. ' Diagnostic ',
         enable_preview_edit = true,
+        title = 'LSP Diagnostic',
       })
       if listview == nil then
         return log('nil listview')

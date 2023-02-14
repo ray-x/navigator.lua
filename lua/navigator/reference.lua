@@ -94,6 +94,7 @@ local ref_view = function(err, locations, ctx, cfg)
     width = width,
     api = 'Reference',
     enable_preview_edit = true,
+    title = 'References ' .. vim.fn.expand('<cword>'),
   }
   local listview
   if not ctx.no_show then
@@ -215,23 +216,26 @@ local function fetch_lsp_references(bufnr, lsp_params, callback)
   log(bufnr, params)
 
   -- return id, closer
-  return vim.lsp.buf_request(bufnr, 'textDocument/references', params, function(err, result, ctx, cfg)
-    log(result)
-    if err then
-      log('[nav-rename] Error while finding references: ' .. err.message)
-      return
+  return vim.lsp.buf_request(
+    bufnr,
+    'textDocument/references',
+    params,
+    function(err, result, ctx, cfg)
+      log(result)
+      if err then
+        log('[nav-rename] Error while finding references: ' .. err.message)
+        return
+      end
+      if not result or vim.tbl_isempty(result) then
+        log('[nav-rename] Nothing to rename', result)
+        return
+      end
+      if callback then
+        callback(err, result, ctx, cfg)
+      end
     end
-    if not result or vim.tbl_isempty(result) then
-      log('[nav-rename] Nothing to rename', result)
-      return
-    end
-    if callback then
-      callback(err, result, ctx, cfg)
-    end
-  end)
+  )
 end
-
-
 
 local ref_req = function()
   if _NgConfigValues.closer ~= nil then

@@ -785,6 +785,7 @@ function M.buf_ts()
     height = 0.62,
     preview_height = 0.12,
     width = (width or 80) + 10,
+    title = 'treesitter symbols',
     api = _NgConfigValues.icons.treesitter_defult,
   })
   return listview, all_nodes, width
@@ -825,6 +826,7 @@ function M.bufs_ts()
       height = 0.62,
       preview_height = 0.12,
       width = max_length + 10,
+      title = 'treesitter symbols',
       api = _NgConfigValues.icons.treesitter_defult,
     })
   end

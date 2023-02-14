@@ -308,6 +308,7 @@ M.rename = function()
   ghinput.setup({
     on_change = function(new_name) end,
     on_concel = function(new_name) end,
+    title = 'lsp rename',
     on_cancel = function() end,
   })
   vim.ui.input = ghinput.input

@@ -126,6 +126,7 @@ M.document_symbol_handler = function(err, result, ctx)
     rawdata = true,
     height = 0.62,
     preview_height = 0.1,
+    title = 'Document Symbols',
     ft = ft,
     api = _NgConfigValues.icons.doc_symbol,
   })
@@ -153,7 +154,7 @@ M.workspace_symbol_handler = function(err, result, ctx, cfg)
   log(items[1])
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
-  gui.new_list_view({ items = items, prompt = true, ft = ft, rowdata = true, api = ' ' })
+  gui.new_list_view({ items = items, prompt = true, ft = ft, rowdata = true, api = ' ' , title = 'Workspace Symbols''})
 end
 
 function M.side_panel()

@@ -122,6 +122,7 @@ hierarchy_handler = function(dir, handler, show, api, err, result, ctx, cfg)
     bufnr = bufnr,
     panel = opts.panel,
     parent_node = opts.parent_node,
+    title = 'Call Hierarchy',
   }
   local win = show(show_args)
   return results, win

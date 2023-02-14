@@ -126,6 +126,7 @@ local function ctags_symbols()
     transparency = 50,
     prompt = true,
     rawdata = true,
+    title = 'ctags',
     rect = { height = height, pos_x = 0, pos_y = 0, width = width },
   }
 

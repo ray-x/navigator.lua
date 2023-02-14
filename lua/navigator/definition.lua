@@ -29,7 +29,7 @@ local definition_hdlr = function(err, locations, ctx, _)
   if vim.tbl_islist(locations) then
     if #locations > 1 then
       local items = locations_to_items(locations)
-      gui.new_list_view({ items = items, api = 'Definition' })
+      gui.new_list_view({ items = items, api = 'Definition', title = 'Definition' })
     else
       vim.lsp.util.jump_to_location(locations[1], oe)
     end

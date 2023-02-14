@@ -93,6 +93,7 @@ M.list_workspace_folders = function()
   local folders = vim.lsp.buf.list_workspace_folders()
   if #folders > 0 then
     return require('navigator.gui').new_list_view({
+      title = 'workspace folders',
       items = folders,
       border = 'single',
       rawdata = true,
