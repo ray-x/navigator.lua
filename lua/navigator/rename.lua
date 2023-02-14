@@ -360,7 +360,7 @@ M.rename_preview = function()
     end,
   }
   if vim.fn.has('nvim-0.9.0') == 1 then
-    inputopts.title = 'inc rename'
+    inputopts.title = 'symbol rename'
   end
   ghinput.setup(inputopts)
   vim.ui.input = ghinput.input
