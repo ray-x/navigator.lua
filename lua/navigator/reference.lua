@@ -198,7 +198,7 @@ end
 -- Get positions of LSP reference symbols
 -- a function from smjonas/inc-rename.nvim
 -- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
-local function fetch_lsp_references(bufnr, lsp_params, callback)
+local function fetch_lsp_references(bufnr, params, callback)
   local clients = vim.lsp.get_active_clients({
     bufnr = bufnr,
   })
@@ -207,11 +207,14 @@ local function fetch_lsp_references(bufnr, lsp_params, callback)
   end, clients)
 
   if #clients == 0 then
-    return log('[nav-rename] No active language server with rename capability')
+    log('[nav-rename] No active language server with rename capability')
+    vim.notify('No active language server with reference capability')
   end
-
-  local params = lsp_params or vim.lsp.util.make_position_params()
-  params.context = lsp_params.context or { includeDeclaration = true }
+  if not params then
+    log('[nav-rename] No params provided')
+    vim.notify('No params provided')
+  end
+  params.context = params.context or { includeDeclaration = true }
 
   log(bufnr, params)
 
@@ -244,8 +247,9 @@ local ref_req = function()
   end
   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
   local bufnr = vim.api.nvim_get_current_buf()
+  local ref_params = vim.lsp.util.make_position_params()
   log('bufnr', bufnr)
-  local ids, closer = fetch_lsp_references(bufnr, nil, ref_hdlr)
+  local ids, closer = fetch_lsp_references(bufnr, ref_params, ref_hdlr)
   log(ids)
 
   _NgConfigValues.closer = closer
