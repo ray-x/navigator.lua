@@ -111,7 +111,9 @@ function M.find_definition(range, bufnr)
     local r, c = definition:range()
     return { start = { line = r, character = c } }
   else
-    trace('error: def not found in ', bufnr, definition:range(), definition:type(), definition:parent():type())
+    if definition then
+      trace('error: def not found in ', bufnr, definition:range(), definition:type(), definition:parent():type())
+    end
   end
 end
 

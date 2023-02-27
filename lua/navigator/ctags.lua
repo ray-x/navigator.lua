@@ -20,7 +20,8 @@ local function entry_to_item(entry)
 
   if type == 'combine' then
     -- '/^type ServerResponse struct {$/;"\ts\tpackage:client'
-    item.inline, item.type, item.containerName, item.ref = string.match(item.remain, '/^(.*)$/;"\t(%a)\t(.+)')
+    item.inline, item.type, item.containerName, item.ref =
+      string.match(item.remain, '/^(.*)$/;"\t(%a)\t(.+)')
   else
     -- '"\tm\tstruct:store.Customer\ttyperef:typename:string'
     item.type, item.containerName, item.ref = string.match(item.remain, '"\t(%a)\t(.+)')
@@ -56,7 +57,8 @@ local function ctags_gen()
   local output = _NgConfigValues.ctags.tagfile
   -- rm file first
   util.rm_file(output)
-  local options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number '
+  local options =
+    '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number '
   if _NgConfigValues.ctags then
     cmd = _NgConfigValues.ctags.cmd
     options = _NgConfigValues.ctags.options or options
@@ -148,10 +150,14 @@ local function ctags(...)
 end
 
 local function testitem()
-  local e = [[ServerResponse	internal/clients/server.go	/^type ServerResponse struct {$/;"	s	package:client]]
-  local ecombine = [[ServerResponse	internal/clients/server.go	5;/^type ServerResponse struct {$/;"	s	package:client]]
-  local enumber = [[CustomerID	internal/store/models.go	17;"	m	struct:store.Customer	typeref:typename:string]]
-  local enumber2 = [[CustomerDescription	internal/controllers/customer.go	27;"	c	package:controllers]]
+  local e =
+    [[ServerResponse	internal/clients/server.go	/^type ServerResponse struct {$/;"	s	package:client]]
+  local ecombine =
+    [[ServerResponse	internal/clients/server.go	5;/^type ServerResponse struct {$/;"	s	package:client]]
+  local enumber =
+    [[CustomerID	internal/store/models.go	17;"	m	struct:store.Customer	typeref:typename:string]]
+  local enumber2 =
+    [[CustomerDescription	internal/controllers/customer.go	27;"	c	package:controllers]]
   local enumber3 = [[add_servers	lua/navigator/lspclient/clients.lua	680;"	f]]
   local i = entry_to_item(ecombine)
   print(vim.inspect(i))

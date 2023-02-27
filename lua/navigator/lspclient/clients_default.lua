@@ -146,6 +146,9 @@ M.defaults = function()
       on_init = function(client)
         require('navigator.lspclient.python').on_init(client)
       end,
+      on_new_config = function(new_config, new_root_dir)
+        -- require('navigator.lspclient.python').pyenv_path( new_root_dir)
+      end,
       cmd = { 'pyright-langserver', '--stdio' },
       filetypes = { 'python' },
       flags = { allow_incremental_sync = true, debounce_text_changes = 500 },

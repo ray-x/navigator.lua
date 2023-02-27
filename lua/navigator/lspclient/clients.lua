@@ -254,10 +254,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     local default_config = {}
     if lspconfig[lspclient] == nil then
-      vim.notify(
-        'lspclient' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
-        vim.log.levels.WARN
-      )
+      vim.schedule(function()
+        vim.notify(
+          'lspclient' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
+          vim.log.levels.WARN
+        )
+      end)
       log('lspclient', lspclient, 'not supported')
       goto continue
     end
@@ -265,7 +267,9 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if lspconfig[lspclient].document_config and lspconfig[lspclient].document_config.default_config then
       default_config = lspconfig[lspclient].document_config.default_config
     else
-      vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.log.levels.WARN)
+      vim.schedule(function()
+        vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.log.levels.WARN)
+      end)
       goto continue
     end
 

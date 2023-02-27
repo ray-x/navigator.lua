@@ -146,8 +146,7 @@ local function fetch_lsp_references(bufnr, lsp_params, callback)
   )
 end
 
--- a function from smjonas/inc-rename.nvim
--- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
+-- inspired by smjonas/inc-rename.nvim
 local function teardown(switch_buffer)
   state.should_fetch_references = true
   state.cached_lines = nil
@@ -171,8 +170,7 @@ local function restore_buffer()
 end
 
 -- Called when the user is still typing the command or the command arguments
--- a function from smjonas/inc-rename.nvim
--- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
+-- inspired by smjonas/inc-rename.nvim
 local function incremental_rename_preview(opts, preview_ns, preview_buf)
   log(opts, preview_ns, preview_buf)
   local new_name = opts.args
@@ -232,8 +230,7 @@ local function incremental_rename_preview(opts, preview_ns, preview_buf)
   state.preview_ns = preview_ns
 end
 
--- a function from smjonas/inc-rename.nvim
--- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
+-- function rewrite from smjonas/inc-rename.nvim
 local function perform_lsp_rename(new_name, params)
   params = params or make_position_params()
   params.newName = new_name
@@ -245,7 +242,7 @@ local function perform_lsp_rename(new_name, params)
     end
 
     if not result or vim.tbl_isempty(result) then
-      set_error('[nav-rename] Nothing renamed', vim.log.levels.WARN)
+      set_error('[nav-rename] Nothing renamed', vim.log.levels.INFO)
       return
     end
 
@@ -430,7 +427,7 @@ function M.rename_inplace(new_name, options)
     if state.confirm then
       -- lets put back
       log('execute rename')
-      inc_rename_execute({ args = state.new_name or vim.fn.expand('<cword>'), params = params })
+      inc_rename_execute({ args = state.new_name or vim.fn.expand('<cword>'), params = {} })
     end
   end
   local try_use_client
