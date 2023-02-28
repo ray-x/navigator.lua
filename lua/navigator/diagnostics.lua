@@ -59,8 +59,8 @@ local function error_marker(result, ctx, config)
     -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
 
     local bufnr = ctx.bufnr
-    if bufnr == nil then
-      bufnr = vim.uri_to_bufnr(result.uri)
+    if bufnr == nil and result.uri then
+      bufnr = vim.uri_to_bufnr(result.uri) or vim.api.nvim_get_current_buf()
     end
     local success, fname = pcall(api.nvim_buf_get_name, bufnr)
     if not success then

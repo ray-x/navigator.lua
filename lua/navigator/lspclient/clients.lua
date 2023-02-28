@@ -499,33 +499,61 @@ local function ft_disabled(ft)
     end
   end
 end
+local ft_map = {
+  js = 'javascript',
+  ts = 'typescript',
+  jsx = 'javascriptreact',
+  tsx = 'typescriptreact',
+  mod = 'gomod',
+  cxx = 'cpp',
+  chh = 'cpp',
+  hs = 'haskell',
+  pl = 'perl',
+  rs = 'rust',
+  rb = 'ruby',
+  py = 'python',
+}
 
 local function setup(user_opts, cnt)
   user_opts = user_opts or {}
   local ft = vim.bo.filetype
   local bufnr = user_opts.bufnr or vim.api.nvim_get_current_buf()
+  cnt = cnt or 0
   if ft == '' or ft == nil then
-    log('nil filetype, callback')
+    log('nil filetype, callback',vim.fn.expand('%'), cnt)
     local ext = vfn.expand('%:e')
+    if ext ~= '' and cnt >= 2 then
+      local ft = ft_map[ext] or ft or ext or 'txt'
+      log('set ft', ft)
+      vim.cmd('setlocal ft=' .. ft)
+      vim.cmd('setlocal syntax=on')
+      -- goto break
+      goto continue
+    end
+    local opt
+    if cnt > 0 then
+      opt = user_opts
+    else
+      opts = vim.deepcopy(user_opts)
+    end
     if ext ~= '' then
-      cnt = cnt or 0
-      local opts = vim.deepcopy(user_opts)
       if cnt > 3 then
         log('failed to load filetype, skip')
         return
-      else
-        cnt = cnt + 1
       end
-      vim.defer_fn(function()
-        log('defer_fn', ext, ft)
-        setup(opts, cnt)
-      end, 200)
+      if cnt < 4 then
+        vim.defer_fn(function()
+          log('defer_fn', ext, ft)
+          setup(opts, cnt + 1)
+        end, 200)
       return
+      end
     else
       log('no filetype, no ext return')
       return
     end
   end
+  ::continue::
   local uri = vim.uri_from_bufnr(bufnr)
 
   if uri == 'file://' or uri == 'file:///' then
