@@ -9,6 +9,12 @@ local TextView = require('guihua.textview')
 local definition_hdlr = function(err, locations, ctx, _)
   -- log(locations)
   if err ~= nil then
+    if tostring(err):find('no type definition') or tostring(err):find('invalid range') then
+      vim.notify('Definition: ' .. tostring(err), vim.log.levels.DEBUG)
+      return vim.lsp.buf.hover() -- this is a primitive type
+    elseif tostring(err):find('no identifier') then
+      return vim.notify('Definition: ' .. tostring(err), vim.log.levels.DEBUG)
+    end
     vim.notify('Defination: ' .. tostring(err) .. vim.inspect(ctx), vim.log.levels.WARN)
     return
   end
@@ -25,13 +31,23 @@ local definition_hdlr = function(err, locations, ctx, _)
 
   locations = util.dedup(locations)
   log(locations)
-  log("found " .. #locations .. " locations")
+  log('found ' .. #locations .. ' locations')
   if vim.tbl_islist(locations) then
     if #locations > 1 then
       local items = locations_to_items(locations)
       gui.new_list_view({ items = items, api = 'Definition', title = 'Definition' })
     else
-      vim.lsp.util.jump_to_location(locations[1], oe)
+      local loc = vim.lsp.util.make_position_params()
+      -- let check if the location is same as current
+      if
+        loc.textDocument.uri == locations[1].uri
+        and loc.position.line == locations[1].range.start.line
+        and loc.position.character == locations[1].range.start.character
+      then
+        vim.lsp.buf.type_definition()
+      else
+        vim.lsp.util.jump_to_location(locations[1], oe)
+      end
     end
   else
     vim.lsp.util.jump_to_location(locations, oe)
@@ -43,9 +59,9 @@ local function get_symbol()
   return currentWord
 end
 
-local function def_preview(timeout_ms)
-  assert(next(vim.lsp.get_active_clients({buffer = 0})), 'Must have a client running')
-  local method = 'textDocument/definition'
+local function def_preview(timeout_ms, method)
+  assert(next(vim.lsp.get_active_clients({ buffer = 0 })), 'Must have a client running')
+  method = method or 'textDocument/definition'
   local params = vim.lsp.util.make_position_params()
   local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)
 
@@ -118,7 +134,7 @@ local function def_preview(timeout_ms)
   end
   local width = 40
 
-  local maxwidth = math.floor( vim.api.nvim_get_option('columns') * 0.8)
+  local maxwidth = math.floor(vim.api.nvim_get_option('columns') * 0.8)
   for _, value in pairs(definition) do
     -- log(key, value, width)
     width = math.max(width, #value + 4)
@@ -152,7 +168,9 @@ local function def_preview(timeout_ms)
   -- TODO:
   -- https://github.com/oblitum/goyo.vim/blob/master/autoload/goyo.vim#L108-L135
 end
-
+local function type_preview(timeout_ms)
+  return def_preview(timeout_ms, 'textDocument/typeDefinition')
+end
 local def = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
@@ -165,11 +183,11 @@ local def = function()
   end)
 end
 
-vim.lsp.handlers['textDocument/definition'] = definition_hdlr
 return {
   definition = def,
   definition_handler = definition_hdlr,
   definition_preview = def_preview,
+  type_definition_preview = type_preview,
   declaration_handler = definition_hdlr,
-  typeDefinition_handler = definition_hdlr,
+  type_definition_handler = definition_hdlr,
 }

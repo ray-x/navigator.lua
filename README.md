@@ -315,6 +315,21 @@ require'navigator'.setup({
       update_in_insert = false, -- update diagnostic message in insert mode
     },
 
+    hover = {
+      enable = true,
+      keymap = {
+        ['<C-k>'] = {
+          go = function()
+            local w = vim.fn.expand('<cWORD>')
+            vim.cmd('GoDoc ' .. w)
+          end,
+          default = function(
+            local w = vim.fn.expand('<cWORD>')
+            vim.lsp.buf.workspace_symbol(w)
+          end,
+        },
+      },
+
     diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- experimental:  diagnostic status in scroll bar area; set to false to disable the diagnostic sign,
                                                  --                for other style, set to {'╍', 'ﮆ'} or {'-', '='}
     diagnostic_virtual_text = true,  -- show virtual for diagnostic message
@@ -449,9 +464,10 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | \<Leader>gr     | show reference and context                                 |
 | i    | \<m-k\>         | signature help                                             |
 | n    | \<c-k\>         | signature help                                             |
-| n    | gW              | workspace symbol                                           |
+| n    | gW              | workspace symbol fuzzy finder                              |
 | n    | gD              | declaration                                                |
 | n    | gd              | definition                                                 |
+| n    | gt              | type definition                                            |
 | n    | g0              | document symbol                                            |
 | n    | \<C-]\>         | go to definition (if multiple show listview)               |
 | n    | gp              | definition preview (show Preview)                          |
