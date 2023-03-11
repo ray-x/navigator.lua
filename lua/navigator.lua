@@ -55,6 +55,7 @@ _NgConfigValues = {
       virtual_text_icon = true,
     },
     rename = {
+      enable = true,
       style = 'floating-preview', -- 'floating' | 'floating-preview' | 'inplace-preview'
       show_result = true,
       confirm = '<S-CR>',
@@ -69,12 +70,50 @@ _NgConfigValues = {
       virtual_text_icon = true,
     },
     diagnostic = {
+      enable = true,
       underline = true,
       virtual_text = { spacing = 3, source = true }, -- show virtual for diagnostic message
       update_in_insert = false, -- update diagnostic message in insert mode
       severity_sort = { reverse = true },
     },
-    hover = true, -- bind hover action to keymap; there are other options e.g. noice, lspsaga provides lsp hover
+    definition = { enable = true },
+    call_hierarchy = { enable = true },
+    implementation = { enable = true },
+    workspace = { enable = true },
+    hover = {
+      enable = true,
+      keymaps = {
+        ['<C-k>'] = {
+          go = function()
+            local w = vim.fn.expand('<cWORD>')
+            w = w:gsub('*', '')
+            vim.cmd('GoDoc ' .. w)
+          end,
+          python = function()
+            local w = vim.fn.expand('<cWORD>')
+            local setup = {
+              'pydoc',
+              w,
+            }
+            return vim.fn.jobstart(setup, {
+              on_stdout = function(_, data, _)
+                if not data then
+                  return
+                end
+                local close_events = { 'CursorMoved', 'CursorMovedI', 'BufHidden', 'InsertCharPre' }
+                local config = { close_events = close_events, focusable = true, border = 'single' }
+                vim.lsp.util.open_floating_preview(data, 'python', config)
+              end,
+            })
+          end,
+          default = function()
+            local w = vim.fn.expand('<cword>')
+            print('default ' .. w)
+            vim.lsp.buf.workspace_symbol(w)
+          end,
+        },
+      },
+    }, -- bind hover action to keymap; there are other options e.g. noice, lspsaga provides lsp hover
     format_on_save = true, -- {true|false} set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
     -- enable: a whitelist of language that will be formatted on save
@@ -247,19 +286,22 @@ end
 M.config_values = function()
   return _NgConfigValues
 end
+local cmd_group
 
 M.setup = function(cfg)
   cfg = cfg or {}
   extend_config(cfg)
 
-  local cmd_group = api.nvim_create_augroup('NGFtGroup', {})
-  api.nvim_create_autocmd({ 'FileType', 'BufEnter' }, {
-    group = cmd_group,
-    pattern = '*',
-    callback = function()
-      require('navigator.lspclient.clients').on_filetype()
-    end,
-  })
+  if not cmd_group then
+    cmd_group = api.nvim_create_augroup('NGFtGroup', {})
+    api.nvim_create_autocmd({ 'FileType', 'BufEnter' }, {
+      group = cmd_group,
+      pattern = '*',
+      callback = function()
+        require('navigator.lspclient.clients').on_filetype()
+      end,
+    })
+  end
   vim.defer_fn(function()
     require('navigator.lazyloader').init()
     require('navigator.lspclient.clients').setup(_NgConfigValues)
