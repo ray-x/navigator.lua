@@ -74,8 +74,8 @@ local function def_preview(timeout_ms, method)
   local data = {}
   -- result = {vim.tbl_deep_extend("force", {}, unpack(result))}
   -- log("def-preview", result)
-  for key, value in pairs(result) do
-    if result[key] ~= nil and not vim.tbl_isempty(result[key]) then
+  for _, value in pairs(result) do
+    if value ~= nil and not vim.tbl_isempty(value.result) then
       table.insert(data, value.result[1])
     end
   end

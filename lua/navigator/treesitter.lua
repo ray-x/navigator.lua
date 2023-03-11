@@ -907,8 +907,8 @@ function M.get_node_at_pos(pos, parser)
   -- local cursor = api.nvim_win_get_cursor(winnr or 0)
   local cursor_range = { pos[1], pos[2] }
 
-  log(cursor_range)
-  local root = ts_utils.get_root_for_position(unpack(cursor_range), parser)
+  log(pos)
+  local root = ts_utils.get_root_for_position(pos[1], pos[2], parser)
 
   if not root then
     return
