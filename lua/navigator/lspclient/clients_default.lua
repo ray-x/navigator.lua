@@ -13,12 +13,17 @@ M.defaults = function()
   local util = lspconfig.util
   local on_attach = require('navigator.lspclient.attach').on_attach
 
-
   local setups = {
     clojure_lsp = {
       root_dir = function(fname)
-        return util.root_pattern('deps.edn', 'build.boot', 'project.clj', 'shadow-cljs.edn', 'bb.edn', '.git')(fname)
-          or util.path.dirname(fname)
+        return util.root_pattern(
+          'deps.edn',
+          'build.boot',
+          'project.clj',
+          'shadow-cljs.edn',
+          'bb.edn',
+          '.git'
+        )(fname) or util.path.dirname(fname)
       end,
       on_attach = on_attach,
       filetypes = { 'clojure', 'edn' },
@@ -43,7 +48,6 @@ M.defaults = function()
     },
 
     gopls = {
-      on_attach = on_attach,
       -- capabilities = cap,
       filetypes = { 'go', 'gomod', 'gohtmltmpl', 'gotexttmpl' },
       message_level = vim.lsp.protocol.MessageType.Error,
@@ -78,8 +82,23 @@ M.defaults = function()
           gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
           buildFlags = { '-tags', 'integration' },
           -- buildFlags = {"-tags", "functional"}
+          semanticTokens = true,
         },
       },
+      on_attach = function(client, bufnr)
+        on_attach(client, bufnr)
+        if
+          vim.fn.has('nvim-0.8.3') == 1
+          and not client.server_capabilities.semanticTokensProvider
+        then
+          local semantic = client.config.capabilities.textDocument.semanticTokens
+          client.server_capabilities.semanticTokensProvider = {
+            full = true,
+            legend = { tokenModifiers = semantic.tokenModifiers, tokenTypes = semantic.tokenTypes },
+            range = true,
+          }
+        end
+      end,
       root_dir = function(fname)
         return util.root_pattern('go.mod', '.git')(fname) or util.path.dirname(fname)
       end,
@@ -106,7 +125,8 @@ M.defaults = function()
     },
     rust_analyzer = {
       root_dir = function(fname)
-        return util.root_pattern('Cargo.toml', 'rust-project.json', '.git')(fname) or util.path.dirname(fname)
+        return util.root_pattern('Cargo.toml', 'rust-project.json', '.git')(fname)
+          or util.path.dirname(fname)
       end,
       filetypes = { 'rust' },
       message_level = vim.lsp.protocol.MessageType.error,
@@ -175,7 +195,10 @@ M.defaults = function()
     },
     jdtls = {
       settings = {
-        java = { signatureHelp = { enabled = true }, contentProvider = { preferred = 'fernflower' } },
+        java = {
+          signatureHelp = { enabled = true },
+          contentProvider = { preferred = 'fernflower' },
+        },
       },
     },
     omnisharp = {
