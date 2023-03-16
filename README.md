@@ -64,6 +64,8 @@ variable is:
 
 - Out of box experience. 10 lines of minimum init.lua can turn your neovim into a full-featured LSP & Treesitter powered IDE
 
+- Lazy loading friendly.
+
 - UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc. It covers
   all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
   implementation.

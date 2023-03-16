@@ -128,6 +128,7 @@ local function def_preview(timeout_ms, method)
     if #definition[1] < 2 then
       table.remove(definition, 1)
       delta = delta - 1
+      row = row + 1
     else
       break
     end
@@ -154,7 +155,17 @@ local function def_preview(timeout_ms, method)
     border = _NgConfigValues.border or 'shadow',
   }
 
-  TextView:new(opts)
+  local view = TextView:new(opts)
+  log(view.buf)
+  vim.keymap.set('n', 'K', function()
+    local par = vim.lsp.util.make_position_params()
+    log(row, par, data[1])
+    par.position.line = par.position.line + row - 1 -- header 1
+    par.textDocument.uri = data[1].uri
+    log(par)
+    local bufnr_org = vim.uri_to_bufnr(data[1].uri)
+    return vim.lsp.buf_request(bufnr_org, 'textDocument/hover', par)
+  end, { buffer = view.buf })
   delta = delta + 1 -- header
   local cmd = 'normal! ' .. tostring(delta) .. 'G'
 

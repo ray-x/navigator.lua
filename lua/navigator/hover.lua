@@ -4,6 +4,7 @@ local M = {}
 function M.handler(_, result, ctx, config)
   config = config or {}
   config.focus_id = ctx.method
+  config.zindex = 53
   if not (result and result.contents) then
     vim.notify('No information available')
     return
