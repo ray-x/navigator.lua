@@ -13,20 +13,39 @@ function M.diagnositc_config_sign()
 
   local sign_name = 'NavigatorLightBulb'
   if vim.fn.sign_getdefined(sign_name).text == nil then
-    vim.fn.sign_define(sign_name, { text = icons.code_action_icon, texthl = 'LspDiagnosticsSignHint' })
+    vim.fn.sign_define(
+      sign_name,
+      { text = icons.code_action_icon, texthl = 'LspDiagnosticsSignHint' }
+    )
 
     sign_name = 'NavigatorCodeLensLightBulb'
-    vim.fn.sign_define(sign_name, { text = icons.code_lens_action_icon, texthl = 'LspDiagnosticsSignHint' })
+    vim.fn.sign_define(
+      sign_name,
+      { text = icons.code_lens_action_icon, texthl = 'LspDiagnosticsSignHint' }
+    )
   end
 
   if icons.icons then
-    local e, w, i, h = icons.diagnostic_err, icons.diagnostic_warn, icons.diagnostic_info, icons.diagnostic_hint
+    local e, w, i, h =
+      icons.diagnostic_err, icons.diagnostic_warn, icons.diagnostic_info, icons.diagnostic_hint
     local t = vim.fn.sign_getdefined('DiagnosticSignWarn')
     if vim.tbl_isempty(t) or t[1].text == 'W ' then
-      vim.fn.sign_define('DiagnosticSignError', { text = e, texthl = 'DiagnosticError', linehl = '', numhl = '' })
-      vim.fn.sign_define('DiagnosticSignWarn', { text = w, texthl = 'DiagnosticWarn', linehl = '', numhl = '' })
-      vim.fn.sign_define('DiagnosticSignInfo', { text = i, texthl = 'DiagnosticInfo', linehl = '', numhl = '' })
-      vim.fn.sign_define('DiagnosticSignHint', { text = h, texthl = 'DiagnosticHint', linehl = '', numhl = '' })
+      vim.fn.sign_define(
+        'DiagnosticSignError',
+        { text = e, texthl = 'DiagnosticError', linehl = '', numhl = '' }
+      )
+      vim.fn.sign_define(
+        'DiagnosticSignWarn',
+        { text = w, texthl = 'DiagnosticWarn', linehl = '', numhl = '' }
+      )
+      vim.fn.sign_define(
+        'DiagnosticSignInfo',
+        { text = i, texthl = 'DiagnosticInfo', linehl = '', numhl = '' }
+      )
+      vim.fn.sign_define(
+        'DiagnosticSignHint',
+        { text = h, texthl = 'DiagnosticHint', linehl = '', numhl = '' }
+      )
 
       t = vim.fn.sign_getdefined('DiagnosticSignWarn')
     end
@@ -47,7 +66,7 @@ function M.add_highlight()
   -- lsp system default
 
   api.nvim_set_hl(0, 'DiagnosticUnderlineError', { link = 'SpellBad', default = true })
-  api.nvim_set_hl(0, 'DiagnosticUnderlineWarning', { link = 'SpellRare', default = true })
+  api.nvim_set_hl(0, 'DiagnosticUnderlineWarn', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'DiagnosticUnderlineInformation', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'DiagnosticUnderlineHint', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'NGPreviewTitle', { link = 'Title', default = true })
