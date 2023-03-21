@@ -7,7 +7,8 @@ local install_path = package_root .. '/packer/start/packer.nvim'
 -- IMPORTANT: update the sumneko setup if you need lua language server
 -- I installed it in '/github/sumneko/lua-language-server'
 local sumneko_root_path = vim.fn.expand('$HOME') .. '/github/sumneko/lua-language-server'
-local sumneko_binary = vim.fn.expand('$HOME') .. '/github/sumneko/lua-language-server/bin/macOS/lua-language-server'
+local sumneko_binary = vim.fn.expand('$HOME')
+  .. '/github/sumneko/lua-language-server/bin/macOS/lua-language-server'
 
 local lua_cfg = {
   -- cmd = { sumneko_binary, '-E', sumneko_root_path .. '/main.lua' },
@@ -41,8 +42,8 @@ local function load_plugins()
       use({ 'ray-x/lsp_signature.nvim' })
       use({ 'ray-x/aurora' })
       use({
-        -- 'ray-x/navigator.lua',
-        '~/github/ray-x/navigator.lua',
+        'ray-x/navigator.lua',
+        -- '~/github/ray-x/navigator.lua',
         requires = { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
         config = function()
           require('navigator').setup({
