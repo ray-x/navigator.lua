@@ -67,7 +67,7 @@ function M.add_highlight()
 
   api.nvim_set_hl(0, 'DiagnosticUnderlineError', { link = 'SpellBad', default = true })
   api.nvim_set_hl(0, 'DiagnosticUnderlineWarn', { link = 'SpellRare', default = true })
-  api.nvim_set_hl(0, 'DiagnosticUnderlineInformation', { link = 'SpellRare', default = true })
+  api.nvim_set_hl(0, 'DiagnosticUnderlineInfo', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'DiagnosticUnderlineHint', { link = 'SpellRare', default = true })
   api.nvim_set_hl(0, 'NGPreviewTitle', { link = 'Title', default = true })
   api.nvim_set_hl(0, 'LspReferenceRead', { default = true, link = 'IncSearch' })
