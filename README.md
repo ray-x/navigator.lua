@@ -336,7 +336,7 @@ require'navigator'.setup({
                                                  --                for other style, set to {'╍', 'ﮆ'} or {'-', '='}
     diagnostic_virtual_text = true,  -- show virtual for diagnostic message
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
-    disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you want to ignore it
+    display_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you want to ignore it
     tsserver = {
       filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetypes

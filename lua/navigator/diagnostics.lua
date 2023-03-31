@@ -437,7 +437,7 @@ M.setloclist = function(bufnr)
 
   if not vim.tbl_isempty(vim.lsp.get_active_clients({ buffer = bufnr })) then
     local err_cnt = get_count(0, [[Error]])
-    if err_cnt > 0 and _NgConfigValues.lsp.disply_diagnostic_qf then
+    if err_cnt > 0 and _NgConfigValues.lsp.display_diagnostic_qf then
       cfg.namespaces = diagnostic.get_namespaces()
       diagnostic.setloclist(cfg)
     else

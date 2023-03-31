@@ -124,7 +124,7 @@ _NgConfigValues = {
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = {}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     -- only want to enable one lsp server
-    disply_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
+    display_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
     diagnostic_load_files = false, -- lsp diagnostic errors list may contains uri that not opened yet set to true
     -- to load those files
     diagnostic_virtual_text = true, -- show virtual for diagnostic message
