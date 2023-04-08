@@ -205,11 +205,8 @@ local diag_hdlr = function(err, result, ctx, config)
 
   local client_id = ctx.client_id
   local bufnr = ctx.bufnr or 0
-  if result.diagnostics ~= nil and result.diagnostics ~= {} then
-    trace('diagnostic', result.diagnostics, ctx, config)
-  end
 
-  trace(err, result, ctx, config)
+  trace('diag', err, mode, result, ctx, confi)
   vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   local uri = result.uri
 
@@ -219,7 +216,6 @@ local diag_hdlr = function(err, result, ctx, config)
     trace('no result? ', diag_cnt)
     return
   end
-  -- trace("diag: ", mode, result, ctx, config)
   if result and result.diagnostics then
     local item_list = {}
     for _, v in ipairs(result.diagnostics) do
@@ -242,7 +238,7 @@ local diag_hdlr = function(err, result, ctx, config)
           head = _NgConfigValues.icons.diagnostic_head_severity_3
         end
       else
-        v.severity = 2
+        v.severity = 3
       end
       if not _NgConfigValues.icons.icons then
         head = ''
@@ -296,7 +292,7 @@ local diag_hdlr = function(err, result, ctx, config)
       M.diagnostic_list[ft][uri] = {}
     end
     M.diagnostic_list[ft][uri][tostring(client_id)] = item_list
-    trace(uri, ft, M.diagnostic_list)
+    -- trace(uri, ft, M.diagnostic_list)
     if not result.uri then
       result.uri = uri
     end
