@@ -97,11 +97,17 @@ _NgConfigValues = {
             }
             return vim.fn.jobstart(setup, {
               on_stdout = function(_, data, _)
-                if not data then
+                if not data or (#data == 1 and vim.fn.empty(data[1]) == 1) then
                   return
                 end
                 local close_events = { 'CursorMoved', 'CursorMovedI', 'BufHidden', 'InsertCharPre' }
-                local config = { close_events = close_events, focusable = true, border = 'single' }
+                local config = {
+                  close_events = close_events,
+                  focusable = true,
+                  border = 'single',
+                  width = 80,
+                  zindex = 100,
+                }
                 vim.lsp.util.open_floating_preview(data, 'python', config)
               end,
             })
