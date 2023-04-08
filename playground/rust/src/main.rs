@@ -22,6 +22,16 @@ fn fun1(x: i32, y: i32) {
     println!("The value of x is: {}, y {}", x, y);
 }
 
+impl<Iter> Iterator for Iter
+where Iter: Iterator,
+{
+    type Item = i32;
+    fn next(&mut self) -> Option<i32> {
+        Some(42)
+    }
+}
+
+
 fn add(left: i32, right: i32) -> i32 {
     return left + right;
 }
