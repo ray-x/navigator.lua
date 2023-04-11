@@ -144,25 +144,12 @@ M.defaults = function()
       },
       flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
     },
-    sqls = {
-      filetypes = { 'sql' },
-      on_attach = function(client, _)
-        client.server_capabilities.executeCommandProvider = client.server_capabilities.documentFormattingProvider
-          or true
-        highlight.diagnositc_config_sign()
-        require('sqls').setup({ picker = 'telescope' }) -- or default
-      end,
+    sqlls = {
+      cmd = { 'sql-language-server', 'up', '--method', 'stdio' },
+      filetypes = { 'sql', 'mysql' },
+      root_dir = util.root_pattern('.sqllsrc.json'),
+      on_attach = on_attach,
       flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
-      settings = {
-        cmd = { 'sqls', '-config', '$HOME/.config/sqls/config.yml' },
-        -- alterantively:
-        -- connections = {
-        --   {
-        --     driver = 'postgresql',
-        --     datasourcename = 'host=127.0.0.1 port=5432 user=postgres password=password dbname=user_db sslmode=disable',
-        --   },
-        -- },
-      },
     },
 
     pyright = {

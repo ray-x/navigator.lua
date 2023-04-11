@@ -19,7 +19,7 @@ return {
   'yamlls',
   'clangd',
   'ccls',
-  'sqls',
+  'sqlls',
   'denols',
   'graphql',
   'dartls',
