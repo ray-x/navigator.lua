@@ -301,7 +301,7 @@ require'navigator'.setup({
                               -- disable: a blacklist of language that will not be formatted on save
                            -- function: function(bufnr) return true end to enable/disable lsp format on save
     format_options = {async=false}, -- async: disable by default, the option used in vim.lsp.buf.format({async={true|false}, name = 'xxx'})
-    disable_format_cap = {"sqls", "lua_ls", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
+    disable_format_cap = {"sqlls", "lua_ls", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
                                                             -- If you using null-ls and want null-ls format your code
                                                             -- you should disable all other lsp and allow only null-ls.
     -- disable_lsp = {'pylsd', 'sqlls'},  -- prevents navigator from setting up this list of servers. 
@@ -390,7 +390,7 @@ Built clients:
 local servers = {
   "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
   "jedi_language_server", "jdtls", "lua_ls", "vimls", "html", "jsonls", "solargraph", "cssls",
-  "yamlls", "clangd", "ccls", "sqls", "denols", "graphql", "dartls", "dotls",
+  "yamlls", "clangd", "ccls", "sqlls", "denols", "graphql", "dartls", "dotls",
   "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
   "r_language_server", "rust_analyzer", "terraformls", "svelte", "texlab", "clojure_lsp", "elixirls",
   "sourcekit", "fsautocomplete", "vls", "hls"
@@ -406,14 +406,14 @@ Other than above setup, additional none default setup are used for following lsp
 - gopls
 - clangd
 - rust_analyzer
-- sqls
+- sqlls
 - lua_ls
 - pyright
 - ccls
 
 Please check [client setup](https://github.com/ray-x/navigator.lua/blob/26012cf9c172aa788a2e53018d94b32c5c75af75/lua/navigator/lspclient/clients.lua#L98-L234)
 
-The plugin can work with multiple LSP, e.g sqls+gopls+efm. But there are cases you may need to disable some of the
+The plugin can work with multiple LSP, e.g sqlls+gopls+efm. But there are cases you may need to disable some of the
 servers. (Prevent loading multiple LSP for same source code.) e.g. I saw strange behaviours when I use
 pylsp+pyright+jedi
 together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
