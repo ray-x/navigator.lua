@@ -12,7 +12,6 @@ if not ok then
 end
 
 local parsers = require('nvim-treesitter.parsers')
-local utils = require('nvim-treesitter.utils')
 local locals = require('nvim-treesitter.locals')
 local ts_utils = require('nvim-treesitter.ts_utils')
 local is_in_node_range = vim.treesitter.is_in_node_range
@@ -399,6 +398,13 @@ local function get_smallest_context(source)
 end
 
 local lsp_reference = require('navigator.dochighlight').goto_adjent_reference
+local function index_of(tbl, obj)
+  for i, o in ipairs(tbl) do
+    if o == obj then
+      return i
+    end
+  end
+end
 
 function M.goto_adjacent_usage(bufnr, delta)
   local opt = { forward = delta > 0 }
@@ -422,7 +428,7 @@ function M.goto_adjacent_usage(bufnr, delta)
   local usages = ts_locals.find_usages(def_node, scope, bufnr)
   log(usages)
 
-  local index = utils.index_of(usages, node_at_point)
+  local index = index_of(usages, node_at_point)
   if not index then
     lsp_reference(opt)
     return
