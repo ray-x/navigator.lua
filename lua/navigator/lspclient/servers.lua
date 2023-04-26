@@ -16,6 +16,7 @@ return {
   'jsonls',
   'solargraph',
   'cssls',
+  'tailwindcss',
   'yamlls',
   'clangd',
   'ccls',
