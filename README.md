@@ -473,6 +473,7 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | g0              | document symbol                                            |
 | n    | \<C-]\>         | go to definition (if multiple show listview)               |
 | n    | gp              | definition preview (show Preview)                          |
+| n    | gP              | type definition preview (show Preview)                     |
 | n    | \<C-LeftMouse\> | definition                                                 |
 | n    | g\<LeftMouse\>  | implementation                                             |
 | n    | \<Leader>gt     | treesitter document symbol                                 |

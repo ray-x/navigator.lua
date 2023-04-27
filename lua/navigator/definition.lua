@@ -190,6 +190,7 @@ local def = function()
     -- if client.resolved_capabilities.goto_definition then
     if client.server_capabilities.definitionProvider then
       client.request('textDocument/definition', ref_params, definition_hdlr, _bufnr)
+      return
     end
   end)
 end
