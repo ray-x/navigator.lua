@@ -130,7 +130,8 @@ _NgConfigValues = {
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = {}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     -- only want to enable one lsp server
-    display_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors
+    display_diagnostic_qf = true, -- bool: always show quickfix if there are diagnostic errors
+                                  -- string: trouble use trouble to show diagnostic
     diagnostic_load_files = false, -- lsp diagnostic errors list may contains uri that not opened yet set to true
     -- to load those files
     diagnostic_virtual_text = true, -- show virtual for diagnostic message
@@ -316,7 +317,21 @@ M.setup = function(cfg)
     require('navigator.definition')
     require('navigator.hierarchy')
     require('navigator.implementation')
-
+    local ts_installed = pcall(require, 'nvim-treesitter')
+    if not ts_installed then
+      if _NgConfigValues.ts_fold == true then
+        warn('treesitter not installed ts_fold disabled')
+        _NgConfigValues.ts_fold = false
+      end
+      if _NgConfigValues.treesitter_analysis == true then
+        warn('nvim-treesitter not installed, disable treesitter_analysis')
+        _NgConfigValues.treesitter_analysis = false
+      end
+      if _NgConfigValues.treesitter_navigation == true then
+        warn('nvim-treesitter not installed, disable treesitter_navigation')
+        _NgConfigValues.treesitter_navigation = false
+      end
+    end
     cfg.lsp = cfg.lsp or _NgConfigValues.lsp
 
     if _NgConfigValues.lsp.enable then
@@ -327,10 +342,7 @@ M.setup = function(cfg)
     end
 
     if _NgConfigValues.ts_fold == true then
-      local ok, _ = pcall(require, 'nvim-treesitter')
-      if ok then
         require('navigator.foldts').on_attach()
-      end
     end
 
     local _start_client = vim.lsp.start_client
