@@ -20,7 +20,7 @@ local key_maps = {
   {
     mode = 'i',
     key = '<M-k>',
-    func = vim.lsp.signature_help,
+    func = vim.lsp.buf.signature_help,
     desc = 'signature_help',
   },
   {
