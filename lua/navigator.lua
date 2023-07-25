@@ -174,7 +174,7 @@ _NgConfigValues = {
     value_changed = '📝',
     value_definition = '🐶🍡', -- it is easier to see than 🦕
     side_panel = {
-      section_separator = '',
+      section_separator = '󰇜',
       line_num_left = '',
       line_num_right = '',
       inner_node = '├○',
@@ -223,7 +223,7 @@ local extend_config = function(opts)
     if _NgConfigValues[key] == nil then
       warn(
         string.format(
-          '[] Deprecated? Key %s is not in default setup, it could be incorrect to set to %s',
+          '[󰎐] Deprecated? Key %s is not in default setup, it could be incorrect to set to %s',
           key,
           vim.inspect(value)
         )
@@ -235,7 +235,7 @@ local extend_config = function(opts)
         if type(value) ~= 'table' then
           info(
             string.format(
-              '[] Reset type: Key %s setup value %s type %s , from %s',
+              '[󰎐] Reset type: Key %s setup value %s type %s , from %s',
               key,
               vim.inspect(value),
               type(value),
@@ -263,7 +263,7 @@ local extend_config = function(opts)
               if key == 'lsp' then
                 local lsp = require('navigator.lspclient.servers')
                 if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' and k ~= 'null-ls' then
-                  info(string.format('[] extend LSP support for  %s %s ', key, k))
+                  info(string.format('[󰎐] extend LSP support for  %s %s ', key, k))
                 end
               elseif key == 'signature_help_cfg' then
                 _NgConfigValues[key][k] = v
@@ -271,7 +271,7 @@ local extend_config = function(opts)
                 info('keymap override' .. vim.inspect(v))
                 -- skip key check and allow mapping to handle that
               else
-                warn(string.format('[] Key %s %s not valid', key, k))
+                warn(string.format('[󰎐] Key %s %s not valid', key, k))
               end
               -- return
             end
