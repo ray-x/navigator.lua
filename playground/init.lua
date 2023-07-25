@@ -1,133 +1,120 @@
 vim.cmd([[set runtimepath=$VIMRUNTIME]])
-vim.cmd([[set packpath=/tmp/nvim/site]])
+local os_name = vim.loop.os_uname().sysname
 
-local package_root = '/tmp/nvim/site/pack'
-local install_path = package_root .. '/packer/start/packer.nvim'
+local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
 
--- IMPORTANT: update the sumneko setup if you need lua language server
--- I installed it in '/github/sumneko/lua-language-server'
-local sumneko_root_path = vim.fn.expand('$HOME') .. '/github/sumneko/lua-language-server'
-local sumneko_binary = vim.fn.expand('$HOME')
-  .. '/github/sumneko/lua-language-server/bin/macOS/lua-language-server'
 
-local lua_cfg = {
-  -- cmd = { sumneko_binary, '-E', sumneko_root_path .. '/main.lua' },
-  settings = {
-    Lua = {
-      runtime = { version = 'LuaJIT', path = vim.split(package.path, ';') },
-      diagnostics = { enable = true },
-    },
-  },
-}
-
-if vim.fn.executable('lua-language-server') == 0 then
-  lua_cfg.cmd = { sumneko_binary, '-E', sumneko_root_path .. '/main.lua' }
+local package_root = '/tmp/nvim/lazy'
+local sep = '/'
+if is_windows then
+  local tmp = os.getenv('TEMP')
+  vim.cmd("set packpath=" .. tmp .. "\\nvim\\lazy")
+  package_root = tmp .. '\\nvim\\lazy'
+  sep = '\\'
+else
+  vim.cmd([[set packpath=/tmp/nvim/lazy]])
 end
 
-local function load_plugins()
-  require('packer').startup({
-    function(use)
-      use({ 'wbthomason/packer.nvim' })
-      use({
-        'nvim-treesitter/nvim-treesitter',
-        config = function()
-          require('nvim-treesitter.configs').setup({
-            ensure_installed = { 'python', 'go', 'javascript' },
-            highlight = { enable = true },
-          })
-        end,
-        run = ':TSUpdate',
-      })
-      use({ 'neovim/nvim-lspconfig' })
-      use({ 'ray-x/lsp_signature.nvim' })
-      use({ 'ray-x/aurora' })
-      use({
-        'ray-x/navigator.lua',
-        -- '~/github/ray-x/navigator.lua',
-        requires = { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
-        config = function()
-          require('navigator').setup({
-            debug = true,
-            keymaps = {
-              { key = 'gK', func = vim.lsp.buf.definition, doc = 'definition' },
-              {
-                key = '<leader>ld',
-                func = require('navigator.diagnostics').show_buf_diagnostics,
-                desc = 'show_buf_diagnostics',
-              },
-            },
-            icons = {
-              diagnostic_virtual_text = '',
-            },
-          })
-        end,
-      })
-      use({ 'L3MON4D3/LuaSnip' })
-      use({
-        'hrsh7th/nvim-cmp',
-        requires = {
-          'hrsh7th/cmp-nvim-lsp',
-          'saadparwaiz1/cmp_luasnip',
-        },
-        config = function()
-          local cmp = require('cmp')
-          local luasnip = require('luasnip')
-          cmp.setup({
-            snippet = {
-              expand = function(args)
-                require('luasnip').lsp_expand(args.body)
-              end,
-            },
 
-            mapping = {
-              ['<CR>'] = cmp.mapping.confirm({ select = true }),
-              ['<Tab>'] = cmp.mapping(function(fallback)
-                if cmp.visible() then
-                  cmp.confirm({ select = true })
-                elseif luasnip.expand_or_locally_jumpable() then
-                  luasnip.expand_or_jump()
-                else
-                  fallback()
-                end
-              end, { 'i', 's' }),
-            },
-
-            sources = {
-              { name = 'nvim_lsp' },
-              { name = 'buffer' },
-            },
-          })
-          require('cmp').setup.cmdline(':', {
-            sources = {
-              { name = 'cmdline' },
-            },
-          })
-          require('cmp').setup.cmdline('/', {
-            sources = {
-              { name = 'buffer' },
-            },
-          })
-        end,
-      })
-    end,
-    config = {
-      package_root = package_root,
-      compile_path = install_path .. '/plugin/packer_compiled.lua',
-    },
-  })
+local plugin_folder = function()
+  local host = os.getenv('HOST_NAME')
+  if host and (host:find('Ray') or host:find('ray')) then
+    return [[~/github/ray-x]] -- vim.fn.expand("$HOME") .. '/github/'
+  else
+    return ''
+  end
 end
 
-if vim.fn.isdirectory(install_path) == 0 then
+local lazypath = package_root .. sep .. 'lazy.nvim'
+if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
     'git',
     'clone',
-    'https://github.com/wbthomason/packer.nvim',
-    install_path,
+    '--filter=blob:none',
+    'https://github.com/folke/lazy.nvim.git',
+    '--branch=stable', -- latest stable release
+    lazypath,
   })
-  load_plugins()
-  require('packer').sync()
-  vim.cmd('colorscheme aurora')
-else
-  load_plugins()
-  vim.cmd('colorscheme aurora')
 end
+vim.opt.rtp:prepend(lazypath)
+local function load_plugins()
+  return {
+    {
+      'nvim-treesitter/nvim-treesitter',
+      config = function()
+        require('nvim-treesitter.configs').setup({
+          ensure_installed = { 'go' },
+          highlight = { enable = true },
+        })
+      end,
+      build = ':TSUpdate',
+    },
+    { 'neovim/nvim-lspconfig' },
+    {
+      'simrat39/rust-tools.nvim',
+      config = function()
+        require('rust-tools').setup({
+          server = {
+            on_attach = function(client, bufnr)
+              require('navigator.lspclient.mapping').setup({ client = client, bufnr = bufnr }) -- setup navigator keymaps here,
+              -- otherwise, you can define your own commands to call navigator functions
+            end,
+          },
+        })
+      end,
+    },
+    { 'ray-x/lsp_signature.nvim', dev = (plugin_folder() ~= '') },
+    {
+      'ray-x/navigator.lua',
+      dev = (plugin_folder() ~= ''),
+      -- '~/github/ray-x/navigator.lua',
+      dependencies = { 'ray-x/guihua.lua', build = 'cd lua/fzy && make' },
+      config = function()
+        require('navigator').setup({
+          lsp = {
+            -- disable_lsp = { 'rust_analyzer', 'clangd' },
+          },
+        })
+      end,
+    },
+    {
+      'ray-x/go.nvim',
+      dev = (plugin_folder() ~= ''),
+      -- dev = true,
+      ft = 'go',
+      dependencies = {
+        'mfussenegger/nvim-dap', -- Debug Adapter Protocol
+        'rcarriga/nvim-dap-ui',
+        'theHamsta/nvim-dap-virtual-text',
+        'ray-x/guihua.lua',
+      },
+      config = function()
+        require('go').setup({
+          verbose = true,
+          lsp_cfg = {
+            handlers = {
+              ['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'double' }),
+              ['textDocument/signatureHelp'] = vim.lsp.with(
+                vim.lsp.handlers.signature_help,
+                { border = 'round' }
+              ),
+            },
+          }, -- false: do nothing
+        })
+      end,
+    },
+  }
+end
+
+local opts = {
+  root = package_root, -- directory where plugins will be installed
+  default = { lazy = true },
+  dev = {
+    -- directory where you store your local plugin projects
+    path = plugin_folder(),
+  },
+}
+
+require('lazy').setup(load_plugins(), opts)
+
+vim.cmd('colorscheme murphy')
