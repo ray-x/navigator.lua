@@ -301,32 +301,8 @@ local function set_mapping(lsp_attach_info)
     if value.doc then
       vim.notify('doc field no longer supported in navigator mapping, use desc instead')
     end
-    if type(value.func) == 'string' then -- deprecated will remove when 0.8 is out
-      vim.notify(
-        'keymap config updated: ' .. value.key .. ' func ' .. value.func .. ' should be a function'
-      )
-      local f = '<Cmd>lua vim.lsp.buf.' .. value.func .. '<CR>'
-      if string.find(value.func, 'require') or string.find(value.func, 'vim.') then
-        f = '<Cmd>lua ' .. value.func .. '<CR>'
-      elseif string.find(value.func, 'diagnostic') then
-        local diagnostic = '<Cmd>lua vim.'
-        diagnostic = '<Cmd>lua vim.'
-        f = diagnostic .. value.func .. '<CR>'
-      end
-
-      local k = value.key
-      local m = value.mode or 'n'
-      if string.find(value.func, 'range_formatting') then
-        rfmtkey = value.key
-      elseif string.find(value.func, 'format') then
-        fmtkey = value.key
-      end
-      trace('binding', k, f)
-      set_keymap(m, k, f, opts)
-    end
     if type(value.func) == 'function' then -- new from 0.7.x
       -- neovim 0.7.0
-
       opts.buffer = key_maps.buffer or value.buffer
       if value.desc then
         opts.desc = value.desc
@@ -369,9 +345,11 @@ local function set_mapping(lsp_attach_info)
     end
     if type(fos) == 'table' and (fos.enable or fos.disable) then
       if fos.enable then
+        -- lsp.format_on_save = {enable = {"python"}}
         fmt = vim.tbl_contains(fos.enable, vim.o.ft)
       end
-      if not fmt and fos.disable then
+      -- lsp.format_on_save = {disable = {"python"}}
+      if fos.disable then
         fmt = not vim.tbl_contains(fos.disable, vim.o.ft)
       end
     end
@@ -380,12 +358,12 @@ local function set_mapping(lsp_attach_info)
     end
     local fopts = _NgConfigValues.lsp.format_options
 
-    if not fopts.async and vim.api.nvim_buf_line_count(0) > 4000 then
+    if fopts.async == nil and vim.api.nvim_buf_line_count(0) > 4000 then
       fopts.async = true
     end
 
     if fmt then
-      api.nvim_create_autocmd({ 'BufWritePre' }, {
+      api.nvim_create_autocmd({ 'BufWritePost' }, {
         group = gn,
         desc = 'auto format',
         buffer = bufnr,
