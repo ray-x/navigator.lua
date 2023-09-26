@@ -122,7 +122,7 @@ function M.prepare_for_render(items, opts)
       space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename, lspapi_display .. ' 12 of 34')
       if trim and opts.width > 52 and #item.display_filename > opts.width - 20 then
         item.display_filename = string.sub(item.display_filename, 1, opts.width - 52)
-          .. ''
+          .. '󰇘'
           .. string.sub(item.display_filename, #item.display_filename - 10, #item.display_filename)
         space = '  '
       end
@@ -161,7 +161,7 @@ function M.prepare_for_render(items, opts)
 
     item.text = item.text:gsub('%s*[%[%(%{]*%s*$', '')
     if item.call_by ~= nil and item.call_by ~= '' then
-      ts_report = ts_report .. ' ' .. item.call_by
+      ts_report = ts_report .. '󰡱' .. item.call_by
     end
     if #ts_report > 1 then
       space, trim = get_pads(win_width, item.text, ts_report)
