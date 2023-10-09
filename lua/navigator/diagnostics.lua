@@ -12,11 +12,7 @@ local empty = util.empty
 local api = vim.api
 _NG_VT_DIAG_NS = api.nvim_create_namespace('navigator_lua_diag')
 
-if not util.nvim_0_6_1() then
-  util.warn(
-    'Navigator 0.4+ only support nvim-0.6+, please use Navigator 0.3.x or a newer version of neovim'
-  )
-end
+util.nvim_0_8()
 
 local diag_map = {}
 if vim.diagnostic then
