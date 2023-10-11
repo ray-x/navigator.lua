@@ -34,6 +34,7 @@ local function lua_ls()
           -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
           version = 'LuaJIT',
         },
+        hint = { enable = true, typeCoverage = true },
         diagnostics = {
           enable = true,
           -- Get the language server to recognize the `vim` global
