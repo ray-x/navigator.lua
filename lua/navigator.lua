@@ -7,7 +7,7 @@ end
 
 local function info(msg)
   if _NgConfigValues.debug then
-    api.nvim_echo({ { 'Info: ' .. msg } }, true, {})
+    api.nvim_echo({ { 'Debug: ' .. msg } }, true, {})
   end
 end
 
