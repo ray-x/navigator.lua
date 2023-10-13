@@ -295,7 +295,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     log(lspclient)
     -- if user provides override values
-    -- cfg.capabilities = capabilities
+    cfg.capabilities = capabilities
     log(lspclient, config.lsp.disable_format_cap)
     if vim.tbl_contains(config.lsp.disable_format_cap or {}, lspclient) then
       log('fileformat disabled for ', lspclient)
