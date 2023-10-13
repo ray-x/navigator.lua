@@ -325,7 +325,7 @@ require'navigator'.setup({
             local w = vim.fn.expand('<cWORD>')
             vim.cmd('GoDoc ' .. w)
           end,
-          default = function(
+          default = function()
             local w = vim.fn.expand('<cWORD>')
             vim.lsp.buf.workspace_symbol(w)
           end,
@@ -755,7 +755,7 @@ You can override the above highlight to fit your current colorscheme
 | LspSymbols      | document symbol in side panel                                             |
 | LspAndDiag      | document symbol and diagnostics in side panel                                             |
 | NRefPanel       | show symbol reference in side panel                                       |
-| TSymobls        | treesitter symbol in side panel                                           |
+| TSymbols        | treesitter symbol in side panel                                           |
 | TsAndDiag        | treesitter symbol and diagnostics in side panel                                           |
 | Calltree {args} | lsp call hierarchy call tree, args: -i (incomming default), -o (outgoing) |
 
