@@ -186,9 +186,6 @@ code_action.range_code_action = function(startpos, endpos)
   startpos = startpos or api.nvim_buf_get_mark(bufnr, '<')
   endpos = endpos or api.nvim_buf_get_mark(bufnr, '>')
   log(startpos, endpos)
-  local params = vim.lsp.util.make_given_range_params(startpos, endpos)
-  params.context = context
-
   local original_select = vim.ui.select
   vim.ui.select = require('guihua.gui').select
 
