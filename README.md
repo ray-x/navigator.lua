@@ -488,6 +488,8 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | \<Leader\>re    | rename (lsp default)                                       |
 | n    | \<Leader\>gi    | hierarchy incoming calls                                   |
 | n    | \<Leader\>go    | hierarchy outgoing calls                                   |
+| n    | \<Space\>ff     | format buffer (LSP)
+| v    | \<Space\>ff     | format selection range (LSP)
 | n    | gi              | implementation                                             |
 | n    | \<Space\> D     | type definition                                            |
 | n    | gL              | show line diagnostic                                       |
