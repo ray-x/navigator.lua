@@ -1,4 +1,4 @@
-# Navigator
+    12 require('nvim-autopairs').setup{ 
 
 - Source code analysis and navigate tool
 
@@ -315,6 +315,14 @@ require'navigator'.setup({
       underline = true,
       virtual_text = true, -- show virtual for diagnostic message
       update_in_insert = false, -- update diagnostic message in insert mode
+      float = {                 -- setup for floating windows style
+        focusable = false,
+        sytle = 'minimal',
+        border = 'rounded',
+        source = 'always',
+        header = '',
+        prefix = '',
+      },
     },
 
     hover = {
@@ -337,6 +345,7 @@ require'navigator'.setup({
     diagnostic_virtual_text = true,  -- show virtual for diagnostic message
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
     display_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you want to ignore it
+                                  -- set to 'trouble' to show diagnositcs in Trouble
     tsserver = {
       filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetypes

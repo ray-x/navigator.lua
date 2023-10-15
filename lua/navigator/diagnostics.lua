@@ -320,14 +320,7 @@ function M.setup()
     signs = true,
     update_in_insert = _NgConfigValues.lsp.diagnostic.update_in_insert or false,
     severity_sort = _NgConfigValues.lsp.diagnostic.severity_sort,
-    float = {
-      focusable = false,
-      style = 'minimal',
-      border = 'rounded',
-      source = 'always',
-      header = '',
-      prefix = '',
-    },
+    float = _NgConfigValues.lsp.diagnostic.float,
   }
   diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
   if

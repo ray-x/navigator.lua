@@ -311,6 +311,14 @@ Nondefault configuration example:
           underline = true,
           virtual_text = true, -- show virtual for diagnostic message
           update_in_insert = false, -- update diagnostic message in insert mode
+          float = {
+		  focusable = false,
+		  style = 'minimal',
+		  border = 'rounded',
+		  source = 'always',
+		  header = '',
+		  prefix = '',
+	  }
         },
         diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- experimental:  diagnostic status in scroll bar area; set to false to disable the diagnostic sign,
         -- for other style, set to {'╍', 'ﮆ'} or {'-', '='}

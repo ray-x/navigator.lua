@@ -75,6 +75,14 @@ _NgConfigValues = {
       virtual_text = { spacing = 3, source = true }, -- show virtual for diagnostic message
       update_in_insert = false, -- update diagnostic message in insert mode
       severity_sort = { reverse = true },
+      float = {
+        focusable = false,
+        sytle = 'minimal',
+        border = 'rounded',
+        source = 'always',
+        header = '',
+        prefix = '',
+      },
     },
     definition = { enable = true },
     call_hierarchy = { enable = true },
@@ -130,8 +138,8 @@ _NgConfigValues = {
     disable_format_cap = {}, -- a list of lsp disable file format (e.g. if you using efm or vim-codeformat etc), empty by default
     disable_lsp = {}, -- a list of lsp server disabled for your project, e.g. denols and tsserver you may
     -- only want to enable one lsp server
-    display_diagnostic_qf = true, -- bool: always show quickfix if there are diagnostic errors
-                                  -- string: trouble use trouble to show diagnostic
+    display_diagnostic_qf = false, -- bool: always show quickfix if there are diagnostic errors
+    -- string: trouble use trouble to show diagnostic
     diagnostic_load_files = false, -- lsp diagnostic errors list may contains uri that not opened yet set to true
     -- to load those files
     diagnostic_virtual_text = true, -- show virtual for diagnostic message
@@ -342,7 +350,7 @@ M.setup = function(cfg)
     end
 
     if _NgConfigValues.ts_fold == true then
-        require('navigator.foldts').on_attach()
+      require('navigator.foldts').on_attach()
     end
 
     local _start_client = vim.lsp.start_client
