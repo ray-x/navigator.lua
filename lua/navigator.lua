@@ -162,7 +162,7 @@ _NgConfigValues = {
   icons = {
     icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
     -- Code action
-    code_action_icon = '🏏', -- "",
+    code_action_icon = '🏏',
     -- code lens
     code_lens_action_icon = '👓',
     -- Diagnostics
@@ -194,11 +194,11 @@ _NgConfigValues = {
     match_kinds = {
       var = ' ', -- "👹", -- Vampaire
       method = 'ƒ ', --  "🍔", -- mac
-      ['function'] = ' ', -- "🤣", -- Fun
+      ['function'] = '󰡱 ', -- "🤣", -- Fun
       parameter = '  ', -- Pi
       associated = '🤝',
       namespace = '🚀',
-      type = ' ',
+      type = '󰉿',
       field = '🏈',
       module = '📦',
       flag = '🎏',

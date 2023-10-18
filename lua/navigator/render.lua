@@ -96,7 +96,7 @@ function M.prepare_for_render(items, opts)
       if trim and opts.width > 50 and #dfn > opts.width - 20 then
         local fn1 = string.sub(dfn, 1, opts.width - 50)
         local fn2 = string.sub(dfn, #dfn - 10, #dfn)
-        display_items[last_summary_idx].display_filename = fn1 .. '' .. fn2
+        display_items[last_summary_idx].display_filename = fn1 .. '󰇘' .. fn2
         space = '  '
         -- log("trim", fn1, fn2)
       end
@@ -119,7 +119,8 @@ function M.prepare_for_render(items, opts)
       lspapi_display = lspapi
       item = clone(items[i])
 
-      space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename, lspapi_display .. ' 12 of 34')
+      space, trim =
+        get_pads(opts.width, icon .. '  ' .. item.display_filename, lspapi_display .. ' 12 of 34')
       if trim and opts.width > 52 and #item.display_filename > opts.width - 20 then
         item.display_filename = string.sub(item.display_filename, 1, opts.width - 52)
           .. '󰇘'
@@ -161,7 +162,7 @@ function M.prepare_for_render(items, opts)
 
     item.text = item.text:gsub('%s*[%[%(%{]*%s*$', '')
     if item.call_by ~= nil and item.call_by ~= '' then
-      ts_report = ts_report .. '󰡱' .. item.call_by
+      ts_report = ts_report .. _NgConfigValues.icons.match_kinds['function'] .. item.call_by
     end
     if #ts_report > 1 then
       space, trim = get_pads(win_width, item.text, ts_report)
