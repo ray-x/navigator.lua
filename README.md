@@ -1,4 +1,4 @@
-    12 require('nvim-autopairs').setup{ 
+    12 require('nvim-autopairs').setup{
 
 - Source code analysis and navigate tool
 
@@ -55,10 +55,10 @@ variable is:
 
 - LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type. This
   also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better LSP default enables
-    * autocompletion *(e.g. nvim-cmp), 
+    * autocompletion *(e.g. nvim-cmp),
     * codelens
     * lsp folding
-    * go implementation 
+    * go implementation
     * incoming/outgoing call and ccls call hierarchy
     * range formatting
 
@@ -275,25 +275,26 @@ require'navigator'.setup({
   lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
   signature_help_cfg = nil, -- if you would like to init ray-x/lsp_signature plugin in navigator, and pass in your own config to signature help
-  icons = {
+  icons = { -- refer to lua/navigator.lua for more icons config
+    -- requires nerd fonts or nvim-web-devicons
+    icons = true,
     -- Code action
     code_action_icon = "🏏", -- note: need terminal support, for those not support unicode, might crash
     -- Diagnostics
     diagnostic_head = '🐛',
     diagnostic_head_severity_1 = "🈲",
-    -- refer to lua/navigator.lua for more icons setups
   },
   mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
   lsp = {
-    enable = true,  -- skip lsp setup, and only use treesitter in navigator. 
-                    -- Use this if you are not using LSP servers, and only want to enable treesitter support. 
-                    -- If you only want to prevent navigator from touching your LSP server configs, 
-                    -- use `disable_lsp = "all"` instead. 
+    enable = true,  -- skip lsp setup, and only use treesitter in navigator.
+                    -- Use this if you are not using LSP servers, and only want to enable treesitter support.
+                    -- If you only want to prevent navigator from touching your LSP server configs,
+                    -- use `disable_lsp = "all"` instead.
                     -- If disabled, make sure add require('navigator.lspclient.mapping').setup({bufnr=bufnr, client=client}) in your
                     -- own on_attach
     code_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
     code_lens_action = {enable = true, sign = true, sign_priority = 40, virtual_text = true},
-    document_highlight = true, -- LSP reference highlight, 
+    document_highlight = true, -- LSP reference highlight,
                                -- it might already supported by you setup, e.g. LunarVim
     format_on_save = true, -- {true|false} set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
                            -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
@@ -304,10 +305,10 @@ require'navigator'.setup({
     disable_format_cap = {"sqlls", "lua_ls", "gopls"},  -- a list of lsp disable format capacity (e.g. if you using efm or vim-codeformat etc), empty {} by default
                                                             -- If you using null-ls and want null-ls format your code
                                                             -- you should disable all other lsp and allow only null-ls.
-    -- disable_lsp = {'pylsd', 'sqlls'},  -- prevents navigator from setting up this list of servers. 
-                                          -- if you use your own LSP setup, and don't want navigator to setup 
+    -- disable_lsp = {'pylsd', 'sqlls'},  -- prevents navigator from setting up this list of servers.
+                                          -- if you use your own LSP setup, and don't want navigator to setup
                                           -- any LSP server for you, use `disable_lsp = "all"`.
-                                          -- you may need to add this to your own on_attach hook: 
+                                          -- you may need to add this to your own on_attach hook:
                                           -- require('navigator.lspclient.mapping').setup({bufnr=bufnr, client=client})
                                           -- for e.g. denols and tsserver you may want to enable one lsp server at a time.
                                           -- default value: {}
@@ -366,7 +367,7 @@ require'navigator'.setup({
         gopls = {gofumpt = false} -- disable gofumpt etc,
       }
     },
-    -- the lsp setup can be a function, .e.g 
+    -- the lsp setup can be a function, .e.g
     gopls = function()
       local go = pcall(require, "go")
       if go then
@@ -677,7 +678,7 @@ There are lots of plugins provides lsp support
 
   * setup with neodev
 ```lua
-use  {"folke/neodev.nvim", 
+use  {"folke/neodev.nvim",
   ft = 'lua',
   config =  function()
     require'neodev'.setup{}

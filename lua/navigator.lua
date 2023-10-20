@@ -160,27 +160,35 @@ _NgConfigValues = {
   mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
   mason_disabled_for = {}, -- disable mason for specified lspclients
   icons = {
+    -- requires Nerd Font or nvim-web-devicons pre-installed
     icons = true, -- set to false to use system default ( if you using a terminal does not have nerd/icon)
-    -- Code action
+
+    -- Code Action (gutter, floating window)
     code_action_icon = '🏏',
-    -- code lens
+
+    -- Code Lens (gutter, floating window)
     code_lens_action_icon = '👓',
-    -- Diagnostics
-    diagnostic_head = '🐛',
+
+    -- Diagnostics (gutter)
+    diagnostic_head = '🐛', -- prefix for other diagnostic_* icons
     diagnostic_err = '📛',
     diagnostic_warn = '👎',
     diagnostic_info = [[👩]],
     diagnostic_hint = [[💁]],
 
+    -- Diagnostics (floating window)
     diagnostic_head_severity_1 = '🈲',
     diagnostic_head_severity_2 = '☣️',
     diagnostic_head_severity_3 = '👎',
-    diagnostic_head_description = '👹',
-    diagnostic_virtual_text = '🦊',
-    diagnostic_file = '🚑',
-    -- Values
-    value_changed = '📝',
-    value_definition = '🐶🍡', -- it is easier to see than 🦕
+    diagnostic_head_description = '👹', -- suffix for severities
+    diagnostic_virtual_text = '🦊', -- floating text preview (set to empty to disable)
+    diagnostic_file = '🚑', -- icon in floating window, indicates the file contains diagnostics
+
+    -- Values (floating window)
+    value_definition = '🐶🍡', -- identifier defined
+    value_changed = '📝', -- identifier modified
+
+    -- Formatting for Side Panel
     side_panel = {
       section_separator = '󰇜',
       line_num_left = '',
@@ -190,21 +198,27 @@ _NgConfigValues = {
       bracket_left = '⟪',
       bracket_right = '⟫',
     },
+
     -- Treesitter
+    -- Note: many more node.type or kind may be available
     match_kinds = {
-      var = ' ', -- "👹", -- Vampaire
-      method = 'ƒ ', --  "🍔", -- mac
-      ['function'] = '󰡱 ', -- "🤣", -- Fun
-      parameter = '  ', -- Pi
-      associated = '🤝',
-      namespace = '🚀',
-      type = '󰉿',
-      field = '🏈',
-      module = '📦',
-      flag = '🎏',
+      var = ' ', -- variable -- "👹", -- Vampaire
+      const = '󱀍 ',
+      method = 'ƒ ', -- method --  "🍔", -- mac
+      -- function is a keyword so wrap in ['key'] syntax
+      ['function'] = '󰡱 ', -- function -- "🤣", -- Fun
+      parameter = '  ', -- param/arg -- Pi
+      parameters = '  ', -- param/arg -- Pi
+      required_parameter = '  ', -- param/arg -- Pi
+      associated = '🤝', -- linked/related
+      namespace = '🚀', -- namespace
+      type = '󰉿', -- type definition
+      field = '🏈', -- field definition
+      module = '📦', -- module
+      flag = '🎏', -- flag
     },
-    treesitter_defult = '🌲',
-    doc_symbols = '',
+    treesitter_defult = '🌲', -- default symbol when unknown node.type or kind
+    doc_symbols = '', -- document
   },
 }
 
