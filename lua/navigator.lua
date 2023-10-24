@@ -284,9 +284,9 @@ local extend_config = function(opts)
             if _NgConfigValues[key][k] == nil then
               if key == 'lsp' then
                 local lsp = require('navigator.lspclient.servers')
-                if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' and k ~= 'null-ls' then
-                  info(string.format('[󰎐] extend LSP support for  %s %s ', key, k))
-                end
+                -- if not vim.tbl_contains(lsp or {}, k) and k ~= 'efm' and k ~= 'null-ls' then
+                --   info(string.format('[󰎐] extend LSP support for  %s %s ', key, k))
+                -- end
               elseif key == 'signature_help_cfg' then
                 _NgConfigValues[key][k] = v
               elseif key == 'keymaps' then
