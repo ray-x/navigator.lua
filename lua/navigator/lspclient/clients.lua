@@ -62,10 +62,6 @@ local has_lspinst = false
 local has_mason = false
 
 
-if config.lsp.disable_lsp == 'all' then
-  config.lsp.disable_lsp = servers
-end
-
 local ng_default_cfg = {
   on_attach = on_attach,
   flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
@@ -522,6 +518,10 @@ local ft_map = {
 }
 
 local function setup(user_opts)
+  if config.lsp.disable_lsp == 'all' then
+    config.lsp.disable_lsp = servers
+  end
+
   user_opts = user_opts or {}
   local bufnr = user_opts.bufnr or vim.api.nvim_get_current_buf()
 
