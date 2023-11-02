@@ -47,7 +47,9 @@ local function error_marker(result, ctx, config)
     return
   end
 
-  vim.defer_fn(function()
+  local async
+  local uv = vim.uv or vim.loop
+  async = uv.new_async(vim.schedule_wrap(function()
     if vim.tbl_isempty(result.diagnostics) then
       return
     end
@@ -173,7 +175,11 @@ local function error_marker(result, ctx, config)
         { virt_text = { { s.sign, hl } }, virt_text_pos = 'right_align' }
       )
     end
-  end, 10) -- defer in 10ms
+    async:close()
+  end))
+  vim.defer_fn(function()
+    async:send()
+  end, 10)
 end
 
 local update_err_marker_async = function()

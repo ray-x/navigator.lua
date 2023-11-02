@@ -24,6 +24,7 @@ _NgConfigValues = {
 
   border = 'single', -- border style, can be one of 'none', 'single', 'double', "shadow"
   lines_show_prompt = 10, -- when the result list items number more than lines_show_prompt,
+  prompt_mode = 'insert', -- 'normal' | 'insert'
   -- fuzzy finder prompt will be shown
   combined_attach = 'both', -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
   on_attach = function(client, bufnr)

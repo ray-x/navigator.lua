@@ -425,7 +425,7 @@ function M.locations_to_items(locations, ctx)
     end
     item.display_filename = filename or item.filename
     item.call_by = context -- find_ts_func_by_range(funcs, item.range)
-    item.rpath = util.get_relative_path(cwd, item.filename)
+    item.rpath = util.get_relative_path(cwd, gutil.add_pec(item.filename))
     width = math.max(width, #item.text)
     item.symbol_name = M.get_symbol(item.text, item.range)
     item.lhs = check_lhs(item.text, item.symbol_name)

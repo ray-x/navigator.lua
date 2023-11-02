@@ -3,6 +3,7 @@
 -- Some of function copied from https://github.com/RishabhRD/nvim-lsputils
 local M = { log_path = vim.lsp.get_log_path() }
 -- local is_windows = uv.os_uname().version:match("Windows")
+pcall(require, 'guihua') -- lazy load
 local guihua = require('guihua.util')
 local nvim_0_8
 local vfn = vim.fn
@@ -116,6 +117,7 @@ function M.get_base(path)
       return ret
     end
   end
+  return ''
 end
 
 local function getDir(path)
@@ -137,6 +139,7 @@ local function getDir(path)
 end
 
 function M.get_relative_path(base_path, my_path)
+  M.log('rel path', base_path, my_path)
   local base_data = getDir(base_path)
   if base_data == nil then
     return
@@ -186,7 +189,8 @@ function M.setup()
   elseif _NgConfigValues.debug == 'trace' then
     level = 'trace'
   end
-  local default_config = { use_console = false, use_file = true, level = level, plugin = 'navigator' }
+  local default_config =
+    { use_console = false, use_file = true, level = level, plugin = 'navigator' }
   if _NgConfigValues.debug_console_output then
     default_config.use_console = true
     default_config.use_file = false
@@ -357,7 +361,13 @@ function M.set_virt_eol(bufnr, lnum, chunks, priority, id)
   bufnr = bufnr == 0 and api.nvim_get_current_buf() or bufnr
   bufs[bufnr] = true
   -- id may be nil
-  return api.nvim_buf_set_extmark(bufnr, nss, lnum, -1, { id = id, virt_text = chunks, priority = priority })
+  return api.nvim_buf_set_extmark(
+    bufnr,
+    nss,
+    lnum,
+    -1,
+    { id = id, virt_text = chunks, priority = priority }
+  )
 end
 
 function M.clear_buf(bufnr)
