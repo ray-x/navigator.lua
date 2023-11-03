@@ -52,7 +52,7 @@ function M.new_list_view(opts)
   opts.transparency = config.transparency
   if #items >= config.lines_show_prompt then
     opts.prompt = true
-    opts.enter = _NgConfigValues.prompt_mode == 'insert'
+    opts.prompt_mode = _NgConfigValues.prompt_mode 
   end
 
   opts.external = config.external
