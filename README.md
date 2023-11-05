@@ -556,7 +556,7 @@ LspDiagnosticsXXX are used for diagnostic. Please check highlight.lua and dochig
 
 The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existance and load those plugins only if they existed.
 
-The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
+The terminal will need to be able to output nerdfont(v.3.0+) and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
 ## Integrate with mason (williamboman/mason.nvim)
 

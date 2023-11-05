@@ -188,6 +188,7 @@ _NgConfigValues = {
     -- Values (floating window)
     value_definition = '🐶🍡', -- identifier defined
     value_changed = '📝', -- identifier modified
+    context_separator = '  ', -- separator between text and value
 
     -- Formatting for Side Panel
     side_panel = {

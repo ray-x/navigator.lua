@@ -89,7 +89,8 @@ function M.find_definition(range, bufnr)
   if not root then
     return
   end
-  local node_at_point = root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1], symbolpos[2])
+  local node_at_point =
+    root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1], symbolpos[2])
   if not node_at_point then
     lerr('no node at cursor')
     return
@@ -108,7 +109,10 @@ function M.find_definition(range, bufnr)
     return { start = { line = r, character = c } }
   else
     if definition then
-      trace('error: def not found in ', bufnr, definition:range(), definition:type(), definition:parent():type())
+
+      -- stylua: ignore start
+      trace( 'error: def not found in ', bufnr, definition:range(), definition:type(), definition:parent():type())
+      -- stylua: ignore end
     end
   end
 end
@@ -142,19 +146,24 @@ function M.get_tsnode_at_pos(pos, bufnr, ignore_injected_langs)
     return
   end
 
-  return root:named_descendant_for_range(cursor_range[1], cursor_range[2], cursor_range[1], cursor_range[2])
+  return root:named_descendant_for_range(
+    cursor_range[1],
+    cursor_range[2],
+    cursor_range[1],
+    cursor_range[2]
+  )
 end
 
 -- Trim spaces and opening brackets from end
 local transform_line = function(line)
-  line = line:gsub("%s*[%[%(%{]*%s*$", "")
-  line = line:gsub("function", "")
-  line = line:gsub("func%w*%s+", "")
+  line = line:gsub('%s*[%[%(%{]*%s*$', '')
+  line = line:gsub('function', '')
+  line = line:gsub('func%w*%s+', '')
   if _NgConfigValues.treesitter_analysis_condense then
-    line = line:gsub("%([%a%.,%s%[%]%*]+%)", "()")
+    line = line:gsub('%([%a%.,%s%[%]%*]+%)', '()')
     -- this is for multi return
-    line = line:gsub("%([%a%.,%s%[%]%*]+%)", "()")
-    line = line:gsub("%(%)%s*%(%)", "()")
+    line = line:gsub('%([%a%.,%s%[%]%*]+%)', '()')
+    line = line:gsub('%(%)%s*%(%)', '()')
   end
   return line
 end
@@ -168,17 +177,17 @@ function M.ref_context(opts)
   local bufnr = options.bufnr or 0
   local pos = options.pos
   if not pos then
-    pos = {start = vim.lsp.util.make_position_params().position}
+    pos = { start = vim.lsp.util.make_position_params().position }
   end
   local indicator_size = options.indicator_size or 100
-  local type_patterns = options.type_patterns or { "class", "function", "method" }
+  local type_patterns = options.type_patterns or { 'class', 'function', 'method' }
   local transform_fn = options.transform_fn or transform_line
-  local separator = options.separator or "  "
+  local separator = options.separator or _NgConfigValues.icons.context_separator
 
   local current_node = M.get_tsnode_at_pos(pos, bufnr)
   if not current_node then
     log('no node at pos', bufnr, pos)
-    return ""
+    return ''
   end
 
   local lines = {}
@@ -187,7 +196,7 @@ function M.ref_context(opts)
   while expr do
     local line = ts_utils._get_line_for_node(expr, type_patterns, transform_fn, bufnr)
     log(line)
-    if line ~= "" and not vim.tbl_contains(lines, line) then
+    if line ~= '' and not vim.tbl_contains(lines, line) then
       table.insert(lines, 1, line)
     end
     expr = expr:parent()
@@ -223,7 +232,11 @@ local function get_definitions(bufnr)
         trace(node, match)
         trace(row, col, erow, offset, node:parent(), node:parent():start(), node:parent():type())
 
-        if node and node:parent() and string.find(node:parent():type(), 'parameter_declaration') then
+        if
+          node
+          and node:parent()
+          and string.find(node:parent():type(), 'parameter_declaration')
+        then
           log('parameter_declaration skip')
           return
         end
@@ -234,7 +247,10 @@ local function get_definitions(bufnr)
     if loc.method then -- for go
       ts_locals.recurse_local_nodes(loc.method, function(def, node, full_match, match)
         local row, col, start = node:start()
-        trace(row, col, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
+        -- stylua: ignore start
+        trace(row, col, start, def, node, full_match, match,
+          node:parent(), node:parent():start(), node:parent():type())
+        -- stylua: ignore end
         if node:type() == 'field_identifier' and nodes_set[start] == nil then
           nodes_set[start] = { node = node, type = 'method' }
         end
@@ -243,7 +259,10 @@ local function get_definitions(bufnr)
     if loc.interface then -- for go using interface can output full method definition
       ts_locals.recurse_local_nodes(loc.interface, function(def, node, full_match, match)
         local k, l, start = node:start()
-        trace(k, l, start, def, node, full_match, match, node:parent(), node:parent():start(), node:parent():type())
+        -- stylua: ignore start
+        trace( k, l, start, def, node, full_match,
+          match, node:parent(), node:parent():start(), node:parent():type())
+        -- stylua: ignore end
         if nodes_set[start] == nil then
           nodes_set[start] = { node = node, type = match or '' }
         end
@@ -265,7 +284,9 @@ local function get_definitions(bufnr)
           p3 = p2:parent()
           p3t = p2:parent():type()
         end
-        trace(row, col, start, def, node, full_match, match, p1t, p1, node:parent():start(), node:parent():type(), p2, p2t, p3, p3t)
+        -- stylua: ignore start
+        trace( row, col, start, def, node, full_match, match, p1t, p1, node:parent():start(), node:parent():type(), p2, p2t, p3, p3t)
+        -- stylua: ignore end
         if p1t == 'arrow_function' then
           row, col, start = p1:start()
           trace('arrow_function 1', row, col)
@@ -349,7 +370,11 @@ local function get_scope(type, source)
   end
 
   if type == 'var' and next ~= nil then
-    if next:type() == 'function' or next:type() == 'arrow_function' or next:type() == 'function_definition' then
+    if
+      next:type() == 'function'
+      or next:type() == 'arrow_function'
+      or next:type() == 'function_definition'
+    then
       trace(current:type(), current:range())
       return next, true
     elseif parent:type() == 'function_declaration' then
@@ -412,7 +437,9 @@ function M.goto_adjacent_usage(bufnr, delta)
   if type(en) == 'table' then
     en = vim.tbl_contains(en, vim.o.ft)
   end
-  if en == false then return lsp_reference(opt) end
+  if en == false then
+    return lsp_reference(opt)
+  end
 
   bufnr = bufnr or api.nvim_get_current_buf()
   local node_at_point = ts_utils.get_node_at_cursor()
@@ -488,17 +515,18 @@ local function get_all_nodes(bufnr, filter, summary)
   local display_filename = fname:gsub(cwd .. path_sep, path_cur, 1)
 
   local all_nodes = {}
-  local containers =  filter or {
-    ['function'] = true,
-    ['local_function'] = true,
-    ['arrow_function'] = true,
-    ['type'] = true,
-    ['class'] = true,
-    ['call_expression'] = true,
-    -- ['var'] = true,
-    ['struct'] = true,
-    ['method'] = true,
-  }
+  local containers = filter
+    or {
+      ['function'] = true,
+      ['local_function'] = true,
+      ['arrow_function'] = true,
+      ['type'] = true,
+      ['class'] = true,
+      ['call_expression'] = true,
+      -- ['var'] = true,
+      ['struct'] = true,
+      ['method'] = true,
+    }
 
   -- check and load buff
 
@@ -578,7 +606,9 @@ local function get_all_nodes(bufnr, filter, summary)
         -- hack for lua and maybe other language aswell
         local parent = tsdata:parent()
         if parent ~= nil and _NgConfigValues.debug == 'trace' then -- for github action failure
-          trace(parent:type(), vim.treesitter.get_node_text(parent, bufnr):sub(1, 30), item.node_text, item.type)
+          -- stylua: ignore start
+          trace( parent:type(), vim.treesitter.get_node_text(parent, bufnr):sub(1, 30), item.node_text, item.type)
+          -- stylua: ignore end
         end
         if
           parent ~= nil
@@ -617,15 +647,10 @@ local function get_all_nodes(bufnr, filter, summary)
         end
 
         if item.node_scope then
-          trace(
-            item.type,
-            tsdata:type(),
-            item.node_text,
-            item.kind,
-            'range',
-            item.node_scope.start.line,
-            item.node_scope['end'].line
-          ) -- set to log if need to trace result
+          -- stylua: ignore start
+          trace( item.type, tsdata:type(), item.node_text, item.kind, 'range',
+            item.node_scope.start.line, item.node_scope['end'].line) -- set to log if need to trace result
+          -- stylua: ignore end
         end
         goto continue
       end
@@ -633,7 +658,8 @@ local function get_all_nodes(bufnr, filter, summary)
       item.range = ts_utils.node_to_lsp_range(tsdata)
       local start_line_node, _, _ = tsdata:start()
 
-      local line_text = api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1] or ''
+      local line_text = api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1]
+        or ''
       item.full_text = vim.trim(line_text)
 
       item.full_text = item.full_text:gsub('%s*[%[%(%{]*%s*$', '')
@@ -670,7 +696,8 @@ local function get_all_nodes(bufnr, filter, summary)
         all_nodes[#all_nodes].next_indent_level = #parents
       end
 
-      item.text = string.format(' %s %s%-10s\t %s', item.kind, indent, item.node_text, item.full_text)
+      item.text =
+        string.format(' %s %s%-10s\t %s', item.kind, indent, item.node_text, item.full_text)
       if #item.text > length then
         length = #item.text
       end
@@ -770,7 +797,7 @@ function M.side_panel()
       end
       return require('navigator.treesitter').all_ts_nodes(b)
     end,
-    scope = 'node_scope'
+    scope = 'node_scope',
   })
   panel:open(true)
 end
@@ -917,7 +944,12 @@ function M.get_node_at_pos(pos, parser)
     return
   end
 
-  local node = root:named_descendant_for_range(cursor_range[1], cursor_range[2], cursor_range[1], cursor_range[2])
+  local node = root:named_descendant_for_range(
+    cursor_range[1],
+    cursor_range[2],
+    cursor_range[1],
+    cursor_range[2]
+  )
   log(node, node:range())
   return node
 end
