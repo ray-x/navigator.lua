@@ -140,7 +140,7 @@ local function getDir(path)
 end
 
 function M.get_relative_path(base_path, my_path)
-  M.log('rel path', base_path, my_path)
+  M.trace('rel path', base_path, my_path)
   base_path = string.lower(base_path)
   my_path = string.lower(my_path)
   local base_data = getDir(base_path)
@@ -489,7 +489,7 @@ function M.info(msg)
 end
 
 function M.dedup(locations)
-  local m = math.min(10, #locations)  -- dedup first 10 elements
+  local m = math.min(10, #locations) -- dedup first 10 elements
   local dict = {}
   local del = {}
   for i = 1, m, 1 do

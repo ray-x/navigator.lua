@@ -26,6 +26,18 @@ local function order_locations(locations)
   end)
   return locations
 end
+
+local function warmup_treesitter(options)
+  local api = vim.api
+  local parsers = require('nvim-treesitter.parsers')
+  local bufnr = options.bufnr or api.nvim_get_current_buf()
+  local parser = parsers.get_parser(bufnr)
+  if not parser then
+    log('err: ts not loaded ' .. vim.o.ft)
+    return
+  end
+end
+
 local M = {}
 local ref_view = function(err, locations, ctx, cfg)
   cfg = cfg or {}
@@ -239,7 +251,7 @@ local function fetch_lsp_references(bufnr, params, callback)
     'textDocument/references',
     params,
     function(err, result, ctx, cfg)
-      log(result)
+      trace(result)
       if err then
         log('[nav-rename] Error while finding references: ' .. err.message)
         return
@@ -259,6 +271,19 @@ local ref_req = function()
   if _NgConfigValues.closer ~= nil then
     -- do not call it twice
     _NgConfigValues.closer()
+  end
+
+  local warmup_ts
+  if _NgConfigValues.treesitter_analysis then
+    warmup_ts = vim.loop.new_async(function()
+      warmup_treesitter(cfg)
+      if warmup_ts:is_active() then
+        warmup_ts:close()
+      end
+    end)
+    vim.defer_fn(function()
+      warmup_ts:send()
+    end, 5)
   end
   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
   local bufnr = vim.api.nvim_get_current_buf()

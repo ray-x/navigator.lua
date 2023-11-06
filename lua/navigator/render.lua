@@ -150,7 +150,7 @@ function M.prepare_for_render(items, opts)
     -- log(item.text, item.symbol_name, item.uri)
     -- log(item.text)
     if item.definition then
-      log('definition', item)
+      log('definition', item.call_by, item.symbol_name, item.text)
       if opts.side_panel then
         ts_report = _NgConfigValues.icons.value_definition
       else

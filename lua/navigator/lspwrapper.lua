@@ -310,7 +310,7 @@ end
 function M.locations_to_items(locations, ctx)
   ctx = ctx or {}
   local max_items = ctx.max_items or 1000 --
-  log(ctx, max_items)
+  trace(ctx, max_items)
   local client_id = ctx.client_id or 1
   local enc = util.encoding(client_id)
   if not locations or vim.tbl_isempty(locations) then
@@ -327,22 +327,26 @@ function M.locations_to_items(locations, ctx)
   local second_part
   locations, second_part = slice_locations(locations, max_items)
   if second_part and #second_part > 0 then
-    log(#locations, locations[1], #second_part, second_part and second_part[1])
+    log('second part', #locations, #second_part)
+    trace(#locations, locations[1], #second_part, second_part and second_part[1])
   end
   trace(locations)
 
   vim.cmd([[set eventignore+=FileType]])
 
+  local now = uv.now()
   local unload_bufnrs = {}
   local file_cnt = {}
   for i, loc in ipairs(locations) do
+
+    local looptimer = uv.now()
     local item = lsp.util.locations_to_items({ loc }, enc)[1]
     item.range = locations[i].range or locations[i].targetRange
     item.uri = locations[i].uri or locations[i].targetUri
     item.definition = locations[i].definition
 
     if is_win then
-      log(item.uri, cwd) -- file:///C:/path/to/file
+      trace(item.uri, cwd) -- file:///C:/path/to/file
     end
     file_cnt[item.uri] = (file_cnt[item.uri] or 0) + 1
     -- only load top 30 file.items
@@ -350,7 +354,7 @@ function M.locations_to_items(locations, ctx)
     local unload, def
     local context = ''
     if not proj_file then
-      log('not proj file', i, item.uri)
+      trace('not proj file', i, item.uri)
     end
     if TS_analysis_enabled and not ctx.no_show and proj_file then
       local ts_context = nts.ref_context
@@ -362,7 +366,7 @@ function M.locations_to_items(locations, ctx)
         unload = bufnr
       end
       context = ts_context({ bufnr = bufnr, pos = item.range }) or 'not found'
-      log(i, context)
+      trace('ts ctx', i, context, uv.now() - looptimer)
 
       -- TODO: unload buffers
       if unload then
@@ -395,6 +399,7 @@ function M.locations_to_items(locations, ctx)
           table.insert(unload_bufnrs, unload)
         end
       end
+      trace('perf: ts ctx', i, uv.now() - looptimer, uv.now() - now)
       trace(uri_def[item.uri], item.range) -- set to log if need to get all in rnge
       local def1 = uri_def[item.uri]
       if def1 and def1.start and item.range then
@@ -425,6 +430,9 @@ function M.locations_to_items(locations, ctx)
     item.lhs = check_lhs(item.text, item.symbol_name)
 
     table.insert(items, item)
+
+    trace('perf: ts render', uv.now() - looptimer, uv.now() - now)
+    loop_timer = uv.now()
   end
   trace(uri_def)
 
