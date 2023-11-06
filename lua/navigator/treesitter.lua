@@ -79,7 +79,7 @@ end
 -- use lsp range to find def
 function M.find_definition(range, bufnr)
   if not range or not range.start then
-    lerr('find_def incorrect range', range)
+    lerr('find_def incorrect range'..vim.inspect(range))
     return
   end
   bufnr = bufnr or api.nvim_get_current_buf()
@@ -169,12 +169,14 @@ local transform_line = function(line)
 end
 
 function M.ref_context(opts)
-  if not parsers.has_parser() then
+  local options = opts or {}
+  local bufnr = options.bufnr or api.nvim_get_current_buf()
+  local parser = parsers.get_parser(bufnr)
+  if not parser then
+    log('err: ts not loaded ' .. vim.o.ft)
     return
   end
-  local options = opts or {}
 
-  local bufnr = options.bufnr or 0
   local pos = options.pos
   if not pos then
     pos = { start = vim.lsp.util.make_position_params().position }
@@ -195,7 +197,7 @@ function M.ref_context(opts)
 
   while expr do
     local line = ts_utils._get_line_for_node(expr, type_patterns, transform_fn, bufnr)
-    log(line)
+    log('line', line)
     if line ~= '' and not vim.tbl_contains(lines, line) then
       table.insert(lines, 1, line)
     end
@@ -204,11 +206,15 @@ function M.ref_context(opts)
       break
     end
   end
+  if #lines == 0 then
+    log('no lines found')
+    return ''
+  end
 
   local text = table.concat(lines, separator)
   local text_len = #text
   if text_len > indicator_size then
-    local str = text:sub(1, text_len)
+    local str = text:sub(1, text_len) -- copy string
     return util.sub_match(str)
   end
 

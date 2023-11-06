@@ -9,12 +9,29 @@ local trace = require('navigator.util').trace
 -- local lsphelper = require "navigator.lspwrapper"
 local locations_to_items = lsphelper.locations_to_items
 
+local function order_locations(locations)
+  table.sort(locations, function(i, j)
+    if i == nil or j == nil or i.uri == nil or j.uri == nil then
+      -- log(i, j)
+      return false
+    end
+    if i.uri == j.uri then
+      if i.range and i.range.start then
+        return i.range.start.line < j.range.start.line
+      end
+      return false
+    else
+      return i.uri < j.uri
+    end
+  end)
+  return locations
+end
 local M = {}
 local ref_view = function(err, locations, ctx, cfg)
   cfg = cfg or {}
   local truncate = cfg and cfg.truncate or 20
   local opts = {}
-  trace('arg1', err, ctx, locations)
+  trace('ref_view', err, ctx, #locations, cfg, locations)
   -- log(#locations, locations[1])
   if ctx.combine then
     -- wait for both reference and definition LSP request
@@ -45,28 +62,22 @@ local ref_view = function(err, locations, ctx, cfg)
 
     if references and references.result and #references.result > 0 then
       local refs = references.result
+
+      order_locations(refs)
       vim.list_extend(locations, refs)
     end
     err = nil
-    trace(locations)
     -- lets de-dup first 10 elements. some lsp does not recognize definition and reference difference
     locations = util.dedup(locations)
     trace(locations)
   end
-  -- log("num", num)
-  -- log("bfnr", bufnr)
+  -- log('num  bufnr: ', num, bufnr)
   if err ~= nil then
     vim.notify(
       'lsp ref callback error' .. vim.inspect(err) .. vim.inspect(ctx) .. vim.inspect(locations),
       vim.log.levels.WARN
     )
     log('ref callback error, lsp may not ready', err, ctx, vim.inspect(locations))
-    return
-  end
-  if type(locations) ~= 'table' then
-    log(locations)
-    log('ctx', ctx)
-    vim.notify('incorrect setup' .. vim.inspect(locations), vim.log.levels.WARN)
     return
   end
   if locations == nil or vim.tbl_isempty(locations) then
@@ -76,8 +87,11 @@ local ref_view = function(err, locations, ctx, cfg)
 
   ctx.max_items = truncate
   local items, width, second_part = locations_to_items(locations, ctx)
-  local thread_items = vim.deepcopy(items)
-  log('splits: ', #items, #second_part)
+  local thread_items = {}
+  if vim.fn.empty(second_part) == 0 then
+    thread_items = vim.deepcopy(items)
+  end
+  log('splits: ', #locations, #items, #second_part)
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr or 0, 'ft')
 
@@ -114,12 +128,13 @@ local ref_view = function(err, locations, ctx, cfg)
 
   -- trace("update items", listview.ctrl.class)
   local nv_ref_async
-  nv_ref_async = vim.loop.new_async(vim.schedule_wrap(function()
-    log('$$$$$$$$ seperate thread... $$$$$$$$')
+  local uv = vim.uv or vim.loop
+  nv_ref_async = uv.new_async(vim.schedule_wrap(function()
     if vim.tbl_isempty(second_part) then
       return
     end
-    ctx.max_items = #second_part
+    log('$$$$$$$$ --- seperate thread... --- $$$$$$$$')
+    ctx.max_items = #second_part -- proccess all the rest
     local items2 = locations_to_items(second_part, ctx)
 
     vim.list_extend(thread_items, items2)
@@ -128,17 +143,17 @@ local ref_view = function(err, locations, ctx, cfg)
     log('thread data size', #data)
     listview.ctrl:on_data_update(data)
     if nv_ref_async then
-      vim.loop.close(nv_ref_async)
+      uv.close(nv_ref_async)
     else
-      log('invalid asy', nv_ref_async)
+      log('invalid ref_async')
     end
   end))
 
   vim.defer_fn(function()
-    vim.loop.new_thread(function(asy)
+    uv.new_thread(function(asy)
       asy:send()
     end, nv_ref_async)
-  end, 100)
+  end, 10)
 
   return listview, items, width
 end
@@ -173,7 +188,7 @@ local async_ref = function()
       end
     end
     results.definitions = { error = err, result = result, ctx = ctx, config = config }
-    log(result)
+    log('number of result', #result)
     ctx = ctx or {}
     ctx.results = results
     ctx.combine = true
@@ -199,7 +214,7 @@ end
 -- a function from smjonas/inc-rename.nvim
 -- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
 local function fetch_lsp_references(bufnr, params, callback)
-  local clients = vim.lsp.get_active_clients({
+  local clients = vim.lsp.get_clients({
     bufnr = bufnr,
   })
   clients = vim.tbl_filter(function(client)

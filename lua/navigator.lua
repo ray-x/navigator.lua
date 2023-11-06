@@ -34,6 +34,7 @@ _NgConfigValues = {
   treesitter_analysis = true, -- treesitter variable context
   treesitter_navigation = true, -- bool|table
   treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
+  treesitter_analysis_max_fnum = 20, -- how many files to run treesitter analysis
   treesitter_analysis_condense = true, -- short format of function
   treesitter_analysis_depth = 3, -- max depth
   transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
