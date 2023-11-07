@@ -9,9 +9,10 @@ local log = require('navigator.util').log
 local lerr = require('navigator.util').error
 local trace = require('navigator.util').trace
 local symbol_kind = require('navigator.lspclient.lspkind').symbol_kind
-local cwd = vim.loop.cwd()
-
-local is_win = vim.loop.os_uname().sysname:find('Windows')
+local uv = vim.uv or vim.loop
+local cwd = uv.cwd()
+local os_name = uv.os_uname().sysname
+local is_win = os_name:find('Windows') or os_name:find('MINGW')
 
 local path_sep = require('navigator.util').path_sep()
 local path_cur = require('navigator.util').path_cur()
@@ -264,24 +265,6 @@ local function find_ts_func_by_range(funcs, range)
   return result
 end
 
-local function order_locations(locations)
-  table.sort(locations, function(i, j)
-    if i == nil or j == nil or i.uri == nil or j.uri == nil then
-      -- log(i, j)
-      return false
-    end
-    if i.uri == j.uri then
-      if i.range and i.range.start then
-        return i.range.start.line < j.range.start.line
-      end
-      return false
-    else
-      return i.uri < j.uri
-    end
-  end)
-  return locations
-end
-
 local function slice_locations(locations, max_items)
   local cut = -1
   if #locations > max_items then
@@ -326,43 +309,54 @@ end
 
 function M.locations_to_items(locations, ctx)
   ctx = ctx or {}
-  local max_items = ctx.max_items or 100000 --
+  local max_items = ctx.max_items or 1000 --
+  trace(ctx, max_items)
   local client_id = ctx.client_id or 1
   local enc = util.encoding(client_id)
   if not locations or vim.tbl_isempty(locations) then
     vim.notify('list not avalible', vim.log.levels.WARN)
     return
   end
-  local width = 4
+  local width = 4 -- text max width
 
   local items = {}
   -- items and locations may not matching
 
   local uri_def = {}
 
-  order_locations(locations)
   local second_part
   locations, second_part = slice_locations(locations, max_items)
+  if second_part and #second_part > 0 then
+    log('second part', #locations, #second_part)
+    trace(#locations, locations[1], #second_part, second_part and second_part[1])
+  end
   trace(locations)
 
   vim.cmd([[set eventignore+=FileType]])
 
+  local now = uv.now()
   local unload_bufnrs = {}
+  local file_cnt = {}
   for i, loc in ipairs(locations) do
+
+    local looptimer = uv.now()
     local item = lsp.util.locations_to_items({ loc }, enc)[1]
     item.range = locations[i].range or locations[i].targetRange
     item.uri = locations[i].uri or locations[i].targetUri
     item.definition = locations[i].definition
 
     if is_win then
-      log(item.uri) -- file:///C:/path/to/file
-      log(cwd)
+      trace(item.uri, cwd) -- file:///C:/path/to/file
     end
-    -- only load top 30 file.
-    local proj_file = item.uri:find(cwd) or is_win or i < _NgConfigValues.treesitter_analysis_max_num
+    file_cnt[item.uri] = (file_cnt[item.uri] or 0) + 1
+    -- only load top 30 file.items
+    local proj_file = (item.uri:find(cwd) or is_win) and i < _NgConfigValues.treesitter_analysis_max_num and table.getn(file_cnt) < _NgConfigValues.treesitter_analysis_max_fnum  -- getn deprecated, but it is the best solution for getting dict size
     local unload, def
     local context = ''
-    if TS_analysis_enabled and proj_file and not ctx.no_show then
+    if not proj_file then
+      trace('not proj file', i, item.uri)
+    end
+    if TS_analysis_enabled and not ctx.no_show and proj_file then
       local ts_context = nts.ref_context
 
       local bufnr = vim.uri_to_bufnr(item.uri)
@@ -371,8 +365,8 @@ function M.locations_to_items(locations, ctx)
         vim.fn.bufload(bufnr)
         unload = bufnr
       end
-      context = ts_context({ bufnr = bufnr, pos = item.range }) or ''
-      log(context)
+      context = ts_context({ bufnr = bufnr, pos = item.range }) or 'not found'
+      trace('ts ctx', i, context, uv.now() - looptimer)
 
       -- TODO: unload buffers
       if unload then
@@ -405,6 +399,7 @@ function M.locations_to_items(locations, ctx)
           table.insert(unload_bufnrs, unload)
         end
       end
+      trace('perf: ts ctx', i, uv.now() - looptimer, uv.now() - now)
       trace(uri_def[item.uri], item.range) -- set to log if need to get all in rnge
       local def1 = uri_def[item.uri]
       if def1 and def1.start and item.range then
@@ -426,11 +421,18 @@ function M.locations_to_items(locations, ctx)
     item.display_filename = filename or item.filename
     item.call_by = context -- find_ts_func_by_range(funcs, item.range)
     item.rpath = util.get_relative_path(cwd, gutil.add_pec(item.filename))
+    if is_win then
+      -- windows C: vs c: -- log(item.filename, filename, cwd .. path_sep, path_cur)
+      item.display_filename = item.rpath or item.display_filename
+    end
     width = math.max(width, #item.text)
     item.symbol_name = M.get_symbol(item.text, item.range)
     item.lhs = check_lhs(item.text, item.symbol_name)
 
     table.insert(items, item)
+
+    trace('perf: ts render', uv.now() - looptimer, uv.now() - now)
+    loop_timer = uv.now()
   end
   trace(uri_def)
 

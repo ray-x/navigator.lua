@@ -22,12 +22,11 @@ end
 local api = vim.api
 local util = require('navigator.util')
 local M = {}
-
-local cwd = vim.loop.cwd()
-local log = require('navigator.util').log
-local lerr = require('navigator.util').error
-local trace = function(...) end
-trace = log
+local uv = vim.uv or vim.loop
+local cwd = uv.cwd()
+local log = util.log
+local lerr = util.error
+local trace = util.trace
 
 local get_icon = function(kind)
   if kind == nil or _NgConfigValues.icons.match_kinds[kind] == nil then
@@ -79,7 +78,7 @@ end
 -- use lsp range to find def
 function M.find_definition(range, bufnr)
   if not range or not range.start then
-    lerr('find_def incorrect range', range)
+    lerr('find_def incorrect range'..vim.inspect(range))
     return
   end
   bufnr = bufnr or api.nvim_get_current_buf()
@@ -92,8 +91,7 @@ function M.find_definition(range, bufnr)
   local node_at_point =
     root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1], symbolpos[2])
   if not node_at_point then
-    lerr('no node at cursor')
-    return
+    return log('Err: no node at cursor', range)
   end
 
   local definition = locals.find_definition(node_at_point, bufnr)
@@ -123,9 +121,9 @@ function M.get_tsnode_at_pos(pos, bufnr, ignore_injected_langs)
   end
   local cursor_range = { pos.start.line, pos.start.character }
 
-  local buf = bufnr
-  local root_lang_tree = parsers.get_parser(buf)
+  local root_lang_tree = parsers.get_parser(bufnr)
   if not root_lang_tree then
+    log('Err: ts not loaded ' .. vim.o.ft, bufnr)
     return
   end
 
@@ -169,12 +167,14 @@ local transform_line = function(line)
 end
 
 function M.ref_context(opts)
-  if not parsers.has_parser() then
+  local options = opts or {}
+  local bufnr = options.bufnr or api.nvim_get_current_buf()
+  local parser = parsers.get_parser(bufnr)
+  if not parser then
+    log('err: ts not loaded ' .. vim.o.ft)
     return
   end
-  local options = opts or {}
 
-  local bufnr = options.bufnr or 0
   local pos = options.pos
   if not pos then
     pos = { start = vim.lsp.util.make_position_params().position }
@@ -195,7 +195,7 @@ function M.ref_context(opts)
 
   while expr do
     local line = ts_utils._get_line_for_node(expr, type_patterns, transform_fn, bufnr)
-    log(line)
+    trace('line', line)
     if line ~= '' and not vim.tbl_contains(lines, line) then
       table.insert(lines, 1, line)
     end
@@ -204,11 +204,15 @@ function M.ref_context(opts)
       break
     end
   end
+  if #lines == 0 then
+    log('no lines found')
+    return ''
+  end
 
   local text = table.concat(lines, separator)
   local text_len = #text
   if text_len > indicator_size then
-    local str = text:sub(1, text_len)
+    local str = text:sub(1, text_len) -- copy string
     return util.sub_match(str)
   end
 
@@ -306,7 +310,7 @@ local function get_definitions(bufnr)
             and node:parent():type() == 'qualified_type'
             and string.find(node:parent():parent():type(), 'interface')
           then
-            log('add node', node)
+            trace('add node', node)
             nodes_set[start] = { node = node, type = match or 'field' }
           end
         end
@@ -450,7 +454,7 @@ function M.goto_adjacent_usage(bufnr, delta)
 
   local def_node, scope = ts_locals.find_definition(node_at_point, bufnr)
   local usages = ts_locals.find_usages(def_node, scope, bufnr)
-  log(usages)
+  trace(usages)
 
   local index = index_of(usages, node_at_point)
   if not index then

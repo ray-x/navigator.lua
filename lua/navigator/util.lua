@@ -8,9 +8,11 @@ local guihua = require('guihua.util')
 local nvim_0_8
 local vfn = vim.fn
 local api = vim.api
+local uv = vim.uv or vim.loop
 
+local os_name = uv.os_uname().sysname
+local is_win = os_name:find('Windows') or os_name:find('MINGW')
 M.path_sep = function()
-  local is_win = vim.loop.os_uname().sysname:find('Windows')
   if is_win then
     return '\\'
   else
@@ -21,7 +23,6 @@ end
 local path_sep = M.path_sep()
 
 M.path_cur = function()
-  local is_win = vim.loop.os_uname().sysname:find('Windows')
   if is_win then
     return '.\\'
   else
@@ -139,23 +140,29 @@ local function getDir(path)
 end
 
 function M.get_relative_path(base_path, my_path)
-  M.log('rel path', base_path, my_path)
+  M.trace('rel path', base_path, my_path)
+  base_path = string.lower(base_path)
+  my_path = string.lower(my_path)
   local base_data = getDir(base_path)
   if base_data == nil then
+    M.log('base data is nil')
     return
   end
   local my_data = getDir(my_path)
-  if my_data == nil then
+  if vim.fn.empty(my_data) == 1 then
+    M.log('my data is nil', my_path)
     return
   end
   local base_len = #base_data
   local my_len = #my_data
 
   if base_len > my_len then
+    M.log('incorrect dir format: base data', base_data, 'my data', my_data)
     return my_path
   end
 
   if base_data[1] ~= my_data[1] then
+    M.log('base data is not same', base_data[1], my_data[1])
     return my_path
   end
 
@@ -277,9 +284,10 @@ function M.open_log()
   local path = vim.lsp.get_log_path()
   vim.cmd('edit ' .. path)
 end
-
-function table.pack(...)
-  return { n = select('#', ...), ... }
+if not table.pack then
+  table.pack = function(...)
+    return { n = select('#', ...), ... }
+  end
 end
 function M.show(...)
   local string = ''
@@ -481,10 +489,7 @@ function M.info(msg)
 end
 
 function M.dedup(locations)
-  local m = 10
-  if m > #locations then
-    m = #locations
-  end
+  local m = math.min(10, #locations) -- dedup first 10 elements
   local dict = {}
   local del = {}
   for i = 1, m, 1 do
@@ -553,7 +558,7 @@ function M.sub_match(str)
   if j % 2 == 1 then
     str = str .. [[']]
   end
-  str = str .. ''
+  str = str .. '󰇘'
   return str
 end
 

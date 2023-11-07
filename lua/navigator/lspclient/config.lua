@@ -4,7 +4,8 @@ capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 function M.reload_lsp()
   vim.cmd("LspStop")
-  local timer = vim.loop.new_timer()
+  local uv = vim.uv or vim.loop
+  local timer = uv.new_timer()
   local i = 0
   timer:start(500, 100, function()
     if i >= 5 then

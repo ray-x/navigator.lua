@@ -1,0 +1,332 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	number	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/ray/github/ray-x/navigator.lua/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/227c65e76/
+Custom_fold_text	lua/navigator/foldts.lua	20;"	f
+Fix	lua/navigator/protocal.txt	374;"	f
+["sumneko_lua"]	issue130/init.lua	62;"	f
+["tsserver"]	issue130/init.lua	71;"	f
+['<Tab>']	playground/init.lua	72;"	f
+['sumneko_lua']	playground/init_130.lua	34;"	f
+['sumneko_lua']	playground/init_131.lua	22;"	f
+['sumneko_lua']	playground/init_lsp_installer.lua	22;"	f
+['tsserver']	playground/init_130.lua	43;"	f
+['tsserver']	playground/init_131.lua	31;"	f
+['tsserver']	playground/init_lsp_installer.lua	31;"	f
+\x21	tests/fixtures/tests	133;"	f
+_	lua/navigator/util.lua	300;"	f
+_update_sign	lua/navigator/codeAction.lua	44;"	f
+_update_sign	lua/navigator/codelens.lua	26;"	f
+_update_virtual_text	lua/navigator/codeAction.lua	27;"	f
+action_virtual_call_back	lua/navigator/codeAction.lua	141;"	f
+add	lua/navigator/lspclient/clients.lua	54;"	f
+add_highlight	lua/navigator/lspclient/highlight.lua	34;"	f	unknown:M
+add_locs	lua/navigator/dochighlight.lua	15;"	f
+add_servers	lua/navigator/lspclient/clients.lua	680;"	f
+add_workspace_folder	lua/navigator/workspace.lua	9;"	f	unknown:M
+adjust_foldend	lua/navigator/foldlsp.lua	120;"	f	unknown:M
+adjust_foldstart	lua/navigator/foldlsp.lua	116;"	f	unknown:M
+async	thread.lua	4;"	f
+async_hdlr	lua/navigator/reference.lua	139;"	f	unknown:M
+async_ref	lua/navigator/reference.lua	148;"	f
+autocmd	lua/navigator/lspclient/mapping.lua	216;"	f
+before	lua/navigator/dochighlight.lua	125;"	f
+buf_func	lua/navigator/treesitter.lua	442;"	f	unknown:M
+buf_ts	lua/navigator/treesitter.lua	489;"	f	unknown:M
+bufs_ts	lua/navigator/treesitter.lua	511;"	f	unknown:M
+call_async	lua/navigator/lspwrapper.lua	153;"	f	unknown:M
+call_hierarchy_handler	lua/navigator/cclshierarchy.lua	12;"	f
+call_hierarchy_handler	lua/navigator/hierarchy.lua	12;"	f
+call_sync	lua/navigator/lspwrapper.lua	145;"	f	unknown:M
+callback	lua/navigator/lspwrapper.lua	155;"	f
+check_cap	lua/navigator/lspclient/mapping.lua	84;"	f
+check_capabilities	lua/navigator/lspwrapper.lua	121;"	f	unknown:M
+check_lhs	lua/navigator/lspwrapper.lua	31;"	f
+clear_all_buf	lua/navigator/util.lua	380;"	f	unknown:M
+clear_buf	lua/navigator/util.lua	366;"	f	unknown:M
+clear_diag_VT	lua/navigator/diagnostics.lua	325;"	f
+clear_usage_highlights	lua/navigator/treesitter.lua	612;"	f	unknown:M
+cmd_nohl	lua/navigator/dochighlight.lua	201;"	f
+cmp_kind	lua/navigator/lspclient/lspkind.lua	128;"	f	unknown:lspkind
+code_action	lua/navigator/codeAction.lua	161;"	f	unknown:code_action
+code_action_prompt	lua/navigator/codeAction.lua	188;"	f	unknown:code_action
+code_action_req	lua/navigator/codeAction.lua	145;"	f
+codelens_hdlr	lua/navigator/codelens.lua	49;"	f
+comp_kind	lua/navigator/lspclient/lspkind.lua	120;"	f	unknown:lspkind
+config	lua/navigator/diagnostics.lua	474;"	f	unknown:M
+config	playground/init.lua	32;"	f
+config	playground/init.lua	47;"	f
+config	playground/init.lua	60;"	f
+config	playground/init_131.lua	17;"	f
+config	playground/init_131.lua	51;"	f
+config	playground/init_lsp_installer.lua	17;"	f
+config	playground/init_lsp_installer.lua	51;"	f
+config	playground/init_ts_only.lua	35;"	f
+config	playground/init_ts_only.lua	52;"	f
+config_values	lua/navigator.lua	212;"	f	unknown:M
+config_values	lua/navigator.lua.bak	47;"	f	unknown:M
+ctags	lua/navigator/ctags.lua	133;"	f
+ctags_gen	lua/navigator/ctags.lua	54;"	f
+ctags_symbols	lua/navigator/ctags.lua	85;"	f
+curriedDot	playground/js/curry.js	1;"	f
+cut	lua/navigator/lru.lua	60;"	f
+debounce_trailing	lua/navigator/debounce.lua	3;"	f	unknown:M
+debug_folds	lua/navigator/foldlsp.lua	82;"	f	unknown:M
+def	lua/navigator/definition.lua	145;"	f
+def_preview	lua/navigator/definition.lua	41;"	f
+definition_hdlr	README.md	759;"	f
+definition_hdlr	doc/navigator.txt	662;"	f
+definition_hdlr	lua/navigator/definition.lua	8;"	f
+del	lua/navigator/lru.lua	95;"	f
+del_keymap	lua/navigator/lspclient/mapping.lua	131;"	f
+delete	lua/navigator/lru.lua	145;"	f
+deprecated	lua/navigator.lua	117;"	f	unknown:M
+diag_hdlr	lua/navigator/diagnostics.lua	196;"	f
+diagnositc_config_sign	lua/navigator/lspclient/highlight.lua	7;"	f	unknown:M
+dirname	lua/navigator/lspclient/clients.lua	85;"	f
+disable	lua/navigator/codelens.lua	99;"	f	unknown:M
+displayName	playground/js/closure.js	3;"	f
+documentHighlight	lua/navigator/dochighlight.lua	218;"	f
+document_symbol_handler	lua/navigator/symbols.lua	43;"	f	unknown:M
+document_symbols	lua/navigator/symbols.lua	21;"	f	unknown:M
+empty	lua/navigator/util.lua	425;"	f	unknown:M
+encoding	lua/navigator/util.lua	436;"	f	unknown:M
+entry_to_item	lua/navigator/ctags.lua	9;"	f
+error	lua/navigator/util.lua	203;"	f	unknown:M
+error	lua/navigator/util.lua	460;"	f	unknown:M
+error_marker	lua/navigator/diagnostics.lua	57;"	f
+exclude	lua/navigator/util.lua	341;"	f	unknown:M
+expand	playground/init.lua	65;"	f
+extend_config	lua/navigator.lua	138;"	f
+extend_config	lua/navigator.lua.bak	27;"	f
+extension	lua/navigator/render.lua	12;"	f
+extract_result	lua/navigator/lspwrapper.lua	109;"	f
+file_exists	lua/navigator/util.lua	75;"	f	unknown:M
+filename	lua/navigator/render.lua	5;"	f
+find_definition	lua/navigator/treesitter.lua	75;"	f	unknown:M
+find_ts_func_by_range	lua/navigator/lspwrapper.lua	246;"	f
+fmt	lua/navigator/util.lua	208;"	f	unknown:M
+fnamemodify	lua/navigator/lspwrapper.lua	56;"	f
+fold_handler	lua/navigator/foldlsp.lua	90;"	f	unknown:M
+folds_levels	lua/navigator/foldts.lua	53;"	f
+format_hdl	lua/navigator/formatting.lua	4;"	f
+func	thread.lua	1;"	f
+get	lua/navigator/lru.lua	112;"	f
+getArgs	lua/navigator/util.lua	245;"	f	unknown:M
+getDir	lua/navigator/util.lua	119;"	f
+get_all_nodes	lua/navigator/treesitter.lua	267;"	f
+get_base	lua/navigator/util.lua	109;"	f	unknown:M
+get_cfg	lua/navigator/lspclient/clients.lua	685;"	f
+get_count	lua/navigator/diagnostics.lua	49;"	f
+get_current_winid	lua/navigator/codeAction.lua	23;"	f
+get_current_winid	lua/navigator/util.lua	387;"	f	unknown:M
+get_data_from_file	lua/navigator/util.lua	36;"	f	unknown:M
+get_definitions	lua/navigator/treesitter.lua	111;"	f
+get_fold_indic	lua/navigator/foldlsp.lua	130;"	f	unknown:M
+get_fold_indic	lua/navigator/foldts.lua	162;"	f	unknown:M
+get_icon	lua/navigator/treesitter.lua	27;"	f
+get_keymaps_help	lua/navigator/lspclient/mapping.lua	333;"	f	unknown:M
+get_line_diagnostic	lua/navigator/diagnostics.lua	452;"	f	unknown:M
+get_namespace	lua/navigator/codeAction.lua	19;"	f
+get_node_at_line	lua/navigator/treesitter.lua	561;"	f	unknown:M
+get_node_at_pos	lua/navigator/treesitter.lua	616;"	f	unknown:M
+get_node_scope	lua/navigator/treesitter.lua	632;"	f	unknown:M
+get_pads	lua/navigator/render.lua	17;"	f
+get_relative_path	lua/navigator/util.lua	137;"	f	unknown:M
+get_scope	lua/navigator/treesitter.lua	151;"	f
+get_smallest_context	lua/navigator/treesitter.lua	213;"	f
+get_symbol	lua/navigator/definition.lua	36;"	f
+get_symbol	lua/navigator/dochighlight.lua	11;"	f
+get_symbol	lua/navigator/lspwrapper.lua	24;"	f	unknown:M
+goto_adjacent_usage	lua/navigator/treesitter.lua	230;"	f	unknown:M
+goto_adjent_reference	lua/navigator/dochighlight.lua	161;"	f
+goto_definition	lua/navigator/treesitter.lua	35;"	f	unknown:M
+goto_next_usage	lua/navigator/treesitter.lua	256;"	f	unknown:M
+goto_previous_usage	lua/navigator/treesitter.lua	259;"	f	unknown:M
+handle_document_highlight	lua/navigator/dochighlight.lua	141;"	f
+handlers['textDocument/codeLens']	lua/navigator/codelens.lua	75;"	f	unknown:vim.lsp
+handlers['textDocument/documentHighlight']	lua/navigator/dochighlight.lua	229;"	f	unknown:vim.lsp
+hi_symbol	lua/navigator/dochighlight.lua	46;"	f
+hide_diagnostic	lua/navigator/diagnostics.lua	336;"	f	unknown:M
+highlight_usages	lua/navigator/treesitter.lua	588;"	f	unknown:M
+i	tests/fixtures/tests	122;"	f
+implementation	lua/navigator/implementation.lua	24;"	f	unknown:M
+implementation_handler	lua/navigator/implementation.lua	18;"	f
+incoming_calls	lua/navigator/cclshierarchy.lua	72;"	f	unknown:M
+incoming_calls	lua/navigator/hierarchy.lua	80;"	f	unknown:M
+incoming_calls_handler	lua/navigator/cclshierarchy.lua	54;"	f
+incoming_calls_handler	lua/navigator/hierarchy.lua	63;"	f
+info	lua/navigator.lua	7;"	f
+info	lua/navigator/util.lua	197;"	f	unknown:M
+info	lua/navigator/util.lua	464;"	f	unknown:M
+init	lua/navigator/lazyloader.lua	2;"	f
+init	lua/navigator/lspclient/lspkind.lua	132;"	f	unknown:lspkind
+inline	lua/navigator/codelens.lua	117;"	f	unknown:M
+io_read	lua/navigator/util.lua	64;"	f	unknown:M
+key	lua/navigator/treesitter.lua	263;"	f
+lines_from_locations	lua/navigator/lspwrapper.lua	55;"	f	unknown:M
+list_workspace_folders	lua/navigator/workspace.lua	92;"	f	unknown:M
+load	lua/navigator/lazyloader.lua	46;"	f
+load_cfg	lua/navigator/lspclient/clients.lua	372;"	f
+load_plugins	playground/init.lua	26;"	f
+load_plugins	playground/init_130.lua	13;"	f
+load_plugins	playground/init_131.lua	10;"	f
+load_plugins	playground/init_lsp_installer.lua	10;"	f
+load_plugins	playground/init_ts_only.lua	26;"	f
+location_handler	lua/navigator/implementation.lua	10;"	f
+locations_to_items	lua/navigator/lspwrapper.lua	315;"	f	unknown:M
+log	lua/navigator/util.lua	194;"	f	unknown:M
+lru_pairs	lua/navigator/lru.lua	164;"	f
+lsp_startup	lua/navigator/lspclient/clients.lua	462;"	f
+main	README.md	36;"	f
+main	doc/navigator.txt	86;"	f
+makeFreeSpace	lua/navigator/lru.lua	105;"	f
+makeFunc	playground/js/closure.js	1;"	f
+map	lua/navigator/util.lua	91;"	f	unknown:M
+match_parameter	lua/navigator/signature.lua	5;"	f
+matches	lua/navigator/foldts.lua	69;"	f
+merge	lua/navigator/util.lua	84;"	f	unknown:M
+mk_handler	lua/navigator/util.lua	413;"	f	unknown:M
+mynext	lua/navigator/lru.lua	149;"	f
+nav_doc_hl	lua/navigator/dochighlight.lua	208;"	f
+new	lua/navigator/lru.lua	32;"	f	unknown:lru
+new_list_view	lua/navigator/gui.lua	10;"	f	unknown:M
+node_in_range	lua/navigator/treesitter.lua	547;"	f
+node_is_definination	lua/navigator/treesitter.lua	51;"	f
+nohl	lua/navigator/dochighlight.lua	34;"	f
+nv_ref_async	lua/navigator/reference.lua	109;"	f
+nvim_0_6_1	lua/navigator/util.lua	391;"	f	unknown:M
+nvim_0_8	lua/navigator/util.lua	402;"	f	unknown:M
+oldval	tests/fixtures/tests	124;"	f
+on_attach	README.md	243;"	f
+on_attach	README.md	303;"	f
+on_attach	README.md	583;"	f
+on_attach	doc/navigator.txt	247;"	f
+on_attach	doc/navigator.txt	289;"	f
+on_attach	doc/navigator.txt	505;"	f
+on_attach	issue130/init.lua	72;"	f	unknown:options
+on_attach	lua/navigator.lua	26;"	f
+on_attach	lua/navigator/foldlsp.lua	25;"	f	unknown:M
+on_attach	lua/navigator/foldts.lua	15;"	f	unknown:M
+on_attach	lua/navigator/lspclient/attach.lua	10;"	f	unknown:M
+on_attach	lua/navigator/lspclient/clients.lua	180;"	f
+on_attach	lua/navigator/lspclient/clients.lua	204;"	f
+on_attach	lua/navigator/lspclient/clients.lua	552;"	f	unknown:cfg
+on_attach	lua/navigator/lspclient/clients.lua	564;"	f	unknown:cfg
+on_attach	lua/navigator/lspclient/clients.lua	576;"	f	unknown:cfg
+on_attach	lua/navigator/lspclient/clients.lua	604;"	f	unknown:cfg
+on_attach	lua/navigator/lspclient/clients.lua	660;"	f	unknown:cfg
+on_attach	playground/init_130.lua	44;"	f	unknown:options
+on_attach	playground/init_131.lua	32;"	f	unknown:options
+on_attach	playground/init_lsp_installer.lua	32;"	f	unknown:options
+on_confirm	lua/navigator/workspace.lua	58;"	f
+on_exit	lua/navigator/ctags.lua	73;"	f
+on_filetype	lua/navigator/lspclient/clients.lua	806;"	f
+on_init	lua/navigator/lspclient/clients.lua	594;"	f	unknown:cfg
+on_input_filter	lua/navigator/workspace.lua	65;"	f
+on_move	lua/navigator/workspace.lua	99;"	f
+on_new_config	lua/navigator/lspclient/clients.lua	247;"	f
+on_stdout	lua/navigator/ctags.lua	69;"	f
+open_file	lua/navigator/util.lua	326;"	f	unknown:M
+open_log	lua/navigator/util.lua	274;"	f	unknown:M
+open_lsp_log	lua/navigator/lspclient/config.lua	22;"	f	unknown:M
+order_locations	lua/navigator/lspwrapper.lua	262;"	f
+outgoing_calls	lua/navigator/cclshierarchy.lua	89;"	f	unknown:M
+outgoing_calls	lua/navigator/hierarchy.lua	91;"	f	unknown:M
+outgoing_calls_handler	lua/navigator/cclshierarchy.lua	64;"	f
+outgoing_calls_handler	lua/navigator/hierarchy.lua	72;"	f
+p	lua/navigator/util.lua	259;"	f	unknown:M
+pack	lua/navigator/util.lua	279;"	f	unknown:table
+partial	lua/navigator/util.lua	419;"	f	unknown:M
+path_cur	lua/navigator/util.lua	23;"	f	unknown:M
+path_sep	lua/navigator/util.lua	12;"	f	unknown:M
+prepare_for_render	lua/navigator/render.lua	51;"	f	unknown:M
+prepare_node	lua/navigator/treesitter.lua	138;"	f
+printError	lua/navigator/util.lua	263;"	f	unknown:M
+prompt	lua/navigator/workspace.lua	12;"	f
+prompt	lua/navigator/workspace.lua	22;"	f
+prompt	lua/navigator/workspace.lua	30;"	f
+quickfix_extract	lua/navigator/util.lua	223;"	f	unknown:M
+range_code_action	lua/navigator/codeAction.lua	173;"	f	unknown:code_action
+ref	lua/navigator/reference.lua	202;"	f
+ref_hdlr	lua/navigator/reference.lua	136;"	f
+ref_req	lua/navigator/reference.lua	185;"	f
+ref_view	lua/navigator/reference.lua	13;"	f
+refresh	lua/navigator/codelens.lua	86;"	f	unknown:M
+reload	lua/navigator/util.lua	269;"	f	unknown:M
+reload_lsp	lua/navigator/lspclient/config.lua	7;"	f	unknown:M
+remove_workspace_folder	lua/navigator/workspace.lua	17;"	f	unknown:M
+rename	lua/navigator/rename.lua	6;"	f	unknown:M
+render_action_virtual_text	lua/navigator/codeAction.lua	79;"	f	unknown:code_action
+request	lua/navigator/lspwrapper.lua	464;"	f	unknown:M
+root_dir	lua/navigator/lspclient/clients.lua	120;"	f
+root_dir	lua/navigator/lspclient/clients.lua	164;"	f
+root_dir	lua/navigator/lspclient/clients.lua	187;"	f
+root_dir	lua/navigator/lspclient/clients.lua	99;"	f
+round	lua/navigator/util.lua	32;"	f	unknown:M
+run_action	lua/navigator/codelens.lua	105;"	f	unknown:M
+select	lua/navigator/gui.lua	59;"	f	unknown:M
+set	lua/navigator/lru.lua	122;"	f
+setNewest	lua/navigator/lru.lua	84;"	f
+set_cmds	lua/navigator/lspclient/mapping.lua	118;"	f
+set_diag_loclist	lua/navigator/diagnostics.lua	383;"	f	unknown:M
+set_event_handler	lua/navigator/lspclient/mapping.lua	228;"	f
+set_keymap	lua/navigator/lspclient/mapping.lua	135;"	f
+set_mapping	lua/navigator/lspclient/mapping.lua	124;"	f
+set_virt_eol	lua/navigator/util.lua	356;"	f	unknown:M
+setup	lua/navigator.lua	216;"	f	unknown:M
+setup	lua/navigator.lua.bak	51;"	f	unknown:M
+setup	lua/navigator/codelens.lua	64;"	f	unknown:M
+setup	lua/navigator/lspclient/clients.lua	19;"	f
+setup	lua/navigator/lspclient/clients.lua	696;"	f
+setup	lua/navigator/lspclient/mapping.lua	273;"	f	unknown:M
+setup_fmt	lua/navigator/lspclient/clients.lua	425;"	f
+setup_fold	lua/navigator/foldts.lua	33;"	f	unknown:M
+setup_plugin	lua/navigator/foldlsp.lua	30;"	f	unknown:M
+show	lua/navigator/util.lua	283;"	f	unknown:M
+show_buf_diagnostics	lua/navigator/diagnostics.lua	351;"	f	unknown:M
+show_diagnostics	lua/navigator/diagnostics.lua	457;"	f	unknown:M
+signature_handler	lua/navigator/signature.lua	44;"	f
+slice_locations	lua/navigator/lspwrapper.lua	280;"	f
+sort_select	lua/navigator/codeAction.lua	154;"	f
+split	lua/navigator/util.lua	212;"	f	unknown:M
+split2	lua/navigator/util.lua	295;"	f	unknown:M
+start_client	lua/navigator.lua	243;"	f	unknown:vim.lsp
+symbol_kind	lua/navigator/lspclient/lspkind.lua	124;"	f	unknown:lspkind
+symbol_to_items	lua/navigator/lspwrapper.lua	425;"	f	unknown:M
+symbols_to_items	lua/navigator/lspwrapper.lua	75;"	f	unknown:M
+testitem	lua/navigator/ctags.lua	144;"	f
+throttle_leading	lua/navigator/debounce.lua	14;"	f	unknown:M
+title	lua/navigator/protocal.txt	388;"	f
+title	lua/navigator/protocal.txt	392;"	f
+toggle_diagnostics	lua/navigator/diagnostics.lua	342;"	f	unknown:M
+toggle_lspformat	lua/navigator/lspclient/mapping.lua	254;"	f	unknown:M
+trace	lua/navigator/util.lua	200;"	f	unknown:M
+trim_and_pad	lua/navigator/util.lua	307;"	f	unknown:M
+trim_level	lua/navigator/foldts.lua	55;"	f
+ts_definition	lua/navigator/lspwrapper.lua	207;"	f
+ts_functions	lua/navigator/lspwrapper.lua	163;"	f
+type	vim.toml	21;"	f
+type	vim.toml	26;"	f
+type	vim.toml	29;"	f
+type	vim.toml	31;"	f
+unload	lua/navigator/lspwrapper.lua	354;"	f
+update_capabilities	lua/navigator/lspclient/clients.lua	442;"	f
+update_err_marker	lua/navigator/diagnostics.lua	414;"	f	unknown:M
+update_err_marker_async	lua/navigator/diagnostics.lua	191;"	f
+update_folds	lua/navigator/foldlsp.lua	62;"	f	unknown:M
+warn	lua/navigator.lua	3;"	f
+warn	lua/navigator/util.lua	456;"	f	unknown:M
+workspace_symbol	lua/navigator/workspace.lua	28;"	f	unknown:M
+workspace_symbol_handler	lua/navigator/symbols.lua	103;"	f	unknown:M
+workspace_symbol_live	lua/navigator/workspace.lua	36;"	f	unknown:M
+workspace_symbols	lua/navigator/symbols.lua	9;"	f	unknown:M
+~	lua/navigator/treesitter.lua	202;"	f
+~	lua/navigator/treesitter.lua	371;"	f

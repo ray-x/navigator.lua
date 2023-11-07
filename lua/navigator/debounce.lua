@@ -1,9 +1,14 @@
 local M = {}
+local uv = vim.uv or vim.loop
 
 function M.debounce_trailing(ms, fn)
-  local timer = vim.loop.new_timer()
+  local timer = uv.new_timer()
   return function(...)
     local argv = {...}
+    if timer:is_active() then
+      timer:stop()
+      return
+    end
     timer:start(ms, 0, function()
       timer:stop()
       fn(unpack(argv))
@@ -12,7 +17,7 @@ function M.debounce_trailing(ms, fn)
 end
 
 function M.throttle_leading(ms, fn)
-  local timer = vim.loop.new_timer()
+  local timer = uv.new_timer()
   local running = false
   return function(...)
     if not running then

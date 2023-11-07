@@ -5,7 +5,8 @@ local on_attach = require('navigator.lspclient.attach').on_attach
 local library = {}
 local function add(lib)
   for _, p in pairs(vfn.expand(lib, false, true)) do
-    p = vim.loop.fs_realpath(p)
+    local uv = vim.uv or vim.loop
+    p = uv.fs_realpath(p)
     if p then
       library[p] = true
     end
