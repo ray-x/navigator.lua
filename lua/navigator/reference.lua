@@ -6,6 +6,7 @@ local lsp = require('navigator.lspwrapper')
 local trace = require('navigator.util').trace
 -- local partial = util.partial
 -- local cwd = vim.loop.cwd()
+local uv = vim.loop
 -- local lsphelper = require "navigator.lspwrapper"
 local locations_to_items = lsphelper.locations_to_items
 
@@ -140,7 +141,6 @@ local ref_view = function(err, locations, ctx, cfg)
 
   -- trace("update items", listview.ctrl.class)
   local nv_ref_async
-  local uv = vim.uv or vim.loop
   nv_ref_async = uv.new_async(vim.schedule_wrap(function()
     if vim.tbl_isempty(second_part) then
       return
@@ -176,7 +176,7 @@ local ref_hdlr = function(err, locations, ctx, cfg)
   if ctx.no_show then
     return ref_view(err, locations, ctx, cfg)
   end
-  M.async_hdlr = vim.loop.new_async(vim.schedule_wrap(function()
+  M.async_hdlr = uv.new_async(vim.schedule_wrap(function()
     ref_view(err, locations, ctx, cfg)
     if M.async_hdlr:is_active() then
       M.async_hdlr:close()
@@ -275,7 +275,7 @@ local ref_req = function()
 
   local warmup_ts
   if _NgConfigValues.treesitter_analysis then
-    warmup_ts = vim.loop.new_async(function()
+    warmup_ts = uv.new_async(function()
       warmup_treesitter(cfg)
       if warmup_ts:is_active() then
         warmup_ts:close()
