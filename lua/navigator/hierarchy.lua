@@ -7,7 +7,8 @@ local lsphelper = require('navigator.lspwrapper')
 
 local path_sep = require('navigator.util').path_sep()
 local path_cur = require('navigator.util').path_cur()
-local cwd = vim.uv.cwd()
+local uv = vim.uv or vim.loop
+local cwd = uv.cwd()
 local in_method = 'callHierarchy/incomingCalls'
 local out_method = 'callHierarchy/outgoingCalls'
 
