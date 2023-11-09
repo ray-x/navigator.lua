@@ -16,8 +16,9 @@ function M.on_attach()
   M.setup_fold()
   -- M.update_folds()
 end
-
-function NG_custom_fold_text()
+local prefix = _NgConfigValues.icons.fold.prefix
+local sep = _NgConfigValues.icons.fold.separator
+local function custom_fold_text()
   local line = vim.fn.getline(vim.v.foldstart)
   local line_count = vim.v.foldend - vim.v.foldstart + 1
   -- log("" .. line .. " // " .. line_count .. " lines")
@@ -25,8 +26,40 @@ function NG_custom_fold_text()
   local spaces = line:sub(ss, se)
   local tabspace = string.rep(' ', vim.o.tabstop)
   spaces = spaces:gsub('\t', tabspace)
-  line = line:gsub('^%s*(.-)%s*$', '%1')
-  return spaces .. '⚡' .. line .. ': ' .. line_count .. ' lines'
+  line = line:gsub('^%s*(.-)%s*$', '%1') --  trim leading and trailing whitespace
+  return spaces .. prefix .. line .. ': ' .. line_count .. ' lines'
+end
+
+function NG_custom_fold_text()
+  if vim.treesitter.foldtext then
+    local line_syntax = vim.treesitter.foldtext()
+    if type(line_syntax) ~= 'table' or #line_syntax < 1 then
+      return line_syntax
+    end
+
+    local line_count = vim.v.foldend - vim.v.foldstart + 1
+    if prefix ~= '' then
+      local spaces = line_syntax[1]
+      local s = spaces[1]
+      local first_char = s:sub(1, 1)
+      if first_char == '\t' then
+        local tabspace = string.rep(' ', vim.o.tabstop)
+        s = s:gsub('\t', tabspace)
+      end
+      s = s:gsub('^ ', prefix)
+      if s ~= spaces[1] then
+        spaces[1] = s
+        spaces[2] = { '@keyword' }
+      end
+    end
+    local sep2 = ' ' .. string.rep(sep, 3)
+    table.insert(line_syntax, { sep2, { '@comment' } })
+    table.insert(line_syntax, { ' ' .. tostring(line_count), { '@number' } })
+    table.insert(line_syntax, { ' lines', { '@comment' } })
+    table.insert(line_syntax, { sep, { '@comment' } })
+    return line_syntax
+  end
+  return custom_fold_text()
 end
 
 vim.opt.foldtext = NG_custom_fold_text()

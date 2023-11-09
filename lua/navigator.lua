@@ -201,6 +201,10 @@ _NgConfigValues = {
       bracket_left = '⟪',
       bracket_right = '⟫',
     },
+    fold = {
+      prefix = '⚡',
+      separator = ' ',
+    },
 
     -- Treesitter
     -- Note: many more node.type or kind may be available

@@ -1,4 +1,4 @@
-    12 require('nvim-autopairs').setup{
+# Navigator
 
 - Source code analysis and navigate tool
 
@@ -102,7 +102,11 @@ variable is:
 
 - ccls call hierarchy (Non-standard `ccls/call` API) supports
 
-- Syntax folding based on treesitter or LSP_fold folding algorithm. (It behaves similar to vs-code); dedicated comment folding.
+- Incorporates a modified folding algorithm based on treesitter or LSP_fold, providing a user experience comparable to Visual Studio Code.
+    - Ensures end or closing brackets remain visible.
+    - Features specific functionality for comment folding.
+    - Enables the display of folded lines.
+    - Includes syntax highlighting capabilities (supported in Neovim version 0.10.x and above).
 
 - Treesitter symbols sidebar, LSP document symbole sidebar. Both with preview and folding
 
@@ -244,7 +248,7 @@ Nondefault configuration example:
 ```lua
 
 require'navigator'.setup({
-  debug = false, -- log output, set to true and log path: ~/.cache/nvim/gh.log 
+  debug = false, -- log output, set to true and log path: ~/.cache/nvim/gh.log
                  -- slowdownd startup and some actions
   width = 0.75, -- max width ratio (number of cols for the floating window) / (window width)
   height = 0.3, -- max list window height, 0.3 by default
@@ -557,7 +561,7 @@ LspDiagnosticsXXX are used for diagnostic. Please check highlight.lua and dochig
 
 The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existance and load those plugins only if they existed.
 
-The terminal will need to be able to output nerdfont(v.3.0+) and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
+The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
 ## Integrate with mason (williamboman/mason.nvim)
 
