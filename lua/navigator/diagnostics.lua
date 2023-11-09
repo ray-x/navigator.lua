@@ -54,6 +54,8 @@ local function error_marker(result, ctx, config)
       return
     end
     local first_line = vim.fn.line('w0')
+    local last_line = vim.fn.line('w$')
+    local wheight = last_line - first_line + 1
     -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
 
     local bufnr = ctx.bufnr
@@ -92,15 +94,18 @@ local function error_marker(result, ctx, config)
     -- local winid = vim.fn.win_getid(vim.fn.winnr())
     -- local winid = api.nvim_get_current_win()
     local total_num = api.nvim_buf_line_count(bufnr)
+    if total_num == 0 then
+      return
+    end
     -- local total_num = vim.fn.getbufinfo(vim.fn.winbufnr(winid))[1].linecount
     -- window size of current buffer
 
-    local stats = api.nvim_list_uis()[1] or {}
+    -- local stats = api.nvim_list_uis()[1] or {}
     -- local wwidth = stats.width;
-    local wheight = stats.height or 0
+    -- local wheight = stats.height or 0
 
-    if total_num <= wheight then
-      return
+    if total_num < wheight then
+      wheight = total_num
     end
     if _NG_VT_DIAG_NS == nil then
       _NG_VT_DIAG_NS = api.nvim_create_namespace('navigator_lua_diag')
@@ -125,8 +130,9 @@ local function error_marker(result, ctx, config)
         diag.range = { start = { line = diag.lnum } }
       end
       if diag.range and diag.range.start and diag.range.start.line then
-        p = diag.range.start.line
+        p = diag.range.start.line + 1 -- convert to 1 based
         p = util.round(p * wheight / math.max(wheight, total_num))
+        trace('pos: ', diag.range.start.line, p)
         if pos[#pos] and pos[#pos].line == p then
           local bar = _NgConfigValues.lsp.diagnostic_scrollbar_sign[2]
           if pos[#pos] == bar then
@@ -161,11 +167,15 @@ local function error_marker(result, ctx, config)
           hl = 'WarningMsg'
         end
       end
-      local l = s.line + first_line
-      if l > total_num then
-        l = total_num
+      local l = s.line + first_line - 1 -- convert back to 0 based
+      if l > total_num - 1 then
+        l = total_num - 1
       end
-      trace('add pos', s, bufnr)
+      if l < 0 then
+        l = 0
+      end
+
+      trace('add pos', s, bufnr, l)
 
       api.nvim_buf_set_extmark(
         bufnr,
@@ -184,7 +194,7 @@ end
 
 local update_err_marker_async = function()
   local debounce = require('navigator.debounce').debounce_trailing
-  return debounce(400, error_marker)
+  return debounce(500, error_marker)
 end
 
 local diag_hdlr = function(err, result, ctx, config)
@@ -208,7 +218,7 @@ local diag_hdlr = function(err, result, ctx, config)
   local client_id = ctx.client_id
   local bufnr = ctx.bufnr or 0
 
-  trace('diag', err, mode, result, ctx, confi)
+  trace('diag', err, mode, result, ctx, config)
   vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
   local uri = result.uri
 
@@ -273,7 +283,7 @@ local diag_hdlr = function(err, result, ctx, config)
         if line ~= nil then
           item.text = head .. line .. ic .. v.message
         else
-          error('diagnostic result empty line', v, row, bufnr1)
+          error('diagnostic result empty line' .. tostring(row))
         end
       else
         item.text = head .. ic .. v.message
@@ -467,7 +477,6 @@ function M.update_err_marker()
     return
   end
 
-  api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
   local errors = diagnostic.get(bufnr)
   if #errors == 0 then
     trace('no errors', errors)

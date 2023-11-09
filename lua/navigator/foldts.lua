@@ -72,7 +72,8 @@ function M.setup_fold()
   api.nvim_command('augroup end')
   vim.opt.foldtext = 'v:lua.NG_custom_fold_text()'
   vim.opt.viewoptions:remove('options')
-  vim.opt.fillchars = { foldclose = "", foldopen = "", vert = "│", fold = " ", diff = "░", msgsep = "‾", foldsep = "│" }
+  -- user should setup themself
+  -- vim.opt.fillchars = { foldclose = "", foldopen = "", vert = "│", fold = " ", diff = "░", msgsep = "‾", foldsep = "│" }
 
   local current_window = api.nvim_get_current_win()
   if not parsers.has_parser() then
