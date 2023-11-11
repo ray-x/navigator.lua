@@ -30,7 +30,12 @@ _NgConfigValues = {
   on_attach = function(client, bufnr)
     -- your on_attach will be called at end of navigator on_attach
   end,
-  ts_fold = false,
+  -- ts_fold = false, -- deprecated
+  ts_fold = {
+    enable = false,
+    comment = true, -- ts fold text object
+    max_lines_scan_comments = 2000, -- maximum lines to scan for comments
+  },
   treesitter_analysis = true, -- treesitter variable context
   treesitter_navigation = true, -- bool|table
   treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
@@ -236,6 +241,9 @@ M.deprecated = function(cfg)
   if cfg.lsp and cfg.lsp.sumneko_lua then
     warn('sumneko_lua option deprecated, refer to README for more details')
   end
+  if cfg.ts_fold ~= nil and type(cfg.ts_fold) == "boolean" then
+    warn('ts_fold option changed, refer to README for more details')
+  end
 end
 
 local extend_config = function(opts)
@@ -348,9 +356,9 @@ M.setup = function(cfg)
     require('navigator.implementation')
     local ts_installed = pcall(require, 'nvim-treesitter')
     if not ts_installed then
-      if _NgConfigValues.ts_fold == true then
+      if _NgConfigValues.ts_fold.enable == true then
         warn('treesitter not installed ts_fold disabled')
-        _NgConfigValues.ts_fold = false
+        _NgConfigValues.ts_fold.enable = false
       end
       if _NgConfigValues.treesitter_analysis == true then
         warn('nvim-treesitter not installed, disable treesitter_analysis')
@@ -370,7 +378,7 @@ M.setup = function(cfg)
       _NgConfigValues.loaded = true
     end
 
-    if _NgConfigValues.ts_fold == true then
+    if _NgConfigValues.ts_fold.enable == true then
       require('navigator.foldts').on_attach()
     end
 

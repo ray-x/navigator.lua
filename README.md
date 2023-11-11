@@ -264,7 +264,11 @@ require'navigator'.setup({
   -- end,
   -- The attach code will apply to all LSP clients
 
-  ts_fold = false,  -- modified version of treesitter folding
+  ts_fold = {
+    enable = false,
+    comment_fold = true, -- fold with comment string
+    max_lines_scan_comments = 20, -- only fold when the fold level higher than this value
+  },  -- modified version of treesitter folding
   default_mapping = true,  -- set to false if you will remap every key or if you using old version of nvim-
   keymaps = {{key = "gK", func = vim.lsp.declaration, desc = 'declaration'}}, -- a list of key maps
   -- this kepmap gK will override "gD" mapping function declaration()  in default kepmap

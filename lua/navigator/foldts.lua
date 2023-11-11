@@ -2,7 +2,6 @@
 
 local log = require('navigator.util').log
 local trace = require('navigator.util').trace
-trace = log
 local api = vim.api
 local tsutils = require('nvim-treesitter.ts_utils')
 local query = require('nvim-treesitter.query')
@@ -52,10 +51,10 @@ function NG_custom_fold_text()
         spaces[2] = { '@keyword' }
       end
     end
-    local sep2 = ' ' .. string.rep(sep, 3)
+    local sep2 = ' ' .. string.rep(sep, 3) .. '  '
     table.insert(line_syntax, { sep2, { '@comment' } })
-    table.insert(line_syntax, { '  ' .. tostring(line_count), { '@number' } })
-    table.insert(line_syntax, { ' lines ', { '@comment' } })
+    table.insert(line_syntax, { tostring(line_count), { '@number' } })
+    table.insert(line_syntax, { ' lines', { '@text.title' } })
     table.insert(line_syntax, { sep2, { '@comment' } })
     return line_syntax
   end
@@ -88,19 +87,23 @@ end
 
 local function is_comment(line_number)
   local node = get_node_at_line(line_number)
-  trace(node, node:type())
+  trace(line_number, node, node:type())
   if not node then
     return false
   end
   local node_type = node:type()
-  trace(node_type)
-  return node_type == 'comment' or node_type == 'comment_block'
+  trace(line_number, node_type)
+  return node_type:find('comment')
 end
 
 local function get_comment_scopes(total_lines)
+  if not _NgConfigValues.ts_fold.comment then
+    return {}
+  end
   local comment_scopes = {}
   local comment_start = nil
 
+  total_lines = math.min(total_lines, _NgConfigValues.ts_fold.max_lines_scan_comments)
   for line = 0, total_lines - 1 do
     if is_comment(line + 1) then
       if not comment_start then
