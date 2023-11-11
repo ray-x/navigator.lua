@@ -203,7 +203,7 @@ _NgConfigValues = {
     },
     fold = {
       prefix = '⚡',
-      separator = ' ',
+      separator = '',
     },
 
     -- Treesitter

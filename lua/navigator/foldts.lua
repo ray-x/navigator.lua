@@ -15,14 +15,13 @@ M.current_buf_folds = {}
 
 function M.on_attach()
   M.setup_fold()
-  -- M.update_folds()
 end
 local prefix = _NgConfigValues.icons.fold.prefix
 local sep = _NgConfigValues.icons.fold.separator
 local function custom_fold_text()
   local line = vim.fn.getline(vim.v.foldstart)
   local line_count = vim.v.foldend - vim.v.foldstart + 1
-  -- log("" .. line .. " // " .. line_count .. " lines")
+  -- trace("" .. line .. " // " .. line_count .. " lines")
   local ss, se = line:find('^%s*')
   local spaces = line:sub(ss, se)
   local tabspace = string.rep(' ', vim.o.tabstop)
@@ -55,9 +54,9 @@ function NG_custom_fold_text()
     end
     local sep2 = ' ' .. string.rep(sep, 3)
     table.insert(line_syntax, { sep2, { '@comment' } })
-    table.insert(line_syntax, { ' ' .. tostring(line_count), { '@number' } })
-    table.insert(line_syntax, { ' lines', { '@comment' } })
-    table.insert(line_syntax, { sep, { '@comment' } })
+    table.insert(line_syntax, { '  ' .. tostring(line_count), { '@number' } })
+    table.insert(line_syntax, { ' lines ', { '@comment' } })
+    table.insert(line_syntax, { sep2, { '@comment' } })
     return line_syntax
   end
   return custom_fold_text()
@@ -135,27 +134,27 @@ local function indent_levels(scopes, total_lines)
   local prev = { -1, -1 }
   for _, scope in ipairs(scopes) do
     if not (prev[1] == scope[1] and prev[2] == scope[2]) then
-      events[scope[1]] = (events[scope[1]] or 0) + 1
+      events[scope[1]] = (events[scope[1]] or 0) + 1 -- incase there is a fold inside a fold
       events[scope[2]] = (events[scope[2]] or 0) - 1
     end
     prev = scope
   end
   trace(events)
 
-  local currentIndent = 0
-  local indentLevels = {}
-  local prevIndentLevel = 0
+  local current_indent = 0
+  local indent_lvls = {}
+  local prev_indent_lvl = 0
   local levels = {}
   for line = 0, total_lines - 1 do
     if events[line] then
-      currentIndent = currentIndent + events[line]
+      current_indent = current_indent + events[line]
     end
-    indentLevels[line] = currentIndent
+    indent_lvls[line] = current_indent
 
-    local indentSymbol = indentLevels[line] > prevIndentLevel and '>' or ' '
-    trace('Line ' .. line .. ': ' .. indentSymbol .. indentLevels[line])
-    levels[line + 1] = indentSymbol .. tostring(trim_level(indentLevels[line]))
-    prevIndentLevel = indentLevels[line]
+    local indent_symbol = indent_lvls[line] > prev_indent_lvl and '>' or ''
+    trace('Line ' .. line .. ': ' .. indent_symbol .. indent_lvls[line])
+    levels[line + 1] = indent_symbol .. tostring(trim_level(indent_lvls[line]))
+    prev_indent_lvl = indent_lvls[line]
   end
   trace(levels)
   return levels

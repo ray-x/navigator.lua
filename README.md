@@ -288,6 +288,10 @@ require'navigator'.setup({
     -- Diagnostics
     diagnostic_head = '🐛',
     diagnostic_head_severity_1 = "🈲",
+    fold = {
+      prefix = '⚡',  -- icon to show before the folding need to be 2 spaces in display width
+      separator = '',  -- e.g. shows   3 lines 
+    },
   },
   mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
   lsp = {
