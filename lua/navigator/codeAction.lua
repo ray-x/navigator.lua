@@ -57,7 +57,7 @@ local function _update_sign(line)
   if code_action[winid].lightbulb_line and code_action[winid].lightbulb_line > 0 then
     vim.fn.sign_unplace(sign_group, { id = code_action[winid].lightbulb_line, buffer = '%' })
 
-    log('sign removed', line)
+    trace('sign removed', line)
   end
 
   if line then
@@ -70,7 +70,7 @@ local function _update_sign(line)
       { lnum = line + 1, priority = config.lsp.code_action.sign_priority }
     )
     code_action[winid].lightbulb_line = id
-    log('sign updated', id)
+    log('sign updated', id, line, sign_group, sign_name)
   end
 end
 
@@ -122,7 +122,7 @@ function code_action:render_action_virtual_text(line, diagnostics)
     end
 
     vim.defer_fn(function()
-      log('clear vt')
+      trace('clear vt')
       if config.lsp.code_action.virtual_text then
         _update_virtual_text(nil)
       end

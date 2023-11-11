@@ -30,8 +30,9 @@ M.path_cur = function()
   end
 end
 
-M.round = function(x)
-  return math.max(0, math.floor(x - 0.5))
+M.round = function(x, r)
+  r = r or 0.5
+  return math.max(0, math.floor(x - r))
 end
 
 function M.get_data_from_file(filename, startLine)

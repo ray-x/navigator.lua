@@ -1,4 +1,5 @@
 local gui = require('navigator.gui')
+local uv = vim.uv or vim.loop
 local diagnostic = vim.diagnostic or vim.lsp.diagnostic
 -- local hide = diagnostic.hide or diagnostic.clear
 local util = require('navigator.util')
@@ -48,7 +49,6 @@ local function error_marker(result, ctx, config)
   end
 
   local async
-  local uv = vim.uv or vim.loop
   async = uv.new_async(vim.schedule_wrap(function()
     if vim.tbl_isempty(result.diagnostics) then
       return
@@ -119,7 +119,7 @@ local function error_marker(result, ctx, config)
         diags[i].range = { start = { line = diags[i].lnum } }
       end
     end
-
+    local ratio = wheight / total_num
     table.sort(diags, function(a, b)
       return a.range.start.line < b.range.start.line
     end)
@@ -131,7 +131,7 @@ local function error_marker(result, ctx, config)
       end
       if diag.range and diag.range.start and diag.range.start.line then
         p = diag.range.start.line + 1 -- convert to 1 based
-        p = util.round(p * wheight / math.max(wheight, total_num))
+        p = util.round(p * ratio, ratio)
         trace('pos: ', diag.range.start.line, p)
         if pos[#pos] and pos[#pos].line == p then
           local bar = _NgConfigValues.lsp.diagnostic_scrollbar_sign[2]
@@ -151,9 +151,7 @@ local function error_marker(result, ctx, config)
       trace('pos, line:', p, diag.severity, diag.range)
     end
 
-    if not vim.tbl_isempty(pos) then
-      api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
-    end
+    api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
     for _, s in pairs(pos) do
       local hl = 'ErrorMsg'
       if type(s.severity) == 'number' then
@@ -209,7 +207,7 @@ local diag_hdlr = function(err, result, ctx, config)
   if mode ~= 'n' and config.update_in_insert == false then
     trace('skip sign update in insert mode')
   end
-  local cwd = vim.loop.cwd()
+  local cwd = uv.cwd()
   local ft = vim.bo.filetype
   if M.diagnostic_list[ft] == nil then
     M.diagnostic_list[vim.bo.filetype] = {}
