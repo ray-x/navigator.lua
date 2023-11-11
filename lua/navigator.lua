@@ -243,6 +243,7 @@ M.deprecated = function(cfg)
   end
   if cfg.ts_fold ~= nil and type(cfg.ts_fold) == "boolean" then
     warn('ts_fold option changed, refer to README for more details')
+    cfg.ts_fold = { enable = cfg.ts_fold }
   end
 end
 
@@ -254,8 +255,10 @@ local extend_config = function(opts)
   if opts.debug then
     _NgConfigValues.debug = opts.debug
   end
+
   -- enable logs
   require('navigator.util').setup()
+  M.deprecated(opts)
   for key, value in pairs(opts) do
     if _NgConfigValues[key] == nil then
       warn(
@@ -324,7 +327,6 @@ local extend_config = function(opts)
   --   vim.notify("Please put sumneko setup in lsp['lua_ls']", vim.log.levels.WARN)
   -- end
 
-  M.deprecated(opts)
 end
 
 M.config_values = function()
