@@ -35,6 +35,7 @@ _NgConfigValues = {
     enable = false,
     comment = true, -- ts fold text object
     max_lines_scan_comments = 2000, -- maximum lines to scan for comments
+    disable_filetypes = {'help', 'text', 'markdown'}, -- disable ts fold for specific filetypes
   },
   treesitter_analysis = true, -- treesitter variable context
   treesitter_navigation = true, -- bool|table
@@ -380,7 +381,7 @@ M.setup = function(cfg)
       _NgConfigValues.loaded = true
     end
 
-    if _NgConfigValues.ts_fold.enable == true then
+    if _NgConfigValues.ts_fold.enable == true and not vim.tbl_contains(_NgConfigValues.ts_fold.disable_filetypes, vim.o.filetype) then
       require('navigator.foldts').on_attach()
     end
 

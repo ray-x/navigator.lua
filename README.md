@@ -14,31 +14,33 @@ Here are some examples:
 
 ## Example: Javascript closure
 
-The following screenshot shows javascript call tree 🌲 of variable `browser` insides a closure. This feature is similar to incoming & outgoing calls from LSP. It is designed for the symbol analysis.
+The screenshot below shows javascript call tree 🌲 for variable `browser` within a closure. This feature parallels the LSP 'incoming & outgoing calls' feature. It is designed for the symbol analysis.
 
 ![navigator](https://user-images.githubusercontent.com/1681295/126022829-291a7a2e-4d24-4fde-8293-5ae61562e67d.jpg)
 
 Explanation:
 
-- The first line of floating windows shows there are 3 references for the symbol <span style="color:red"> _browser_ </span> in closure.js
-- The first reference of browser is an assignment, an emoji 📝 indicates the value is changed in this line. In many
+- The topmost entry in the floating window indicates there are 3 references for the symbol <span style="color:red"> _browser_ </span> within closure.js
+- The first reference of browser is an assignment, an emoji 📝 indicates the value is modified in this line. In many
   cases, we search for references to find out when the value changed.
 - The second reference of `browser` is inside function `displayName` and `displayName` sit inside `makeFunc`, So you
   will see `displayName{} <- makeFunc{}`
-- The third similar to the second, as var browser is on the right side of '=', the value not changed in this line
-  and emoji is not shown.
+- The next occurrence of `browser` is located within the function `displayName`, which is nested inside `makeFunc`. Hence, the display reads `displayName{} <- makeFunc{}.`
+- The final reference is akin to the previous one, except that since `browser` appears on the right side of the `=`, its value remains unaltered, and consequently, no emoji is displayed.
 
 ## Example: C++ definition
 
 C++ example: search reference and definition
+
 ![cpp_ref](https://user-images.githubusercontent.com/1681295/119215215-8bd7a080-bb0f-11eb-82fc-8cdf1955e6e7.jpg)
+
 You may find a 🦕 dinosaur(d) on the line of `Rectangle rect,` which means there is a definition (d for def) of rect in this line.
 
 `<- f main()` means the definition is inside function main().
 
 ## Golang struct type
 
-Struct type references in multiple Go ﳑ files
+Struct type references in multiple Go 󰟓  files
 
 ![go_reference](https://user-images.githubusercontent.com/1681295/119123823-54b3b180-ba73-11eb-8790-097601e10f6a.gif)
 
@@ -268,6 +270,7 @@ require'navigator'.setup({
     enable = false,
     comment_fold = true, -- fold with comment string
     max_lines_scan_comments = 20, -- only fold when the fold level higher than this value
+    disable_filetypes = {'help', 'guihua', 'text'}, -- list of filetypes which doesn't fold using treesitter
   },  -- modified version of treesitter folding
   default_mapping = true,  -- set to false if you will remap every key or if you using old version of nvim-
   keymaps = {{key = "gK", func = vim.lsp.declaration, desc = 'declaration'}}, -- a list of key maps
