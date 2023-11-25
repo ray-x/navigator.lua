@@ -491,11 +491,6 @@ function M.setup(attach_opts)
     if hassig then
       sig.setup(_NgConfigValues.signature_help_cfg or {})
     end
-  else
-    vim.lsp.handlers['textDocument/signatureHelp'] =
-      vim.lsp.with(require('navigator.signature').signature_handler, {
-        border = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
-      })
   end
 
   api.nvim_create_autocmd({ 'BufWritePre' }, {
@@ -511,11 +506,11 @@ function M.setup(attach_opts)
   if _NgConfigValues.border == 'double' then
     border_style = double
   end
-  if _NgConfigValues.lsp.hover then
-    vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(require('navigator.hover').handler, {
-      border = border_style,
-    })
-  end
+  -- if _NgConfigValues.lsp.hover then
+  --   vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(require('navigator.hover').handler, {
+  --     border = border_style,
+  --   })
+  -- end
   if cap.documentFormattingProvider then
     log('formatting enabled setup hdl')
     vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl

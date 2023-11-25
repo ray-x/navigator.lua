@@ -563,4 +563,36 @@ function M.sub_match(str)
   return str
 end
 
+
+function M.try_trim_markdown_code_blocks(lines)
+  local language_id = lines[1]:match('^```(.*)')
+  if language_id then
+    local has_inner_code_fence = false
+    for i = 2, (#lines - 1) do
+      local line = lines[i]
+      if line:sub(1, 3) == '```' then
+        has_inner_code_fence = true
+        break
+      end
+    end
+    -- No inner code fences + starting with code fence = hooray.
+    if not has_inner_code_fence then
+      table.remove(lines, 1)
+      table.remove(lines)
+      return language_id
+    end
+  end
+  return 'markdown'
+end
+
+function M.trim_empty_lines(lines)
+  local new_list = {}
+  for i, str in ipairs(lines) do
+    if str ~= '' and str then
+      table.insert(new_list, str)
+    end
+  end
+  return new_list
+end
+
 return M
