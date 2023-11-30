@@ -276,6 +276,8 @@ require'navigator'.setup({
   keymaps = {{key = "gK", func = vim.lsp.declaration, desc = 'declaration'}}, -- a list of key maps
   -- this kepmap gK will override "gD" mapping function declaration()  in default kepmap
   -- please check mapping.lua for all keymaps
+  -- rule of overriding: if func and mode ('n' by default) is same
+  -- it can be overrided
   treesitter_analysis = true, -- treesitter variable context
   treesitter_navigation = true, -- bool|table false: use lsp to navigate between symbol ']r/[r', table: a list of
   --lang using TS navigation

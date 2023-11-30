@@ -563,7 +563,6 @@ function M.sub_match(str)
   return str
 end
 
-
 function M.try_trim_markdown_code_blocks(lines)
   local language_id = lines[1]:match('^```(.*)')
   if language_id then
@@ -593,6 +592,18 @@ function M.trim_empty_lines(lines)
     end
   end
   return new_list
+end
+
+function M.for_each_buffer_client(bufnr, fn)
+  local clients
+  if vim.lsp.get_clients then -- nightly nvim 0.10
+    clients = vim.lsp.get_clients({ bufnr = bufnr })
+  else
+    clients = vim.lsp.buf_get_clients()
+  end
+  for _, client in pairs(clients) do
+    fn(client, client.id, bufnr)
+  end
 end
 
 return M

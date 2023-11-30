@@ -495,7 +495,7 @@ end
 function M.request(method, hdlr) -- e.g  textDocument/reference
   local bufnr = vim.api.nvim_get_current_buf()
   local ref_params = vim.lsp.util.make_position_params()
-  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _)
+  util.for_each_buffer_client(bufnr, function(client, _, _)
     client.request(method, ref_params, hdlr, bufnr)
   end)
 end

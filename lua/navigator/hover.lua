@@ -1,59 +1,42 @@
 local lsp = vim.lsp
 local util = lsp.util
 local nutils = require('navigator.util')
+local api = vim.api
 local log = nutils.log
 local M = {}
+
 function M.handler(_, result, ctx, config)
   config = config or {}
   config.focus_id = ctx.method
-  config.zindex = 53
+  if api.nvim_get_current_buf() ~= ctx.bufnr then
+    -- Ignore result since buffer changed. This happens for slow language servers.
+    return
+  end
   if not (result and result.contents) then
-    -- vim.notify('No information available')
-    vim.schedule(function()
-      vim.lsp.buf.signature_help()
-    end)
-    return
-  end
-  local ft = vim.bo.ft
-  -- require('navigator.util').log(result)
-  local markdown_lines = util.convert_input_to_markdown_lines(result.contents)
-  markdown_lines = nutils.trim_empty_lines(markdown_lines)
-  if vim.tbl_isempty(markdown_lines) then
-    vim.schedule(function()
-      vim.lsp.buf.signature_help()
-    end)
-    return
-  end
-
-  local opts = {}
-  opts.wrap = true -- wrapping by default
-  opts.stylize_markdown = true
-  opts.focus = true
-  local contents = markdown_lines
-  if vim.fn.has('nvim-0.10') == 0 then
-    contents = util._trim(markdown_lines, opts) -- function removed in 0.10
-  else
-    contents = markdown_lines
-  end
-
-  -- applies the syntax and sets the lines to the buffer
-  local bufnr, winnr = util.open_floating_preview(contents, 'markdown', config)
-
-  vim.api.nvim_buf_set_option(bufnr, 'modifiable', true)
-  contents = lsp.util.stylize_markdown(bufnr, contents, opts)
-  vim.api.nvim_buf_set_option(bufnr, 'modifiable', false)
-  if _NgConfigValues.lsp.hover.keymaps then
-    for key, v in pairs(_NgConfigValues.lsp.hover.keymaps) do
-      if v[ft] == nil or v[ft] == true then
-        local f = v.default or function() end
-        vim.keymap.set('n', key, f, { noremap = true, silent = true, buffer = bufnr })
-      else
-        local f = v[ft]
-        vim.keymap.set('n', key, f, { noremap = true, silent = true, buffer = bufnr })
-      end
+    if config.silent ~= true then
+      vim.notify('No information available')
     end
+    vim.schedule(function()
+      -- fallback to signature help
+      vim.lsp.buf.signature_help()
+    end)
+    return
   end
-  return bufnr, winnr
+  local format = 'markdown'
+  local contents ---@type string[]
+  if type(result.contents) == 'table' and result.contents.kind == 'plaintext' then
+    format = 'plaintext'
+    contents = vim.split(result.contents.value or '', '\n', { trimempty = true })
+  else
+    contents = util.convert_input_to_markdown_lines(result.contents)
+  end
+  if vim.tbl_isempty(contents) then
+    if config.silent ~= true then
+      vim.notify('No information available')
+    end
+    return
+  end
+  return util.open_floating_preview(contents, format, config)
 end
 
 return M
