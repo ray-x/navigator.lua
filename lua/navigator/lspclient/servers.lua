@@ -45,5 +45,6 @@ return {
   'hls',
   'tflint',
   'terraform_lsp',
-  'zls'
+  'zls',
+  'ruff_lsp'
 }
