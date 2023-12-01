@@ -39,6 +39,7 @@ return {
   'texlab',
   'clojure_lsp',
   'elixirls',
+  'ruff_lsp',
   'sourcekit',
   'fsautocomplete',
   'vls',
@@ -46,5 +47,4 @@ return {
   'tflint',
   'terraform_lsp',
   'zls',
-  'ruff_lsp'
 }
