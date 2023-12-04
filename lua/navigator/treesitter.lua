@@ -109,7 +109,10 @@ function M.find_definition(range, bufnr)
     if definition then
 
       -- stylua: ignore start
-      trace( 'error: def not found in ', bufnr, definition:range(), definition:type(), definition:parent():type())
+      trace( 'error: def not found in ', bufnr, definition:range(), definition:type())
+      if definition:parent() then
+        trace("def not found", definition:parent():type())
+      end
       -- stylua: ignore end
     end
   end
