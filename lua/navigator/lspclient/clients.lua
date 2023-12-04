@@ -613,7 +613,7 @@ local function on_filetype()
   if ft == nil then
     return
   end
-  if uri == 'file://' or uri == 'file:///' then
+  if uri == 'file://' or uri == 'file:///' or vim.wo.diff then
     trace('skip loading for ft ', ft, uri)
     return
   end
