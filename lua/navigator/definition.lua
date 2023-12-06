@@ -37,17 +37,18 @@ local definition_hdlr = function(err, locations, ctx, _)
       local items = locations_to_items(locations)
       gui.new_list_view({ items = items, api = 'Definition', title = 'Definition' })
     else
-      local loc = vim.lsp.util.make_position_params()
-      -- let check if the location is same as current
-      if
-        loc.textDocument.uri == locations[1].uri
-        and loc.position.line == locations[1].range.start.line
-        and loc.position.character == locations[1].range.start.character
-      then
-        vim.lsp.buf.type_definition()
-      else
-        vim.lsp.util.jump_to_location(locations[1], oe)
-      end
+      vim.lsp.util.jump_to_location(locations[1], oe)
+      -- local loc = vim.lsp.util.make_position_params()
+      -- -- let check if the location is same as current
+      -- if
+      --   loc.textDocument.uri == locations[1].uri
+      --   and loc.position.line == locations[1].range.start.line
+      --   and loc.position.character == locations[1].range.start.character
+      -- then
+      --   vim.lsp.buf.type_definition()
+      -- else
+      --   vim.lsp.util.jump_to_location(locations[1], oe)
+      -- end
     end
   else
     vim.lsp.util.jump_to_location(locations, oe)
