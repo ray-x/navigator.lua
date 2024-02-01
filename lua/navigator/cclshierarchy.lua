@@ -4,7 +4,7 @@ local log = util.log
 local partial = util.partial
 local lsphelper = require('navigator.lspwrapper')
 local uv = vim.uv or vim.loop
-local cwd = vim.loop.cwd()
+local cwd = uv.cwd()
 
 local path_sep = require('navigator.util').path_sep()
 local path_cur = require('navigator.util').path_cur()

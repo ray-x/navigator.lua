@@ -17,4 +17,5 @@ local func = function(p, uv)
   assert(elapsed >= 1000, "elapsed should be at least delay ")
 end
 
-func(print, vim.loop)
+local uv = vim.uv or vim.loop
+func(print, uv)

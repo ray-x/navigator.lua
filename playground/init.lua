@@ -1,5 +1,6 @@
 vim.cmd([[set runtimepath=$VIMRUNTIME]])
-local os_name = vim.loop.os_uname().sysname
+local uv = vim.uv or vim.loop
+local os_name = uv.os_uname().sysname
 
 local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
 
@@ -26,7 +27,7 @@ local plugin_folder = function()
 end
 
 local lazypath = package_root .. sep .. 'lazy.nvim'
-if not vim.loop.fs_stat(lazypath) then
+if not uv.fs_stat(lazypath) then
   vim.fn.system({
     'git',
     'clone',

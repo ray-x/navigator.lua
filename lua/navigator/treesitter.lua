@@ -228,7 +228,8 @@ local function get_definitions(bufnr)
   local local_nodes = ts_locals.get_locals(bufnr)
   -- Make sure the nodes are unique.
   local nodes_set = {}
-  for _, loc in ipairs(local_nodes) do
+  for _, nodes in ipairs(local_nodes) do
+    local loc = nodes["local"]
     trace(loc)
     if loc.definition then
       ts_locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
