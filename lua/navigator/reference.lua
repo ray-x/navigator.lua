@@ -6,7 +6,7 @@ local lsp = require('navigator.lspwrapper')
 local trace = require('navigator.util').trace
 -- local partial = util.partial
 -- local cwd = vim.loop.cwd()
-local uv = vim.loop
+local uv = vim.uv or vim.loop
 -- local lsphelper = require "navigator.lspwrapper"
 local locations_to_items = lsphelper.locations_to_items
 
@@ -28,10 +28,9 @@ local function order_locations(locations)
   return locations
 end
 
-local function warmup_treesitter(options)
-  local api = vim.api
+local function warmup_treesitter()
   local parsers = require('nvim-treesitter.parsers')
-  local bufnr = options.bufnr or api.nvim_get_current_buf()
+  local bufnr = vim.api.nvim_get_current_buf()
   local parser = parsers.get_parser(bufnr)
   if not parser then
     log('err: ts not loaded ' .. vim.o.ft)
@@ -276,17 +275,8 @@ local ref_req = function()
     _NgConfigValues.closer()
   end
 
-  local warmup_ts
   if _NgConfigValues.treesitter_analysis then
-    warmup_ts = uv.new_async(function()
-      warmup_treesitter(cfg)
-      if warmup_ts:is_active() then
-        warmup_ts:close()
-      end
-    end)
-    vim.defer_fn(function()
-      warmup_ts:send()
-    end, 5)
+    warmup_treesitter()
   end
   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
   local bufnr = vim.api.nvim_get_current_buf()
