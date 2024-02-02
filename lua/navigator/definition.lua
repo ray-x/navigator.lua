@@ -7,7 +7,6 @@ local trace = util.trace
 local TextView = require('guihua.textview')
 -- callback for lsp definition, implementation and declaration handler
 local definition_hdlr = function(err, locations, ctx, _)
-  -- log(locations)
   if err ~= nil then
     if tostring(err):find('no type definition') or tostring(err):find('invalid range') then
       vim.notify('Definition: ' .. tostring(err), vim.log.levels.DEBUG)
@@ -18,11 +17,9 @@ local definition_hdlr = function(err, locations, ctx, _)
     vim.notify('Defination: ' .. tostring(err) .. vim.inspect(ctx), vim.log.levels.WARN)
     return
   end
-  if type(locations) == 'number' then
+  if locations == nil or vim.tbl_isempty(locations) or type(locations) == 'number' then
     log(locations)
     log('unable to handle request')
-  end
-  if locations == nil or vim.tbl_isempty(locations) then
     vim.notify('Definition not found')
     return
   end
@@ -50,8 +47,9 @@ local definition_hdlr = function(err, locations, ctx, _)
       end
     end
   else
-    vim.lsp.util.jump_to_location(locations, oe)
+    return
   end
+  return true
 end
 
 local function get_symbol()
@@ -67,10 +65,13 @@ local function def_preview(timeout_ms, method)
 
   if result == nil or vim.tbl_isempty(result) then
     vim.notify('No result found: ' .. method, vim.log.levels.WARN)
-    return nil
+    return
   end
 
   log(result)
+  if not vim.tbl_islist(result) then
+    return
+  end
   local data = {}
   -- result = {vim.tbl_deep_extend("force", {}, unpack(result))}
   -- log("def-preview", result)
@@ -82,7 +83,7 @@ local function def_preview(timeout_ms, method)
 
   if vim.tbl_isempty(data) then
     vim.notify('No result found: ' .. method, vim.log.levels.WARN)
-    return nil
+    return
   end
 
   local range = data[1].targetRange or data[1].range or data[1].targetSelectionRange
@@ -101,6 +102,9 @@ local function def_preview(timeout_ms, method)
   end
 
   local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
+  if not ok then
+    return
+  end
 
   -- TODO: 32/64 should be an option
   local lines_num = 64
@@ -176,6 +180,7 @@ local function def_preview(timeout_ms, method)
     -- log(def_line[1], niddle)
     vim.fn.matchadd('Search', niddle)
   end
+  return true -- disable key-remap fallback
   -- TODO:
   -- https://github.com/oblitum/goyo.vim/blob/master/autoload/goyo.vim#L108-L135
 end

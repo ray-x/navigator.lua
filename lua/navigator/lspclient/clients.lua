@@ -43,6 +43,8 @@ local disabled_ft = {
   'notify',
   'nofile',
   'help',
+  'dap-*',
+  'dapui_*',
   '',
 }
 -- local cap = vim.lsp.protocol.make_client_capabilities()
@@ -500,6 +502,12 @@ local function ft_disabled(ft)
     if ft == disabled_ft[i] then
       return true
     end
+    if disabled_ft[i]:find('*') then
+      local pattern = disabled_ft[i]:gsub('*', '')
+      if ft:find(pattern) then
+        return true
+      end
+    end
   end
 end
 local ft_map = {
@@ -561,6 +569,7 @@ local function setup(user_opts)
     trace('navigator disabled for ft or it is loaded', ft)
     return
   end
+
   if _NgConfigValues.lsp.servers then
     add_servers(_NgConfigValues.lsp.servers)
     _NgConfigValues.lsp.servers = nil

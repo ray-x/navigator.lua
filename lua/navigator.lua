@@ -35,7 +35,7 @@ _NgConfigValues = {
     enable = false,
     comment = true, -- ts fold text object
     max_lines_scan_comments = 2000, -- maximum lines to scan for comments
-    disable_filetypes = {'help', 'text', 'markdown'}, -- disable ts fold for specific filetypes
+    disable_filetypes = { 'help', 'text', 'markdown' }, -- disable ts fold for specific filetypes
   },
   treesitter_analysis = true, -- treesitter variable context
   treesitter_navigation = true, -- bool|table
@@ -242,7 +242,7 @@ M.deprecated = function(cfg)
   if cfg.lsp and cfg.lsp.sumneko_lua then
     warn('sumneko_lua option deprecated, refer to README for more details')
   end
-  if cfg.ts_fold ~= nil and type(cfg.ts_fold) == "boolean" then
+  if cfg.ts_fold ~= nil and type(cfg.ts_fold) == 'boolean' then
     warn('ts_fold option changed, refer to README for more details')
     cfg.ts_fold = { enable = cfg.ts_fold }
   end
@@ -327,7 +327,6 @@ local extend_config = function(opts)
   -- if _NgConfigValues.sumneko_root_path or _NgConfigValues.sumneko_binary then
   --   vim.notify("Please put sumneko setup in lsp['lua_ls']", vim.log.levels.WARN)
   -- end
-
 end
 
 M.config_values = function()
@@ -381,7 +380,7 @@ M.setup = function(cfg)
       _NgConfigValues.loaded = true
     end
 
-    if _NgConfigValues.ts_fold.enable == true and not vim.tbl_contains(_NgConfigValues.ts_fold.disable_filetypes, vim.o.filetype) then
+    if _NgConfigValues.ts_fold.enable == true and not vim.tbl_contains(_NgConfigValues.ts_fold.disable_filetypes, vim.o.filetype) and not vim.wo.diff then
       require('navigator.foldts').on_attach()
     end
 

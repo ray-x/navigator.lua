@@ -606,4 +606,25 @@ function M.for_each_buffer_client(bufnr, fn)
   end
 end
 
+function M.binding_remap(fn, key)
+  return function(...)
+    if fn(...) ~= true and key then -- the function failed fallback to key
+      M.log(key)
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, false, true), 'n', true)
+    end
+  end
+end
+
+function M.mk_handler_remap(fn, fallback)
+  return function(...)
+    if fn(...) ~= true then -- the function failed fallback to key
+      M.log('fallback, ', fallback)
+      if fallback then
+        M.log('fallback')
+        fallback()
+      end
+    end
+  end
+end
+
 return M
