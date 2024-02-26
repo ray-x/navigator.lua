@@ -402,7 +402,7 @@ require'navigator'.setup({
       sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
     },
     servers = {'cmake', 'ltex'}, -- by default empty, and it should load all LSP clients avalible based on filetype
-    -- but if you whant navigator load  e.g. `cmake` and `ltex` for you , you
+    -- but if you want navigator load  e.g. `cmake` and `ltex` for you , you
     -- can put them in the `servers` list and navigator will auto load them.
     -- you could still specify the custom config  like this
     -- cmake = {filetypes = {'cmake', 'makefile'}, single_file_support = false},
