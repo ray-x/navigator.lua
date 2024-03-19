@@ -276,7 +276,7 @@ local function set_mapping(lsp_attach_info)
     end
 
     if fmt then
-      api.nvim_create_autocmd({ 'BufWritePost' }, {
+      api.nvim_create_autocmd({ 'BufWritePre' }, {
         group = gn,
         desc = 'auto format',
         buffer = bufnr,
