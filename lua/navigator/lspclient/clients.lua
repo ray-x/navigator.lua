@@ -198,18 +198,24 @@ local function update_capabilities()
   if installed and cmp_lsp then
     capabilities = cmp_lsp.default_capabilities()
   else
-    capabilities.textDocument.completion.completionItem.snippetSupport = true
-    capabilities.textDocument.completion.completionItem.preselectSupport = true
-    capabilities.textDocument.completion.completionItem.insertReplaceSupport = true
-    capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
-    capabilities.textDocument.completion.completionItem.deprecatedSupport = true
-    capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
-    capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
-    capabilities.textDocument.completion.completionItem.resolveSupport = {
-      properties = { 'documentation', 'detail', 'additionalTextEdits' },
+    capabilities.textDocument.completion = {
+      completionItem = {
+        snippetSupport = vim.snippet and true or false,
+        resolveSupport = {
+          properties = { 'edit', 'documentation', 'detail', 'additionalTextEdits' },
+        },
+      },
+      completionList = {
+        itemDefaults = {
+          'editRange',
+          'insertTextFormat',
+          'insertTextMode',
+          'data',
+        },
+      },
     }
-    capabilities.workspace.configuration = true
   end
+  capabilities.workspace.configuration = true
   return capabilities
 end
 
