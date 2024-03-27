@@ -215,7 +215,6 @@ local function update_capabilities()
       },
     }
   end
-  capabilities.workspace.configuration = true
   return capabilities
 end
 
