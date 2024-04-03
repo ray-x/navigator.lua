@@ -42,10 +42,7 @@ end
 M.document_symbol_handler = function(err, result, ctx)
   if err then
     if error ~= 'timeout' then
-      vim.notify(
-        'failed to get document symbol' .. vim.inspect(ctx) .. err,
-        vim.log.levels.WARN
-      )
+      vim.notify('failed to get document symbol' .. vim.inspect(ctx) .. err, vim.log.levels.WARN)
     else
       log('request timeout')
     end
@@ -58,10 +55,7 @@ M.document_symbol_handler = function(err, result, ctx)
   end
 
   if not result or vim.tbl_isempty(result) then
-    vim.notify(
-      'symbol ' .. query .. ' not found for buf ' .. vim.inspect(ctx),
-      vim.log.levels.WARN
-    )
+    vim.notify('symbol ' .. query .. ' not found for buf ' .. vim.inspect(ctx), vim.log.levels.WARN)
     return
   end
   local locations = {}
@@ -95,8 +89,9 @@ M.document_symbol_handler = function(err, result, ctx)
     item.node_text = item.name
 
     table.insert(locations, item)
-    if result[i].children ~= nil then
-      for _, c in pairs(result[i].children) do
+    -- local tab = ' ' .. _NgConfigValues.icons.side_panel.tab .. ' '
+    local function add_children(children, level)
+      for _, c in pairs(children) do
         local child = {}
         child.kind = c.kind
         child.name = c.name
@@ -110,10 +105,16 @@ M.document_symbol_handler = function(err, result, ctx)
         child.uri = uri
         child.lnum = child.range.start.line + 1
         child.detail = c.detail or ''
-        child.indent_level = item.indent_level + 1
-        child.text = '   ' .. ckind .. '' .. child.name .. ' ' .. child.detail
+        child.indent_level = item.indent_level + level
+        child.text = string.rep('  ', level) .. ckind .. '' .. child.name .. ' ' .. child.detail
         table.insert(locations, child)
+        if c.children ~= nil then
+          add_children(c.children, level + 1)
+        end
       end
+    end
+    if result[i].children ~= nil then
+      add_children(result[i].children, 1)
     end
   end
   if ctx.no_show then
@@ -155,7 +156,14 @@ M.workspace_symbol_handler = function(err, result, ctx, cfg)
   log(items[1])
 
   local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
-  gui.new_list_view({ items = items, prompt = true, ft = ft, rowdata = true, api = ' ' , title = 'Workspace Symbols'})
+  gui.new_list_view({
+    items = items,
+    prompt = true,
+    ft = ft,
+    rowdata = true,
+    api = ' ',
+    title = 'Workspace Symbols',
+  })
 end
 
 function M.side_panel()
@@ -179,6 +187,29 @@ function M.side_panel()
     end,
   })
   p:open(true)
+  -- redraw the pannel if current buffer modified and saved
+  local group = vim.api.nvim_create_augroup('guihua_side_panel', { clear = false })
+  vim.api.nvim_create_autocmd({
+    'BufWritePost',
+  }, {
+    callback = function()
+      p:redraw(buf)
+    end,
+    group = group,
+    buffer = buf,
+    desc = 'redraw side panel',
+  })
+
+  vim.api.nvim_create_autocmd({
+    'BufLeave',
+  }, {
+    callback = function()
+      p:close()
+    end,
+    group = group,
+    buffer = buf,
+    desc = 'close side panel',
+  })
 end
 
 return M

@@ -206,6 +206,7 @@ _NgConfigValues = {
       outer_node = '╰○',
       bracket_left = '⟪',
       bracket_right = '⟫',
+      tab = '󰌒'
     },
     fold = {
       prefix = '⚡',
