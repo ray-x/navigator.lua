@@ -9,7 +9,6 @@ local parsers = require('nvim-treesitter.parsers')
 local get_node_at_line = require('navigator.treesitter').get_node_at_line
 local M = {}
 
--- TODO: per-buffer fold table?
 M.current_buf_folds = {}
 
 function M.on_attach()
@@ -17,48 +16,128 @@ function M.on_attach()
 end
 local prefix = _NgConfigValues.icons.fold.prefix
 local sep = _NgConfigValues.icons.fold.separator
-local function custom_fold_text()
-  local line = vim.fn.getline(vim.v.foldstart)
-  local line_count = vim.v.foldend - vim.v.foldstart + 1
-  -- trace("" .. line .. " // " .. line_count .. " lines")
-  local ss, se = line:find('^%s*')
-  local spaces = line:sub(ss, se)
-  local tabspace = string.rep(' ', vim.o.tabstop)
-  spaces = spaces:gsub('\t', tabspace)
-  line = line:gsub('^%s*(.-)%s*$', '%1') --  trim leading and trailing whitespace
-  return spaces .. prefix .. line .. ': ' .. line_count .. ' lines'
+
+-- vim.treesitter.foldtext was removed
+-- • Removed `vim.treesitter.foldtext` as transparent foldtext is now supported
+--   https://github.com/neovim/neovim/pull/20750
+-- get the foldtext from treesitter
+-- https://github.com/Wansmer/nvim-config/blob/main/lua/modules/foldtext.lua
+local function parse_line(linenr)
+  local bufnr = vim.api.nvim_get_current_buf()
+
+  local line = vim.api.nvim_buf_get_lines(bufnr, linenr - 1, linenr, false)[1]
+  if not line then
+    return nil
+  end
+
+  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+  if not ok then
+    return nil
+  end
+
+  local lang_query = vim.treesitter.query.get(parser:lang(), 'highlights')
+  if not lang_query then
+    return nil
+  end
+
+  local tree = parser:parse({ linenr - 1, linenr })[1]
+
+  local result = {}
+
+  local line_pos = 0
+
+  for id, node, metadata in lang_query:iter_captures(tree:root(), 0, linenr - 1, linenr) do
+    local name = lang_query.captures[id]
+    local start_row, start_col, end_row, end_col = node:range()
+
+    local priority = tonumber(metadata.priority or vim.highlight.priorities.treesitter)
+
+    if start_row == linenr - 1 and end_row == linenr - 1 then
+      -- check for characters ignored by treesitter
+      if start_col > line_pos then
+        table.insert(result, {
+          line:sub(line_pos + 1, start_col),
+          { { 'Folded', priority } },
+          range = { line_pos, start_col },
+        })
+      end
+      line_pos = end_col
+
+      local text = line:sub(start_col + 1, end_col)
+      table.insert(result, { text, { { '@' .. name, priority } }, range = { start_col, end_col } })
+    end
+  end
+
+  local i = 1
+  while i <= #result do
+    -- find first capture that is not in current range and apply highlights on the way
+    local j = i + 1
+    while
+      j <= #result
+      and result[j].range[1] >= result[i].range[1]
+      and result[j].range[2] <= result[i].range[2]
+    do
+      for k, v in ipairs(result[i][2]) do
+        if not vim.tbl_contains(result[j][2], v) then
+          table.insert(result[j][2], k, v)
+        end
+      end
+      j = j + 1
+    end
+
+    -- remove the parent capture if it is split into children
+    if j > i + 1 then
+      table.remove(result, i)
+    else
+      -- highlights need to be sorted by priority, on equal prio, the deeper nested capture (earlier
+      -- in list) should be considered higher prio
+      if #result[i][2] > 1 then
+        table.sort(result[i][2], function(a, b)
+          return a[2] < b[2]
+        end)
+      end
+
+      result[i][2] = vim.tbl_map(function(tbl)
+        return tbl[1]
+      end, result[i][2])
+      result[i] = { result[i][1], result[i][2] }
+
+      i = i + 1
+    end
+  end
+
+  return result
 end
 
 function NG_custom_fold_text()
-  if vim.treesitter.foldtext then
-    local line_syntax = vim.treesitter.foldtext()
-    if type(line_syntax) ~= 'table' or #line_syntax < 1 then
-      return line_syntax
-    end
+  -- if vim.treesitter.foldtext then
+  local line_syntax = parse_line(vim.v.foldstart)
 
-    local line_count = vim.v.foldend - vim.v.foldstart + 1
-    if prefix ~= '' then
-      local spaces = line_syntax[1]
-      local s = spaces[1]
-      local first_char = s:sub(1, 1)
-      if first_char == '\t' then
-        local tabspace = string.rep(' ', vim.o.tabstop)
-        s = s:gsub('\t', tabspace)
-      end
-      s = s:gsub('^  ', prefix) -- replace prefix with two spaces
-      if s ~= spaces[1] then
-        spaces[1] = s
-        spaces[2] = { '@keyword' }
-      end
-    end
-    local sep2 = ' ' .. string.rep(sep, 3) .. '  '
-    table.insert(line_syntax, { sep2, { '@comment' } })
-    table.insert(line_syntax, { tostring(line_count), { '@number' } })
-    table.insert(line_syntax, { ' lines', { '@text.title' } })
-    table.insert(line_syntax, { sep2, { '@comment' } })
-    return line_syntax
+  if type(line_syntax) ~= 'table' or #line_syntax < 1 then
+    return vim.fn.foldtext()
   end
-  return custom_fold_text()
+
+  local line_count = vim.v.foldend - vim.v.foldstart + 1
+  if prefix ~= '' then
+    local spaces = line_syntax[1]
+    local s = spaces[1]
+    local first_char = s:sub(1, 1)
+    if first_char == '\t' then
+      local tabspace = string.rep(' ', vim.o.tabstop)
+      s = s:gsub('\t', tabspace)
+    end
+    s = s:gsub('^  ', prefix) -- replace prefix with two spaces
+    if s ~= spaces[1] then
+      spaces[1] = s
+      spaces[2] = { '@keyword' }
+    end
+  end
+  local sep2 = ' ' .. string.rep(sep, 3) .. '  '
+  table.insert(line_syntax, { sep2, { '@comment' } })
+  table.insert(line_syntax, { tostring(line_count), { '@number' } })
+  table.insert(line_syntax, { ' lines', { '@text.title' } })
+  table.insert(line_syntax, { sep2, { '@comment' } })
+  return line_syntax
 end
 
 vim.opt.foldtext = NG_custom_fold_text()
@@ -66,23 +145,26 @@ vim.opt.foldtext = NG_custom_fold_text()
 vim.opt.viewoptions:remove('options')
 
 function M.setup_fold()
-  api.nvim_command('augroup FoldingCommand')
-  api.nvim_command('autocmd! * <buffer>')
-  api.nvim_command('augroup end')
   vim.opt.foldtext = 'v:lua.NG_custom_fold_text()'
-  vim.opt.viewoptions:remove('options')
-  -- user should setup themself
-  -- vim.opt.fillchars = { foldclose = "", foldopen = "", vert = "│", fold = " ", diff = "░", msgsep = "‾", foldsep = "│" }
+  -- vim.opt.viewoptions:remove('options')
+  local cmd_group = api.nvim_create_augroup('NGFoldGroup', {})
+  vim.api.nvim_create_autocmd({ 'BufWinEnter', 'WinEnter' }, {
+    group = cmd_group,
+    callback = function()
+      -- user should setup fillchars themself
+      -- vim.opt.fillchars = { foldclose = "", foldopen = "", vert = "│", fold = " ", diff = "░", msgsep = "‾", foldsep = "│" }
 
-  local current_window = api.nvim_get_current_win()
-  if not parsers.has_parser() then
-    api.nvim_win_set_option(current_window, 'foldmethod', 'indent')
-    log('fallback to indent folding')
-    return
-  end
-  log('setup treesitter folding')
-  api.nvim_win_set_option(current_window, 'foldmethod', 'expr')
-  api.nvim_win_set_option(current_window, 'foldexpr', 'folding#ngfoldexpr()')
+      local current_window = api.nvim_get_current_win()
+      if not parsers.has_parser() then
+        api.nvim_win_set_option(current_window, 'foldmethod', 'indent')
+        log('fallback to indent folding')
+        return
+      end
+      log('setup treesitter folding winid', current_window)
+      api.nvim_set_option_value('foldexpr', 'folding#ngfoldexpr()', { win = current_window })
+      api.nvim_set_option_value('foldmethod', 'expr', { win = current_window })
+    end,
+  })
 end
 
 local function is_comment(line_number)
@@ -230,6 +312,7 @@ local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
   end)
   return indent_levels(scopes, total_lines)
 end)
+
 function M.get_fold_indic(lnum)
   if not parsers.has_parser() or not lnum then
     return '0'

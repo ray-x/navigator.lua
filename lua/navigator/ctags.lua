@@ -65,9 +65,9 @@ local function ctags_gen()
   end
 
   local lang = vim.o.ft
-  options = options .. '--language=' .. lang
+  options = options .. '--language-force=' .. lang
   cmd = cmd .. ' ' .. options
-  cmd = string.format('%s -f %s %s --language=%s', cmd, output, options, lang)
+  cmd = string.format('%s -f %s %s --language-force=%s', cmd, output, options, lang)
   cmd = vim.split(cmd, ' ')
   log(cmd)
   vfn.jobstart(cmd, {
