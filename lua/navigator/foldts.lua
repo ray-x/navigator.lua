@@ -155,6 +155,12 @@ function M.setup_fold()
       -- vim.opt.fillchars = { foldclose = "", foldopen = "", vert = "│", fold = " ", diff = "░", msgsep = "‾", foldsep = "│" }
 
       local current_window = api.nvim_get_current_win()
+      local in_diff_mode = api.nvim_win_get_option(current_window, 'diff')
+      if in_diff_mode then
+        -- In diff mode, use diff folding.
+        return
+      end
+      local current_window = api.nvim_get_current_win()
       if not parsers.has_parser() then
         api.nvim_win_set_option(current_window, 'foldmethod', 'indent')
         log('fallback to indent folding')
