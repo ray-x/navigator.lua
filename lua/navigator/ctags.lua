@@ -94,9 +94,16 @@ local function ctags_symbols()
   width = math.floor(vim.api.nvim_get_option('columns') * width)
   local items = {}
   local ctags_file = _NgConfigValues.ctags.tagfile
+  -- the tagfile name can be either .tags or tags
+  if vim.fn.filereadable(ctags_file) == 0 then
+    if vim.fn.filereadable('tags') == 1 then -- for some config the default tagfile is tags
+      ctags_file = 'tags'
+      _NgConfigValues.ctags.tagfile = 'tags'
+    end
+  end
   if not util.file_exists(ctags_file) then
     ctags_gen()
-    vim.cmd('sleep 200m')
+    vim.cmd('sleep 400m')
   end
   local cnts = util.io_read(ctags_file)
   if cnts == nil then

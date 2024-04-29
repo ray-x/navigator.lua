@@ -5,21 +5,20 @@ local api = vim.api
 local log = nutils.log
 local M = {}
 
-function M.handler(_, result, ctx, config)
+function M.handler(err, result, ctx, config)
   config = config or {}
   config.focus_id = ctx.method
+  if err then
+    return vim.notify('no hover info ' .. err)
+  end
   if api.nvim_get_current_buf() ~= ctx.bufnr then
     -- Ignore result since buffer changed. This happens for slow language servers.
     return
   end
   if not (result and result.contents) then
     if config.silent ~= true then
-      vim.notify('No information available')
+      vim.notify('No hover information available')
     end
-    vim.schedule(function()
-      -- fallback to signature help
-      vim.lsp.buf.signature_help()
-    end)
     return
   end
   local format = 'markdown'

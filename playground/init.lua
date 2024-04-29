@@ -4,18 +4,16 @@ local os_name = uv.os_uname().sysname
 
 local is_windows = os_name == 'Windows' or os_name == 'Windows_NT'
 
-
 local package_root = '/tmp/nvim/lazy'
 local sep = '/'
 if is_windows then
   local tmp = os.getenv('TEMP')
-  vim.cmd("set packpath=" .. tmp .. "\\nvim\\lazy")
+  vim.cmd('set packpath=' .. tmp .. '\\nvim\\lazy')
   package_root = tmp .. '\\nvim\\lazy'
   sep = '\\'
 else
   vim.cmd([[set packpath=/tmp/nvim/lazy]])
 end
-
 
 local plugin_folder = function()
   local host = os.getenv('HOST_NAME')
@@ -51,19 +49,19 @@ local function load_plugins()
       build = ':TSUpdate',
     },
     { 'neovim/nvim-lspconfig' },
-    {
-      'simrat39/rust-tools.nvim',
-      config = function()
-        require('rust-tools').setup({
-          server = {
-            on_attach = function(client, bufnr)
-              require('navigator.lspclient.mapping').setup({ client = client, bufnr = bufnr }) -- setup navigator keymaps here,
-              -- otherwise, you can define your own commands to call navigator functions
-            end,
-          },
-        })
-      end,
-    },
+    -- {
+    --   'simrat39/rust-tools.nvim',
+    --   config = function()
+    --     require('rust-tools').setup({
+    --       server = {
+    --         on_attach = function(client, bufnr)
+    --           require('navigator.lspclient.mapping').setup({ client = client, bufnr = bufnr }) -- setup navigator keymaps here,
+    --           -- otherwise, you can define your own commands to call navigator functions
+    --         end,
+    --       },
+    --     })
+    --   end,
+    -- },
     { 'ray-x/lsp_signature.nvim', dev = (plugin_folder() ~= '') },
     {
       'ray-x/navigator.lua',
@@ -72,6 +70,13 @@ local function load_plugins()
       dependencies = { 'ray-x/guihua.lua', build = 'cd lua/fzy && make' },
       config = function()
         require('navigator').setup({
+          keymaps = {
+            {
+              key = '<Leader>rn',
+              func = require('navigator.rename').rename,
+              desc = 'rename',
+            },
+          },
           lsp = {
             -- disable_lsp = { 'rust_analyzer', 'clangd' },
           },
@@ -84,10 +89,10 @@ local function load_plugins()
         'neovim/nvim-lspconfig',
         'hrsh7th/cmp-nvim-lsp',
       },
-      config = function ()
+      config = function()
         -- Add additional capabilities supported by nvim-cmp
-        local cmp = require 'cmp'
-        cmp.setup {
+        local cmp = require('cmp')
+        cmp.setup({
           snippet = {
             expand = function(args)
               luasnip.lsp_expand(args.body)
@@ -98,14 +103,15 @@ local function load_plugins()
             ['<C-d>'] = cmp.mapping.scroll_docs(4), -- Down
             -- C-b (back) C-f (forward) for snippet placeholder navigation.
             ['<C-Space>'] = cmp.mapping.complete(),
-            ['<CR>'] = cmp.mapping.confirm {
+            ['<CR>'] = cmp.mapping.confirm({
               behavior = cmp.ConfirmBehavior.Replace,
               select = true,
-            },}),
+            }),
+          }),
           sources = {
             { name = 'nvim_lsp' },
           },
-        }
+        })
       end,
     },
     {

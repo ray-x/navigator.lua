@@ -272,12 +272,12 @@ require'navigator'.setup({
     max_lines_scan_comments = 20, -- only fold when the fold level higher than this value
     disable_filetypes = {'help', 'guihua', 'text'}, -- list of filetypes which doesn't fold using treesitter
   },  -- modified version of treesitter folding
-  default_mapping = true,  -- set to false if you will remap every key or if you using old version of nvim-
+  default_mapping = true,  -- set to false if you will remap every key
   keymaps = {{key = "gK", func = vim.lsp.declaration, desc = 'declaration'}}, -- a list of key maps
   -- this kepmap gK will override "gD" mapping function declaration()  in default kepmap
   -- please check mapping.lua for all keymaps
   -- rule of overriding: if func and mode ('n' by default) is same
-  -- it can be overrided
+  -- the key will be overridden
   treesitter_analysis = true, -- treesitter variable context
   treesitter_navigation = true, -- bool|table false: use lsp to navigate between symbol ']r/[r', table: a list of
   --lang using TS navigation
