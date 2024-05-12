@@ -201,7 +201,7 @@ function M.side_panel()
   })
 
   vim.api.nvim_create_autocmd({
-    'BufLeave',
+    'BufWinLeave',
   }, {
     callback = function()
       p:close()
