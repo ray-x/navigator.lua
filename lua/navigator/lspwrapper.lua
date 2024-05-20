@@ -120,7 +120,7 @@ local function extract_result(results_lsp)
 end
 
 function M.check_capabilities(feature, bufnr)
-  local clients = lsp.get_active_clients({ buffer = bufnr or vim.api.nvim_get_current_buf() })
+  local clients = lsp.get_clients({ buffer = bufnr or vim.api.nvim_get_current_buf() })
 
   local supported_client = false
   for _, client in pairs(clients) do

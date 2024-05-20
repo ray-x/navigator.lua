@@ -4,7 +4,7 @@
 
 - Easy code navigation, view diagnostic errors, see relationships of functions, variables
 
-- A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provids a better highlight but also help you analyse symbol context effectively.
+- A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provides a better highlight but also help you analyse symbol context effectively.
 
 - ctags fuzzy search & build ctags symbols
 
@@ -140,7 +140,7 @@ I'd like to go beyond what the system is offering.
 
 ## Install
 
-Require nvim-0.6.1 or above, nightly (0.8) prefered
+Require nvim-0.9 or above, nightly (0.10 or greater) preferred
 
 You can remove your lspconfig setup and use this plugin.
 The plugin depends on lspconfig and [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(migrate from [romgrk's project](romgrk/fzy-lua-native)).
@@ -364,7 +364,7 @@ require'navigator'.setup({
     diagnostic_virtual_text = true,  -- show virtual for diagnostic message
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
     display_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you want to ignore it
-                                  -- set to 'trouble' to show diagnositcs in Trouble
+                                  -- set to 'trouble' to show diagnostcs in Trouble
     tsserver = {
       filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetypes
@@ -401,7 +401,7 @@ require'navigator'.setup({
       sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
       sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
     },
-    servers = {'cmake', 'ltex'}, -- by default empty, and it should load all LSP clients avalible based on filetype
+    servers = {'cmake', 'ltex'}, -- by default empty, and it should load all LSP clients available based on filetype
     -- but if you want navigator load  e.g. `cmake` and `ltex` for you , you
     -- can put them in the `servers` list and navigator will auto load them.
     -- you could still specify the custom config  like this
@@ -425,7 +425,7 @@ local servers = {
 }
 ```
 
-Navigator will try to load avalible lsp server/client based on filetype. The clients has none default on_attach.
+Navigator will try to load available lsp server/client based on filetype. The clients has none default on_attach.
 incremental sync and debounce is enabled by navigator. And the lsp
 snippet will be enabled. So you could use COQ and nvim-cmp snippet expand.
 
@@ -572,7 +572,7 @@ LspDiagnosticsXXX are used for diagnostic. Please check highlight.lua and dochig
   - treesitter (list treesitter symbols, object analysis)
   - lsp-signature (better signature help)
 
-The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existance and load those plugins only if they existed.
+The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existence and load those plugins only if they existed.
 
 The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
 
@@ -778,16 +778,16 @@ You can override the above highlight to fit your current colorscheme
 | command         | function                                                                  |
 | --------------- | ------------------------------------------------------------------------- |
 | LspToggleFmt    | toggle lsp auto format                                                    |
-| LspKeymaps      | show LSP releated keymaps                                                 |
+| LspKeymaps      | show LSP related keymaps                                                  |
 | Nctags {args}   | show ctags symbols, args: -g regen ctags                                  |
 | LspRestart      | reload lsp                                                                |
 | LspToggleFmt    | toggle lsp format                                                         |
 | LspSymbols      | document symbol in side panel                                             |
-| LspAndDiag      | document symbol and diagnostics in side panel                                             |
+| LspAndDiag      | document symbol and diagnostics in side panel                             |
 | NRefPanel       | show symbol reference in side panel                                       |
 | TSymbols        | treesitter symbol in side panel                                           |
-| TsAndDiag        | treesitter symbol and diagnostics in side panel                                           |
-| Calltree {args} | lsp call hierarchy call tree, args: -i (incomming default), -o (outgoing) |
+| TsAndDiag       | treesitter symbol and diagnostics in side panel                           |
+| Calltree {args} | lsp call hierarchy call tree, args: -i (incoming default), -o (outgoing)  |
 
 ## Screenshots
 
@@ -866,7 +866,7 @@ You can in place edit your code in floating window
 
 <https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9778-11d0f356b38d.mov>
 
-(Note: This feature only avalible in `find reference` and `find diagnostic`, You can not add/remove lines in floating window)
+(Note: This feature only available in `find reference` and `find diagnostic`, You can not add/remove lines in floating window)
 
 ### Implementation
 
@@ -897,7 +897,7 @@ You can in place edit your code in floating window
 Treetsitter symbols in all buffers
 ![treesitter](https://user-images.githubusercontent.com/1681295/118734953-cc6eba00-b882-11eb-9db8-0a052630d57e.jpg?raw=true)
 
-### Call hierarchy (incomming/outgoing calls)
+### Call hierarchy (incoming/outgoing calls)
 
 ![incomming_calls](https://user-images.githubusercontent.com/1681295/142348079-49b71486-4f16-4f10-95c9-483aad11c262.jpg)
 
@@ -987,7 +987,7 @@ end
 
 ## API and extensions
 The plugin built on top of guihua, you can extend the plugin based on your requirements.
-e.g. A side pannel of lsp symbols and lsp diagnostics:
+e.g. A side panel of lsp symbols and lsp diagnostics:
 
 
 ```lua
@@ -1040,10 +1040,11 @@ end
 
 ## Errors and Bug Reporting
 
-- Please double check your setup and check if minium setup works or not
-- It should works for 0.6.1, neovim 0.8.x prefered.
+- Please double check your setup and check if minimum setup works or not
+- It should works for 0.6.1, neovim 0.8.x preferred.
 - Check console output
 - Check `LspInfo` and treesitter status with `checkhealth`
 - Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log
-- Submit Issue with minium vimrc. Please check playground/init.lua as a vimrc template. !!!Please DONOT use a packer vimrc.
-  That installs everything to default folder!!! Also check this repo [navigator bug report](https://github.com/fky2015/navigator.nvim-bug-report)
+- Submit Issue with minium init.lua. Please check playground/init.lua as a vimrc template.
+  Also check this repo [navigator bug report](https://github.com/fky2015/navigator.nvim-bug-report) on how to report bug
+  with minimum setup.

@@ -84,7 +84,7 @@ M.lsp_clients = {}
 
 function M.refresh()
   local bufnr = vim.api.nvim_get_current_buf()
-  if next(vim.lsp.get_active_clients({ buffer = bufnr })) == nil then
+  if next(vim.lsp.get_clients({ buffer = bufnr })) == nil then
     log('Must have a client running to use lsp code action')
     return
   end
@@ -124,7 +124,7 @@ M.inline = function()
   end
 
   local bufnr = api.nvim_get_current_buf()
-  if next(vim.lsp.get_active_clients({ buffer = bufnr })) == nil then
+  if next(vim.lsp.get_clients({ buffer = bufnr })) == nil then
     return
   end
   if vim.tbl_contains(M.disabled, bufnr) then

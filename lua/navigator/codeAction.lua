@@ -81,7 +81,7 @@ function code_action:render_action_virtual_text(line, diagnostics)
   return function(err, actions, context)
     trace(actions, context)
     if context and context.client_id then
-      local cname = vim.lsp.get_active_clients({ id = context.client_id })[1].name
+      local cname = vim.lsp.get_clients({ id = context.client_id })[1].name
       if cname == 'null-ls' and _NgConfigValues.lsp.disable_nulls_codeaction_sign then
         return
       end

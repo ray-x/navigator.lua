@@ -277,7 +277,7 @@ function M.printError(msg)
 end
 
 function M.reload()
-  vim.lsp.stop_client(vim.lsp.get_active_clients())
+  vim.lsp.stop_client(vim.lsp.get_clients())
   vim.cmd([[edit]])
 end
 

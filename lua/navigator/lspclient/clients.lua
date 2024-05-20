@@ -118,7 +118,7 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       end
     end
 
-    local clients = vim.lsp.get_active_clients({buffer = 0 })
+    local clients = vim.lsp.get_clients({buffer = 0 })
     for _, c in pairs(clients or {}) do
       log("lsp start up in progress client", client, c.name)
       if c.name == client then
@@ -228,7 +228,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
   local capabilities = update_capabilities()
 
   for _, lspclient in ipairs(servers) do
-    local clients = vim.lsp.get_active_clients() or {}
+    local clients = vim.lsp.get_clients() or {}
     for _, client in ipairs(clients) do
       if client ~= nil then
         loaded[client.name] = client.id
@@ -582,7 +582,7 @@ local function setup(user_opts)
 
   trace(debug.traceback())
 
-  local clients = vim.lsp.get_active_clients({buffer = bufnr})
+  local clients = vim.lsp.get_clients({buffer = bufnr})
   for key, client in pairs(clients) do
     if client.name ~= 'null_ls' and client.name ~= 'efm' then
       if vim.tbl_contains(client.filetypes or {}, vim.bo.ft) then
@@ -597,7 +597,7 @@ local function setup(user_opts)
   local retry = true
 
   log('loading for ft ', ft, uri)
-  highlight.diagnositc_config_sign()
+  highlight.config_signs()
   highlight.add_highlight()
   local lsp_opts = user_opts.lsp or {}
 
@@ -638,7 +638,7 @@ local function on_filetype()
   if _NG_Loaded[bufnr].cnt > 1 then
     log('navigator was loaded for ft', ft, bufnr)
     -- check if lsp is loaded
-    local clients = vim.lsp.get_active_clients({buffer = bufnr})
+    local clients = vim.lsp.get_clients({buffer = bufnr})
     for key, client in pairs(clients) do
       if client.name ~= 'null_ls' and client.name ~= 'efm' then
         loaded = _NG_Loaded[bufnr].lsp[client.name]

@@ -186,8 +186,8 @@ _NgConfigValues = {
 
     -- Diagnostics (floating window)
     diagnostic_head_severity_1 = '🈲',
-    diagnostic_head_severity_2 = '☣️',
-    diagnostic_head_severity_3 = '👎',
+    diagnostic_head_severity_2 = '🛠️',
+    diagnostic_head_severity_3 = '🔧',
     diagnostic_head_description = '👹', -- suffix for severities
     diagnostic_virtual_text = '🦊', -- floating text preview (set to empty to disable)
     diagnostic_file = '🚑', -- icon in floating window, indicates the file contains diagnostics
@@ -195,7 +195,7 @@ _NgConfigValues = {
     -- Values (floating window)
     value_definition = '🐶🍡', -- identifier defined
     value_changed = '📝', -- identifier modified
-    context_separator = '  ', -- separator between text and value
+    context_separator = ' ', -- separator between text and value
 
     -- Formatting for Side Panel
     side_panel = {
@@ -206,7 +206,7 @@ _NgConfigValues = {
       outer_node = '╰○',
       bracket_left = '⟪',
       bracket_right = '⟫',
-      tab = '󰌒'
+      tab = '󰌒',
     },
     fold = {
       prefix = '⚡',
@@ -246,6 +246,10 @@ M.deprecated = function(cfg)
   if cfg.ts_fold ~= nil and type(cfg.ts_fold) == 'boolean' then
     warn('ts_fold option changed, refer to README for more details')
     cfg.ts_fold = { enable = cfg.ts_fold }
+  end
+  local has_nvim_011 = vim.fn.has('nvim-0.11.0')
+  if not has_nvim_011 then
+    vim.lsp.get_clients = vim.lsp.get_active_clients
   end
 end
 
@@ -381,7 +385,11 @@ M.setup = function(cfg)
       _NgConfigValues.loaded = true
     end
 
-    if _NgConfigValues.ts_fold.enable == true and not vim.tbl_contains(_NgConfigValues.ts_fold.disable_filetypes, vim.o.filetype) and not vim.wo.diff then
+    if
+      _NgConfigValues.ts_fold.enable == true
+      and not vim.tbl_contains(_NgConfigValues.ts_fold.disable_filetypes, vim.o.filetype)
+      and not vim.wo.diff
+    then
       require('navigator.foldts').on_attach()
     end
 
@@ -389,7 +397,7 @@ M.setup = function(cfg)
     vim.lsp.start_client = function(lsp_config)
       -- add highlight for Lspxxx
       require('navigator.lspclient.highlight').add_highlight()
-      require('navigator.lspclient.highlight').diagnositc_config_sign()
+      require('navigator.lspclient.highlight').config_signs()
       -- require('navigator.lspclient.mapping').setup()
       require('navigator.lspclient.lspkind').init()
       return _start_client(lsp_config)

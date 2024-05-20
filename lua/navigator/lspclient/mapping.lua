@@ -101,7 +101,7 @@ local ccls_mappings = {
 }
 
 local check_cap = function(opts)
-  -- log(vim.lsp.get_active_clients({buffer = 0}))
+  -- log(vim.lsp.get_clients({buffer = 0}))
   local fmt, rfmt, ccls
   local cap = opts.cap
   if cap == nil then
@@ -115,7 +115,7 @@ local check_cap = function(opts)
   if cap and cap.documentRangeFormattingProvider then
     rfmt = true
   end
-  for _, value in pairs(vim.lsp.get_active_clients({ buffer = 0 })) do
+  for _, value in pairs(vim.lsp.get_clients({ buffer = 0 })) do
     trace(value)
     if value ~= nil and value.server_capabilities == nil then
       if value.server_capabilities.documentFormattingProvider then

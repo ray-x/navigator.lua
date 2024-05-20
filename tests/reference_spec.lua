@@ -75,7 +75,7 @@ describe('should run lsp reference', function()
   for _ = 1, 20 do
     vim.wait(400, function() end)
     local found = false
-    for _, client in ipairs(vim.lsp.get_active_clients()) do
+    for _, client in ipairs(vim.lsp.get_clients()) do
       if client.name == 'gopls' then
         found = true
         break

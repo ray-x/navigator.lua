@@ -27,7 +27,7 @@ M.on_attach = function(client, bufnr)
 
   -- add highlight for Lspxxx
   require('navigator.lspclient.highlight').add_highlight()
-  require('navigator.lspclient.highlight').diagnositc_config_sign()
+  require('navigator.lspclient.highlight').config_signs()
   api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   require('navigator.lspclient.mapping').setup({

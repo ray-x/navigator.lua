@@ -5,7 +5,7 @@ local api = vim.api
 
 local cmd_group = api.nvim_create_augroup('NGHiGroup', {})
 -- lsp sign            ﮻           ﯭ                ﳀ    
-function M.diagnositc_config_sign()
+function M.config_signs()
   if M.configed then
     return
   end
@@ -23,32 +23,6 @@ function M.diagnositc_config_sign()
       sign_name,
       { text = icons.code_lens_action_icon, texthl = 'LspDiagnosticsSignHint' }
     )
-  end
-
-  if icons.icons then
-    local e, w, i, h =
-      icons.diagnostic_err, icons.diagnostic_warn, icons.diagnostic_info, icons.diagnostic_hint
-    local t = vim.fn.sign_getdefined('DiagnosticSignWarn')
-    if vim.tbl_isempty(t) or t[1].text == 'W ' then
-      vim.fn.sign_define(
-        'DiagnosticSignError',
-        { text = e, texthl = 'DiagnosticError', linehl = '', numhl = '' }
-      )
-      vim.fn.sign_define(
-        'DiagnosticSignWarn',
-        { text = w, texthl = 'DiagnosticWarn', linehl = '', numhl = '' }
-      )
-      vim.fn.sign_define(
-        'DiagnosticSignInfo',
-        { text = i, texthl = 'DiagnosticInfo', linehl = '', numhl = '' }
-      )
-      vim.fn.sign_define(
-        'DiagnosticSignHint',
-        { text = h, texthl = 'DiagnosticHint', linehl = '', numhl = '' }
-      )
-
-      t = vim.fn.sign_getdefined('DiagnosticSignWarn')
-    end
   end
   M.configed = true
 end

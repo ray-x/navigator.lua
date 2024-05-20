@@ -226,7 +226,7 @@ end
 -- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
 local function fetch_lsp_references(bufnr, params, callback)
   if not vim.lsp.get_clients then
-    vim.lsp.get_clients = vim.lsp.get_active_clients
+    vim.lsp.get_clients = vim.lsp.get_clients
   end
   local clients = vim.lsp.get_clients({
     bufnr = bufnr,

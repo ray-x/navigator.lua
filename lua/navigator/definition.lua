@@ -58,7 +58,7 @@ local function get_symbol()
 end
 
 local function def_preview(timeout_ms, method)
-  assert(next(vim.lsp.get_active_clients({ buffer = 0 })), 'Must have a client running')
+  assert(next(vim.lsp.get_clients({ buffer = 0 })), 'Must have a client running')
   method = method or 'textDocument/definition'
   local params = vim.lsp.util.make_position_params()
   local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)

@@ -15,15 +15,12 @@ _NG_VT_DIAG_NS = api.nvim_create_namespace('navigator_lua_diag')
 
 util.nvim_0_8()
 
-local diag_map = {}
-if vim.diagnostic then
-  diag_map = {
-    Error = vim.diagnostic.severity.ERROR,
-    Warning = vim.diagnostic.severity.WARN,
-    Info = vim.diagnostic.severity.Info,
-    Hint = vim.diagnostic.severity.Hint,
-  }
-end
+local diag_map = {
+  Error = vim.diagnostic.severity.ERROR,
+  Warning = vim.diagnostic.severity.WARN,
+  Info = vim.diagnostic.severity.Info,
+  Hint = vim.diagnostic.severity.Hint,
+}
 
 local diagnostic_cfg
 
@@ -55,8 +52,7 @@ local function error_marker(result, ctx, config)
     end
     local first_line = vim.fn.line('w0')
     local last_line = vim.fn.line('w$')
-    local wheight = last_line - first_line + 1
-    -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
+    local weight = last_line - first_line + 1 -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
 
     local bufnr = ctx.bufnr
     if bufnr == nil and result.uri then
@@ -89,23 +85,13 @@ local function error_marker(result, ctx, config)
       return
     end
 
-    -- total line num of current buffer
-
-    -- local winid = vim.fn.win_getid(vim.fn.winnr())
-    -- local winid = api.nvim_get_current_win()
     local total_num = api.nvim_buf_line_count(bufnr)
     if total_num == 0 then
       return
     end
-    -- local total_num = vim.fn.getbufinfo(vim.fn.winbufnr(winid))[1].linecount
-    -- window size of current buffer
 
-    -- local stats = api.nvim_list_uis()[1] or {}
-    -- local wwidth = stats.width;
-    -- local wheight = stats.height or 0
-
-    if total_num < wheight then
-      wheight = total_num
+    if total_num < weight then
+      weight = total_num
     end
     if _NG_VT_DIAG_NS == nil then
       _NG_VT_DIAG_NS = api.nvim_create_namespace('navigator_lua_diag')
@@ -119,7 +105,7 @@ local function error_marker(result, ctx, config)
         diags[i].range = { start = { line = diags[i].lnum } }
       end
     end
-    local ratio = wheight / total_num
+    local ratio = weight / total_num
     table.sort(diags, function(a, b)
       return a.range.start.line < b.range.start.line
     end)
@@ -196,7 +182,7 @@ local update_err_marker_async = function()
 end
 
 local diag_hdlr = function(err, result, ctx, config)
-  require('navigator.lspclient.highlight').diagnositc_config_sign()
+  require('navigator.lspclient.highlight').config_signs()
   config = config or diagnostic_cfg
   if err ~= nil then
     log(err, config, result)
@@ -316,12 +302,49 @@ local diag_hdlr = function(err, result, ctx, config)
   end
 end
 
+local function diag_signs()
+  if not _NgConfigValues.lsp.diagnostic or _NgConfigValues.lsp.diagnostic.signs == false then
+    return
+  end
+  local icons = _NgConfigValues.icons
+  if icons.icons then
+    local e, w, i, h =
+      icons.diagnostic_err, icons.diagnostic_warn, icons.diagnostic_info, icons.diagnostic_hint
+    local t = vim.fn.sign_getdefined('DiagnosticSignWarn')
+    local text = {
+      [vim.diagnostic.severity.ERROR] = e,
+      [vim.diagnostic.severity.WARN] = w,
+      [vim.diagnostic.severity.INFO] = i,
+      [vim.diagnostic.severity.HINT] = h,
+    }
+    -- in case there are duplicated signs defined in _NgConfigValues.lsp.diagnostic.signs
+    if
+      _NgConfigValues.lsp.diagnostic.signs
+      and type(_NgConfigValues.lsp.diagnostic.signs) == 'table'
+      and _NgConfigValues.lsp.diagnostic.signs.text
+    then
+      for k, v in pairs(_NgConfigValues.lsp.diagnostic.signs) do
+        text[k] = v
+      end
+    end
+    if vim.tbl_isempty(t) or (t[1] and t[1].text:find('W')) then
+      local signs = {
+        text = text,
+        linehl = {
+          [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
+        },
+      }
+      return signs
+    end
+  end
+end
+
 -- local diag_hdlr_async = function()
 --   local debounce = require('navigator.debounce').debounce_trailing
 --   return debounce(100, diag_hdlr)
 -- end
 
-function M.setup()
+function M.setup(cfg)
   if diagnostic_cfg ~= nil and diagnostic_cfg.float ~= nil then
     return
   end
@@ -331,10 +354,10 @@ function M.setup()
     -- Enable virtual
     -- Use a function to dynamically turn signs off
     -- and on, using buffer local variables
-    signs = true,
     update_in_insert = _NgConfigValues.lsp.diagnostic.update_in_insert or false,
     severity_sort = _NgConfigValues.lsp.diagnostic.severity_sort,
     float = _NgConfigValues.lsp.diagnostic.float,
+    signs = diag_signs(),
   }
   diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
   if
@@ -344,6 +367,7 @@ function M.setup()
   end
   -- vim.lsp.handlers["textDocument/publishDiagnostics"]
   M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
+  diagnostic_cfg = vim.tbl_extend('force', diagnostic_cfg, cfg)
 
   vim.diagnostic.config(diagnostic_cfg)
 
@@ -376,12 +400,8 @@ M.hide_diagnostic = function()
 end
 
 M.toggle_diagnostics = function()
-  if M.diagnostic_enabled then
-    M.diagnostic_enabled = false
-    return vim.diagnostic.disable()
-  end
-  vim.diagnostic.enable()
-  M.diagnostic_enabled = true
+  M.diagnostic_enabled = not vim.diagnostic.enable()
+  vim.diagnostic.enable(M.diagnostic_enabled)
 end
 
 M.show_buf_diagnostics = function()
@@ -427,14 +447,14 @@ M.setloclist = function(bufnr)
     return vim.cmd('lclose')
   end
 
-  local clients = vim.lsp.get_active_clients({ buffer = bufnr })
+  local clients = vim.lsp.get_clients({ buffer = bufnr })
   local cfg = { open = diag_cnt > 0 }
   for _, client in pairs(clients) do
     cfg.client_id = client['id']
     break
   end
 
-  if not vim.tbl_isempty(vim.lsp.get_active_clients({ buffer = bufnr })) then
+  if not vim.tbl_isempty(vim.lsp.get_clients({ buffer = bufnr })) then
     local err_cnt = get_count(0, [[Error]])
     if err_cnt > 0 then
       if _NgConfigValues.lsp.display_diagnostic_qf then
@@ -493,7 +513,7 @@ function M.get_line_diagnostic()
   local diags = diagnostic.get(api.nvim_get_current_buf(), { lnum = lnum })
 
   table.sort(diags, function(diag1, diag2)
-    return diag1.severity < diag2.severity
+    return diag1.severity or 0 < diag2.severity or 0
   end)
   return diags
 end
@@ -525,24 +545,15 @@ function M.show_diagnostics(pos)
 end
 
 function M.config(cfg)
-  M.setup()
   cfg = cfg or {}
   log('diag config', cfg)
-  local default_cfg = {
-    underline = true,
-    virtual_text = true,
-    update_in_insert = false,
-  }
-  if _NgConfigValues.icons then
-    default_cfg.signs = { _NgConfigValues.icons.diagnostic_err }
-  end
-
+  local default_cfg = {}
   cfg = vim.tbl_extend('keep', cfg, default_cfg)
   if vim.diagnostic == nil then
     vim.notify('deprecated: please update nvim to 0.7+')
     return
   end
-  vim.diagnostic.config(cfg)
+  M.setup(cfg)
 end
 
 return M

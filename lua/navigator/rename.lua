@@ -376,7 +376,7 @@ function M.rename_inplace(new_name, options)
   state.lsp_params = make_position_params()
   rename_group = api.nvim_create_augroup('nav-rename', {})
   local bufnr = options.bufnr or api.nvim_get_current_buf()
-  local clients = vim.lsp.get_active_clients({
+  local clients = vim.lsp.get_clients({
     bufnr = bufnr,
     name = options.name,
   })
