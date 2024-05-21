@@ -191,7 +191,7 @@ local def = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
   local ref_params = vim.lsp.util.make_position_params()
-  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _bufnr)
+  util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     -- if client.resolved_capabilities.goto_definition then
     if client.server_capabilities.definitionProvider then
       client.request('textDocument/definition', ref_params, definition_hdlr, _bufnr)

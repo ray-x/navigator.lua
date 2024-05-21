@@ -293,7 +293,7 @@ local ref = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
   local ref_params = vim.lsp.util.make_position_params()
-  vim.lsp.for_each_buffer_client(bufnr, function(client, _, _)
+  util.for_each_buffer_client(bufnr, function(client, _, _)
     if client.server_capabilities.referencesProvider then
       client.request('textDocument/references', ref_params, ref_hdlr, bufnr)
     end
