@@ -29,7 +29,7 @@ local definition_hdlr = function(err, locations, ctx, _)
   locations = util.dedup(locations)
   log(locations)
   log('found ' .. #locations .. ' locations')
-  if vim.tbl_islist(locations) then
+  if vim.islist(locations) then
     if #locations > 1 then
       local items = locations_to_items(locations)
       gui.new_list_view({ items = items, api = 'Definition', title = 'Definition' })
@@ -69,7 +69,7 @@ local function def_preview(timeout_ms, method)
   end
 
   log(result)
-  if not vim.tbl_islist(result) then
+  if not vim.islist(result) then
     return
   end
   local data = {}

@@ -327,14 +327,19 @@ local function diag_signs()
         text[k] = v
       end
     end
-    if vim.tbl_isempty(t) or (t[1] and t[1].text:find('W')) then
-      local signs = {
+    -- text must have at least one sign
+    local signs_valid = false
+    for _, v in pairs(text) do
+      if v then
+        signs_valid = true
+        break
+      end
+    end
+    if vim.tbl_isempty(t) or (t[1] and t[1].text and t[1].text:find('W')) and signs_valid == true then
+      log('set signs ', text)
+      return  {
         text = text,
-        linehl = {
-          [vim.diagnostic.severity.ERROR] = 'ErrorMsg',
-        },
       }
-      return signs
     end
   end
 end
@@ -348,6 +353,8 @@ function M.setup(cfg)
   if diagnostic_cfg ~= nil and diagnostic_cfg.float ~= nil then
     return
   end
+
+  local signs = diag_signs()
   diagnostic_cfg = {
     -- Enable underline, use default values
     underline = _NgConfigValues.lsp.diagnostic.underline,
@@ -357,8 +364,10 @@ function M.setup(cfg)
     update_in_insert = _NgConfigValues.lsp.diagnostic.update_in_insert or false,
     severity_sort = _NgConfigValues.lsp.diagnostic.severity_sort,
     float = _NgConfigValues.lsp.diagnostic.float,
-    signs = diag_signs(),
   }
+  if type(signs) == 'table' then
+    diagnostic_cfg.signs = signs
+  end
   diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
   if
     type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' and _NgConfigValues.icons.icons
@@ -373,7 +382,7 @@ function M.setup(cfg)
 
   if _NgConfigValues.lsp.diagnostic_scrollbar_sign then
     api.nvim_create_autocmd({ 'WinScrolled' }, {
-      group = api.nvim_create_augroup('NGWinScrolledGroup', {}),
+      group = api.nvim_create_augroup('NGWinScrolledGroup', { clear = false }),
       pattern = '*',
       callback = function()
         require('navigator.diagnostics').update_err_marker()

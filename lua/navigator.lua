@@ -247,9 +247,10 @@ M.deprecated = function(cfg)
     warn('ts_fold option changed, refer to README for more details')
     cfg.ts_fold = { enable = cfg.ts_fold }
   end
-  local has_nvim_011 = vim.fn.has('nvim-0.11.0')
-  if not has_nvim_011 then
+  local has_nvim_010 = vim.fn.has('nvim-0.10')
+  if not has_nvim_010 then
     vim.lsp.get_clients = vim.lsp.get_active_clients
+    vim.islist = vim.tbl_islist
   end
 end
 
@@ -353,6 +354,7 @@ M.setup = function(cfg)
       end,
     })
   end
+
   vim.defer_fn(function()
     require('navigator.lazyloader').init()
     require('navigator.lspclient.clients').setup(_NgConfigValues)
