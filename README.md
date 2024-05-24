@@ -516,14 +516,14 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 | n    | \<Leader\>re    | rename (lsp default)                                       |
 | n    | \<Leader\>gi    | hierarchy incoming calls                                   |
 | n    | \<Leader\>go    | hierarchy outgoing calls                                   |
-| n    | \<Space\>ff     | format buffer (LSP)
-| v    | \<Space\>ff     | format selection range (LSP)
+| n    | \<Space\>ff     | format buffer (LSP)                                        |
+| v    | \<Space\>ff     | format selection range (LSP)                               |
 | n    | gi              | implementation                                             |
 | n    | \<Space\> D     | type definition                                            |
 | n    | gL              | show line diagnostic                                       |
 | n    | gG              | show diagnostic for all buffers                            |
-| n    | ]d              | next diagnostic                                            |
-| n    | [d              | previous diagnostic                                        |
+| n    | ]d              | next diagnostic error or fallback                          |
+| n    | [d              | previous diagnostic error or fallback                      |
 | n    | \<Leader\> dt   | diagnostic toggle(enable/disable)                          |
 | n    | ]r              | next treesitter reference/usage                            |
 | n    | [r              | previous treesitter reference/usage                        |

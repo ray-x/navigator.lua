@@ -335,15 +335,39 @@ local function diag_signs()
         break
       end
     end
-    if vim.tbl_isempty(t) or (t[1] and t[1].text and t[1].text:find('W')) and signs_valid == true then
+    if
+      vim.tbl_isempty(t) or (t[1] and t[1].text and t[1].text:find('W')) and signs_valid == true
+    then
       log('set signs ', text)
-      return  {
+      return {
         text = text,
       }
     end
   end
 end
 
+--  goto next Error if none found, go to first
+function M.goto_next(opts)
+  opts = opts or {}
+  local bufnr = api.nvim_get_current_buf()
+  local diags = diagnostic.get(bufnr, { severity = vim.diagnostic.severity.ERROR })
+  if diags and #diags > 0 then
+    opts.severity = vim.diagnostic.severity.ERROR
+    return diagnostic.goto_next(opts)
+  end
+  diagnostic.goto_next(opts)
+end
+
+function M.goto_prev(opts)
+  opts = opts or {}
+  local bufnr = api.nvim_get_current_buf()
+  local diags = diagnostic.get(bufnr, { severity = vim.diagnostic.severity.ERROR })
+  if diags and #diags > 0 then
+    opts.severity = vim.diagnostic.severity.ERROR
+    return diagnostic.goto_prev(opts)
+  end
+  diagnostic.goto_prev(opts)
+end
 -- local diag_hdlr_async = function()
 --   local debounce = require('navigator.debounce').debounce_trailing
 --   return debounce(100, diag_hdlr)
@@ -521,9 +545,12 @@ function M.get_line_diagnostic()
   local lnum = api.nvim_win_get_cursor(0)[1] - 1
   local diags = diagnostic.get(api.nvim_get_current_buf(), { lnum = lnum })
 
-  table.sort(diags, function(diag1, diag2)
-    return diag1.severity or 0 < diag2.severity or 0
-  end)
+  local l = 0
+  local cmp = function(d1, d2)
+    return d1.severity < d2.severity
+  end
+  table.sort(diags, cmp)
+
   return diags
 end
 
@@ -547,6 +574,18 @@ function M.show_diagnostics(pos)
   local diags = M.get_line_diagnostic()
   if diags == nil or next(diags) == nil then
     return
+  end
+  -- if there is diagnostic at cursor position, show only that diagnostic
+
+  local line_length = #api.nvim_buf_get_lines(bufnr, lnum, lnum + 1, true)[1]
+  local diags_cursor = vim.tbl_filter(function(d)
+    return d.lnum == lnum
+      and math.min(d.col, line_length - 1) <= col
+      and (d.end_col >= col or d.end_lnum > lnum)
+  end, diags)
+  if #diags_cursor > 0 then
+    opt.scope = 'cursor'
+    diags = diags_cursor
   end
   local diag1 = diags[1]
   opt.offset_x = -1 * (col - diag1.col)

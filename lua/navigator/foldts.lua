@@ -132,11 +132,12 @@ function NG_custom_fold_text()
       spaces[2] = { '@keyword' }
     end
   end
-  local sep2 = ' ' .. string.rep(sep, 3) .. '  '
-  table.insert(line_syntax, { sep2, { '@comment' } })
+  local sep2 = ' ' .. string.rep(sep, 1) .. '  '
+  table.insert(line_syntax, { '  ', { '@tag' } })
+  table.insert(line_syntax, { sep2, { '@tag' } })
   table.insert(line_syntax, { tostring(line_count), { '@number' } })
   table.insert(line_syntax, { ' lines', { '@text.title' } })
-  table.insert(line_syntax, { sep2, { '@comment' } })
+  table.insert(line_syntax, { sep2, { '@tag' } })
   return line_syntax
 end
 
