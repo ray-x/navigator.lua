@@ -237,17 +237,11 @@ _NgConfigValues = {
 }
 
 M.deprecated = function(cfg)
-  if cfg.lsp ~= nil and cfg.lsp.neodev ~= false and cfg.lsp.neodev then
-    warn('neodev option deprecated, refer to README for more details')
-  end
-  if cfg.lsp and cfg.lsp.sumneko_lua then
-    warn('sumneko_lua option deprecated, refer to README for more details')
-  end
   if cfg.ts_fold ~= nil and type(cfg.ts_fold) == 'boolean' then
     warn('ts_fold option changed, refer to README for more details')
     cfg.ts_fold = { enable = cfg.ts_fold }
   end
-  local has_nvim_010 = vim.fn.has('nvim-0.10')
+  local has_nvim_010 = vim.fn.has('nvim-0.10') == 1
   if not has_nvim_010 then
     vim.lsp.get_clients = vim.lsp.get_active_clients
     vim.islist = vim.tbl_islist
