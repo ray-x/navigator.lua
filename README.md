@@ -346,18 +346,22 @@ require'navigator'.setup({
 
     hover = {
       enable = true,
-      keymap = {
-        ['<C-k>'] = {
-          go = function()
-            local w = vim.fn.expand('<cWORD>')
-            vim.cmd('GoDoc ' .. w)
-          end,
-          default = function()
-            local w = vim.fn.expand('<cWORD>')
-            vim.lsp.buf.workspace_symbol(w)
-          end,
-        },
-      },
+      -- fallback when hover failed
+      -- e.g. if filetype is go, try godoc
+      go = function()
+        local w = vim.fn.expand('<cWORD>')
+        vim.cmd('GoDoc ' .. w)
+      end,
+      -- if python, do python doc
+      python = function()
+        -- run pydoc, behaviours defined in lua/navigator.lua
+      end,
+      default = function()
+        -- fallback apply to all file types not been specified above
+        -- local w = vim.fn.expand('<cWORD>')
+        -- vim.lsp.buf.workspace_symbol(w)
+      end,
+    },
 
     diagnostic_scrollbar_sign = {'▃', '▆', '█'}, -- experimental:  diagnostic status in scroll bar area; set to false to disable the diagnostic sign,
                                                  --                for other style, set to {'╍', 'ﮆ'} or {'-', '='}

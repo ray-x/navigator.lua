@@ -8,18 +8,32 @@ local M = {}
 function M.handler(err, result, ctx, config)
   config = config or {}
   config.focus_id = ctx.method
-  if err then
-    return vim.notify('no hover info ' .. err)
-  end
   if api.nvim_get_current_buf() ~= ctx.bufnr then
     -- Ignore result since buffer changed. This happens for slow language servers.
     return
   end
-  if not (result and result.contents) then
+  local failed = false
+  if err then
+    vim.notify('no hover info ' .. err)
+    failed = true
+  end
+  if not result or not result.contents then
     if config.silent ~= true then
       vim.notify('No hover information available')
     end
-    return
+    failed = true
+  end
+  local bufnr = ctx.bufnr
+  -- get filetype for bufnr
+  local ft = api.nvim_buf_get_option(bufnr, 'filetype')
+  if failed then
+    if _NgConfigValues.lsp.hover.ft then
+      local fallback_fn = _NgConfigValues.hover.ft or ''
+      if type(fallback_fn) == 'function' then
+        fallback_fn(ctx, config)
+      end
+    end
+    return -- return early as no valid hover info lets fallback to other sources
   end
   local format = 'markdown'
   local contents ---@type string[]

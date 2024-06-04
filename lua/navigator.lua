@@ -98,43 +98,42 @@ _NgConfigValues = {
     workspace = { enable = true },
     hover = {
       enable = true,
-      keymaps = {
-        ['<C-k>'] = {
-          go = function()
-            local w = vim.fn.expand('<cWORD>')
-            w = w:gsub('*', '')
-            vim.cmd('GoDoc ' .. w)
-          end,
-          python = function()
-            local w = vim.fn.expand('<cWORD>')
-            local setup = {
-              'pydoc',
-              w,
+      -- fallback if hover failed
+      -- go = function()
+      --   local w = vim.fn.expand('<cWORD>')
+      --   w = w:gsub('*', '')
+      --   vim.cmd('GoDoc ' .. w)
+      -- end,
+      python = function()
+        local w = vim.fn.expand('<cWORD>')
+        local setup = {
+          'pydoc',
+          w,
+        }
+        return vim.fn.jobstart(setup, {
+          on_stdout = function(_, data, _)
+            if not data or (#data == 1 and vim.fn.empty(data[1]) == 1) then
+              return
+            end
+            local close_events = { 'CursorMoved', 'CursorMovedI', 'BufHidden', 'InsertCharPre' }
+            local config = {
+              close_events = close_events,
+              focusable = true,
+              border = 'single',
+              width = 80,
+              zindex = 100,
             }
-            return vim.fn.jobstart(setup, {
-              on_stdout = function(_, data, _)
-                if not data or (#data == 1 and vim.fn.empty(data[1]) == 1) then
-                  return
-                end
-                local close_events = { 'CursorMoved', 'CursorMovedI', 'BufHidden', 'InsertCharPre' }
-                local config = {
-                  close_events = close_events,
-                  focusable = true,
-                  border = 'single',
-                  width = 80,
-                  zindex = 100,
-                }
-                vim.lsp.util.open_floating_preview(data, 'python', config)
-              end,
-            })
+            vim.lsp.util.open_floating_preview(data, 'python', config)
           end,
-          default = function()
-            local w = vim.fn.expand('<cword>')
-            print('default ' .. w)
-            vim.lsp.buf.workspace_symbol(w)
-          end,
-        },
-      },
+        })
+      end,
+      default = function()
+        -- local w = vim.fn.expand('<cword>')
+        -- print('default ' .. w)
+        -- vim.lsp.buf.workspace_symbol(w)
+      end,
+      -- },
+      -- },
     }, -- bind hover action to keymap; there are other options e.g. noice, lspsaga provides lsp hover
     format_on_save = true, -- {true|false} set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
@@ -245,6 +244,9 @@ M.deprecated = function(cfg)
   if not has_nvim_010 then
     vim.lsp.get_clients = vim.lsp.get_active_clients
     vim.islist = vim.tbl_islist
+  end
+  if cfg.lsp and cfg.lsp.hover and cfg.lsp.hover.keymaps then
+    warn('lsp.hover.keymaps is deprecated, refer to README for more details')
   end
 end
 
