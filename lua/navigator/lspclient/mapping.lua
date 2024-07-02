@@ -67,7 +67,7 @@ local key_maps = {
   { key = '<Space>wa',     func = require('navigator.workspace').add_workspace_folder,                  desc = 'add_workspace_folder' },
   { key = '<Space>wr',     func = require('navigator.workspace').remove_workspace_folder,               desc = 'remove_workspace_folder' },
   { key = '<Space>ff',     func = vim.lsp.buf.format,                                             mode = 'n',                                               desc = 'format' },
-  { key = '<Space>ff',     func = vim.lsp.buf.range_formatting,                                   mode = 'v',                                               desc = 'range format' },
+  { key = '<Space>ff',     func = vim.lsp.buf.format,                                             mode = 'v',                                               desc = 'range format', opts = {silent = true} },
   { key = '<Space>gm',     func = require('navigator.formatting').range_format,                         mode = 'n',                                         desc = 'range format operator e.g gmip' },
   { key = '<Space>wl',     func = require('navigator.workspace').list_workspace_folders,                desc = 'list_workspace_folders' },
   {
@@ -221,6 +221,11 @@ local function set_mapping(lsp_attach_info)
         opts.desc = value.desc
       end
       opts.buffer = bufnr
+      if value.opts then
+        for k, v in pairs(value.opts) do
+          opts[k] = v
+        end
+      end
       vim.keymap.set(value.mode or 'n', value.key, value.func, opts)
       if string.find(value.desc, 'range format') and value.mode == 'v' then
         rfmtkey = value.key

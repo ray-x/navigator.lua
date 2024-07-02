@@ -1,6 +1,21 @@
--- https://github.com/wention/dotfiles/blob/master/.config/nvim/lua/config/lsp.lua
 -- https://github.com/lukas-reineke/dotfiles/blob/master/vim/lua/lsp/handlers.lua
 
+local get_range = function(cmd)
+  -- if visual selected
+  local range = {
+    start = vim.api.nvim_buf_get_mark(0, '['),
+    ['end'] = vim.api.nvim_buf_get_mark(0, ']'),
+  }
+  -- if specified range
+  if cmd.line1 ~= range.start[1] or cmd.line2 ~= range['end'][1] then
+    -- Supplied range inferred
+    range = {
+      start = { cmd.line1, 0 },
+      ['end'] = { cmd.line2, 2147483647 },
+    }
+  end
+  return range
+end
 return {
   format_hdl = function(err, result, ctx, _) -- FIXME: bufnr is nil
     if err ~= nil or result == nil then
@@ -18,7 +33,10 @@ return {
     vim.defer_fn(function()
       log('fmt callback')
 
-      if ctx.bufnr == vim.api.nvim_get_current_buf() or not vim.api.nvim_buf_get_option(ctx.bufnr, 'modified') then
+      if
+        ctx.bufnr == vim.api.nvim_get_current_buf()
+        or not vim.api.nvim_buf_get_option(ctx.bufnr, 'modified')
+      then
         local view = vim.fn.winsaveview()
         vim.lsp.util.apply_text_edits(result, ctx.bufnr, offset_encoding)
         vim.fn.winrestview(view)
@@ -34,12 +52,12 @@ return {
   end,
   range_format = function()
     local old_func = vim.go.operatorfunc
-    _G.op_func_formatting = function()
-      print('formatting range')
-      local start = vim.api.nvim_buf_get_mark(0, '[')
-      local finish = vim.api.nvim_buf_get_mark(0, ']')
-      print(vim.inspect(start), vim.inspect(finish))
-      vim.lsp.buf.range_formatting({}, start, finish)
+    _G.op_func_formatting = function(cmd)
+      local range = get_range(cmd)
+      vim.lsp.buf.format({
+        async = _NgConfigValues.lsp.format_options.async,
+        range = range,
+      })
       vim.go.operatorfunc = old_func
       _G.op_func_formatting = nil
     end
