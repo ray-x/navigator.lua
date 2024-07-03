@@ -66,8 +66,7 @@ local key_maps = {
   { key = '<Leader>k',     func = require('navigator.dochighlight').hi_symbol,                          desc = 'hi_symbol' },
   { key = '<Space>wa',     func = require('navigator.workspace').add_workspace_folder,                  desc = 'add_workspace_folder' },
   { key = '<Space>wr',     func = require('navigator.workspace').remove_workspace_folder,               desc = 'remove_workspace_folder' },
-  { key = '<Space>ff',     func = vim.lsp.buf.format,                                             mode = 'n',                                               desc = 'format' },
-  { key = '<Space>ff',     func = vim.lsp.buf.format,                                             mode = 'v',                                               desc = 'range format', opts = {silent = true} },
+  { key = '<Space>ff',     func = vim.lsp.buf.format,                                             mode = {'n', 'v', 'x'},                                               desc = 'format' },
   { key = '<Space>gm',     func = require('navigator.formatting').range_format,                         mode = 'n',                                         desc = 'range format operator e.g gmip' },
   { key = '<Space>wl',     func = require('navigator.workspace').list_workspace_folders,                desc = 'list_workspace_folders' },
   {
@@ -245,9 +244,9 @@ local function set_mapping(lsp_attach_info)
       helper_msg = val.func
     end
 
-    local item = (val.mode or 'n') .. '|' .. val.key .. '|' .. helper_msg
+    local item = vim.inspect(val.mode or 'n') .. '|' .. val.key .. '|' .. helper_msg
     if not vim.tbl_contains(key_maps_help, item) then
-      table.insert(key_maps_help, (val.mode or 'n') .. '|' .. val.key .. '|' .. helper_msg)
+      table.insert(key_maps_help, vim.inspect(val.mode or 'n') .. '|' .. val.key .. '|' .. helper_msg)
     end
   end
 
