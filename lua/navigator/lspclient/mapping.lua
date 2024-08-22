@@ -32,7 +32,7 @@ local remap = util.binding_remap
 local key_maps = {
   { key = 'gr',            func = require('navigator.reference').async_ref,                             desc = 'async_ref' },
   { key = '<Leader>gr',    func = require('navigator.reference').reference,                             desc = 'reference' }, -- reference deprecated
-  { mode = 'i',            key = '<M-k>',                                                               func = vim.lsp.buf.signature_help,                        desc = 'signature_help' },
+  { key = '<M-k>',         func = vim.lsp.buf.signature_help,                                           desc = 'signature_help', mode = 'i' },
   { key = '<c-k>',         func = vim.lsp.buf.signature_help,                                           desc = 'signature_help' },
   { key = '<Leader>g0',    func = require('navigator.symbols').document_symbols,                        desc = 'document_symbols' },
   { key = 'gW',            func = require('navigator.workspace').workspace_symbol_live,                 desc = 'workspace_symbol_live' },
@@ -45,13 +45,12 @@ local key_maps = {
   { key = '<Leader>gt',    func = require('navigator.treesitter').buf_ts,                               desc = 'buf_ts' },
   { key = '<Leader>gT',    func = require('navigator.treesitter').bufs_ts,                              desc = 'bufs_ts' },
   { key = '<Leader>ct',    func = require('navigator.ctags').ctags,                                     desc = 'ctags' },
-  { key = '<Space>ca',     mode = 'n',                                                                  func = require('navigator.codeAction').code_action,       desc = 'code_action' },
-  { key = '<Space>ca',     mode = 'v',                                                                  func = require('navigator.codeAction').range_code_action, desc = 'range_code_action' },
+  { key = '<Space>ca',     func = require('navigator.codeAction').code_action, desc = 'code_action',    mode = {'n', 'v'} },
   -- { key = '<Leader>re', func = 'rename()' },
   { key = '<Space>rn',     func = require('navigator.rename').rename,                                   desc = 'rename' },
   { key = '<Leader>gi',    func = vim.lsp.buf.incoming_calls,                                           desc = 'incoming_calls' },
   { key = '<Leader>go',    func = vim.lsp.buf.outgoing_calls,                                           desc = 'outgoing_calls' },
-  { key = 'gi',            func = vim.lsp.buf.implementation, desc = 'implementation',  fallback = fallback_fn('gi') }, -- insert
+  { key = 'gi',            func = vim.lsp.buf.implementation,                                           desc = 'implementation',  fallback = fallback_fn('gi') }, -- insert
   { key = '<Space>D',      func = vim.lsp.buf.type_definition,                                          desc = 'type_definition' },
   { key = 'gL',            func = require('navigator.diagnostics').show_diagnostics,                    desc = 'show_diagnostics' },
   { key = 'gG',            func = require('navigator.diagnostics').show_buf_diagnostics,                desc = 'show_buf_diagnostics' },
@@ -66,15 +65,10 @@ local key_maps = {
   { key = '<Leader>k',     func = require('navigator.dochighlight').hi_symbol,                          desc = 'hi_symbol' },
   { key = '<Space>wa',     func = require('navigator.workspace').add_workspace_folder,                  desc = 'add_workspace_folder' },
   { key = '<Space>wr',     func = require('navigator.workspace').remove_workspace_folder,               desc = 'remove_workspace_folder' },
-  { key = '<Space>ff',     func = vim.lsp.buf.format,                                             mode = {'n', 'v', 'x'},                                               desc = 'format' },
+  { key = '<Space>ff',     func = vim.lsp.buf.format,                                                   desc = 'format', mode = {'n', 'v', 'x'} },
   { key = '<Space>gm',     func = require('navigator.formatting').range_format,                         mode = 'n',                                         desc = 'range format operator e.g gmip' },
   { key = '<Space>wl',     func = require('navigator.workspace').list_workspace_folders,                desc = 'list_workspace_folders' },
-  {
-    key = '<Space>la',
-    mode = 'n',
-    func = require('navigator.codelens').run_action,
-    desc = 'run code lens action',
-  }
+  { key = '<Space>la',     func = require('navigator.codelens').run_action, desc = 'run code lens action', mode = 'n'}
   -- stylua: ignore end
 }
 
