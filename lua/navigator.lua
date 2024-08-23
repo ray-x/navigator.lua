@@ -61,6 +61,7 @@ _NgConfigValues = {
       sign_priority = 40,
       virtual_text = true,
       virtual_text_icon = true,
+      only = {},
     },
     rename = {
       enable = true,

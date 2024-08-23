@@ -79,7 +79,7 @@ M.on_attach = function(client, bufnr)
         group = api.nvim_create_augroup('NGCodeActGroup_' .. tostring(bufnr), {}),
         buffer = bufnr,
         callback = function()
-          require('navigator.codeAction').code_action_prompt(bufnr)
+          require('navigator.codeAction').code_action_prompt(bufnr, _NgConfigValues.lsp.code_action.only)
         end,
       })
     end
