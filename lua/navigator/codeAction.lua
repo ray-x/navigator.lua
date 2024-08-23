@@ -225,7 +225,7 @@ code_action.code_action_prompt = function(bufnr, only)
     context.only = only
   end
 
-  log('using code action context', context)
+  log('using code action context for prompt', context)
 
   local winid = get_current_winid()
   code_action[winid] = code_action[winid] or {}
