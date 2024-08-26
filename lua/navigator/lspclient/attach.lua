@@ -74,12 +74,22 @@ M.on_attach = function(client, bufnr)
 
   if _NgConfigValues.lsp.code_action.enable then
     if client.server_capabilities.codeActionProvider and client.name ~= 'null-ls' then
+
+      local kinds = {}
+      if client.server_capabilities.codeActionProvider.codeActionKinds then
+        for _, kind in ipairs(client.server_capabilities.codeActionProvider.codeActionKinds) do
+          if not vim.tbl_contains(_NgConfigValues.lsp.code_action.exclude, kind) then
+            table.insert(kinds, kind)
+          end
+        end
+      end
+
       trace('code action enabled for client', client.server_capabilities.codeActionProvider)
       api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
         group = api.nvim_create_augroup('NGCodeActGroup_' .. tostring(bufnr), {}),
         buffer = bufnr,
         callback = function()
-          require('navigator.codeAction').code_action_prompt(bufnr, _NgConfigValues.lsp.code_action.only)
+        require('navigator.codeAction').code_action_prompt(bufnr, kinds)
         end,
       })
     end
