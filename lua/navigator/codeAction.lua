@@ -147,12 +147,11 @@ local action_virtual_call_back = function(line, diagnostics)
   return code_action:render_action_virtual_text(line, diagnostics)
 end
 
-local code_action_req = function(_call_back_fn, diagnostics)
-  local context = { diagnostics = diagnostics }
+local code_action_req = function(_call_back_fn, context)
   local params = vim.lsp.util.make_range_params()
   params.context = context
   local line = params.range.start.line
-  local callback = _call_back_fn(line, diagnostics)
+  local callback = _call_back_fn(line, context.diagnostics)
   vim.lsp.buf_request(0, 'textDocument/codeAction', params, callback)
 end
 
@@ -188,7 +187,7 @@ code_action.code_action = function()
   end, 1000)
 end
 
-code_action.code_action_prompt = function(bufnr)
+code_action.code_action_prompt = function(bufnr, only)
   if special_buffers[vim.bo.filetype] then
     log('skip buffer', vim.bo.filetype)
     return
@@ -203,10 +202,20 @@ code_action.code_action_prompt = function(bufnr)
     diagnostics = diagnostic.get(vim.api.nvim_get_current_buf(), { lnum = lnum })
   end
 
+  local context = {
+    diagnostics = diagnostics,
+  }
+
+  if next(only) then
+    context.only = only
+  end
+
+  log('using code action context for prompt', context)
+
   local winid = get_current_winid()
   code_action[winid] = code_action[winid] or {}
   code_action[winid].lightbulb_line = code_action[winid].lightbulb_line or 0
-  code_action_req(action_virtual_call_back, diagnostics)
+  code_action_req(action_virtual_call_back, context)
 end
 
 return code_action
