@@ -1,7 +1,7 @@
 return {
   'angularls',
   'gopls',
-  'tsserver',
+  'ts_ls',
   'flow',
   'bashls',
   'dockerls',
