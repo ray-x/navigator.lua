@@ -74,9 +74,11 @@ M.on_attach = function(client, bufnr)
 
   if _NgConfigValues.lsp.code_action.enable then
     if client.server_capabilities.codeActionProvider and client.name ~= 'null-ls' then
-
       local kinds = {}
-      if client.server_capabilities.codeActionProvider.codeActionKinds then
+      if
+        type(client.server_capabilities.codeActionProvider) == 'table'
+        and client.server_capabilities.codeActionProvider.codeActionKinds
+      then
         for _, kind in ipairs(client.server_capabilities.codeActionProvider.codeActionKinds) do
           if not vim.tbl_contains(_NgConfigValues.lsp.code_action.exclude, kind) then
             table.insert(kinds, kind)
@@ -89,7 +91,7 @@ M.on_attach = function(client, bufnr)
         group = api.nvim_create_augroup('NGCodeActGroup_' .. tostring(bufnr), {}),
         buffer = bufnr,
         callback = function()
-        require('navigator.codeAction').code_action_prompt(bufnr, kinds)
+          require('navigator.codeAction').code_action_prompt(bufnr, kinds)
         end,
       })
     end
