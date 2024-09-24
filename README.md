@@ -369,7 +369,7 @@ require'navigator'.setup({
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
     display_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you want to ignore it
                                   -- set to 'trouble' to show diagnostcs in Trouble
-    tsserver = {
+    ts_ls = {
       filetypes = {'typescript'} -- disable javascript etc,
       -- set to {} to disable the lspclient for all filetypes
     },
@@ -420,7 +420,7 @@ Built clients:
 
 ```lua
 local servers = {
-  "angularls", "gopls", "tsserver", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
+  "angularls", "gopls", "ts_ls", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
   "jedi_language_server", "jdtls", "lua_ls", "vimls", "html", "jsonls", "solargraph", "cssls",
   "yamlls", "clangd", "ccls", "sqlls", "denols", "graphql", "dartls", "dotls",
   "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
@@ -667,8 +667,8 @@ To start LSP installed by mason, please use following setups
 require'navigator'.setup({
   -- mason = false -- default value is false
   lsp = {
-    tsserver = { cmd = {'your tsserver installed by mason'} }
-    -- e.g. tsserver = { cmd = {'/home/username/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/bin/tsserver'} }
+    ts_ls = { cmd = {'your typescript-language-server installed by mason'} }
+    -- e.g. ts_ls = { cmd = {'/home/username/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/bin/typescript-language-server'} }
 
   }
 })
@@ -681,9 +681,8 @@ require'navigator'.setup({
   -- mason = false -- default value is false
 
   lsp = {
-    tsserver = {
+    pyright = {
       cmd = { "/Users/username/.local/share/nvim/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio" }
-      -- or mason: cmd = { "/Users/username/.local/share/nvim/mason/packages/pyright/node_modules/pyright/index.js", "--stdio"}
     }
   }
 }
