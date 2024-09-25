@@ -4,7 +4,8 @@
 
 - Easy code navigation, view diagnostic errors, see relationships of functions, variables
 
-- A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provides a better highlight but also help you analyse symbol context effectively.
+- A plugin combines the power of LSP and 🌲🏡 Treesitter together. Not only provides a better highlight but also help
+  you analyse symbol context effectively.
 
 - ctags fuzzy search & build ctags symbols
 
@@ -14,19 +15,23 @@ Here are some examples:
 
 ## Example: Javascript closure
 
-The screenshot below shows javascript call tree 🌲 for variable `browser` within a closure. This feature parallels the LSP 'incoming & outgoing calls' feature. It is designed for the symbol analysis.
+The screenshot below shows javascript call tree 🌲 for variable `browser` within a closure. This feature parallels the
+LSP 'incoming & outgoing calls' feature. It is designed for the symbol analysis.
 
 ![navigator](https://user-images.githubusercontent.com/1681295/126022829-291a7a2e-4d24-4fde-8293-5ae61562e67d.jpg)
 
 Explanation:
 
-- The topmost entry in the floating window indicates there are 3 references for the symbol <span style="color:red"> _browser_ </span> within closure.js
+- The topmost entry in the floating window indicates there are 3 references for the symbol <span style="color:red">
+  _browser_ </span> within closure.js
 - The first reference of browser is an assignment, an emoji 📝 indicates the value is modified in this line. In many
   cases, we search for references to find out when the value changed.
 - The second reference of `browser` is inside function `displayName` and `displayName` sit inside `makeFunc`, So you
   will see `displayName{} <- makeFunc{}`
-- The next occurrence of `browser` is located within the function `displayName`, which is nested inside `makeFunc`. Hence, the display reads `displayName{} <- makeFunc{}.`
-- The final reference is akin to the previous one, except that since `browser` appears on the right side of the `=`, its value remains unaltered, and consequently, no emoji is displayed.
+- The next occurrence of `browser` is located within the function `displayName`, which is nested inside `makeFunc`.
+  Hence, the display reads `displayName{} <- makeFunc{}.`
+- The final reference is akin to the previous one, except that since `browser` appears on the right side of the `=`, its
+  value remains unaltered, and consequently, no emoji is displayed.
 
 ## Example: C++ definition
 
@@ -34,95 +39,71 @@ C++ example: search reference and definition
 
 ![cpp_ref](https://user-images.githubusercontent.com/1681295/119215215-8bd7a080-bb0f-11eb-82fc-8cdf1955e6e7.jpg)
 
-You may find a 🦕 dinosaur(d) on the line of `Rectangle rect,` which means there is a definition (d for def) of rect in this line.
+You may find a 🦕 dinosaur(d) on the line of `Rectangle rect,` which means there is a definition (d for def) of rect in
+this line.
 
 `<- f main()` means the definition is inside function main().
-
-## Golang struct type
-
-Struct type references in multiple Go 󰟓  files
-
-![go_reference](https://user-images.githubusercontent.com/1681295/119123823-54b3b180-ba73-11eb-8790-097601e10f6a.gif)
-
-This feature can provide you info in which function/class/method the variable was referenced. It is handy for a large
-project where class/function definition is too long to fit into the preview window. Also provides a bird's eye view of where the
-variable is:
-
-- Referenced
-- Modified
-- Defined
-- Called
 
 ## Features
 
 - LSP easy setup. Support the most commonly used lsp clients setup. Dynamic lsp activation based on buffer type. This
-  also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml). A better LSP default enables
-    * autocompletion *(e.g. nvim-cmp),
-    * codelens
-    * lsp folding
-    * go implementation
-    * incoming/outgoing call and ccls call hierarchy
-    * range formatting
+  also enables you to handle workspace with mixed types of codes (e.g. Go + javascript + yml).
 
-- Out of box experience. 10 lines of minimum init.lua can turn your neovim into a full-featured LSP & Treesitter powered IDE
+- Out of box experience. 10 lines of minimum init.lua can turn your neovim into a full-featured LSP & Treesitter powered
+  IDE
 
-- Lazy loading friendly.
+- UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors,
+  references etc. It covers all features(handler) provided by LSP from commonly used search reference, to less commonly
+  used search for interface implementation.
 
-- UI with floating windows, navigator provides a visual way to manage and navigate through symbols, diagnostic errors, reference etc. It covers
-  all features(handler) provided by LSP from commonly used search reference, to less commonly used search for interface
-  implementation.
+- [Edit your code in preview window](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md#edit-in-preview-window)
 
-- Code Action GUI
+- Async (Luv async thread and tasks) request with lsp.buf_request for better performance
 
-- Luv async thread and tasks
-
-- Edit your code in preview window
-
-- Async request with lsp.buf_request for reference search
-
-- Treesitter symbol search. It is handy for large files (Some of LSP e.g. lua_ls, there is a 100kb file size limitation?). Also as LSP trying to hide details behind, Treesitter allows you to access all AST semantics.
+- Treesitter symbol search. It is handy for large files (Some of LSP e.g. lua_ls, there is a 100kb file size
+  limitation?). Also as LSP trying to hide details behind, Treesitter allows you to access all AST semantics.
 
 - FZY search with either native C (if gcc installed) or Lua-JIT
 
-- LSP multiple symbols highlight/marker and hop between document references
+- [LSP multiple symbols highlight/marker and hop between document references](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md#highlight-document-symbol-and-jump-between-reference)
 
-- Preview definination/references
+- [Preview definition/references](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md#definition-preview)
 
-- Better navigation for diagnostic errors, Navigate through all files/buffers that contain errors/warnings
+- [Better navigation for diagnostic errors, Navigate through all files/buffers that contain errors/warnings](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md#diagnostic)
 
 - Grouping references/implementation/incoming/outgoing based on file names.
 
-- Treesitter based variable/function context analysis. It is 10x times faster compared to purely rely on LSP. In most
-  of the case, it takes treesitter less than 4 ms to read and render all nodes for a file of 1,000 LOC.
+- Treesitter based variable/function context analysis. It is 10x times faster compared to purely rely on LSP. In most of
+  the case, it takes treesitter less than 4 ms to read and render all nodes for a file of 1,000 LOC.
 
 - The first plugin, IMO, allows you to search in all treesitter symbols in the workspace.
 
-- Nerdfont, emoji for LSP and treesitter kind
+- Optimize display (remove trailing bracket/space), display the caller of reference, de-duplicate lsp results (e.g
+  reference in the same line). Using treesitter for file preview highlighter etc
 
-- Optimize display (remove trailing bracket/space), display the caller of reference, de-duplicate lsp results (e.g reference
-  in the same line). Using treesitter for file preview highlighter etc
+- [ccls call hierarchy](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md#call-hierarchy-incomingoutgoing-calls)
+  (Non-standard `ccls/call` API) supports
 
-- ccls call hierarchy (Non-standard `ccls/call` API) supports
+- Advanced folding capabilities:
+  - Incorporates a tailored folding algorithm based on treesitter & LSP_fold, providing a user experience comparable to
+    Visual Studio Code.
+    - Visible Closing Brackets: Ensures that end or closing brackets stay visible even when code is folded.
+    - Collapsible Comments: Allows users to fold and unfold comment sections.
+    - Fold Indicator: Displays indicators for lines that are folded.
+    - Highlighted Folded Lines: Applies syntax highlighting to folded lines (supported in Neovim v0.10.x+).
 
-- Incorporates a modified folding algorithm based on treesitter or LSP_fold, providing a user experience comparable to Visual Studio Code.
-    - Ensures end or closing brackets remain visible.
-    - Features specific functionality for comment folding.
-    - Enables the display of folded lines.
-    - Includes syntax highlighting capabilities (supported in Neovim version 0.10.x and above).
-
-- Treesitter symbols sidebar, LSP document symbole sidebar. Both with preview and folding
+- [Treesitter symbols sidebar](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md#sidebar-folding-outline),
+  LSP document symbol sidebar. Both with preview and folding
 
 - Calltree: Display and expand Lsp incoming/outgoing calls hierarchy-tree with sidebar
 
 - Fully support LSP CodeAction, CodeLens, CodeLens action. Help you improve code quality.
 
-- LRU cache for treesitter nodes
-
 - Lazy loader friendly
 
-- Multigrid support (different font and detachable)
+- [Multigrid support (different font and detachable)](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md#sidebar-folding-outline)
 
-- Side panel (sidebar) and floating windows
+- [Side panel (sidebar) and floating windows](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md#sidebar-folding-outline)
 
 ## Why a new plugin
 
@@ -138,12 +119,17 @@ I'd like to go beyond what the system is offering.
 - [nvim-treesitter-textobjects](https://github.com/nvim-treesitter/nvim-treesitter-textobjects)
 - [inc-rename.nvim](https://github.com/smjonas/inc-rename.nvim)
 
+## Showcases and Screenshots
+
+For more showcases, please check [showcases.md](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md)
+
 ## Install
 
 Require nvim-0.9 or above, nightly (0.10 or greater) preferred
 
-You can remove your lspconfig setup and use this plugin.
-The plugin depends on lspconfig and [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(migrate from [romgrk's project](romgrk/fzy-lua-native)).
+You can remove your lspconfig setup and use this plugin. The plugin depends on lspconfig and
+[guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(migrate from
+[romgrk's project](romgrk/fzy-lua-native)).
 
 ```vim
 Plug 'neovim/nvim-lspconfig'
@@ -195,11 +181,10 @@ require'navigator'.setup()
 EOF
 ```
 
-You can remove your lspconfig.lua and use the hooks of navigator.lua. As the
-navigator will bind keys and handler for you. The LSP will be loaded lazily based on filetype.
+You can remove your lspconfig.lua and use the hooks of navigator.lua. As the navigator will bind keys and handler for
+you. The LSP will be loaded lazily based on filetype.
 
-A treesitter only mode. In some cases LSP is buggy or not available, you can also use treesitter
-standalone
+A treesitter only mode. In some cases LSP is buggy or not available, you can also use treesitter standalone
 
 ```vim
 call plug#begin('~/.vim/plugged')
@@ -223,9 +208,7 @@ EOF
 
 ## Work with nvim-cmp and nvim-autopairs
 
-The buffer type of navigator floating windows is `guihua`
-I would suggest disable `guihua` for autocomplete.
-e.g.
+The buffer type of navigator floating windows is `guihua` I would suggest disable `guihua` for autocomplete. e.g.
 
 ```lua
 require('nvim-autopairs').setup{
@@ -248,7 +231,6 @@ vim.cmd("autocmd FileType guihua_rust lua require('cmp').setup.buffer { enabled 
 Nondefault configuration example:
 
 ```lua
-
 require'navigator'.setup({
   debug = false, -- log output, set to true and log path: ~/.cache/nvim/gh.log
                  -- slowdownd startup and some actions
@@ -430,8 +412,8 @@ local servers = {
 ```
 
 Navigator will try to load available lsp server/client based on filetype. The clients has none default on_attach.
-incremental sync and debounce is enabled by navigator. And the lsp
-snippet will be enabled. So you could use COQ and nvim-cmp snippet expand.
+incremental sync and debounce is enabled by navigator. And the lsp snippet will be enabled. So you could use COQ and
+nvim-cmp snippet expand.
 
 Other than above setup, additional none default setup are used for following lsp:
 
@@ -443,17 +425,19 @@ Other than above setup, additional none default setup are used for following lsp
 - pyright
 - ccls
 
-Please check [client setup](https://github.com/ray-x/navigator.lua/blob/26012cf9c172aa788a2e53018d94b32c5c75af75/lua/navigator/lspclient/clients.lua#L98-L234)
+Please check
+[client setup](https://github.com/ray-x/navigator.lua/blob/26012cf9c172aa788a2e53018d94b32c5c75af75/lua/navigator/lspclient/clients.lua#L98-L234)
 
 The plugin can work with multiple LSP, e.g sqlls+gopls+efm. But there are cases you may need to disable some of the
 servers. (Prevent loading multiple LSP for same source code.) e.g. I saw strange behaviours when I use
-pylsp+pyright+jedi
-together. If you have multiple similar LSP installed and have trouble with the plugin, please enable only one at a time.
+pylsp+pyright+jedi together. If you have multiple similar LSP installed and have trouble with the plugin, please enable
+only one at a time.
 
 #### Add your own servers
 
 Above servers covered a small part neovim lspconfig support, You can still use lspconfig to add and config servers not
-in the list. If you would like to add a server not in the list, you can check this PR https://github.com/ray-x/navigator.lua/pull/107
+in the list. If you would like to add a server not in the list, you can check this PR
+https://github.com/ray-x/navigator.lua/pull/107
 
 Alternatively, update following option in setup(if you do not want a PR):
 
@@ -465,8 +449,8 @@ Above option add cmake and lexls to the default server list
 
 ### Disable a lsp client loading from navigator
 
-Note: If you have multiple lsp installed for same language, please only enable one at a time by disable others with e.g. `disable_lsp={'denols', 'clangd'}`
-To disable a specific LSP, set `filetypes` to {} e.g.
+Note: If you have multiple lsp installed for same language, please only enable one at a time by disable others with e.g.
+`disable_lsp={'denols', 'clangd'}` To disable a specific LSP, set `filetypes` to {} e.g.
 
 ```lua
 require'navigator'.setup({
@@ -486,9 +470,10 @@ require'navigator'.setup({
 })
 ```
 
-### Try it your self
+### Try it yourself
 
-In `playground` folder, there is a `init.lua` and source code for you to play with. Check [playground/README.md](https://github.com/ray-x/navigator.lua/blob/master/playground/README.md) for more details
+In `playground` folder, there is a `init.lua` and source code for you to play with. Check
+[playground/README.md](https://github.com/ray-x/navigator.lua/blob/master/playground/README.md) for more details
 
 ### Default keymaps
 
@@ -555,7 +540,8 @@ In `playground` folder, there is a `init.lua` and source code for you to play wi
 
 ### Colors/Highlight
 
-You can override default highlight GuihuaListDark (listview) and GuihuaTextViewDark (code view) and GuihuaListHl (select item)
+You can override default highlight GuihuaListDark (listview) and GuihuaTextViewDark (code view) and GuihuaListHl (select
+item)
 
 e.g.
 
@@ -576,11 +562,12 @@ LspDiagnosticsXXX are used for diagnostic. Please check highlight.lua and dochig
   - treesitter (list treesitter symbols, object analysis)
   - lsp-signature (better signature help)
 
-The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existence and load those plugins only if they existed.
+The plugin can be loaded lazily (packer `opt = true` ), And it will check if optional plugins existence and load those
+plugins only if they exists.
 
-The terminal will need to be able to output nerdfont and emoji correctly. I am using Kitty with nerdfont (Victor Mono).
+Terminal nerdfont and emoji capacity. I am using Kitty with nerdfont (Victor Mono).
 
-## Integrate with mason (williamboman/mason.nvim)
+## Integrate with williamboman/mason.nvim
 
 If you are using mason and would like to use the lsp servers installed by mason. Please set
 
@@ -589,7 +576,6 @@ mason = true -- mason user
 ```
 
 In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
-
 
 for mason
 
@@ -657,9 +643,7 @@ Another way to setup mason is disable navigator lsp setup and using mason setup 
       })
 ```
 
-
-Alternatively, Navigator can be used to startup the server installed by mason.
-as it will override the navigator setup
+Alternatively, Navigator can be used to startup the server installed by mason. as it will override the navigator setup
 
 To start LSP installed by mason, please use following setups
 
@@ -686,18 +670,18 @@ require'navigator'.setup({
     }
   }
 }
-
 ```
 
 ### Integration with other lsp plugins (e.g. rust-tools, go.nvim, clangd extension)
 
 There are lots of plugins provides lsp support
-* go.nvim allow you either hook gopls from go.nvim or from navigator and it can export the lsp setup from go.nvim.
-* rust-tools and clangd allow you to setup on_attach from config server
-* [neodev](https://github.com/folke/neodev.nvim) Dev setup for lua development. Navigator help you setup neodev
 
+- go.nvim allow you either hook gopls from go.nvim or from navigator and it can export the lsp setup from go.nvim.
+- rust-tools and clangd allow you to setup on_attach from config server
+- [neodev](https://github.com/folke/neodev.nvim) Dev setup for lua development. Navigator help you setup neodev
 
-  * setup with neodev
+  - setup with neodev
+
 ```lua
 use  {"folke/neodev.nvim",
   ft = 'lua',
@@ -713,11 +697,9 @@ use {"ray-x/navigator.lua",
   }
 ```
 
-
-  * Here is an example to setup rust with rust-tools
+- Here is an example to setup rust with rust-tools
 
 ```lua
-
 require('rust-tools').setup({
   server = {
     on_attach = function(client, bufnr)
@@ -740,7 +722,6 @@ require("clangd_extensions").setup {
     end,
   }
 }
-
 ```
 
 ## Usage
@@ -766,11 +747,12 @@ require'navigator'.setup({on_attach = function(client, bufnr) require 'illuminat
 
 I am using:
 
-- LspReferenceRead, LspReferenceText and LspReferenceWrite are used for `autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()`
-  That is where you saw the current symbol been highlighted.
+- LspReferenceRead, LspReferenceText and LspReferenceWrite are used for
+  `autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()` That is where you saw the current symbol been
+  highlighted.
 
-- GuihuaListDark and GuihuaTextViewDark is used for floating listvew and TextView. They are be based on current background
-  (Normal) and PmenuSel
+- GuihuaListDark and GuihuaTextViewDark is used for floating listvew and TextView. They are be based on current
+  background (Normal) and PmenuSel
 
 - In future, I will use NormalFloat for floating view. But ATM, most of colorscheme does not define NormalFloat
 
@@ -778,19 +760,19 @@ You can override the above highlight to fit your current colorscheme
 
 ## commands
 
-| command         | function                                                                  |
-| --------------- | ------------------------------------------------------------------------- |
-| LspToggleFmt    | toggle lsp auto format                                                    |
-| LspKeymaps      | show LSP related keymaps                                                  |
-| Nctags {args}   | show ctags symbols, args: -g regen ctags                                  |
-| LspRestart      | reload lsp                                                                |
-| LspToggleFmt    | toggle lsp format                                                         |
-| LspSymbols      | document symbol in side panel                                             |
-| LspAndDiag      | document symbol and diagnostics in side panel                             |
-| NRefPanel       | show symbol reference in side panel                                       |
-| TSymbols        | treesitter symbol in side panel                                           |
-| TsAndDiag       | treesitter symbol and diagnostics in side panel                           |
-| Calltree {args} | lsp call hierarchy call tree, args: -i (incoming default), -o (outgoing)  |
+| command         | function                                                                 |
+| --------------- | ------------------------------------------------------------------------ |
+| LspToggleFmt    | toggle lsp auto format                                                   |
+| LspKeymaps      | show LSP related keymaps                                                 |
+| Nctags {args}   | show ctags symbols, args: -g regen ctags                                 |
+| LspRestart      | reload lsp                                                               |
+| LspToggleFmt    | toggle lsp format                                                        |
+| LspSymbols      | document symbol in side panel                                            |
+| LspAndDiag      | document symbol and diagnostics in side panel                            |
+| NRefPanel       | show symbol reference in side panel                                      |
+| TSymbols        | treesitter symbol in side panel                                          |
+| TsAndDiag       | treesitter symbol and diagnostics in side panel                          |
+| Calltree {args} | lsp call hierarchy call tree, args: -i (incoming default), -o (outgoing) |
 
 ## Screenshots
 
@@ -800,131 +782,10 @@ colorscheme: [aurora](https://github.com/ray-x/aurora)
 
 Pls check the first part of README
 
-### Definition preview
-
-Using treesitter and LSP to view the symbol definition
-
-![image](https://user-images.githubusercontent.com/1681295/139771978-bbc970a5-be9f-42cf-8942-3477485bd89c.png)
-
-### Sidebar, folding, outline
-
-Treesitter outline and Diagnostics
-<img width="708" alt="image" src="https://user-images.githubusercontent.com/1681295/174791609-0023e68f-f1f4-4335-9ea2-d2360e9f0bfd.png">
-<img width="733" alt="image" src="https://user-images.githubusercontent.com/1681295/174804579-26f87fbf-426b-46d0-a7a3-a5aab69c032f.png">
-
-The side panel is vim buffer. You can toggle folds with za/zo/zc
-
-
-Calltree (Expandable LSP call hierarchy)
-<img width="769" alt="image" src="https://user-images.githubusercontent.com/1681295/176998572-e39fc968-4c8c-475d-b3b8-fb7991663646.png">
-
-### GUI and multigrid support
-
-You can load a different font size for floating win
-
-![multigrid2](https://user-images.githubusercontent.com/1681295/139196378-bf69ade9-c916-42a9-a91f-cccb39b9c4eb.jpg)
-
-### Document Symbol and navigate through the list
-
-![doc_symbol_and_navigate](https://user-images.githubusercontent.com/1681295/148642747-1870b1a4-67c2-4a0d-8a41-d462ecdc663e.gif)
-The key binding to navigate in the list.
-
-- up and down key
-- `<Ctrl-f/b>` for page up and down
-- number key 1~9 go to the ith item.
-- If there are loads of results, would be good to use fzy search prompt to filter out the result you are interested.
-
-### Workspace Symbol
-
-![workspace symbol](https://github.com/ray-x/files/blob/master/img/navigator/workspace_symbol.gif?raw=true)
-
-### highlight document symbol and jump between reference
-
-![multiple_symbol_hi3](https://user-images.githubusercontent.com/1681295/120067627-f9f80680-c0bf-11eb-9216-18e5c8547f59.gif)
-
-## Current symbol highlight and jump backward/forward between symbols
-
-Document highlight provided by LSP.
-Jump between symbols with treesitter (with `]r` and `[r`)
-![doc jump](https://github.com/ray-x/files/blob/master/img/navigator/doc_hl_jump.gif?raw=true)
-
-### Diagnostic
-
-Visual studio code style show errors minimap in scroll bar area
-(Check setup for `diagnostic_scrollbar_sign`)
-
-![diagnostic_scroll_bar](https://user-images.githubusercontent.com/1681295/128736430-e365523d-810c-4c16-a3b4-c74969f45f0b.jpg)
-
-Diagnostic in single bufer
-
-![diagnostic](https://github.com/ray-x/files/blob/master/img/navigator/diag.jpg?raw=true)
-
-Show diagnostic in all buffers
-
-![diagnostic multi files](https://github.com/ray-x/files/blob/master/img/navigator/diagnostic_multiplefiles.jpg?raw=true)
-
-### Edit in preview window
-
-You can in place edit your code in floating window
-
-<https://user-images.githubusercontent.com/1681295/121832919-89cbc080-cd0e-11eb-9778-11d0f356b38d.mov>
-
-(Note: This feature only available in `find reference` and `find diagnostic`, You can not add/remove lines in floating window)
-
-### Implementation
-
-![implementation](https://user-images.githubusercontent.com/1681295/118735346-967e0580-b883-11eb-8c1e-88c5810f7e05.jpg?raw=true)
-
-### Fzy search in reference
-
-![fzy_reference](https://github.com/ray-x/files/blob/master/img/navigator/fzy_reference.jpg?raw=true)
-
-### Code actions
-
-![code actions](https://github.com/ray-x/files/blob/master/img/navigator/codeaction.jpg?raw=true)
-
-### Symbol rename
-
-<https://user-images.githubusercontent.com/1681295/200327179-0fc84660-44a8-4ee1-9631-2cc7a17b0b12.mov>
-
-#### Fill struct with gopls
-
-![code actions fill struct](https://github.com/ray-x/files/blob/master/img/navigator/fill_struct.gif?raw=true)
-
-### Code preview with highlight
-
-![treesitter_preview](https://user-images.githubusercontent.com/1681295/118900852-4bccbe00-b955-11eb-82f6-0747b1b64e7c.jpg)
-
-### Treesitter symbol
-
-Treetsitter symbols in all buffers
-![treesitter](https://user-images.githubusercontent.com/1681295/118734953-cc6eba00-b882-11eb-9db8-0a052630d57e.jpg?raw=true)
-
-### Call hierarchy (incoming/outgoing calls)
-
-![incomming_calls](https://user-images.githubusercontent.com/1681295/142348079-49b71486-4f16-4f10-95c9-483aad11c262.jpg)
-
-### Light bulb if codeAction available
-
-![lightbulb](https://github.com/ray-x/files/blob/master/img/navigator/lightbulb.jpg?raw=true)
-
-### Codelens
-
-Codelens for gopls/golang. Garbage collection analyse:
-
-![codelens](https://user-images.githubusercontent.com/1681295/132428956-7835bf30-2ed5-4871-b2d7-7fbad22f63e8.jpg)
-
-Codelens for C++/ccls. Symbol reference
-
-![codelens_cpp_ccls](https://user-images.githubusercontent.com/1681295/132429134-abc6547e-79cc-44a4-b7a9-23550b895e51.jpg)
-
-### Predefined LSP symbol nerdfont/emoji
-
-![nerdfont](https://github.com/ray-x/files/blob/master/img/navigator/icon_nerd.jpg?raw=true)
-
 ### Enhanced Folding Inspired by VS Code Using Treesitter
 
-This feature introduces an advanced folding mechanism based on a customized variant of the treesitter folding algorithm (enabled with the ts_fold option).
+This feature introduces an advanced folding mechanism based on a customized variant of the treesitter folding algorithm
+(enabled with the ts_fold option).
 
 #### function folding
 
@@ -934,7 +795,8 @@ The `end` delimiter of a function is recognized as a distinct
 
 #### comments folding
 
-Multiline comments are recognized as distinct blocks and can be collapsed seamlessly, simplifying navigation through extensive comments.
+Multiline comments are recognized as distinct blocks and can be collapsed seamlessly, simplifying navigation through
+extensive comments.
 
 ![image](https://user-images.githubusercontent.com/1681295/148491845-5ffb18ea-f05d-4229-aec3-aa635b3de814.png)
 
@@ -949,14 +811,6 @@ syntax highlight require treesitter and neovim 0.10 +
 <img width="550" alt="image"
 src="https://user-images.githubusercontent.com/1681295/281575203-3d08256a-7592-4bea-8e6a-c747023ff3a3.png">
 
-### Signature help
-
-Improved signature help with current parameter highlighted
-
-![signature](https://github.com/ray-x/files/blob/master/img/navigator/signature_with_highlight.jpg?raw=true)
-
-![show_signature](https://github.com/ray-x/files/blob/master/img/navigator/show_signnature.gif?raw=true "show_signature")
-
 ## Debugging the plugin
 
 One simple way to gather debug info and understand what is wrong is to output the debug logs
@@ -968,7 +822,6 @@ require'navigator'.setup({
 ```
 
 ```lua
-
 -- a example of adding logs in the plugin
 
 local log = require"navigator.util".log
@@ -980,18 +833,16 @@ local definition_hdlr = util.mk_handler(function(err, locations, ctx, _)
     return
   end
 end
-
 ```
 
 ## Break changes and known issues
 
 [known issues I am working on](https://github.com/ray-x/navigator.lua/issues/1)
 
-
 ## API and extensions
-The plugin built on top of guihua, you can extend the plugin based on your requirements.
-e.g. A side panel of lsp symbols and lsp diagnostics:
 
+The plugin built on top of guihua, you can extend the plugin based on your requirements. e.g. A side panel of lsp
+symbols and lsp diagnostics:
 
 ```lua
 local function treesitter_and_diag_panel()
@@ -1038,7 +889,8 @@ end
 
 - The project is in the early phase, bugs expected, PRs and suggestions are welcome
 - Async (some of the requests is slow on large codebases and might be good to use co-rountine)
-- More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Did not test other languages (e.g dart, swift etc)
+- More clients. I use go, python, js/ts, java, c/cpp, lua most of the time. Did not test other languages (e.g dart,
+  swift etc)
 - Configuration options
 
 ## Errors and Bug Reporting
@@ -1048,6 +900,5 @@ end
 - Check console output
 - Check `LspInfo` and treesitter status with `checkhealth`
 - Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log
-- Submit Issue with minium init.lua. Please check playground/init.lua as a vimrc template.
-  Also check this repo [navigator bug report](https://github.com/fky2015/navigator.nvim-bug-report) on how to report bug
-  with minimum setup.
+- Submit Issue with minium init.lua. Please check playground/init.lua as a vimrc template. Also check this repo
+  [navigator bug report](https://github.com/fky2015/navigator.nvim-bug-report) on how to report bug with minimum setup.
