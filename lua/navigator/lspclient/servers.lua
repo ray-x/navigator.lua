@@ -39,7 +39,7 @@ return {
   'texlab',
   'clojure_lsp',
   'elixirls',
-  'ruff_lsp',
+  'ruff',
   'sourcekit',
   'fsautocomplete',
   'vls',
