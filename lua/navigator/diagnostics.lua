@@ -433,7 +433,7 @@ M.hide_diagnostic = function()
 end
 
 M.toggle_diagnostics = function()
-  M.diagnostic_enabled = not vim.diagnostic.enable()
+  M.diagnostic_enabled = not vim.diagnostic.is_enabled()
   vim.diagnostic.enable(M.diagnostic_enabled)
 end
 
