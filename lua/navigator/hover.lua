@@ -14,7 +14,7 @@ function M.handler(err, result, ctx, config)
   end
   local failed = false
   if err then
-    vim.notify('no hover info ' .. err)
+    vim.notify('no hover info ' .. vim.inspect(err))
     failed = true
   end
   if not result or not result.contents then
