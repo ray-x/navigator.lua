@@ -35,8 +35,8 @@ local get_icon = function(kind)
     return _NgConfigValues.icons.match_kinds[kind]
   end
 end
--- require'navigator.treesitter'.goto_definition()
-function M.goto_definition(bufnr)
+
+function M.is_definition(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
   local node_at_point = ts_utils.get_node_at_cursor()
 
@@ -46,7 +46,12 @@ function M.goto_definition(bufnr)
 
   local definition = locals.find_definition(node_at_point, bufnr)
 
-  if definition ~= node_at_point then
+  return definition == node_at_point
+end
+
+function M.goto_definition(bufnr)
+  if not M.is_definition(bufnr) then
+    local definition = locals.find_definition(node_at_point, bufnr)
     log('def found:', definition:range())
     ts_utils.goto_node(definition)
   end

@@ -24,7 +24,7 @@ local definition_hdlr = function(err, locations, ctx, _)
     return
   end
 
-  local oe = require('navigator.util').encoding(ctx.client_id)
+  local enc = require('navigator.util').encoding(ctx.client_id)
 
   locations = util.dedup(locations)
   log(locations)
@@ -43,7 +43,7 @@ local definition_hdlr = function(err, locations, ctx, _)
       then
         vim.lsp.buf.type_definition()
       else
-        vim.lsp.util.jump_to_location(locations[1], oe)
+        vim.lsp.util.show_document(locations[1], enc, { focus = true })
       end
     end
   else
@@ -191,8 +191,8 @@ local def = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
   local ref_params = vim.lsp.util.make_position_params()
+  -- check if the pos is already a definition with treesitter
   util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
-    -- if client.resolved_capabilities.goto_definition then
     if client.server_capabilities.definitionProvider then
       client.request('textDocument/definition', ref_params, definition_hdlr, _bufnr)
       return
