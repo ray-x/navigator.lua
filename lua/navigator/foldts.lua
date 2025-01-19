@@ -30,8 +30,8 @@ local function parse_line(linenr)
     return nil
   end
 
-  local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
-  if not ok then
+  local parser = vim.treesitter.get_parser(bufnr)
+  if not parser then
     return nil
   end
 

@@ -90,22 +90,18 @@ function code_action:render_action_virtual_text(line, diagnostics)
     if actions == nil or type(actions) ~= 'table' or vim.tbl_isempty(actions) then
       -- no actions cleanup
       if config.lsp.code_action.virtual_text then
-        _update_virtual_text(nil)
+        _update_virtual_text()
       end
       if config.lsp.code_action.sign then
-        _update_sign(nil)
+        _update_sign()
       end
     else
       trace(err, line, diagnostics, actions, context)
 
       if config.lsp.code_action.sign then
-        if need_check_diagnostic[vim.bo.filetype] then
-          if next(diagnostics) == nil then
-            -- no diagnostic, no code action sign..
-            _update_sign(nil)
-          else
-            _update_sign(line)
-          end
+        if need_check_diagnostic[vim.bo.filetype] and next(diagnostics) == nil then
+          -- no diagnostic, no code action sign..
+          _update_sign()
         else
           _update_sign(line)
         end
@@ -149,6 +145,7 @@ end
 
 local code_action_req = function(_call_back_fn, context)
   local params = vim.lsp.util.make_range_params()
+  log(params)
   params.context = context
   local line = params.range.start.line
   local callback = _call_back_fn(line, context.diagnostics)
@@ -181,7 +178,7 @@ code_action.code_action = function()
     end
   end
 
-  vim.lsp.buf.code_action(context)
+  vim.lsp.buf.code_action({context = context})
   vim.defer_fn(function()
     vim.ui.select = original_select
   end, 1000)
