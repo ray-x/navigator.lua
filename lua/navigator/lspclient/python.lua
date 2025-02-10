@@ -16,8 +16,6 @@ M.pyenv_path = function(workspace)
     local sep = require('navigator.util').path_sep()
     local py = 'bin' .. sep .. 'python'
     if match ~= '' then
-      print('found', match)
-      print(vim.fn.glob(path.join(workspace, pattern)))
       match = string.gsub(match, 'pyvenv.cfg', py)
       return match, string.format('venv base folder: %s', match)
     end
