@@ -22,7 +22,8 @@ M.pyenv_path = function(workspace)
     match = vim.fn.glob(path.join(workspace, pattern, 'poetry.lock'))
     if match ~= '' then
       local venv_base_folder = vim.fn.trim(vim.fn.system('poetry env info -p'))
-      return path.join(venv_base_folder, 'bin', 'python'), string.format('venv base folder: %s', venv_base_folder)
+      return path.join(venv_base_folder, 'bin', 'python'),
+        string.format('venv base folder: %s', venv_base_folder)
     end
   end
 
@@ -30,8 +31,10 @@ M.pyenv_path = function(workspace)
   return exepath('python3') or exepath('python') or 'python', 'fallback to system python path'
 end
 M.on_init = function(client)
-  local python_path, msg = M.pyenv_path(client.config.root_dir)
-  vim.notify(string.format('%s \ncurrent python path: %s', msg, python_path))
-  client.config.settings.python.pythonPath = python_path
+  if client.config.root_dir then
+    local python_path, msg = M.pyenv_path(client.config.root_dir)
+    vim.notify(string.format('%s \ncurrent python path: %s', msg, python_path))
+    client.config.settings.python.pythonPath = python_path
+  end
 end
 return M
