@@ -129,13 +129,6 @@ local function load_plugins()
         require('go').setup({
           verbose = true,
           lsp_cfg = {
-            handlers = {
-              ['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = 'double' }),
-              ['textDocument/signatureHelp'] = vim.lsp.with(
-                vim.lsp.handlers.signature_help,
-                { border = 'round' }
-              ),
-            },
           }, -- false: do nothing
         })
       end,

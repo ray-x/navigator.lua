@@ -260,7 +260,7 @@ call_hierarchy = function(method, opts)
     bufnr,
     'textDocument/prepareCallHierarchy',
     params,
-    vim.lsp.with(function(err, result, ctx)
+    util.lsp_with(function(err, result, ctx)
       if err then
         vim.notify(err.message, vim.log.levels.WARN)
         return

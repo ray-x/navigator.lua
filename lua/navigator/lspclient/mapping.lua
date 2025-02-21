@@ -449,7 +449,7 @@ function M.setup(attach_opts)
     border_style = double
   end
   if _NgConfigValues.lsp.hover.enable then
-    vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(require('navigator.hover').handler, {
+    vim.lsp.handlers['textDocument/hover'] = util.lsp_with(require('navigator.hover').handler, {
       border = border_style,
     })
   end

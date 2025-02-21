@@ -182,7 +182,7 @@ function M.side_panel()
         'textDocument/documentSymbol',
         params,
         { timeout = 1000, bufnr = bufnr, no_show = true },
-        vim.lsp.with(M.document_symbol_handler, { no_show = true })
+        util.lsp_with(M.document_symbol_handler, { no_show = true })
       )
     end,
   })

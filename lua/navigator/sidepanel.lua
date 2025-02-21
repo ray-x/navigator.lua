@@ -68,7 +68,7 @@ function M.lsp_and_diag_panel()
           'textDocument/documentSymbol',
           params,
           { timeout = 2000, bufnr = bufnr, no_show = true },
-          vim.lsp.with(require('navigator.symbols').document_symbol_handler, { no_show = true })
+          util.lsp_with(require('navigator.symbols').document_symbol_handler, { no_show = true })
         )
       else
         lsp_call = require('navigator.lspwrapper').call_async

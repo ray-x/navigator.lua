@@ -399,7 +399,7 @@ function M.setup(cfg)
     diagnostic_cfg.virtual_text.prefix = _NgConfigValues.icons.diagnostic_virtual_text
   end
   -- vim.lsp.handlers["textDocument/publishDiagnostics"]
-  M.diagnostic_handler = vim.lsp.with(diag_hdlr, diagnostic_cfg)
+  M.diagnostic_handler = util.lsp_with(diag_hdlr, diagnostic_cfg)
   diagnostic_cfg = vim.tbl_extend('force', diagnostic_cfg, cfg)
 
   vim.diagnostic.config(diagnostic_cfg)

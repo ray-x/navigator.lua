@@ -318,7 +318,7 @@ local function side_panel()
         'textDocument/references',
         ref_params,
         { timeout = 1000, bufnr = bufnr, no_show = true },
-        vim.lsp.with(function(err, locations, ctx, cfg)
+        util.lsp_with(function(err, locations, ctx, cfg)
           cfg.side_panel = true
           return ref_hdlr(err, locations, ctx, cfg)
         end, { no_show = true })
