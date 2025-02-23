@@ -125,6 +125,7 @@ local function cache_lines(result)
 end
 
 local function fetch_lsp_references(bufnr, lsp_params, callback)
+  log('fetch_lsp_references', bufnr, lsp_params)
   require('navigator.reference').fetch_lsp_references(
     bufnr,
     lsp_params,
@@ -153,6 +154,7 @@ local function teardown(switch_buffer)
   state.cached_lines = nil
   state.oldname = nil
   state.newname = nil
+  state.lsp_params = nil
   if state.input_win_id and api.nvim_win_is_valid(state.input_win_id) then
     state.input_win_id = nil
     if switch_buffer then
@@ -231,10 +233,17 @@ local function incremental_rename_preview(opts, preview_ns, preview_buf)
   state.preview_ns = preview_ns
 end
 
--- function rewrite from smjonas/inc-rename.nvim
-local function perform_lsp_rename(new_name, params)
-  params = params or make_position_params()
-  params.newName = new_name
+local function perform_lsp_rename(opts)
+  local new_name = opts.args
+  local clients = vim.lsp.get_clients({
+    method = 'textDocument/rename',
+    bufnr = opts.bufnr,
+  })
+  if not clients then
+    return
+  end
+
+  local params = opts.params or state.lsp_params
 
   vim.lsp.buf_request(0, 'textDocument/rename', params, function(err, result, ctx, _)
     if err and err.message then
@@ -288,7 +297,7 @@ local function inc_rename_execute(opts)
   end
   restore_buffer()
   teardown(true)
-  perform_lsp_rename(opts.args, opts.params)
+  perform_lsp_rename(opts)
 end
 
 M.rename = function()
@@ -319,26 +328,22 @@ end
 M.rename_preview = function()
   local input = vim.ui.input
   state.cached_lines = {}
-  state.confrim = nil
+  state.confirm = nil
   state.should_fetch_references = true
-  state.lsp_params = make_position_params()
+  local clients = vim.lsp.get_clients({
+    bufnr = api.nvim_get_current_buf(),
+    method = 'textDocument/rename',
+  })
 
-  if not ts_symbol() then
+  if not clients or not ts_symbol() then
     return
   end
 
-  rename_group = api.nvim_create_augroup('nav-rename', {})
-  if vim.fn.has('nvim-0.8.0') ~= 1 then
-    vim.ui.input = require('guihua.floating').input
-    vim.lsp.buf.rename()
-    return vim.defer_fn(function()
-      vim.ui.input = input
-    end, 1000)
-  end
+  state.lsp_params = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
 
+  rename_group = api.nvim_create_augroup('nav-rename', {})
   local ghinput = require('guihua.input')
   state.win_id = vim.fn.win_getid(0)
-  state.lsp_params = make_position_params()
   state.preview_buf = vim.api.nvim_get_current_buf()
 
   local inputopts = {
@@ -370,32 +375,24 @@ end
 -- a moodify version of neovim vim.lsp.buf.rename
 function M.rename_inplace(new_name, options)
   options = options or {}
-  state.confrim = nil
+  state.confirm = nil
   state.should_fetch_references = true
   state.cached_lines = {}
-  state.lsp_params = make_position_params()
+
   rename_group = api.nvim_create_augroup('nav-rename', {})
   local bufnr = options.bufnr or api.nvim_get_current_buf()
+
   local clients = vim.lsp.get_clients({
     bufnr = bufnr,
-    name = options.name,
+    method = 'textDocument/rename',
   })
-  if options.filter then
-    clients = vim.tbl_filter(options.filter, clients)
-  end
 
-  if not ts_symbol() then
+  if not clients or not ts_symbol() then
+    vim.notify('[LSP] Rename, no matching language servers with rename capability.')
     return
   end
 
-  -- Clients must at least support rename, prepareRename is optional
-  clients = vim.tbl_filter(function(client)
-    return client.supports_method('textDocument/rename')
-  end, clients)
-
-  if #clients == 0 then
-    vim.notify('[LSP] Rename, no matching language servers with rename capability.')
-  end
+  state.lsp_params = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
 
   local confirm_key = _NgConfigValues.lsp.rename.confirm
   local cancel_key = _NgConfigValues.lsp.rename.concel
@@ -404,18 +401,6 @@ function M.rename_inplace(new_name, options)
   -- Compute early to account for cursor movements after going async
   local cword = vim.fn.expand('<cword>')
   state.oldname = cword
-
-  ---@private
-  local function get_text_at_range(range, offset_encoding)
-    return api.nvim_buf_get_text(
-      bufnr,
-      range.start.line,
-      util._get_line_byte_from_position(bufnr, range.start, offset_encoding),
-      range['end'].line,
-      util._get_line_byte_from_position(bufnr, range['end'], offset_encoding),
-      {}
-    )[1]
-  end
 
   local on_finish_cb = function()
     log('leave insert')
@@ -428,7 +413,11 @@ function M.rename_inplace(new_name, options)
     if state.confirm then
       -- lets put back
       log('execute rename')
-      inc_rename_execute({ args = state.new_name or vim.fn.expand('<cword>'), params = {} })
+      inc_rename_execute({
+        args = state.new_name or vim.fn.expand('<cword>'),
+        params = {},
+        bufnr = bufnr,
+      })
     end
   end
   local try_use_client
@@ -437,7 +426,7 @@ function M.rename_inplace(new_name, options)
       return
     end
 
-    local params = make_position_params(win, client.offset_encoding)
+    local params = vim.lsp.util.make_position_params(win, client.offset_encoding)
     ---@private
     local function rename(name)
       params.newName = name

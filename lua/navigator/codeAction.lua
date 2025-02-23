@@ -143,9 +143,8 @@ local action_virtual_call_back = function(line, diagnostics)
   return code_action:render_action_virtual_text(line, diagnostics)
 end
 
-local code_action_req = function(_call_back_fn, context)
-  local params = util.make_range_params()
-  log(params)
+local code_action_req = function(_call_back_fn, client, context)
+  local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
   params.context = context
   local line = params.range.start.line
   local callback = _call_back_fn(line, context.diagnostics)
@@ -178,13 +177,13 @@ code_action.code_action = function()
     end
   end
 
-  vim.lsp.buf.code_action({context = context})
+  vim.lsp.buf.code_action({ context = context })
   vim.defer_fn(function()
     vim.ui.select = original_select
   end, 1000)
 end
 
-code_action.code_action_prompt = function(bufnr, only)
+code_action.code_action_prompt = function(client, bufnr, only)
   if special_buffers[vim.bo.filetype] then
     log('skip buffer', vim.bo.filetype)
     return
@@ -212,7 +211,7 @@ code_action.code_action_prompt = function(bufnr, only)
   local winid = get_current_winid()
   code_action[winid] = code_action[winid] or {}
   code_action[winid].lightbulb_line = code_action[winid].lightbulb_line or 0
-  code_action_req(action_virtual_call_back, context)
+  code_action_req(action_virtual_call_back, client, context)
 end
 
 return code_action

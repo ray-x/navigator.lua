@@ -66,7 +66,14 @@ function M.lines_from_locations(locations, include_filename)
   for _, loc in ipairs(locations) do
     table.insert(
       lines,
-      (fnamemodify(loc['filename']) .. loc['lnum'] .. ':' .. loc['col'] .. ': ' .. vim.trim(loc['text']))
+      (
+        fnamemodify(loc['filename'])
+        .. loc['lnum']
+        .. ':'
+        .. loc['col']
+        .. ': '
+        .. vim.trim(loc['text'])
+      )
     )
   end
 
@@ -143,7 +150,8 @@ function M.call_sync(method, params, opts, handler)
   params = params or {}
   opts = opts or {}
   log(method, params)
-  local results_lsp, err = lsp.buf_request_sync(opts.bufnr or 0, method, params, opts.timeout or 1000)
+  local results_lsp, err =
+    lsp.buf_request_sync(opts.bufnr or 0, method, params, opts.timeout or 1000)
 
   return handler(err, extract_result(results_lsp), { method = method, no_show = opts.no_show }, nil)
 end
@@ -155,7 +163,19 @@ function M.call_async(method, params, handler, bufnr)
     handler(...)
   end
   bufnr = bufnr or 0
-  return lsp.buf_request(bufnr, method, params, callback)
+  -- note: neovim vim.lsp.buf_request seems no longer exposed, in future, use lsp.Client:request
+  -- return lsp.buf_request(bufnr, method, params, callback)
+  -- get clients for the buffer
+  local clients = lsp.get_clients({ buffer = bufnr })
+  for _, client in pairs(clients) do
+    if client.supports_method(method) then
+      if type(params) == 'function' then
+        params = params(client)
+      end
+      return client.request(method, params, callback, bufnr)
+    end
+  end
+
   -- results_lsp, canceller
 end
 
@@ -214,7 +234,8 @@ local function ts_definition(uri, range, optional)
     return nil
   end
 
-  local key = string.format('%s_%d_%d_%d', uri, range.start.line, range.start.character, range['end'].line)
+  local key =
+    string.format('%s_%d_%d_%d', uri, range.start.line, range.start.character, range['end'].line)
   local tsnodes = ts_nodes:get(key)
   local ftime = ts_nodes_time:get(key)
 
@@ -258,7 +279,11 @@ local function find_ts_func_by_range(funcs, range)
   for _, value in pairs(funcs) do
     local func_range = value.node_scope
     -- note treesitter is C style
-    if func_range and func_range.start.line <= range.start.line and func_range['end'].line >= range['end'].line then
+    if
+      func_range
+      and func_range.start.line <= range.start.line
+      and func_range['end'].line >= range['end'].line
+    then
       table.insert(result, value)
     end
   end
@@ -338,7 +363,6 @@ function M.locations_to_items(locations, ctx)
   local unload_bufnrs = {}
   local file_cnt = {}
   for i, loc in ipairs(locations) do
-
     local looptimer = uv.now()
     local item = lsp.util.locations_to_items({ loc }, enc)[1]
     item.range = locations[i].range or locations[i].targetRange
@@ -350,7 +374,9 @@ function M.locations_to_items(locations, ctx)
     end
     file_cnt[item.uri] = (file_cnt[item.uri] or 0) + 1
     -- only load top 30 file.items
-    local proj_file = (item.uri:find(cwd) or is_win) and i < _NgConfigValues.treesitter_analysis_max_num and table.getn(file_cnt) < _NgConfigValues.treesitter_analysis_max_fnum  -- getn deprecated, but it is the best solution for getting dict size
+    local proj_file = (item.uri:find(cwd) or is_win)
+      and i < _NgConfigValues.treesitter_analysis_max_num
+      and table.getn(file_cnt) < _NgConfigValues.treesitter_analysis_max_fnum -- getn deprecated, but it is the best solution for getting dict size
     local unload, def
     local context = ''
     if not proj_file then
@@ -494,8 +520,8 @@ end
 
 function M.request(method, hdlr) -- e.g  textDocument/reference
   local bufnr = vim.api.nvim_get_current_buf()
-  local ref_params = vim.lsp.util.make_position_params()
   util.for_each_buffer_client(bufnr, function(client, _, _)
+    local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)
     client.request(method, ref_params, hdlr, bufnr)
   end)
 end

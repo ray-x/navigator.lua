@@ -73,26 +73,21 @@ end
 function M.incoming_calls(bang, opts)
   local bufnr = vim.api.nvim_get_current_buf()
   assert(next(vim.lsp.get_clients({buffer = bufnr})), 'Must have a client running to use lsp_tags' )
-  -- if not lsphelper.check_capabilities("call_hierarchy") then
-  --   return
-  -- end
+  local client = lsphelper.check_capabilities("call_hierarchy")
 
-  local params = util.make_position_params()
+  local params = util.make_position_params({levels = 2, callee = false})
   -- params['hierarchy'] = true
-  params['levels'] = 2
-  params['callee'] = false
-  -- params['callee'] = true
-  log(params)
-  log(opts)
+  -- params['levels'] = 2
+  -- params['callee'] = false
+  -- log(params)
+  -- log(opts)
   lsphelper.call_sync('$ccls/call', params, opts, partial(incoming_calls_handler, bang))
 end
 
 function M.outgoing_calls(bang, opts)
   local bufnr = vim.api.nvim_get_current_buf()
   assert(next(vim.lsp.get_clients({buffer = bufnr})), 'Must have a client running to use lsp_tags')
-  local params = util.make_position_params()
-  params['levels'] = 2
-  params['callee'] = true
+  local params = util.make_position_params({levels = 2, callee = true})
   log(params)
   lsphelper.call_sync('$ccls/call', params, opts, partial(outgoing_calls_handler, bang))
 end

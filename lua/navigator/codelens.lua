@@ -3,8 +3,9 @@
 -- https://github.com/neovim/neovim/blob/master/runtime/lua/vim/lsp/codelens.lua
 local codelens = require('vim.lsp.codelens')
 
-local log = require('navigator.util').log
-local trace = require('navigator.util').trace
+local util = require('navigator.util')
+local log = util.log
+local trace = util.trace
 -- local trace = log
 local lsphelper = require('navigator.lspwrapper')
 local api = vim.api
@@ -134,7 +135,7 @@ M.inline = function()
     return
   end
 
-  local parameter = lsp.util.make_position_params()
+  local parameter = util.make_position_params()
 
   local on_codelens = vim.lsp.handlers['textDocument/codeLens']
   local ids = lsp.buf_request(

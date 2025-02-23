@@ -164,7 +164,7 @@ function M.setup_fold()
       local current_window = api.nvim_get_current_win()
       if not parsers.has_parser() then
         api.nvim_win_set_option(current_window, 'foldmethod', 'indent')
-        log('fallback to indent folding')
+        trace('fallback to indent folding')
         return
       end
       log('setup treesitter folding winid', current_window)

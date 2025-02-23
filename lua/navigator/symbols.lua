@@ -29,14 +29,18 @@ function M.document_symbols(opts)
 
   local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
   vim.list_extend(lspopts, opts)
-  local params = vim.lsp.util.make_position_params()
+  local clients = vim.lsp.get_clients({
+    bufnr = bufnr,
+    method = 'textDocument/documentSymbol',
+  })
+  if not clients or #clients == 0 then
+    log('no clients found for bufnr', bufnr)
+    return
+  end
+  local params = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
   params.context = { includeDeclaration = true }
   params.query = opts.prompt or ''
-  util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
-    if client.name ~= 'null-ls' and client.server_capabilities.documentSymbolProvider then
-      client.request('textDocument/documentSymbol', params, M.document_symbol_handler, _bufnr)
-    end
-  end)
+  clients[1].request('textDocument/documentSymbol', params, M.document_symbol_handler, _bufnr)
 end
 
 M.document_symbol_handler = function(err, result, ctx)

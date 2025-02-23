@@ -206,7 +206,7 @@ local async_ref = function()
     ref_view(err, result, ctx, config)
   end) -- return asyncresult, canceller
 
-  ref_params.context = { includeDeclaration = false }
+  ref_params = util.make_position_params({ includeDeclaration = false })
   lsp.call_async('textDocument/references', ref_params, function(err, result, ctx, config)
     if err ~= nil or result == nil then
       log('failed to get ref', err, result, ctx, config)
@@ -221,19 +221,11 @@ local async_ref = function()
   end) -- return asyncresult, canceller
 end
 
--- Get positions of LSP reference symbols
--- a function from smjonas/inc-rename.nvim
--- https://github.com/smjonas/inc-rename.nvim/blob/main/lua/inc_rename/init.lua
 local function fetch_lsp_references(bufnr, params, callback)
-  if not vim.lsp.get_clients then
-    vim.lsp.get_clients = vim.lsp.get_clients
-  end
   local clients = vim.lsp.get_clients({
     bufnr = bufnr,
+    method = 'textDocument/rename',
   })
-  clients = vim.tbl_filter(function(client)
-    return client.supports_method('textDocument/rename')
-  end, clients)
 
   if #clients == 0 then
     log('[nav-rename] No active language server with rename capability')
@@ -243,9 +235,10 @@ local function fetch_lsp_references(bufnr, params, callback)
     log('[nav-rename] No params provided')
     vim.notify('No params provided')
   end
+  if type(params) == 'function' then
+    params = params(clients[1])
+  end
   params.context = params.context or { includeDeclaration = true }
-
-  log(bufnr, params)
 
   -- return id, closer
   return vim.lsp.buf_request(
@@ -253,9 +246,8 @@ local function fetch_lsp_references(bufnr, params, callback)
     'textDocument/references',
     params,
     function(err, result, ctx, cfg)
-      trace(result)
       if err then
-        log('[nav-rename] Error while finding references: ' .. err.message)
+        log('[nav-rename] Error while finding references: ' .. err.message, bufnr, params, ctx, cfg)
         return
       end
       if not result or vim.tbl_isempty(result) then

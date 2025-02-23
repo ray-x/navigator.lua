@@ -34,7 +34,8 @@ local definition_hdlr = function(err, locations, ctx, _)
       local items = locations_to_items(locations)
       gui.new_list_view({ items = items, api = 'Definition', title = 'Definition' })
     else
-      local loc = util.make_position_params()
+      local client = vim.lsp.get_client_by_id(ctx.client_id)
+      local loc = vim.lsp.util.make_position_params(0, client.offset_encoding)
       -- let check if the location is same as current
       if
         loc.textDocument.uri == locations[1].uri
@@ -161,15 +162,6 @@ local function def_preview(timeout_ms, method)
 
   local view = TextView:new(opts)
   log(view.buf)
-  vim.keymap.set('n', 'K', function()
-    local par = util.make_position_params()
-    log(row, par, data[1])
-    par.position.line = par.position.line + row - 1 -- header 1
-    par.textDocument.uri = data[1].uri
-    log(par)
-    local bufnr_org = vim.uri_to_bufnr(data[1].uri)
-    return vim.lsp.buf_request(bufnr_org, 'textDocument/hover', par)
-  end, { buffer = view.buf })
   delta = delta + 1 -- header
   local cmd = 'normal! ' .. tostring(delta) .. 'G'
 
@@ -190,10 +182,10 @@ end
 local def = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
-  local ref_params = util.make_position_params()
   -- check if the pos is already a definition with treesitter
   util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     if client.server_capabilities.definitionProvider then
+      local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)
       client.request('textDocument/definition', ref_params, definition_hdlr, _bufnr)
       return
     end

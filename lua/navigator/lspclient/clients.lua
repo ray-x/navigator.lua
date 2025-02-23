@@ -84,7 +84,7 @@ local function load_cfg(ft, client, cfg, loaded, starting)
   local additional_ft = setups[client] and setups[client].filetypes or {}
   local bufnr = vim.api.nvim_get_current_buf()
   local cmd = cfg.cmd
-  log(lspft, additional_ft, _NG_Loaded)
+  trace(lspft, additional_ft, _NG_Loaded)
   _NG_Loaded[bufnr] = _NG_Loaded[bufnr] or { cnt = 0, lsp = {} }
   local should_load = false
   if lspft ~= nil and #lspft > 0 then
@@ -147,10 +147,10 @@ local function load_cfg(ft, client, cfg, loaded, starting)
     -- log(lspconfig.available_servers())
     -- force reload with config
     -- lets have a guard here
-    log(_NG_Loaded[bufnr])
+    trace(_NG_Loaded[bufnr])
     if not _NG_Loaded[client] then
-      log(client, 'loading for', ft, cfg)
-      log(lspconfig[client])
+      trace(client, 'loading for', ft, cfg)
+      trace(lspconfig[client])
       lspconfig[client].setup(cfg)
       _NG_Loaded[client] = true
       table.insert(_NG_Loaded[bufnr].lsp, client)
@@ -633,7 +633,7 @@ local function on_filetype()
   end
   _NG_Loaded[bufnr] = _NG_Loaded[bufnr] or {cnt = 1, lsp = {}}
 
-  log (_NG_Loaded)
+  trace (_NG_Loaded)
   local loaded
   if _NG_Loaded[bufnr].cnt > 1 then
     log('navigator was loaded for ft', ft, bufnr)
