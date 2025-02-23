@@ -77,7 +77,7 @@ function M.incoming_calls(bang, opts)
   --   return
   -- end
 
-  local params = vim.lsp.util.make_position_params()
+  local params = util.make_position_params()
   -- params['hierarchy'] = true
   params['levels'] = 2
   params['callee'] = false
@@ -90,7 +90,7 @@ end
 function M.outgoing_calls(bang, opts)
   local bufnr = vim.api.nvim_get_current_buf()
   assert(next(vim.lsp.get_clients({buffer = bufnr})), 'Must have a client running to use lsp_tags')
-  local params = vim.lsp.util.make_position_params()
+  local params = util.make_position_params()
   params['levels'] = 2
   params['callee'] = true
   log(params)

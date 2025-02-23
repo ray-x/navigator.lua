@@ -11,7 +11,7 @@ local vfn = vim.fn
 local M = {
   hl_group = 'Substitute',
 }
-local make_position_params = vim.lsp.util.make_position_params
+local make_position_params = util.make_position_params
 local rename_group = api.nvim_create_augroup('nav-rename', {})
 
 local state = {

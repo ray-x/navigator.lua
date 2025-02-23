@@ -632,5 +632,39 @@ function M.lsp_with(handler, override_config)
     return handler(err, result, ctx, vim.tbl_deep_extend('force', config or {}, override_config))
   end
 end
+M.make_position_params = function(extra_params)
+  if vim.fn.has('nvim-0.11') == 0 then
+    local params = vim.lsp.util.make_position_params()
+    if extra_params then
+      params = vim.tbl_deep_extend('force', params, extra_params)
+    end
+    return params
+  end
+  ---@param client vim.lsp.Client
+  return function(client, _)
+    local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+    if extra_params then
+      params = vim.tbl_deep_extend('force', params, extra_params)
+    end
+    return params
+  end
+end
 
+M.make_range_params = function(extra_params)
+  if vim.fn.has('nvim-0.11') == 0 then
+    local params = vim.lsp.util.make_range_params()
+    if extra_params then
+      params = vim.tbl_deep_extend('force', params, extra_params)
+    end
+    return params
+  end
+  ---@param client vim.lsp.Client
+  return function(client, _)
+    local params = vim.lsp.util.make_range_params(client.offset_encoding)
+    if extra_params then
+      params = vim.tbl_deep_extend('force', params, extra_params)
+    end
+    return params
+  end
+end
 return M

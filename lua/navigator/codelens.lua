@@ -5,7 +5,7 @@ local codelens = require('vim.lsp.codelens')
 
 local log = require('navigator.util').log
 local trace = require('navigator.util').trace
--- trace = log
+-- local trace = log
 local lsphelper = require('navigator.lspwrapper')
 local api = vim.api
 local M = {}
@@ -14,7 +14,10 @@ M.disabled = {}
 local config = require('navigator').config_values()
 local sign_name = 'NavigatorCodeLensLightBulb'
 if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
-  vim.fn.sign_define(sign_name, { text = config.icons.code_lens_action_icon, texthl = 'LspDiagnosticsSignHint' })
+  vim.fn.sign_define(
+    sign_name,
+    { text = config.icons.code_lens_action_icon, texthl = 'LspDiagnosticsSignHint' }
+  )
 end
 
 local sign_group = 'nvcodelensaction'
@@ -64,7 +67,7 @@ end
 local codelens_au
 
 function M.setup(bufnr)
-  log('setup for ****** ', bufnr)
+  log('setup codelens for ', bufnr)
   if codelens_au == nil then
     vim.api.nvim_set_hl(0, 'LspCodeLens', { link = 'DiagnosticsHint', default = true })
     vim.api.nvim_set_hl(0, 'LspCodeLensText', { link = 'DiagnosticsInformation', default = true })
@@ -134,24 +137,29 @@ M.inline = function()
   local parameter = lsp.util.make_position_params()
 
   local on_codelens = vim.lsp.handlers['textDocument/codeLens']
-  local ids = lsp.buf_request(bufnr, 'textDocument/codeLens', parameter, function(err, response, ctx, _)
-    if err then
-      log('lsp code lens', vim.inspect(err), ctx)
-      -- lets disable code lens for this buffer
-      vim.list_extend(M.disabled, { vim.api.nvim_get_current_buf() })
-      return
+  local ids = lsp.buf_request(
+    bufnr,
+    'textDocument/codeLens',
+    parameter,
+    function(err, response, ctx, _)
+      if err then
+        log('lsp code lens', vim.inspect(err), ctx)
+        -- lets disable code lens for this buffer
+        vim.list_extend(M.disabled, { vim.api.nvim_get_current_buf() })
+        return
+      end
+      -- Clear previous highlighting
+      api.nvim_buf_clear_namespace(bufnr, virtual_types_ns, 0, -1)
+
+      if response then
+        trace(response)
+
+        on_codelens(err, response, ctx, _)
+
+        codelens_hdlr(err, response, ctx, _)
+      end
     end
-    -- Clear previous highlighting
-    api.nvim_buf_clear_namespace(bufnr, virtual_types_ns, 0, -1)
-
-    if response then
-      trace(response)
-
-      on_codelens(err, response, ctx, _)
-
-      codelens_hdlr(err, response, ctx, _)
-    end
-  end)
+  )
   if next(ids) == nil then
     vim.list_extend(M.disabled, { vim.api.nvim_get_current_buf() })
   end

@@ -61,7 +61,7 @@ function M.lsp_and_diag_panel()
     header = 'symbols',
     render = function(bufnr)
       bufnr = bufnr or api.nvim_get_current_buf()
-      local params = vim.lsp.util.make_range_params()
+      local params = util.make_range_params()
       local lsp_call = require('navigator.lspwrapper').call_sync
       if not Panel:is_open() or vim.fn.empty(lsp) == 1 then
         lsp = lsp_call(

@@ -187,6 +187,12 @@ M.defaults = function()
       },
       flags = { allow_incremental_sync = true },
     },
+    ruff = {
+      filetypes = { 'python' },
+      init_options = {
+        settings = { logLevel = 'info' }
+      }
+    },
     jdtls = {
       settings = {
         java = {

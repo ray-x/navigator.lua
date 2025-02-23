@@ -185,7 +185,7 @@ local ref_hdlr = function(err, locations, ctx, cfg)
 end
 
 local async_ref = function()
-  local ref_params = vim.lsp.util.make_position_params()
+  local ref_params = util.make_position_params()
   local results = {}
   lsp.call_async('textDocument/definition', ref_params, function(err, result, ctx, config)
     trace(err, result, ctx, config)
@@ -280,7 +280,7 @@ local ref_req = function()
   end
   -- lsp.call_async("textDocument/references", ref_params, ref_hdlr) -- return asyncresult, canceller
   local bufnr = vim.api.nvim_get_current_buf()
-  local ref_params = vim.lsp.util.make_position_params()
+  local ref_params = util.make_position_params()
   log('bufnr', bufnr)
   local ids, closer = fetch_lsp_references(bufnr, ref_params, ref_hdlr)
   log(ids)
@@ -292,7 +292,7 @@ end
 local ref = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
-  local ref_params = vim.lsp.util.make_position_params()
+  local ref_params = util.make_position_params()
   util.for_each_buffer_client(bufnr, function(client, _, _)
     if client.server_capabilities.referencesProvider then
       client.request('textDocument/references', ref_params, ref_hdlr, bufnr)
@@ -312,7 +312,7 @@ local function side_panel()
       if ft == 'nofile' or ft == 'guihua' or ft == 'prompt' then
         return
       end
-      local ref_params = vim.lsp.util.make_position_params()
+      local ref_params = util.make_position_params()
       local sync_req = require('navigator.lspwrapper').call_sync
       return sync_req(
         'textDocument/references',

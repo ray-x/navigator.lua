@@ -53,7 +53,10 @@ local function call_hierarchy_result_procesor(direction, err, result, ctx, confi
   -- trace('call_hierarchy', result)
 
   local bufnr = ctx.bufnr or vim.api.nvim_get_current_buf()
-  assert(next(vim.lsp.get_clients({buffer = bufnr})), 'Must have a client running to use call hierarchy')
+  assert(
+    next(vim.lsp.get_clients({ buffer = bufnr })),
+    'Must have a client running to use call hierarchy'
+  )
   if err ~= nil then
     log('dir', direction, 'result', result, 'err', err, ctx)
     vim.notify('ERROR: ' .. err, vim.log.levels.WARN)
@@ -102,9 +105,16 @@ hierarchy_handler = function(dir, handler, show, api, err, result, ctx, cfg)
   ctx = ctx or {} -- can be nil if it is async call
   cfg = cfg or {}
   local opts = ctx.opts or {}
-  vim.validate({ handler = { handler, 'function' }, show = { show, 'function' }, api = { api, 'string' } })
+  vim.validate({
+    handler = { handler, 'function' },
+    show = { show, 'function' },
+    api = { api, 'string' },
+  })
   local bufnr = ctx.bufnr or vim.api.nvim_get_current_buf()
-  assert(next(vim.lsp.get_clients({buffer = bufnr})), 'Must have a client running to use lsp hierarchy')
+  assert(
+    next(vim.lsp.get_clients({ buffer = bufnr })),
+    'Must have a client running to use lsp hierarchy'
+  )
 
   local results = handler(err, result, ctx, cfg, 'Incoming calls not found')
 
@@ -201,26 +211,20 @@ local function expand_item(args)
   panel:redraw(false)
 end
 
-incoming_calls_handler = util.partial4(
-  hierarchy_handler,
-  'from',
-  call_hierarchy_handler_from,
-  gui.new_list_view,
-  ' '
-)
-outgoing_calls_handler = util.partial4(hierarchy_handler, 'to', call_hierarchy_handler_to, gui.new_list_view, ' ')
+incoming_calls_handler =
+  util.partial4(hierarchy_handler, 'from', call_hierarchy_handler_from, gui.new_list_view, ' ')
+outgoing_calls_handler =
+  util.partial4(hierarchy_handler, 'to', call_hierarchy_handler_to, gui.new_list_view, ' ')
 
-local incoming_calls_panel = util.partial4(
-  hierarchy_handler,
-  'from',
-  call_hierarchy_handler_from,
-  display_panel,
-  ' '
-)
-local outgoing_calls_panel = util.partial4(hierarchy_handler, 'to', call_hierarchy_handler_to, display_panel, ' ')
+local incoming_calls_panel =
+  util.partial4(hierarchy_handler, 'from', call_hierarchy_handler_from, display_panel, ' ')
+local outgoing_calls_panel =
+  util.partial4(hierarchy_handler, 'to', call_hierarchy_handler_to, display_panel, ' ')
 
-local incoming_calls_expand = util.partial4(hierarchy_handler, 'from', call_hierarchy_handler_from, expand_item, ' ')
-local outgoing_calls_expand = util.partial4(hierarchy_handler, 'to', call_hierarchy_handler_to, expand_item, ' ')
+local incoming_calls_expand =
+  util.partial4(hierarchy_handler, 'from', call_hierarchy_handler_from, expand_item, ' ')
+local outgoing_calls_expand =
+  util.partial4(hierarchy_handler, 'to', call_hierarchy_handler_to, expand_item, ' ')
 
 function expand(panel, node)
   trace(panel, node)
@@ -249,7 +253,7 @@ local request = vim.lsp.buf_request
 call_hierarchy = function(method, opts)
   trace(method, opts)
   opts = opts or {}
-  local params = opts.params or vim.lsp.util.make_position_params()
+  local params = opts.params or util.make_position_params()
   local bufnr = opts.bufnr
   local handler = function(err, result, ctx, cfg)
     ctx.opts = opts

@@ -144,7 +144,7 @@ local action_virtual_call_back = function(line, diagnostics)
 end
 
 local code_action_req = function(_call_back_fn, context)
-  local params = vim.lsp.util.make_range_params()
+  local params = util.make_range_params()
   log(params)
   params.context = context
   local line = params.range.start.line

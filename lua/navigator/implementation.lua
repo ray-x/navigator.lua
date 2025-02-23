@@ -26,7 +26,7 @@ function M.implementation(bang, opts)
     return
   end
 
-  local params = vim.lsp.util.make_position_params()
+  local params = util.make_position_params()
   log('impel params', params)
 
   lsphelper.call_sync(
