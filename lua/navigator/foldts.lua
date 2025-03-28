@@ -141,17 +141,13 @@ function NG_custom_fold_text()
   return line_syntax
 end
 
-vim.opt.foldtext = NG_custom_fold_text()
-
-vim.opt.viewoptions:remove('options')
-
 function M.setup_fold()
   vim.opt.foldtext = 'v:lua.NG_custom_fold_text()'
   -- vim.opt.viewoptions:remove('options')
   local cmd_group = api.nvim_create_augroup('NGFoldGroup', {})
-  vim.api.nvim_create_autocmd({ 'BufWinEnter', 'WinEnter' }, {
+  vim.api.nvim_create_autocmd({ 'BufWinEnter', 'WinEnter', 'BufEnter' }, {
     group = cmd_group,
-    callback = function()
+    callback = function(ev)
       -- user should setup fillchars themself
       -- vim.opt.fillchars = { foldclose = "", foldopen = "", vert = "│", fold = " ", diff = "░", msgsep = "‾", foldsep = "│" }
 
@@ -172,6 +168,9 @@ function M.setup_fold()
       api.nvim_set_option_value('foldmethod', 'expr', { win = current_window })
     end,
   })
+
+  vim.opt.foldtext = NG_custom_fold_text()
+  vim.opt.viewoptions:remove('options')
 end
 
 local function is_comment(line_number)

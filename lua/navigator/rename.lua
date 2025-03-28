@@ -245,7 +245,7 @@ local function perform_lsp_rename(opts)
 
   local params = opts.params or state.lsp_params
 
-  vim.lsp.buf_request(0, 'textDocument/rename', params, function(err, result, ctx, _)
+  clients[1].request('textDocument/rename', params, function(err, result, ctx, _)
     if err and err.message then
       vim.notify('[nav-rename] Error while renaming: ' .. err.message, vim.log.levels.ERROR)
       return
@@ -283,7 +283,7 @@ local function perform_lsp_rename(opts)
     if M.config and M.config.post_hook then
       M.config.post_hook(result)
     end
-  end)
+  end, 0)
 end
 
 local function inc_rename_execute(opts)

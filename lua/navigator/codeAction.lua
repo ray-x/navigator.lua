@@ -148,7 +148,8 @@ local code_action_req = function(_call_back_fn, client, context)
   params.context = context
   local line = params.range.start.line
   local callback = _call_back_fn(line, context.diagnostics)
-  vim.lsp.buf_request(0, 'textDocument/codeAction', params, callback)
+  client.request('textDocument/codeAction', params, callback, bufnr)
+
 end
 
 local function sort_select(action_tuples, opts, on_user_choice)

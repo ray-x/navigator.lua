@@ -135,11 +135,17 @@ M.inline = function()
     return
   end
 
-  local parameter = util.make_position_params()
 
   local on_codelens = vim.lsp.handlers['textDocument/codeLens']
-  local ids = lsp.buf_request(
-    bufnr,
+  local clients = vim.lsp.get_clients({ bufnr = bufnr, method = 'textDocument/codeLens' })
+  if not clients or #clients == 0 then
+    log('no codeLens clients found for bufnr')
+    return
+  end
+  -- do we want to support multiple clients?
+
+  local parameter = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
+  local ids = clients[1].request(
     'textDocument/codeLens',
     parameter,
     function(err, response, ctx, _)
@@ -159,11 +165,9 @@ M.inline = function()
 
         codelens_hdlr(err, response, ctx, _)
       end
-    end
+    end,
+    bufnr
   )
-  if next(ids) == nil then
-    vim.list_extend(M.disabled, { vim.api.nvim_get_current_buf() })
-  end
 end
 
 return M

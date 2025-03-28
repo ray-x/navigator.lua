@@ -224,11 +224,11 @@ end
 local function fetch_lsp_references(bufnr, params, callback)
   local clients = vim.lsp.get_clients({
     bufnr = bufnr,
-    method = 'textDocument/rename',
+    method = 'textDocument/references',
   })
 
   if #clients == 0 then
-    log('[nav-rename] No active language server with rename capability')
+    log('No active language server with reference capability')
     vim.notify('No active language server with reference capability')
   end
   if not params then
@@ -241,24 +241,19 @@ local function fetch_lsp_references(bufnr, params, callback)
   params.context = params.context or { includeDeclaration = true }
 
   -- return id, closer
-  return vim.lsp.buf_request(
-    bufnr,
-    'textDocument/references',
-    params,
-    function(err, result, ctx, cfg)
-      if err then
-        log('[nav-rename] Error while finding references: ' .. err.message, bufnr, params, ctx, cfg)
-        return
-      end
-      if not result or vim.tbl_isempty(result) then
-        log('[nav-rename] Nothing to rename', result)
-        return
-      end
-      if callback then
-        callback(err, result, ctx, cfg)
-      end
+  return clients[1].request('textDocument/references', params, function(err, result, ctx, cfg)
+    if err then
+      log('Error while finding references: ' .. err.message, bufnr, params, ctx, cfg)
+      return
     end
-  )
+    if not result or vim.tbl_isempty(result) then
+      log('No reference found', result)
+      return
+    end
+    if callback then
+      callback(err, result, ctx, cfg)
+    end
+  end, bufnr)
 end
 
 local ref_req = function()

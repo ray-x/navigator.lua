@@ -391,7 +391,7 @@ function M.locations_to_items(locations, ctx)
         vim.fn.bufload(bufnr)
         unload = bufnr
       end
-      context = ts_context({ bufnr = bufnr, pos = item.range }) or 'not found'
+      context = ts_context({ bufnr = bufnr, pos = item.range, encoding = enc }) or 'not found'
       trace('ts ctx', i, context, uv.now() - looptimer)
 
       -- TODO: unload buffers

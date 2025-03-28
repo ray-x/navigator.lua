@@ -185,7 +185,7 @@ function M.ref_context(opts)
 
   local pos = options.pos
   if not pos then
-    pos = { start = vim.lsp.util.make_position_params().position }
+    pos = { start = vim.lsp.util.make_position_params(0, opts.encoding).position }
   end
   local indicator_size = options.indicator_size or 100
   local type_patterns = options.type_patterns or { 'class', 'function', 'method' }

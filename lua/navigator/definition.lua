@@ -59,9 +59,17 @@ local function get_symbol()
 end
 
 local function def_preview(timeout_ms, method)
-  assert(next(vim.lsp.get_clients({ buffer = 0 })), 'Must have a client running')
   method = method or 'textDocument/definition'
-  local params = util.make_position_params()
+  local clients = vim.lsp.get_clients({
+    bufnr = vim.api.nvim_get_current_buf(),
+    method = method,
+  })
+
+  if not clients or #clients == 0 then
+    vim.notify('no definition clients found for bufnr')
+    return
+  end
+  local params = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
   local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)
 
   if result == nil or vim.tbl_isempty(result) then
@@ -69,10 +77,12 @@ local function def_preview(timeout_ms, method)
     return
   end
 
-  log(result)
   if not vim.islist(result) then
+    log('no result found')
     return
   end
+
+  log(result)
   local data = {}
   -- result = {vim.tbl_deep_extend("force", {}, unpack(result))}
   -- log("def-preview", result)
@@ -162,6 +172,44 @@ local function def_preview(timeout_ms, method)
 
   local view = TextView:new(opts)
   log(view.buf)
+  vim.keymap.set('n', 'K', function()
+    local par = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
+    log(row, par, data[1])
+    par.position.line = par.position.line + row - 1 -- header 1
+    par.textDocument.uri = data[1].uri or data[1].targetUri
+    log(par, clients[1].name)
+    local bufnr_org = vim.uri_to_bufnr(data[1].uri or data[1].targetUri)
+    return clients[1].request('textDocument/hover', par, function(err, res, ctx, _)
+      if err ~= nil then
+        log('error on hover', err)
+        return
+      end
+      if res == nil or vim.tbl_isempty(res) then
+        log('no hover result')
+        return
+      end
+      log(res)
+      local contents = vim.lsp.util.convert_input_to_markdown_lines(res.contents)
+      local ft = vim.api.nvim_buf_get_option(view.buf, 'filetype')
+      local hover_opts = {
+        relative = 'cursor',
+        style = 'minimal',
+        ft = ft,
+        rect = { width = 40, height = math.min(#contents + 3, 16), pos_y = 2 },
+        data = contents,
+        enter = true,
+        border = _NgConfigValues.border or 'shadow',
+      }
+      local hover_view = TextView:new(hover_opts)
+      vim.api.nvim_buf_set_keymap(hover_view.buf, 'n', 'K', '', {
+        noremap = true,
+        callback = function()
+          vim.lsp.buf.hover()
+        end,
+      })
+      return true
+    end, bufnr_org)
+  end, { buffer = view.buf })
   delta = delta + 1 -- header
   local cmd = 'normal! ' .. tostring(delta) .. 'G'
 
