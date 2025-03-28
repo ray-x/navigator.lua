@@ -238,6 +238,10 @@ local function fetch_lsp_references(bufnr, params, callback)
   if type(params) == 'function' then
     params = params(clients[1])
   end
+  if params == nil then
+    params = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
+  end
+
   params.context = params.context or { includeDeclaration = true }
 
   -- return id, closer
