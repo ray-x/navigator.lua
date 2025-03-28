@@ -239,14 +239,8 @@ require'navigator'.setup({
   preview_height = 0.35, -- max height of preview windows
   border = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}, -- border style, can be one of 'none', 'single', 'double',
                                                      -- 'shadow', or a list of chars which defines the border
-  on_attach = function(client, bufnr)
-    -- your hook
+  on_attach = function(client, bufnr) -- no longer supported for nvim > 0.11 use your own LspAttach autocmd
   end,
-  -- put a on_attach of your own here, e.g
-  -- function(client, bufnr)
-  --   -- the on_attach will be called at end of navigator on_attach
-  -- end,
-  -- The attach code will apply to all LSP clients
 
   ts_fold = {
     enable = false,
@@ -351,42 +345,23 @@ require'navigator'.setup({
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
     display_diagnostic_qf = true, -- always show quickfix if there are diagnostic errors, set to false if you want to ignore it
                                   -- set to 'trouble' to show diagnostcs in Trouble
-    ts_ls = {
-      filetypes = {'typescript'} -- disable javascript etc,
-      -- set to {} to disable the lspclient for all filetypes
-    },
     ctags ={
       cmd = 'ctags',
       tagfile = 'tags',
       options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number',
     },
-    gopls = {   -- gopls setting
-      on_attach = function(client, bufnr)  -- on_attach for gopls
-        -- your special on attach here
-        -- e.g. disable gopls format because a known issue https://github.com/golang/go/issues/45732
-        print("i am a hook, I will disable document format")
-        client.resolved_capabilities.document_formatting = false
-      end,
-      settings = {
-        gopls = {gofumpt = false} -- disable gofumpt etc,
-      }
+    -- lsp setup and config no longer supported for nvim 0.11
+    -- refer to nvim 0.11 lsp setup doc and lspconfig for more info
+    ts_ls = {  -- no longer supported for nvim 0.11
+    },
+    gopls = {   -- no longer supported for nvim 0.11
     },
     -- the lsp setup can be a function, .e.g
-    gopls = function()
-      local go = pcall(require, "go")
-      if go then
-        local cfg = require("go.lsp").config()
-        cfg.on_attach = function(client)
-          client.server_capabilities.documentFormattingProvider = false -- efm/null-ls
-        end
-        return cfg
-      end
+    gopls = function() -- no longer supported for nvim 0.11
     end,
 
-    lua_ls = {
-      sumneko_root_path = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server",
-      sumneko_binary = vim.fn.expand("$HOME") .. "/github/sumneko/lua-language-server/bin/macOS/lua-language-server",
-    },
+    lua_ls = { }, -- no longer supported
+
     servers = {'cmake', 'ltex'}, -- by default empty, and it should load all LSP clients available based on filetype
     -- but if you want navigator load  e.g. `cmake` and `ltex` for you , you
     -- can put them in the `servers` list and navigator will auto load them.
@@ -645,32 +620,6 @@ Another way to setup mason is disable navigator lsp setup and using mason setup 
 
 Alternatively, Navigator can be used to startup the server installed by mason. as it will override the navigator setup
 
-To start LSP installed by mason, please use following setups
-
-```lua
-require'navigator'.setup({
-  -- mason = false -- default value is false
-  lsp = {
-    ts_ls = { cmd = {'your typescript-language-server installed by mason'} }
-    -- e.g. ts_ls = { cmd = {'/home/username/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/bin/typescript-language-server'} }
-
-  }
-})
-```
-
-example cmd setup (mac) for pyright :
-
-```lua
-require'navigator'.setup({
-  -- mason = false -- default value is false
-
-  lsp = {
-    pyright = {
-      cmd = { "/Users/username/.local/share/nvim/lsp_servers/python/node_modules/.bin/pyright-langserver", "--stdio" }
-    }
-  }
-}
-```
 
 ### Integration with other lsp plugins (e.g. rust-tools, go.nvim, clangd extension)
 
@@ -697,7 +646,7 @@ use {"ray-x/navigator.lua",
   }
 ```
 
-- Here is an example to setup rust with rust-tools
+- Here is an example to setup rust with rust-tools (nvim < 0.11)
 
 ```lua
 require('rust-tools').setup({

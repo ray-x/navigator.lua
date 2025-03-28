@@ -27,9 +27,6 @@ _NgConfigValues = {
   prompt_mode = 'insert', -- 'normal' | 'insert'
   -- fuzzy finder prompt will be shown
   combined_attach = 'both', -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
-  on_attach = function(client, bufnr)
-    -- your on_attach will be called at end of navigator on_attach
-  end,
   -- ts_fold = false, -- deprecated
   ts_fold = {
     enable = false,
@@ -154,11 +151,6 @@ _NgConfigValues = {
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
     diagnostic_scrollbar_sign = { '▃', '▆', '█' }, -- set to nil to disable, set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
     neodev = false,
-    lua_ls = {
-      -- sumneko_root_path = sumneko_root_path,
-      -- sumneko_binary = sumneko_binary,
-      -- cmd = {'lua-language-server'}
-    },
     servers = {}, -- you can add additional lsp server so navigator will load the default for you
   },
   mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
@@ -388,13 +380,46 @@ M.setup = function(cfg)
       require('navigator.foldts').on_attach()
     end
 
+    vim.api.nvim_create_autocmd('LspAttach', {
+      group = vim.api.nvim_create_augroup('nv_lspattach', {}),
+      callback = function(args)
+        local bufnr = args.buf
+        local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+
+        local kinds = {}
+        if
+          type(client.server_capabilities.codeActionProvider) == 'table'
+          and client.server_capabilities.codeActionProvider.codeActionKinds
+        then
+          for _, kind in ipairs(client.server_capabilities.codeActionProvider.codeActionKinds) do
+            if not vim.tbl_contains(_NgConfigValues.lsp.code_action.exclude, kind) then
+              table.insert(kinds, kind)
+            end
+          end
+        end
+
+        require('navigator.lspclient.mapping').setup({
+          client = client,
+          bufnr = bufnr,
+        })
+
+        require('navigator.lspclient.highlight').add_highlight()
+        require('navigator.lspclient.highlight').config_signs()
+        require('navigator.lspclient.lspkind').init()
+        api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+          group = api.nvim_create_augroup('NGCodeActGroup_' .. tostring(bufnr), {}),
+          buffer = bufnr,
+          callback = function(args)
+            require('navigator.codeAction').code_action_prompt(client, bufnr, kinds)
+          end,
+        })
+      end,
+    })
+
     local _start_client = vim.lsp.start_client
     vim.lsp.start_client = function(lsp_config)
       -- add highlight for Lspxxx
-      require('navigator.lspclient.highlight').add_highlight()
-      require('navigator.lspclient.highlight').config_signs()
-      -- require('navigator.lspclient.mapping').setup()
-      require('navigator.lspclient.lspkind').init()
+
       return _start_client(lsp_config)
     end
   end, 1)
