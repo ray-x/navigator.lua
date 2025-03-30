@@ -187,6 +187,12 @@ describe('should run lsp reference', function()
     vim.cmd([[packadd nvim-lspconfig]])
     vim.cmd([[packadd navigator.lua]])
     vim.cmd([[packadd guihua.lua]])
+    vim.cmd([[packadd nvim-treesitter]])
+    require('nvim-treesitter.configs').setup({
+      ensure_installed = { 'go' },
+      sync_install = true,
+      highlight = { enable = true },
+    })
     local path = cur_dir .. '/tests/fixtures/interface_test.go' -- %:p:h ? %:p
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
