@@ -28,8 +28,6 @@ _G.test_close = true
 require("plenary/busted")
 require'nvim-treesitter.configs'.setup {
   ensure_installed = { "go" },
-  sync_install = true,
-  auto_install = true,
   highlight = {
     enable = true,
   }
