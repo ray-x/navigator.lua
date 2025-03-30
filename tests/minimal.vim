@@ -27,10 +27,12 @@ _G.test_rename = true
 _G.test_close = true
 require("plenary/busted")
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = {"go"}, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  ensure_installed = { "go" },
+  sync_install = true,
+  auto_install = true,
   highlight = {
-    enable = true,              -- false will disable the whole extension
-  },
+    enable = true,
+  }
 }
 
 -- for testing load gopls ahead

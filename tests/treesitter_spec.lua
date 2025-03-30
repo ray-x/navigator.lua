@@ -216,7 +216,11 @@ describe('should run lsp reference', function()
     vim.fn.setpos('.', { bufn, 15, 4, 0 }) -- width
 
     vim.bo.filetype = 'go'
+
+    vim.treesitter.stop()
+    vim.treesitter.start()
     local view, items, w = require('navigator.treesitter').buf_ts()
+
     eq(items[1].node_text, golden_result[1].node_text)
     eq(items[2].node_text, golden_result[2].node_text)
   end)
