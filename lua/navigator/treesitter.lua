@@ -83,7 +83,7 @@ end
 -- use lsp range to find def
 function M.find_definition(range, bufnr)
   if not range or not range.start then
-    lerr('find_def incorrect range'..vim.inspect(range))
+    lerr('find_def incorrect range' .. vim.inspect(range))
     return
   end
   bufnr = bufnr or api.nvim_get_current_buf()
@@ -94,7 +94,7 @@ function M.find_definition(range, bufnr)
     return
   end
   local node_at_point =
-    root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1], symbolpos[2])
+      root:named_descendant_for_range(symbolpos[1], symbolpos[2], symbolpos[1], symbolpos[2])
   if not node_at_point then
     return log('Err: no node at cursor', range)
   end
@@ -112,9 +112,8 @@ function M.find_definition(range, bufnr)
     return { start = { line = r, character = c } }
   else
     if definition then
-
       -- stylua: ignore start
-      trace( 'error: def not found in ', bufnr, definition:range(), definition:type())
+      trace('error: def not found in ', bufnr, definition:range(), definition:type())
       if definition:parent() then
         trace("def not found", definition:parent():type())
       end
@@ -228,7 +227,6 @@ function M.ref_context(opts)
 end
 
 --- Get definitions of bufnr (unique and sorted by order of appearance).
---- This function copy from treesitter/refactor/navigation.lua
 local function get_definitions(bufnr)
   local local_nodes = ts_locals.get_locals(bufnr)
   -- Make sure the nodes are unique.
@@ -246,9 +244,9 @@ local function get_definitions(bufnr)
         trace(row, col, erow, offset, node:parent(), node:parent():start(), node:parent():type())
 
         if
-          node
-          and node:parent()
-          and string.find(node:parent():type(), 'parameter_declaration')
+            node
+            and node:parent()
+            and string.find(node:parent():type(), 'parameter_declaration')
         then
           log('parameter_declaration skip')
           return
@@ -273,7 +271,7 @@ local function get_definitions(bufnr)
       ts_locals.recurse_local_nodes(loc.interface, function(def, node, full_match, match)
         local k, l, start = node:start()
         -- stylua: ignore start
-        trace( k, l, start, def, node, full_match,
+        trace(k, l, start, def, node, full_match,
           match, node:parent(), node:parent():start(), node:parent():type())
         -- stylua: ignore end
         if nodes_set[start] == nil then
@@ -298,7 +296,8 @@ local function get_definitions(bufnr)
           p3t = p2:parent():type()
         end
         -- stylua: ignore start
-        trace( row, col, start, def, node, full_match, match, p1t, p1, node:parent():start(), node:parent():type(), p2, p2t, p3, p3t)
+        trace(row, col, start, def, node, full_match, match, p1t, p1, node:parent():start(), node:parent():type(), p2,
+          p2t, p3, p3t)
         -- stylua: ignore end
         if p1t == 'arrow_function' then
           row, col, start = p1:start()
@@ -313,11 +312,11 @@ local function get_definitions(bufnr)
         end
         if nodes_set[start] == nil then
           if -- qualified_type : e.g. io.Reader inside interface
-            node:parent()
-            and node:parent():parent()
-            and node:type() == 'type_identifier'
-            and node:parent():type() == 'qualified_type'
-            and string.find(node:parent():parent():type(), 'interface')
+              node:parent()
+              and node:parent():parent()
+              and node:type() == 'type_identifier'
+              and node:parent():type() == 'qualified_type'
+              and string.find(node:parent():parent():type(), 'interface')
           then
             trace('add node', node)
             nodes_set[start] = { node = node, type = match or 'field' }
@@ -384,9 +383,9 @@ local function get_scope(type, source)
 
   if type == 'var' and next ~= nil then
     if
-      next:type() == 'function'
-      or next:type() == 'arrow_function'
-      or next:type() == 'function_definition'
+        next:type() == 'function'
+        or next:type() == 'arrow_function'
+        or next:type() == 'function_definition'
     then
       trace(current:type(), current:range())
       return next, true
@@ -478,6 +477,7 @@ end
 function M.goto_next_usage(bufnr)
   return M.goto_adjacent_usage(bufnr, 1)
 end
+
 function M.goto_previous_usage(bufnr)
   return M.goto_adjacent_usage(bufnr, -1)
 end
@@ -517,7 +517,7 @@ local function get_all_nodes(bufnr, filter, summary)
   local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
   if not parsers.has_parser() then
     if not require('navigator.lspclient.clients').ft_disabled(ft) then
-      -- vim.notify('ts not loaded ' .. ft, vim.log.levels.Debug)
+      vim.notify('ts not loaded ' .. ft, vim.log.levels.Debug)
       log('ts not loaded ' .. ft)
     end
     return {}
@@ -529,17 +529,17 @@ local function get_all_nodes(bufnr, filter, summary)
 
   local all_nodes = {}
   local containers = filter
-    or {
-      ['function'] = true,
-      ['local_function'] = true,
-      ['arrow_function'] = true,
-      ['type'] = true,
-      ['class'] = true,
-      ['call_expression'] = true,
-      -- ['var'] = true,
-      ['struct'] = true,
-      ['method'] = true,
-    }
+      or {
+        ['function'] = true,
+        ['local_function'] = true,
+        ['arrow_function'] = true,
+        ['type'] = true,
+        ['class'] = true,
+        ['call_expression'] = true,
+        -- ['var'] = true,
+        ['struct'] = true,
+        ['method'] = true,
+      }
 
   -- check and load buff
 
@@ -561,17 +561,17 @@ local function get_all_nodes(bufnr, filter, summary)
       -- trace(parent_def.type, parent_def.node:type(), vim.treesitter.get_node_text(parent_def.node, bufnr))
       -- trace(def.node:type(), vim.treesitter.get_node_text(def.node, bufnr))
       if
-        ts_utils.is_parent(parent_def.node, def.node)
-        or (
-          containers[parent_def.type]
-          and (
-            ts_utils.is_parent(parent_def.node:parent(), def.node)
-            or (
-              parent_def.node:parent():type():find('dot_index')
-              and ts_utils.is_parent(parent_def.node:parent():parent(), def.node)
+          ts_utils.is_parent(parent_def.node, def.node)
+          or (
+            containers[parent_def.type]
+            and (
+              ts_utils.is_parent(parent_def.node:parent(), def.node)
+              or (
+                parent_def.node:parent():type():find('dot_index')
+                and ts_utils.is_parent(parent_def.node:parent():parent(), def.node)
+              )
             )
           )
-        )
       then
         -- trace('is parent', i, index)
         break
@@ -620,18 +620,18 @@ local function get_all_nodes(bufnr, filter, summary)
         local parent = tsdata:parent()
         if parent ~= nil and _NgConfigValues.debug == 'trace' then -- for github action failure
           -- stylua: ignore start
-          trace( parent:type(), vim.treesitter.get_node_text(parent, bufnr):sub(1, 30), item.node_text, item.type)
+          trace(parent:type(), vim.treesitter.get_node_text(parent, bufnr):sub(1, 30), item.node_text, item.type)
           -- stylua: ignore end
         end
         if
-          parent ~= nil
-          and (
-            parent:type() == 'function_name'
-            -- or parent:type() == 'function'
-            -- or parent:type() == 'function_declaration' -- this bring in too much info
-            or parent:type() == 'method_name'
-            or parent:type() == 'function_name_field'
-          )
+            parent ~= nil
+            and (
+              parent:type() == 'function_name'
+              -- or parent:type() == 'function'
+              -- or parent:type() == 'function_declaration' -- this bring in too much info
+              or parent:type() == 'method_name'
+              or parent:type() == 'function_name_field'
+            )
         then
           -- replace function name
           item.node_text = vim.treesitter.get_node_text(parent, bufnr)
@@ -661,7 +661,7 @@ local function get_all_nodes(bufnr, filter, summary)
 
         if item.node_scope then
           -- stylua: ignore start
-          trace( item.type, tsdata:type(), item.node_text, item.kind, 'range',
+          trace(item.type, tsdata:type(), item.node_text, item.kind, 'range',
             item.node_scope.start.line, item.node_scope['end'].line) -- set to log if need to trace result
           -- stylua: ignore end
         end
@@ -672,7 +672,7 @@ local function get_all_nodes(bufnr, filter, summary)
       local start_line_node, _, _ = tsdata:start()
 
       local line_text = api.nvim_buf_get_lines(bufnr, start_line_node, start_line_node + 1, false)[1]
-        or ''
+          or ''
       item.full_text = vim.trim(line_text)
 
       item.full_text = item.full_text:gsub('%s*[%[%(%{]*%s*$', '')
@@ -710,13 +710,13 @@ local function get_all_nodes(bufnr, filter, summary)
       end
 
       item.text =
-        string.format(' %s %s%-10s\t %s', item.kind, indent, item.node_text, item.full_text)
+          string.format(' %s %s%-10s\t %s', item.kind, indent, item.node_text, item.full_text)
       if #item.text > length then
         length = #item.text
       end
       if
-        loaded_symbol[item.node_text .. item.kind] == nil
-        or not util.range_inside(loaded_symbol[item.node_text .. item.kind], item.node_scope)
+          loaded_symbol[item.node_text .. item.kind] == nil
+          or not util.range_inside(loaded_symbol[item.node_text .. item.kind], item.node_scope)
       then
         table.insert(all_nodes, item)
         loaded_symbol[item.node_text .. item.kind] = item.node_scope
