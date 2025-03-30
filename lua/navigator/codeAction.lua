@@ -185,6 +185,8 @@ code_action.code_action = function()
 end
 
 code_action.code_action_prompt = function(client, bufnr, only)
+  bufnr = bufnr or api.nvim_get_current_buf()
+  only = only or {}
   if special_buffers[vim.bo.filetype] then
     log('skip buffer', vim.bo.filetype)
     return
