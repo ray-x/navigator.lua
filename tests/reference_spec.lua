@@ -65,11 +65,7 @@ describe('should run lsp reference', function()
     border = 'none',
   })
 
-  if vim.fn.has('nvim-0.7') then
-    _NgConfigValues.treesitter_analysis = true
-  else
-    _NgConfigValues.treesitter_analysis = false
-  end
+  _NgConfigValues.treesitter_analysis = true
   -- allow gopls start
 
   for _ = 1, 20 do
