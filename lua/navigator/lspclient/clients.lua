@@ -14,15 +14,11 @@ _LoadedFiletypes = {}
 local highlight = require('navigator.lspclient.highlight')
 
 local has_lsp, lspconfig = pcall(require, 'lspconfig')
-if not has_lsp then
-  return {
-    setup = function()
-      vim.notify('loading lsp config failed LSP may not working correctly', vim.log.levels.WARN)
-    end,
-  }
+local has_nvim_011 = vfn.has('nvim-0.11')
+if not has_lsp and not has_nvim_011 then
+  vim.notify('loading lsp config failed LSP may not working correctly', vim.log.levels.WARN)
 end
 
-local util = lspconfig.util
 local config = require('navigator').config_values()
 local disabled_ft = {
   'NvimTree',
@@ -51,16 +47,7 @@ local disabled_ft = {
 -- gopls["ui.completion.usePlaceholders"] = true
 
 
-if _NgConfigValues.mason then
-  require('navigator.lazyloader').load('mason.nvim', 'williamboman/mason.nvim')
-  require('navigator.lazyloader').load('mason-lspconfig.nvim', 'williamboman/mason-lspconfig.nvim')
-end
-
 local servers = require('navigator.lspclient.servers')
-
-local lsp_mason_servers = {}
-local has_mason = false
-
 
 local ng_default_cfg = {
   flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
@@ -339,7 +326,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if nulls_cfg then
       local cfg = {}
       cfg = vim.tbl_deep_extend('keep', cfg, nulls_cfg)
-      vim.lsp.config['null-ls']=cfg
+      vim.lsp.config['null-ls'] = cfg
       vim.lsp.enable('null-ls')
     end
   end
@@ -410,8 +397,8 @@ local function setup(user_opts)
     if vim.fn.empty(lang) == 0 then
       log('set filetype', ft, ext)
 
-      vim.api.nvim_set_option_value('filetype', lang, {buf = bufnr})
-      vim.api.nvim_set_option_value( 'syntax', 'on', {buf = bufnr})
+      vim.api.nvim_set_option_value('filetype', lang, { buf = bufnr })
+      vim.api.nvim_set_option_value('syntax', 'on', { buf = bufnr })
       ft = vim.api.nvim_get_option_value('ft', { buf = bufnr })
       if vim.fn.empty(ft) == 1 then
         log('still failed to idnetify filetype, try again')

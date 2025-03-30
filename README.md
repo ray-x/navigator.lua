@@ -278,7 +278,7 @@ require'navigator'.setup({
       separator = '',  -- e.g. shows   3 lines 
     },
   },
-  mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
+  mason = false, -- Deprecated, mason no longger supported as setup lsp changed in nvim 0.11
   lsp = {
     enable = true,  -- skip lsp setup, and only use treesitter in navigator.
                     -- Use this if you are not using LSP servers, and only want to enable treesitter support.
@@ -544,82 +544,14 @@ Terminal nerdfont and emoji capacity. I am using Kitty with nerdfont (Victor Mon
 
 ## Integrate with williamboman/mason.nvim
 
-If you are using mason and would like to use the lsp servers installed by mason. Please set
+Note: mason lspconfig no longger support as of nvim 0.11 The only change you need in in LspAttach event add if you
+prefer to use mason lspconfig
 
 ```lua
-mason = true -- mason user
+require("navigator.lspclient.mapping").setup({ client = client, bufnr = bufnr }) -- setup navigator keymaps here,
+require("navigator.dochighlight").documentHighlight(bufnr)
+require("navigator.codeAction").code_action_prompt(bufnr)
 ```
-
-In the config. Also please setup the lsp server from installer setup with `server:setup{opts}`
-
-for mason
-
-```lua
-      use("williamboman/mason.nvim")
-      use({
-        "williamboman/mason-lspconfig.nvim",
-        config = function()
-          require("mason").setup()
-          require("mason-lspconfig").setup({})
-        end,
-      })
-
-      use({
-        "ray-x/navigator.lua",
-        requires = {
-          { "ray-x/guihua.lua", run = "cd lua/fzy && make" },
-          { "neovim/nvim-lspconfig" },
-          { "nvim-treesitter/nvim-treesitter" },
-        },
-        config = function()
-          require("navigator").setup({
-            mason = true,
-          })
-        end,
-      })
-```
-
-Another way to setup mason is disable navigator lsp setup and using mason setup handlers, pylsp for example
-
-```lua
-      use("williamboman/mason.nvim")
-      use({
-        "williamboman/mason-lspconfig.nvim",
-        config = function()
-          require("mason").setup()
-          require("mason-lspconfig").setup_handlers({
-            ["pylsp"] = function()
-              require("lspconfig").pylsp.setup({
-                on_attach = function(client, bufnr)
-                  require("navigator.lspclient.mapping").setup({ client = client, bufnr = bufnr }) -- setup navigator keymaps here,
-                  require("navigator.dochighlight").documentHighlight(bufnr)
-                  require("navigator.codeAction").code_action_prompt(bufnr)
-                end,
-              })
-            end,
-          })
-          require("mason-lspconfig").setup({})
-        end,
-      })
-
-      use({
-        "navigator.lua",
-        requires = {
-          { "ray-x/guihua.lua", run = "cd lua/fzy && make" },
-          { "nvim-lspconfig" },
-          { "nvim-treesitter/nvim-treesitter" },
-        },
-        config = function()
-          require("navigator").setup({
-            mason = true,
-            lsp = { disable_lsp = { "pylsp" } },  -- disable pylsp setup from navigator
-          })
-        end,
-      })
-```
-
-Alternatively, Navigator can be used to startup the server installed by mason. as it will override the navigator setup
-
 
 ### Integration with other lsp plugins (e.g. rust-tools, go.nvim, clangd extension)
 
