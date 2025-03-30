@@ -46,7 +46,7 @@ local function ts_symbol()
   local ft_to_lang = require('nvim-treesitter.parsers').ft_to_lang
 
   local lang = ft_to_lang(vim.bo[bufnr].filetype)
-  local query = (vim.fn.has('nvim-0.9') == 1) and vim.treesitter.query.get(lang, 'highlights')
+  local query = vim.treesitter.query.get(lang, 'highlights')
     or vim.treesitter.get_query(lang, 'highlights')
 
   local ts_utils = require('nvim-treesitter.ts_utils')
@@ -362,9 +362,7 @@ M.rename_preview = function()
       log('cancel', new_name)
     end,
   }
-  if vim.fn.has('nvim-0.9.0') == 1 then
-    inputopts.title = 'symbol rename'
-  end
+  inputopts.title = 'symbol rename'
   ghinput.setup(inputopts)
   vim.ui.input = ghinput.input
 

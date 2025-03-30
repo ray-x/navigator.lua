@@ -229,10 +229,12 @@ M.deprecated = function(cfg)
     warn('ts_fold option changed, refer to README for more details')
     cfg.ts_fold = { enable = cfg.ts_fold }
   end
-  local has_nvim_010 = vim.fn.has('nvim-0.10') == 1
-  if not has_nvim_010 then
-    vim.lsp.get_clients = vim.lsp.get_active_clients
-    vim.islist = vim.tbl_islist
+  local has_nvim_011 = vim.fn.has('nvim-0.11') == 1
+  if not has_nvim_011 then
+    vim.notify(
+      'navigator.nvim requires nvim 0.11 or higher, please update your neovim version',
+      vim.log.levels.WARN
+    )
   end
   if cfg.lsp and cfg.lsp.hover and cfg.lsp.hover.keymaps then
     warn('lsp.hover.keymaps is deprecated, refer to README for more details')
@@ -326,6 +328,12 @@ end
 local cmd_group
 
 M.setup = function(cfg)
+  local util = require('navigator.util')
+  local has_nvim_011 = util.nvim_0_11()
+  if not has_nvim_011 then
+    vim.notify('navigator.nvim requires nvim 0.11 or higher', vim.log.levels.WARN)
+    return
+  end
   cfg = cfg or {}
   extend_config(cfg)
 
@@ -419,7 +427,10 @@ M.setup = function(cfg)
     local _start_client = vim.lsp.start_client
     vim.lsp.start_client = function(lsp_config)
       -- add highlight for Lspxxx
-
+      require('navigator.lspclient.highlight').add_highlight()
+      require('navigator.lspclient.highlight').config_signs()
+      -- require('navigator.lspclient.mapping').setup()
+      require('navigator.lspclient.lspkind').init()
       return _start_client(lsp_config)
     end
   end, 1)
