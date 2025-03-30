@@ -87,10 +87,7 @@ M.defaults = function()
       },
       on_attach = function(client, bufnr)
         on_attach(client, bufnr)
-        if
-          vim.fn.has('nvim-0.8.3') == 1
-          and not client.server_capabilities.semanticTokensProvider
-        then
+        if not client.server_capabilities.semanticTokensProvider then
           local semantic = client.config.capabilities.textDocument.semanticTokens
           if semantic then
             client.server_capabilities.semanticTokensProvider = {

@@ -174,14 +174,6 @@ local function load_cfg(ft, client, cfg, loaded, starting)
 end
 
 local function setup_fmt(client, enabled)
-  if not require('navigator.util').nvim_0_8() then
-    if enabled == false then
-      client.resolved_capabilities.document_formatting = enabled
-    else
-      client.resolved_capabilities.document_formatting = client.resolved_capabilities.document_formatting or enabled
-    end
-  end
-
   if enabled == false then
     client.server_capabilities.documentFormattingProvider = false
   else
