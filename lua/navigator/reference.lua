@@ -206,7 +206,7 @@ local async_ref = function()
     ref_view(err, result, ctx, config)
   end) -- return asyncresult, canceller
 
-  ref_params = util.make_position_params({ includeDeclaration = false })
+  ref_params = util.make_position_params({ context = { includeDeclaration = false } })
   lsp.call_async('textDocument/references', ref_params, function(err, result, ctx, config)
     if err ~= nil or result == nil then
       log('failed to get ref', err, result, ctx, config)
