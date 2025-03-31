@@ -173,6 +173,11 @@ local transform_line = function(line)
   return line
 end
 
+local trim_line = function(line)
+  line = line:gsub('%s*[%[%(%{]*%s*$', '')
+  return line
+end
+
 function M.ref_context(opts)
   local options = opts or {}
   local bufnr = options.bufnr or api.nvim_get_current_buf()
@@ -184,7 +189,7 @@ function M.ref_context(opts)
 
   local pos = options.pos
   if not pos then
-    pos = { start = vim.lsp.util.make_position_params(0, opts.encoding).position }
+    pos = { start = vim.lsp.util.make_position_params(0, opts.encoding or 'utf-8').position }
   end
   local indicator_size = options.indicator_size or 100
   local type_patterns = options.type_patterns or { 'class', 'function', 'method' }
@@ -198,13 +203,19 @@ function M.ref_context(opts)
   end
 
   local lines = {}
+  local org_lines = {}
   local expr = current_node
 
   while expr do
     local line = ts_utils._get_line_for_node(expr, type_patterns, transform_fn, bufnr)
-    trace('line', line)
+    local line_org = ts_utils._get_line_for_node(expr, type_patterns, trim_line, bufnr)
+    trace('line', line, line_org)
+
     if line ~= '' and not vim.tbl_contains(lines, line) then
       table.insert(lines, 1, line)
+    end
+    if line_org ~= '' and not vim.tbl_contains(org_lines, line_org) then
+      table.insert(org_lines, 1, line_org)
     end
     expr = expr:parent()
     if #line > _NgConfigValues.treesitter_analysis_depth then
@@ -215,15 +226,19 @@ function M.ref_context(opts)
     log('no lines found')
     return ''
   end
+  trace(lines, org_lines or 'org lines not found')
 
   local text = table.concat(lines, separator)
+  local org_text = _NgConfigValues.icons.treesitter_defult ..
+      ' ' .. separator .. ' ' .. table.concat(org_lines, separator)
+  trace(text, org_text)
   local text_len = #text
   if text_len > indicator_size then
     local str = text:sub(1, text_len) -- copy string
     return util.sub_match(str)
   end
 
-  return text
+  return text, org_text
 end
 
 --- Get definitions of bufnr (unique and sorted by order of appearance).
@@ -450,17 +465,20 @@ function M.goto_adjacent_usage(bufnr, delta)
     en = vim.tbl_contains(en, vim.o.ft)
   end
   if en == false then
+    log("fallback lsp")
     return lsp_reference(opt)
   end
 
   bufnr = bufnr or api.nvim_get_current_buf()
   local node_at_point = ts_utils.get_node_at_cursor()
   if not node_at_point then
+    log("no node fallback lsp")
     lsp_reference(opt)
     return
   end
 
   local def_node, scope = ts_locals.find_definition(node_at_point, bufnr)
+  trace(def_node, scope)
   local usages = ts_locals.find_usages(def_node, scope, bufnr)
   trace(usages)
 

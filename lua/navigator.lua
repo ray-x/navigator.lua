@@ -411,6 +411,7 @@ M.setup = function(cfg)
           bufnr = bufnr,
         })
 
+        require('navigator.dochighlight').documentHighlight(bufnr)
         require('navigator.lspclient.highlight').add_highlight()
         require('navigator.lspclient.highlight').config_signs()
         require('navigator.lspclient.lspkind').init()

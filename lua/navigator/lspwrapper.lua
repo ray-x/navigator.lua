@@ -379,20 +379,19 @@ function M.locations_to_items(locations, ctx)
       and table.getn(file_cnt) < _NgConfigValues.treesitter_analysis_max_fnum -- getn deprecated, but it is the best solution for getting dict size
     local unload, def
     local context = ''
+    local org_context
     if not proj_file then
       trace('not proj file', i, item.uri)
     end
     if TS_analysis_enabled and not ctx.no_show and proj_file then
-      local ts_context = nts.ref_context
-
       local bufnr = vim.uri_to_bufnr(item.uri)
       if not api.nvim_buf_is_loaded(bufnr) then
         log('! load buf !', item.uri, bufnr)
         vim.fn.bufload(bufnr)
         unload = bufnr
       end
-      context = ts_context({ bufnr = bufnr, pos = item.range, encoding = enc }) or 'not found'
-      trace('ts ctx', i, context, uv.now() - looptimer)
+      context, org_context = nts.ref_context({ bufnr = bufnr, pos = item.range, encoding = enc })
+      trace('ts ctx', i, context, org_context, uv.now() - looptimer)
 
       -- TODO: unload buffers
       if unload then
@@ -446,6 +445,7 @@ function M.locations_to_items(locations, ctx)
     end
     item.display_filename = filename or item.filename
     item.call_by = context -- find_ts_func_by_range(funcs, item.range)
+    item.status_line = org_context
     item.rpath = util.get_relative_path(cwd, gutil.add_pec(item.filename))
     if is_win then
       -- windows C: vs c: -- log(item.filename, filename, cwd .. path_sep, path_cur)
