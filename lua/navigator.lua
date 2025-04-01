@@ -86,7 +86,7 @@ _NgConfigValues = {
       severity_sort = { reverse = true },
       float = {
         focusable = false,
-        sytle = 'minimal',
+        style = 'minimal',
         border = 'rounded',
         source = 'always',
         header = '',
