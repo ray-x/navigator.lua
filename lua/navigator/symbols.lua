@@ -41,7 +41,7 @@ function M.document_symbols(opts)
   local params = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
   params.context = { includeDeclaration = true }
   params.query = opts.prompt or ''
-  clients[1].request('textDocument/documentSymbol', params, M.document_symbol_handler, _bufnr)
+  clients[1].request('textDocument/documentSymbol', params, M.document_symbol_handler, bufnr)
 end
 
 M.document_symbol_handler = function(err, result, ctx)
