@@ -48,9 +48,9 @@ local key_maps = {
   { key = '<Space>ca',     func = require('navigator.codeAction').code_action, desc = 'code_action',    mode = {'n', 'v'} },
   -- { key = '<Leader>re', func = 'rename()' },
   { key = '<Space>rn',     func = require('navigator.rename').rename,                                   desc = 'rename' },
-  { key = '<Leader>gi',    func = vim.lsp.buf.incoming_calls,                                           desc = 'incoming_calls' },
-  { key = '<Leader>go',    func = vim.lsp.buf.outgoing_calls,                                           desc = 'outgoing_calls' },
-  { key = 'gi',            func = vim.lsp.buf.implementation,                                           desc = 'implementation',  fallback = fallback_fn('gi') }, -- insert
+  { key = '<Leader>gi',    func = require('navigator.hierarchy').incoming_calls,                                           desc = 'incoming_calls' },
+  { key = '<Leader>go',    func = require('navigator.hierarchy').outgoing_calls,                                           desc = 'outgoing_calls' },
+  { key = 'gi',            func = require('navigator.implementation').implementation_call,                                           desc = 'implementation',  fallback = fallback_fn('gi') }, -- insert
   { key = '<Space>D',      func = vim.lsp.buf.type_definition,                                          desc = 'type_definition' },
   { key = 'gL',            func = require('navigator.diagnostics').show_diagnostics,                    desc = 'show_diagnostics' },
   { key = 'gG',            func = require('navigator.diagnostics').show_buf_diagnostics,                desc = 'show_buf_diagnostics' },
@@ -344,7 +344,12 @@ function M.setup(attach_opts)
       vim.log.levels.WARN
     )
   end
-  attach_opts = attach_opts or { bufnr = 0, client = {}, cap = {} }
+
+  attach_opts = attach_opts or {}
+  -- extend the default mapping
+  attach_opts = vim.tbl_deep_extend('force', { bufnr = vim.api.nvim_get_current_buf(), client = {}, cap = {} },
+  attach_opts)
+
   set_mapping(attach_opts)
   set_cmds(attach_opts)
 
