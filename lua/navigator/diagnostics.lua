@@ -11,7 +11,7 @@ local path_sep = require('navigator.util').path_sep()
 local path_cur = require('navigator.util').path_cur()
 local empty = util.empty
 local api = vim.api
-_NG_VT_DIAG_NS = api.nvim_create_namespace('navigator_lua_diag')
+local ng_vt_diag_ns = api.nvim_create_namespace('navigator_lua_diag')
 
 util.nvim_0_11()
 
@@ -78,9 +78,9 @@ local function error_marker(result, ctx, config)
 
     if result == nil or result.diagnostics == nil or #result.diagnostics == 0 then
       local diag_cnt = get_count(bufnr, [[Error]]) + get_count(bufnr, [[Warning]])
-      if diag_cnt == 0 and _NG_VT_DIAG_NS ~= nil then
+      if diag_cnt == 0 and ng_vt_diag_ns ~= nil then
         log('great no errors')
-        api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
+        api.nvim_buf_clear_namespace(bufnr, ng_vt_diag_ns, 0, -1)
       end
       return
     end
@@ -93,8 +93,8 @@ local function error_marker(result, ctx, config)
     if total_num < weight then
       weight = total_num
     end
-    if _NG_VT_DIAG_NS == nil then
-      _NG_VT_DIAG_NS = api.nvim_create_namespace('navigator_lua_diag')
+    if ng_vt_diag_ns == nil then
+      ng_vt_diag_ns = api.nvim_create_namespace('navigator_lua_diag')
     end
 
     local pos = {}
@@ -137,7 +137,7 @@ local function error_marker(result, ctx, config)
       trace('pos, line:', p, diag.severity, diag.range)
     end
 
-    api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
+    api.nvim_buf_clear_namespace(bufnr, ng_vt_diag_ns, 0, -1)
     for _, s in pairs(pos) do
       local hl = 'ErrorMsg'
       if type(s.severity) == 'number' then
@@ -163,7 +163,7 @@ local function error_marker(result, ctx, config)
 
       api.nvim_buf_set_extmark(
         bufnr,
-        _NG_VT_DIAG_NS,
+        ng_vt_diag_ns,
         l,
         -1,
         { virt_text = { { s.sign, hl } }, virt_text_pos = 'right_align' }
@@ -297,8 +297,8 @@ local diag_hdlr = function(err, result, ctx, config)
     marker(result, ctx, config)
   else
     trace('great, no diag errors')
-    api.nvim_buf_clear_namespace(0, _NG_VT_DIAG_NS, 0, -1)
-    _NG_VT_DIAG_NS = nil
+    api.nvim_buf_clear_namespace(0, ng_vt_diag_ns, 0, -1)
+    ng_vt_diag_ns = nil
   end
 end
 
@@ -417,17 +417,17 @@ end
 
 local function clear_diag_VT(bufnr) -- important for clearing out when no more errors
   bufnr = bufnr or api.nvim_get_current_buf()
-  log(bufnr, _NG_VT_DIAG_NS)
-  if _NG_VT_DIAG_NS == nil then
+  log(bufnr, ng_vt_diag_ns)
+  if ng_vt_diag_ns == nil then
     return
   end
 
-  api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
-  _NG_VT_DIAG_NS = nil
+  api.nvim_buf_clear_namespace(bufnr, ng_vt_diag_ns, 0, -1)
+  ng_vt_diag_ns = nil
 end
 
 M.hide_diagnostic = function()
-  if _NG_VT_DIAG_NS then
+  if ng_vt_diag_ns then
     clear_diag_VT()
   end
 end
@@ -462,9 +462,6 @@ M.show_buf_diagnostics = function()
         return log('nil listview')
       end
       trace('new buffer', listview.bufnr)
-      if listview.bufnr then
-        api.nvim_buf_add_highlight(listview.bufnr, -1, 'Title', 0, 0, -1)
-      end
     end
   end
 end
@@ -509,8 +506,8 @@ end
 
 -- TODO: callback when scroll
 function M.update_err_marker()
-  trace('update err marker', _NG_VT_DIAG_NS)
-  if _NG_VT_DIAG_NS == nil then
+  trace('update err marker', ng_vt_diag_ns)
+  if ng_vt_diag_ns == nil then
     -- nothing to update
     return
   end
@@ -522,8 +519,8 @@ function M.update_err_marker()
     + get_count(bufnr, [[Hint]])
 
   -- redraw
-  if diag_cnt == 0 and _NG_VT_DIAG_NS ~= nil then
-    api.nvim_buf_clear_namespace(bufnr, _NG_VT_DIAG_NS, 0, -1)
+  if diag_cnt == 0 and ng_vt_diag_ns ~= nil then
+    api.nvim_buf_clear_namespace(bufnr, ng_vt_diag_ns, 0, -1)
     trace('no errors')
     return
   end
