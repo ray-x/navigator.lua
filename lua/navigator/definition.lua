@@ -5,6 +5,7 @@ local gui = require('navigator.gui')
 local log = util.log
 local trace = util.trace
 local TextView = require('guihua.textview')
+local ms = require('vim.lsp.protocol').Methods
 -- callback for lsp definition, implementation and declaration handler
 local definition_hdlr = function(err, locations, ctx, _)
   if err ~= nil then
@@ -150,14 +151,14 @@ local function def_preview(timeout_ms, method)
   end
   local width = 40
 
-  local maxwidth = math.floor(vim.api.nvim_get_option('columns') * 0.8)
+  local maxwidth = math.floor(vim.api.nvim_get_option_value('columns', {scope = 'global'}) * 0.8)
   for _, value in pairs(definition) do
     -- log(key, value, width)
     width = math.max(width, #value + 4)
     width = math.min(maxwidth, width)
   end
   definition = vim.list_extend({ '    [' .. get_symbol() .. '] Definition: ' }, definition)
-  local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+  local filetype = vim.api.nvim_get_option_value('filetype', {buf = bufnr})
 
   -- TODO multiple resuts?
   local opts = {
@@ -179,7 +180,7 @@ local function def_preview(timeout_ms, method)
     par.textDocument.uri = data[1].uri or data[1].targetUri
     log(par, clients[1].name)
     local bufnr_org = vim.uri_to_bufnr(data[1].uri or data[1].targetUri)
-    return clients[1].request('textDocument/hover', par, function(err, res, ctx, _)
+    return clients[1]:request(ms.textDocument_hover, par, function(err, res, ctx, _)
       if err ~= nil then
         log('error on hover', err)
         return
@@ -190,7 +191,7 @@ local function def_preview(timeout_ms, method)
       end
       log(res)
       local contents = vim.lsp.util.convert_input_to_markdown_lines(res.contents)
-      local ft = vim.api.nvim_buf_get_option(view.buf, 'filetype')
+      local ft = vim.api.nvim_get_option_value('filetype', { buf = view.buf })
       local hover_opts = {
         relative = 'cursor',
         style = 'minimal',
@@ -227,6 +228,7 @@ end
 local function type_preview(timeout_ms)
   return def_preview(timeout_ms, 'textDocument/typeDefinition')
 end
+local ms = require('vim.lsp.protocol').Methods
 local def = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
@@ -234,7 +236,7 @@ local def = function()
   util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     if client.server_capabilities.definitionProvider then
       local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)
-      client.request('textDocument/definition', ref_params, definition_hdlr, _bufnr)
+      client:request(ms.textDocument_documentHighlight, ref_params, definition_hdlr, _bufnr or bufnr)
       return
     end
   end)

@@ -438,7 +438,7 @@ function M.rename_inplace(new_name, options)
       params.newName = name
       local handler = client.handlers['textDocument/rename']
         or vim.lsp.handlers['textDocument/rename']
-      client.request('textDocument/rename', params, function(...)
+      client:request(ms.textDocument_rename, params, function(...)
         handler(...)
         try_use_client(next(clients, idx))
       end, bufnr)
@@ -446,7 +446,7 @@ function M.rename_inplace(new_name, options)
 
     if client.supports_method('textDocument/prepareRename') then
       -- log(params)
-      client.request('textDocument/prepareRename', params, function(err, result)
+      client:request(ms.textDocument_prepareRename, params, function(err, result)
         if err or result == nil then
           if next(clients, idx) then
             try_use_client(next(clients, idx))
