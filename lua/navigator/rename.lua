@@ -7,6 +7,7 @@ local util = require('navigator.util')
 local log = util.log
 local api = vim.api
 local vfn = vim.fn
+local ms = require('vim.lsp.protocol').Methods
 
 local M = {
   hl_group = 'Substitute',
@@ -241,6 +242,7 @@ end
 
 local function perform_lsp_rename(opts)
   local new_name = opts.args
+  opts.bufnr = opts.bufnr or api.nvim_get_current_buf()
   local clients = vim.lsp.get_clients({
     method = 'textDocument/rename',
     bufnr = opts.bufnr,
@@ -251,7 +253,7 @@ local function perform_lsp_rename(opts)
 
   local params = opts.params or state.lsp_params
 
-  clients[1].request('textDocument/rename', params, function(err, result, ctx, _)
+  clients[1]:request(ms.textDocument_rename, params, function(err, result, ctx, _)
     if err and err.message then
       vim.notify('[nav-rename] Error while renaming: ' .. err.message, vim.log.levels.ERROR)
       return
@@ -289,7 +291,7 @@ local function perform_lsp_rename(opts)
     if M.config and M.config.post_hook then
       M.config.post_hook(result)
     end
-  end, 0)
+  end, opts.bufnr)
 end
 
 local function inc_rename_execute(opts)

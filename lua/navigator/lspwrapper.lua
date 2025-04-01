@@ -168,11 +168,11 @@ function M.call_async(method, params, handler, bufnr)
   -- get clients for the buffer
   local clients = lsp.get_clients({ buffer = bufnr })
   for _, client in pairs(clients) do
-    if client.supports_method(method) then
+    if client:supports_method(method, bufnr) then
       if type(params) == 'function' then
         params = params(client)
       end
-      return client.request(method, params, callback, bufnr)
+      return client:request(method, params, callback, bufnr)
     end
   end
 
@@ -522,7 +522,7 @@ function M.request(method, hdlr) -- e.g  textDocument/reference
   local bufnr = vim.api.nvim_get_current_buf()
   util.for_each_buffer_client(bufnr, function(client, _, _)
     local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)
-    client.request(method, ref_params, hdlr, bufnr)
+    client:request(method, ref_params, hdlr, bufnr)
   end)
 end
 

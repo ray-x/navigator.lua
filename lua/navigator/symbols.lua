@@ -6,6 +6,7 @@ local trace = util.trace
 local lsphelper = require('navigator.lspwrapper')
 local symbol_kind = require('navigator.lspclient.lspkind').symbol_kind
 local symbols_to_items = lsphelper.symbols_to_items
+local ms = require('vim.lsp.protocol').Methods
 
 function M.workspace_symbols(query)
   query = query or pcall(vim.fn.input, 'Query: ')
@@ -13,7 +14,7 @@ function M.workspace_symbols(query)
   local params = { query = query }
   util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     if client.server_capabilities.workspaceSymbolProvider then
-      client.request('workspace/symbol', params, M.workspace_symbol_handler, _bufnr)
+      client:request(ms.workspace_symbol, params, M.workspace_symbol_handler, _bufnr)
     end
   end)
 end

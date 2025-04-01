@@ -245,7 +245,7 @@ local function fetch_lsp_references(bufnr, params, callback)
   params.context = params.context or { includeDeclaration = true }
 
   -- return id, closer
-  return clients[1].request('textDocument/references', params, function(err, result, ctx, cfg)
+  return clients[1]:request('textDocument/references', params, function(err, result, ctx, cfg)
     if err then
       log('Error while finding references: ' .. err.message, bufnr, params, ctx, cfg)
       return

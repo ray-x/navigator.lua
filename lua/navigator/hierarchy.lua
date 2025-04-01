@@ -273,7 +273,7 @@ call_hierarchy = function(method, opts)
       local client = vim.lsp.get_client_by_id(ctx.client_id)
       if client then
         trace('result', result, 'items', call_hierarchy_item, method, ctx, client.name)
-        client.request(method, {
+        client:request(method, {
           item = call_hierarchy_item,
           args = {
             method = method,
