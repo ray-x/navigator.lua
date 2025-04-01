@@ -17,7 +17,7 @@ end
 
 local function implementation_handler(_, err, result, ctx, cfg)
   local results = location_handler(err, result, ctx, cfg, 'Implementation not found')
-  local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
+  local ft = vim.api.nvim_buf_get_option(ctx.bufnr or 0, 'ft')
   gui.new_list_view({ items = results, ft = ft, api = 'Implementation', title = 'Implementation' })
 end
 
