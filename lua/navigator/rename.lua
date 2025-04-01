@@ -213,14 +213,20 @@ local function incremental_rename_preview(opts, preview_ns, preview_buf)
     api.nvim_buf_set_lines(bufnr or opts.bufnr, line_nr, line_nr + 1, false, { updated_line })
 
     for _, hl_pos in ipairs(highlight_positions) do
-      api.nvim_buf_add_highlight(
-        bufnr or opts.bufnr,
-        preview_ns,
-        M.hl_group,
-        line_nr,
-        hl_pos.start_col,
-        hl_pos.end_col
-      )
+      -- api.nvim_buf_add_highlight(
+      -- bufnr or opts.bufnr,
+      -- preview_ns,
+      -- M.hl_group,
+      -- line_nr,
+      -- hl_pos.start_col,
+      -- hl_pos.end_col
+      -- )
+      api.nvim_buf_set_extmark(bufnr or opts.bufnr, preview_ns, line_nr, hl_pos.start_col, {
+        end_line = line_nr,
+        end_col = hl_pos.end_col,
+        hl_group = M.hl_group,
+        priority = 1000,
+      })
     end
   end
 
