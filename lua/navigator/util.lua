@@ -639,7 +639,7 @@ M.make_position_params = function(extra_params)
   end
   ---@param client vim.lsp.Client
   return function(client, bufnr)
-    local params = vim.lsp.util.make_position_params(bufnr or 0, client.offset_encoding)
+    local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
     if extra_params then
       params = vim.tbl_deep_extend('force', params, extra_params)
     end

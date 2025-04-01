@@ -287,10 +287,12 @@ call_hierarchy = function(method, opts)
 end
 
 function M.incoming_calls(opts)
+  opts = opts or {handler = incoming_calls_handler}
   call_hierarchy(in_method, opts)
 end
 
 function M.outgoing_calls(opts)
+  opts = opts or {handler = outgoing_calls_handler}
   call_hierarchy(out_method, opts)
 end
 
