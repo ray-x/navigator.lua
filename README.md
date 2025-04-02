@@ -278,7 +278,7 @@ require'navigator'.setup({
       separator = '',  -- e.g. shows   3 lines 
     },
   },
-  mason = false, -- Deprecated, mason no longger supported as setup lsp changed in nvim 0.11
+  mason = false, -- Deprecated, mason no longer supported as setup lsp changed in nvim 0.11
   lsp = {
     enable = true,  -- skip lsp setup, and only use treesitter in navigator.
                     -- Use this if you are not using LSP servers, and only want to enable treesitter support.
