@@ -5,7 +5,7 @@ local M = { log_path = vim.lsp.get_log_path() }
 -- local is_windows = uv.os_uname().version:match("Windows")
 pcall(require, 'guihua') -- lazy load
 local guihua = require('guihua.util')
-local nvim_0_8
+local nvim_0_11
 local vfn = vim.fn
 local api = vim.api
 local uv = vim.uv or vim.loop
@@ -404,16 +404,13 @@ function M.get_current_winid()
   return api.nvim_get_current_win()
 end
 
-function M.nvim_0_8()
-  if nvim_0_8 ~= nil then
-    return nvim_0_8
+function M.nvim_0_11()
+  if vim.fn.has('nvim-0.11') == 1 then
+    nvim_0_11 = true
+  else
+    nvim_0_11 = false
   end
-  nvim_0_8 = vfn.has('nvim-0.8') == 1
-  if nvim_0_8 == false then
-    M.log('Please use navigator 0.4 version for neovim version < 0.8')
-    vim.notify('Please use navigator 0.4 version for neovim version < 0.8', vim.log.levels.ERROR)
-  end
-  return nvim_0_8
+  return nvim_0_11
 end
 
 function M.mk_handler(fn)

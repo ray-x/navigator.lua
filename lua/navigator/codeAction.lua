@@ -5,6 +5,7 @@ local code_action = {}
 -- local gui = require('navigator.gui')
 local config = require('navigator').config_values()
 local api = vim.api
+local ms = require('vim.lsp.protocol').Methods
 
 local sign_name = 'NavigatorLightBulb'
 
@@ -145,11 +146,10 @@ end
 
 local code_action_req = function(_call_back_fn, client, context)
   local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
-  params.context = context
+  params.context = vim.tbl_deep_extend( 'force', params.context or {}, context)
   local line = params.range.start.line
   local callback = _call_back_fn(line, context.diagnostics)
-  client.request('textDocument/codeAction', params, callback, bufnr)
-
+  client:request(ms.textDocument_codeAction, params, callback, vim.api.nvim_get_current_buf())
 end
 
 local function sort_select(action_tuples, opts, on_user_choice)
