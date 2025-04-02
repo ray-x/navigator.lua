@@ -236,7 +236,7 @@ local def = function()
   util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     if client.server_capabilities.definitionProvider then
       local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)
-      client:request(ms.textDocument_documentHighlight, ref_params, definition_hdlr, _bufnr or bufnr)
+      client:request(ms.textDocument_definition, ref_params, definition_hdlr, _bufnr or bufnr)
       return
     end
   end)
