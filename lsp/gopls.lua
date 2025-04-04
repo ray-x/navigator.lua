@@ -1,4 +1,8 @@
 local util = require('lspconfig').util
+local hasgo = pcall(require 'go')
+if hasgo then
+  return require('go.lsp').config()
+end
 return {
   -- capabilities = cap,
   filetypes = { 'go', 'gomod', 'gohtmltmpl', 'gotexttmpl' },
@@ -33,8 +37,6 @@ return {
       symbolMatcher = 'fuzzy',
       gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
       buildFlags = { '-tags', 'integration' },
-      -- buildFlags = {"-tags", "functional"}
-      semanticTokens = true,
     },
   },
 }
