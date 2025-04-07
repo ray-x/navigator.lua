@@ -34,7 +34,7 @@ local key_maps = {
   { key = '<Leader>gr',    func = require('navigator.reference').reference,                             desc = 'reference' }, -- reference deprecated
   { key = '<M-k>',         func = vim.lsp.buf.signature_help,                                           desc = 'signature_help', mode = 'i' },
   { key = '<c-k>',         func = vim.lsp.buf.signature_help,                                           desc = 'signature_help' },
-  { key = '<Leader>g0',    func = require('navigator.symbols').document_symbols,                        desc = 'document_symbols' },
+  { key = 'gO',    func = require('navigator.symbols').document_symbols,                        desc = 'document_symbols' },
   { key = 'gW',            func = require('navigator.workspace').workspace_symbol_live,                 desc = 'workspace_symbol_live' },
   { key = '<c-]>',         func = require('navigator.definition').definition,                           desc = 'definition' },
   { key = 'gd',            func = remap(require('navigator.definition').definition, 'gd'),              desc = 'definition' },

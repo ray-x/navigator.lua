@@ -2,7 +2,7 @@ local M = {}
 local api = vim.api
 
 local function warn(msg)
-  api.nvim_echo({ { 'WRN: ' .. msg, 'WarningMsg' } }, true, {})
+  api.nvim_echo({ { 'WRN: ' .. msg, 'WarningMsg' } }, true, { err = true })
 end
 
 local function info(msg)
@@ -331,7 +331,7 @@ M.setup = function(cfg)
   local util = require('navigator.util')
   local has_nvim_011 = util.nvim_0_11()
   if not has_nvim_011 then
-    vim.notify('navigator.nvim requires nvim 0.11 or higher', vim.log.levels.WARN)
+    vim.notify('navigator.nvim requires nvim 0.11 or higher use nvim_0.10 branch if you are using old version of nvim', vim.log.levels.WARN)
     return
   end
   cfg = cfg or {}
