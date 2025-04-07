@@ -2,7 +2,7 @@ local M = {}
 local api = vim.api
 
 local function warn(msg)
-  api.nvim_echo({ { 'WRN: ' .. msg, 'WarningMsg' } }, true, { err = true })
+  api.nvim_echo({ { 'WRN: ' .. msg, 'WarningMsg' } }, true, {})
 end
 
 local function info(msg)

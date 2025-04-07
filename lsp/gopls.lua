@@ -37,6 +37,8 @@ return {
       symbolMatcher = 'fuzzy',
       gofumpt = false, -- true, -- turn on for new repos, gofmpt is good but also create code turmoils
       buildFlags = { '-tags', 'integration' },
+      -- buildFlags = {"-tags", "functional"}
+      semanticTokens = false,
     },
   },
 }
