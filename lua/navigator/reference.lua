@@ -4,6 +4,7 @@ local lsphelper = require('navigator.lspwrapper')
 local gui = require('navigator.gui')
 local lsp = require('navigator.lspwrapper')
 local trace = require('navigator.util').trace
+local ms = require('vim.lsp.protocol').Methods
 -- local partial = util.partial
 -- local cwd = vim.loop.cwd()
 local uv = vim.uv or vim.loop
@@ -245,7 +246,7 @@ local function fetch_lsp_references(bufnr, params, callback)
   params.context = params.context or { includeDeclaration = true }
 
   -- return id, closer
-  return clients[1].request('textDocument/references', params, function(err, result, ctx, cfg)
+  return clients[1]:request('textDocument/references', params, function(err, result, ctx, cfg)
     if err then
       log('Error while finding references: ' .. err.message, bufnr, params, ctx, cfg)
       return
@@ -286,7 +287,7 @@ local ref = function()
   local ref_params = util.make_position_params()
   util.for_each_buffer_client(bufnr, function(client, _, _)
     if client.server_capabilities.referencesProvider then
-      client.request('textDocument/references', ref_params, ref_hdlr, bufnr)
+      client:request(ms.textDocument_references, ref_params, ref_hdlr, bufnr)
     end
   end)
 end
@@ -299,7 +300,7 @@ local function side_panel()
     scope = 'range',
     header = '  ' .. currentWord .. ' ref ',
     render = function(bufnr)
-      local ft = vim.api.nvim_buf_get_option(bufnr, 'buftype')
+      local ft = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
       if ft == 'nofile' or ft == 'guihua' or ft == 'prompt' then
         return
       end
