@@ -1,11 +1,12 @@
 local lsp = vim.lsp
 local util = lsp.util
 local nutils = require('navigator.util')
+local lsphelper = require('navigator.lspwrapper')
 local api = vim.api
 local log = nutils.log
 local M = {}
 
-function M.handler(err, result, ctx, config)
+local function handler(err, result, ctx, config)
   config = config or {}
   config.focus_id = ctx.method
   if api.nvim_get_current_buf() ~= ctx.bufnr then
@@ -23,9 +24,6 @@ function M.handler(err, result, ctx, config)
     end
     failed = true
   end
-  local bufnr = ctx.bufnr
-  -- get filetype for bufnr
-  local ft = api.nvim_buf_get_option(bufnr, 'filetype')
   if failed then
     if _NgConfigValues.lsp.hover.ft then
       local fallback_fn = _NgConfigValues.hover.ft or ''
@@ -35,6 +33,7 @@ function M.handler(err, result, ctx, config)
     end
     return -- return early as no valid hover info lets fallback to other sources
   end
+
   local format = 'markdown'
   local contents ---@type string[]
   if type(result.contents) == 'table' and result.contents.kind == 'plaintext' then
@@ -49,7 +48,36 @@ function M.handler(err, result, ctx, config)
     end
     return
   end
+
+  local double = { '╔', '═', '╗', '║', '╝', '═', '╚', '║' }
+  local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
+
+  local border_style = single
+  if _NgConfigValues.border == 'double' then
+    border_style = double
+  end
+  config.border = border_style
+
   return util.open_floating_preview(contents, format, config)
+end
+
+function M.hover(opts)
+  if not lsphelper.check_capabilities('hoverProvider') then
+    return
+  end
+
+  opts = {}
+  opts.bufnr = api.nvim_get_current_buf()
+
+  local params = nutils.make_position_params()
+  log('hover params', params)
+
+  lsphelper.call_sync_single(
+    'textDocument/hover',
+    params,
+    opts,
+    handler
+  )
 end
 
 return M

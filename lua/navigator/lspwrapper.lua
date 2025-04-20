@@ -126,6 +126,16 @@ local function extract_result(results_lsp)
   end
 end
 
+local function extract_result_single(results_lsp)
+  if results_lsp then
+    for _, server_results in pairs(results_lsp) do
+      if server_results.result then
+        return server_results.result
+      end
+    end
+  end
+end
+
 function M.check_capabilities(feature, bufnr)
   local clients = lsp.get_clients({ buffer = bufnr or vim.api.nvim_get_current_buf() })
 
@@ -154,6 +164,23 @@ function M.call_sync(method, params, opts, handler)
     lsp.buf_request_sync(opts.bufnr or 0, method, params, opts.timeout or 1000)
 
   return handler(err, extract_result(results_lsp), { method = method, no_show = opts.no_show }, nil)
+end
+
+function M.call_sync_single(method, params, opts, handler)
+  params = params or {}
+  opts = opts or {}
+  local bufnr = opts.bufnr or 0
+  log(method, params)
+  local ctx = {
+    method = method,
+    no_show = opts.no_show,
+    bufnr = bufnr,
+  }
+
+  local results_lsp, err =
+    lsp.buf_request_sync(opts.bufnr or 0, method, params, opts.timeout or 1000)
+
+  return handler(err, extract_result_single(results_lsp), ctx, nil)
 end
 
 function M.call_async(method, params, handler, bufnr)

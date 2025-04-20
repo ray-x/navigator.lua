@@ -25,8 +25,6 @@ local function fallback_fn(key)
   end
 end
 
-local double = { '╔', '═', '╗', '║', '╝', '═', '╚', '║' }
-local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
 local remap = util.binding_remap
 -- stylua: ignore start
 local key_maps = {
@@ -73,7 +71,7 @@ local key_maps = {
 }
 
 if _NgConfigValues.lsp.hover then
-  table.insert(key_maps, { key = 'K', func = vim.lsp.buf.hover, desc = 'hover' })
+  table.insert(key_maps, { key = 'K', func = require('navigator.hover').hover, desc = 'hover' })
 end
 
 local key_maps_help = {}
@@ -449,15 +447,6 @@ function M.setup(attach_opts)
     end,
   })
 
-  local border_style = single
-  if _NgConfigValues.border == 'double' then
-    border_style = double
-  end
-  if _NgConfigValues.lsp.hover.enable then
-    vim.lsp.handlers['textDocument/hover'] = util.lsp_with(require('navigator.hover').handler, {
-      border = border_style,
-    })
-  end
   if cap.documentFormattingProvider then
     log('formatting enabled setup hdl')
     vim.lsp.handlers['textDocument/formatting'] = require('navigator.formatting').format_hdl
