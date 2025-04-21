@@ -15,9 +15,9 @@ local function location_handler(err, locations, ctx, _, msg)
   return locations_to_items(locations, ctx)
 end
 
-local function implementation_handler(_, err, result, ctx, cfg)
+local function implementation_handler(err, result, ctx, cfg)
   local results = location_handler(err, result, ctx, cfg, 'Implementation not found')
-  local ft = vim.api.nvim_buf_get_option(ctx.bufnr or 0, 'ft')
+  local ft = vim.api.nvim_get_option_value('ft', { buf = ctx.bufnr })
   gui.new_list_view({ items = results, ft = ft, api = 'Implementation', title = 'Implementation' })
 end
 
@@ -33,12 +33,10 @@ function M.implementation(bang, opts)
     'textDocument/implementation',
     params,
     opts,
-    partial(implementation_handler, bang)
+    implementation_handler
   )
 end
 
-M.implementation_call = partial(M.implementation, 0)
-
-M.implementation_handler = partial(implementation_handler, 0)
+M.implementation_handler = implementation_handler
 
 return M

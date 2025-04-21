@@ -166,7 +166,7 @@ function M.call_async(method, params, handler, bufnr)
   -- note: neovim vim.lsp.buf_request seems no longer exposed, in future, use lsp.Client:request
   -- return lsp.buf_request(bufnr, method, params, callback)
   -- get clients for the buffer
-  local clients = lsp.get_clients({ buffer = bufnr })
+  local clients = lsp.get_clients({ buffer = bufnr, method = method })
   for _, client in pairs(clients) do
     if client:supports_method(method, bufnr) then
       if type(params) == 'function' then

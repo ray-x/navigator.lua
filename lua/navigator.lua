@@ -331,7 +331,10 @@ M.setup = function(cfg)
   local util = require('navigator.util')
   local has_nvim_011 = util.nvim_0_11()
   if not has_nvim_011 then
-    vim.notify('navigator.nvim requires nvim 0.11 or higher use nvim_0.10 branch if you are using old version of nvim', vim.log.levels.WARN)
+    vim.notify(
+      'navigator.nvim requires nvim 0.11 or higher use nvim_0.10 branch if you are using old version of nvim',
+      vim.log.levels.WARN
+    )
     return
   end
   cfg = cfg or {}
@@ -424,16 +427,6 @@ M.setup = function(cfg)
         })
       end,
     })
-
-    local _start_client = vim.lsp.start_client
-    vim.lsp.start_client = function(lsp_config)
-      -- add highlight for Lspxxx
-      require('navigator.lspclient.highlight').add_highlight()
-      require('navigator.lspclient.highlight').config_signs()
-      -- require('navigator.lspclient.mapping').setup()
-      require('navigator.lspclient.lspkind').init()
-      return _start_client(lsp_config)
-    end
   end, 1)
 end
 
