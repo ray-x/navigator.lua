@@ -133,8 +133,11 @@ local function load_cfg(ft, client, cfg, loaded, starting)
     if not _NG_Loaded[client] then
       trace(client, 'loading for', ft, cfg)
       trace(lspconfig[client])
-      -- lspconfig[client].setup(cfg)
-      vim.lsp.enable(client)
+      if vim.lsp.enable then
+        vim.lsp.enable(client)
+      else
+        lspconfig[client].setup(cfg)
+      end
       _NG_Loaded[client] = true
       table.insert(_NG_Loaded[bufnr].lsp, client)
       vim.defer_fn(function()
@@ -159,9 +162,9 @@ end
 local function setup_fmt(client, enabled)
   if enabled == false then
     client.server_capabilities.documentFormattingProvider = false
-  else
-    client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
-        or enabled
+  -- else
+    -- client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
+        -- or enabled
   end
 end
 
@@ -237,10 +240,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     local default_config = {}
-    if lspconfig[lspclient] == nil then
+    local lsp_config = vim.lsp.config or lspconfig
+    local client_cfg = lsp_config[lspclient]
+    if client_cfg == nil then
       vim.schedule(function()
         vim.notify(
-          'lspclient' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
+          'lspclient: ' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
           vim.log.levels.WARN
         )
       end)
@@ -248,19 +253,19 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       goto continue
     end
 
-    if lspconfig[lspclient].document_config and lspconfig[lspclient].document_config.default_config then
+    if client_cfg.document_config and client_cfg.document_config.default_config then
       default_config = lspconfig[lspclient].document_config.default_config
     else
       vim.schedule(function()
-        vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.log.levels.WARN)
+        -- vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.log.levels.WARN)
+        log('missing document_config for client: '.. vim.inspect(lspclient))
       end)
       goto continue
     end
 
     default_config = vim.tbl_deep_extend('force', default_config, ng_default_cfg)
-    local cfg = vim.lsp.config[lspclient] or require('lspconfig')[lspclient] or {}
 
-    cfg = vim.tbl_deep_extend('keep', cfg, default_config)
+    local cfg = vim.tbl_deep_extend('keep', client_cfg, default_config)
     -- filetype disabled
     if not vim.tbl_contains(cfg.filetypes or {}, ft) then
       trace('ft', ft, 'disabled for', lspclient)
@@ -326,8 +331,12 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if nulls_cfg then
       local cfg = {}
       cfg = vim.tbl_deep_extend('keep', cfg, nulls_cfg)
-      vim.lsp.config['null-ls'] = cfg
-      vim.lsp.enable('null-ls')
+      if vim.lsp.config then
+        vim.lsp.config['null-ls'] = cfg
+        vim.lsp.enable('null-ls')
+      else
+        lspconfig['null-ls'].setup(cfg)
+      end
     end
   end
 
