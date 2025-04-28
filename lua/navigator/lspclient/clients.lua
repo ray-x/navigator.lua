@@ -2,6 +2,7 @@
 local ng_util = require('navigator.util')
 local log = ng_util.log
 local trace = ng_util.trace
+trace = log
 local empty = ng_util.empty
 local warn = ng_util.warn
 local vfn = vim.fn
@@ -162,9 +163,9 @@ end
 local function setup_fmt(client, enabled)
   if enabled == false then
     client.server_capabilities.documentFormattingProvider = false
-  -- else
+    -- else
     -- client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
-        -- or enabled
+    -- or enabled
   end
 end
 
@@ -212,16 +213,6 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
     end
     -- check should load lsp
-
-    if type(lspclient) == 'table' then
-      if lspclient.name then
-        lspclient = lspclient.name
-      else
-        warn('incorrect set for lspclient' .. vim.inspect(lspclient))
-        goto continue
-      end
-    end
-
     -- for lazy loading
     -- e.g. {lsp={tsserver=function() if tsver>'1.17' then return {xxx} else return {xxx} end}}
     if type(user_lsp_opts[lspclient]) == 'function' then
@@ -241,7 +232,10 @@ local function lsp_startup(ft, retry, user_lsp_opts)
 
     local default_config = {}
     local lsp_config = vim.lsp.config or lspconfig
-    local client_cfg = lsp_config[lspclient]
+    local client_cfg = lsp_config[lspclient] or {}
+    local lspconfig_client_cfg = lspconfig[lspclient] or {}
+    client_cfg = vim.tbl_deep_extend('keep', client_cfg, lspconfig_client_cfg)
+
     if client_cfg == nil then
       vim.schedule(function()
         vim.notify(
@@ -258,7 +252,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     else
       vim.schedule(function()
         -- vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.log.levels.WARN)
-        log('missing document_config for client: '.. vim.inspect(lspclient))
+        log('missing document_config for client: ' .. vim.inspect(lspclient))
       end)
       goto continue
     end
@@ -269,7 +263,6 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     -- filetype disabled
     if not vim.tbl_contains(cfg.filetypes or {}, ft) then
       trace('ft', ft, 'disabled for', lspclient)
-
       goto continue
     end
 
