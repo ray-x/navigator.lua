@@ -127,8 +127,8 @@ local check_cap = function(opts)
         rfmt = true
       end
 
-      log('override ccls', value.config)
       if value.config.name == 'ccls' then
+        log('override ccls', value.config)
         ccls = true
       end
     end
