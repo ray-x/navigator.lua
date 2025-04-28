@@ -2,7 +2,6 @@
 local ng_util = require('navigator.util')
 local log = ng_util.log
 local trace = ng_util.trace
-trace = log
 local empty = ng_util.empty
 local warn = ng_util.warn
 local vfn = vim.fn
@@ -163,9 +162,6 @@ end
 local function setup_fmt(client, enabled)
   if enabled == false then
     client.server_capabilities.documentFormattingProvider = false
-    -- else
-    -- client.server_capabilities.documentFormattingProvider = client.server_capabilities.documentFormattingProvider
-    -- or enabled
   end
 end
 
@@ -235,6 +231,14 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     local client_cfg = lsp_config[lspclient] or {}
     local lspconfig_client_cfg = lspconfig[lspclient] or {}
     client_cfg = vim.tbl_deep_extend('keep', client_cfg, lspconfig_client_cfg)
+    -- get config from lsp/lsp_name.lua
+    local lsp_dot_cfg = {}
+    local require_path = 'lsp.' .. lspclient
+    local has_cfg = false
+    has_cfg, lsp_dot_cfg = pcall(require, require_path)
+    if has_cfg then
+      client_cfg = vim.tbl_deep_extend('force', client_cfg, lsp_dot_cfg)
+    end
 
     if client_cfg == nil then
       vim.schedule(function()
