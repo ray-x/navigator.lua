@@ -544,8 +544,8 @@ Terminal nerdfont and emoji capacity. I am using Kitty with nerdfont (Victor Mon
 
 ## Integrate with williamboman/mason.nvim
 
-Note: mason lspconfig no longger support as of nvim 0.11 The only change you need in in LspAttach event add if you
-prefer to use mason lspconfig
+Note: mason lspconfig no longger support as of navigator nvim 0.11 branch The only change you need in in LspAttach event
+add if you prefer to use mason lspconfig
 
 ```lua
 require("navigator.lspclient.mapping").setup({ client = client, bufnr = bufnr }) -- setup navigator keymaps here,

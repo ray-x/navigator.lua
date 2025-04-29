@@ -1,9 +1,5 @@
-local util = require('lspconfig').util
 return {
-  root_dir = function(fname)
-    return util.root_pattern('Cargo.toml', 'rust-project.json', '.git')(fname)
-        or util.path.dirname(fname)
-  end,
+  root_markers = {'Cargo.toml', 'rust-project.json', '.git'},
   filetypes = { 'rust' },
   message_level = vim.lsp.protocol.MessageType.error,
   settings = {
