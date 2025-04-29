@@ -183,16 +183,24 @@ describe('should run lsp reference', function()
     local status = require('plenary.reload').reload_module('navigator')
     local status = require('plenary.reload').reload_module('guihua')
     local status = require('plenary.reload').reload_module('lspconfig')
-
     vim.cmd([[packadd nvim-lspconfig]])
     vim.cmd([[packadd navigator.lua]])
     vim.cmd([[packadd guihua.lua]])
+    vim.cmd([[packadd nvim-treesitter]])
+    require('plenary.reload').reload_module('nvim-treesitter/nvim-treesitter')
+    require('plenary.reload').reload_module('nvim-treesitter')
     local path = cur_dir .. '/tests/fixtures/interface_test.go' -- %:p:h ? %:p
     local cmd = " silent exe 'e " .. path .. "'"
     vim.cmd(cmd)
     vim.cmd([[cd %:p:h]])
     local bufn = vim.fn.bufnr('')
     -- require'lspconfig'.gopls.setup {}
+
+    require('nvim-treesitter.configs').setup({
+      ensure_installed = { 'go' },
+      sync_install = true,
+      highlight = { enable = true },
+    })
     require('navigator').setup({
       debug = true, -- log output, set to true and log path: ~/.local/share/nvim/gh.log
     })
@@ -210,7 +218,21 @@ describe('should run lsp reference', function()
     vim.fn.setpos('.', { bufn, 15, 4, 0 }) -- width
 
     vim.bo.filetype = 'go'
+
+    -- Give TreeSitter a moment to process the buffer
+    vim.wait(800, function() end)
+
+    vim.treesitter.stop()
+    vim.treesitter.start()
+
+
     local view, items, w = require('navigator.treesitter').buf_ts()
+    if items == nil then
+      print('no items')
+    end
+
+    print('ts result', vim.inspect(view), vim.inspect(items))
+
     eq(items[1].node_text, golden_result[1].node_text)
     eq(items[2].node_text, golden_result[2].node_text)
   end)

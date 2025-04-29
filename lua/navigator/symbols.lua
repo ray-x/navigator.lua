@@ -6,6 +6,7 @@ local trace = util.trace
 local lsphelper = require('navigator.lspwrapper')
 local symbol_kind = require('navigator.lspclient.lspkind').symbol_kind
 local symbols_to_items = lsphelper.symbols_to_items
+local ms = require('vim.lsp.protocol').Methods
 
 function M.workspace_symbols(query)
   query = query or pcall(vim.fn.input, 'Query: ')
@@ -13,7 +14,7 @@ function M.workspace_symbols(query)
   local params = { query = query }
   util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     if client.server_capabilities.workspaceSymbolProvider then
-      client.request('workspace/symbol', params, M.workspace_symbol_handler, _bufnr)
+      client:request(ms.workspace_symbol, params, M.workspace_symbol_handler, _bufnr)
     end
   end)
 end
@@ -38,9 +39,10 @@ function M.document_symbols(opts)
     return
   end
   local params = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
-  params.context = { includeDeclaration = true }
+  params.context = params.context or {}
+  params.context.includeDeclaration = false
   params.query = opts.prompt or ''
-  clients[1].request('textDocument/documentSymbol', params, M.document_symbol_handler, bufnr)
+  clients[1]:request(ms.textDocument_documentSymbol, params, M.document_symbol_handler, bufnr)
 end
 
 M.document_symbol_handler = function(err, result, ctx)
@@ -125,7 +127,7 @@ M.document_symbol_handler = function(err, result, ctx)
     return locations
   end
 
-  local ft = vim.api.nvim_buf_get_option(bufnr, 'ft')
+  local ft = vim.api.nvim_get_option_value('ft', { buf = bufnr })
   gui.new_list_view({
     items = locations,
     prompt = true,
@@ -159,7 +161,7 @@ M.workspace_symbol_handler = function(err, result, ctx, cfg)
   local items = symbols_to_items(result)
   log(items[1])
 
-  local ft = vim.api.nvim_buf_get_option(ctx.bufnr, 'ft')
+  local ft = vim.api.nvim_buf_get_option_value('ft', { buf = ctx.bufnr })
   gui.new_list_view({
     items = items,
     prompt = true,
@@ -176,7 +178,7 @@ function M.side_panel()
   local p = Panel:new({
     scope = 'range',
     render = function(bufnr)
-      local ft = vim.api.nvim_buf_get_option(bufnr, 'buftype')
+      local ft = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
       if ft == 'nofile' or ft == 'guihua' or ft == 'prompt' then
         return
       end
@@ -191,7 +193,7 @@ function M.side_panel()
     end,
   })
   p:open(true)
-  -- redraw the pannel if current buffer modified and saved
+  -- redraw the panel if current buffer modified and saved
   local group = vim.api.nvim_create_augroup('guihua_side_panel', { clear = false })
   vim.api.nvim_create_autocmd({
     'BufWritePost',

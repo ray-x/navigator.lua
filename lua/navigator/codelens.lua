@@ -145,8 +145,9 @@ M.inline = function()
   -- do we want to support multiple clients?
 
   local parameter = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
-  local ids = clients[1].request(
-    'textDocument/codeLens',
+  local ms = require('vim.lsp.protocol').Methods
+  local ids = clients[1]:request(
+    ms.textDocument_codeLens,
     parameter,
     function(err, response, ctx, _)
       if err then

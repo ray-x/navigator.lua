@@ -7,13 +7,13 @@ if not vim.health then
   health = require('health')
 end
 
-local nvim_09 = vim.fn.has('nvim-0.9') == 1
+local nvim_011 = vim.fn.has('nvim-0.11') == 1
 
-local start = nvim_09 and health.start or health.report_start
-local ok = nvim_09 and health.ok or health.report_ok
-local error = nvim_09 and health.error or health.report_error
-local warn = nvim_09 and health.warn or health.report_warn
-local info = nvim_09 and health.info or health.report_info
+local start = nvim_011 and health.start or health.report_start
+local ok = nvim_011 and health.ok or health.report_ok
+local error = nvim_011 and health.error or health.report_error
+local warn = nvim_011 and health.warn or health.report_warn
+local info = nvim_011 and health.info or health.report_info
 
 local vfn = vim.fn
 
@@ -47,7 +47,7 @@ end
 
 
 function M.check()
-  if vim.fn.has('nvim-0.9') == 0 then
+  if vim.fn.has('nvim-0.11') == 0 then
     warn('Suggested neovim version 0.9 or higher')
   end
   plugin_check()

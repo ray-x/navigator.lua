@@ -2,6 +2,7 @@ local log = require('navigator.util').log
 
 local lsp = vim.lsp
 local api = vim.api
+local ms = require('vim.lsp.protocol').Methods
 
 local M = {}
 
@@ -55,10 +56,10 @@ end
 
 function M.update_folds()
   local current_window = api.nvim_get_current_win()
-  local in_diff_mode = api.nvim_win_get_option(current_window, 'diff')
+  local in_diff_mode = api.nvim_get_option_value('diff', {win = current_window})
   if in_diff_mode then
     -- In diff mode, use diff folding.
-    api.nvim_win_set_option(current_window, 'foldmethod', 'diff')
+    api.nvim_set_option_value(current_window, 'foldmethod', 'diff', {win = current_window})
   else
     local clients = lsp.get_clients({buffer = 0})
     for client_id, client in pairs(clients) do
@@ -67,7 +68,7 @@ function M.update_folds()
         -- client.config.callbacks['textDocument/foldingRange'] = M.fold_handler
         local current_bufnr = api.nvim_get_current_buf()
         local params = { uri = vim.uri_from_bufnr(current_bufnr) }
-        client.request('textDocument/foldingRange', { textDocument = params }, M.fold_handler, current_bufnr)
+        client:request(ms.textDocument_foldingRange, { textDocument = params }, M.fold_handler, current_bufnr)
       end
     end
   end

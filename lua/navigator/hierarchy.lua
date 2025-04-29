@@ -251,17 +251,30 @@ local request = vim.lsp.buf_request
 
 -- call_hierarchy with floating window
 call_hierarchy = function(method, opts)
+  local client = opts.client
+  local bufnr = opts.bufnr or vim.api.nvim_get_current_buf()
+
+  log(method, opts, client, bufnr)
+  if not client then
+    local clients = vim.lsp.get_clients({
+      bufnr = bufnr,
+      method = method,
+    })
+    if not clients or #clients == 0 then
+      vim.notify('no call hierarchy clients found for bufnr')
+      return
+    end
+    client = clients[1]
+  end
   trace(method, opts)
   opts = opts or {}
   local params = opts.params or util.make_position_params()
-  local bufnr = opts.bufnr
   local handler = function(err, result, ctx, cfg)
     ctx.opts = opts
     return opts.handler(err, result, ctx, cfg)
   end
   -- log(opts, params)
-  return request(
-    bufnr,
+  return client:request(
     'textDocument/prepareCallHierarchy',
     params,
     util.lsp_with(function(err, result, ctx)
@@ -269,11 +282,16 @@ call_hierarchy = function(method, opts)
         vim.notify(err.message, vim.log.levels.WARN)
         return
       end
-      local call_hierarchy_item = pick_call_hierarchy_item(result)
       local client = vim.lsp.get_client_by_id(ctx.client_id)
+      -- check if the client supports call hierarchy
+      if not client.supports_method(method, ctx.bufnr) then
+        vim.notify('Client ' .. client.name .. ' does not support ' .. method, vim.log.levels.INFO)
+        return
+      end
+      local call_hierarchy_item = pick_call_hierarchy_item(result)
       if client then
         trace('result', result, 'items', call_hierarchy_item, method, ctx, client.name)
-        client.request(method, {
+        client:request(method, {
           item = call_hierarchy_item,
           args = {
             method = method,
@@ -282,17 +300,18 @@ call_hierarchy = function(method, opts)
       else
         vim.notify(string.format('Client with id=%d stopped', ctx.client_id), vim.log.levels.WARN)
       end
-    end, { direction = method, depth = opts.depth })
+    end, { direction = method, depth = opts.depth }),
+    bufnr
   )
 end
 
 function M.incoming_calls(opts)
-  opts = opts or {handler = incoming_calls_handler}
+  opts = opts or { handler = incoming_calls_handler }
   call_hierarchy(in_method, opts)
 end
 
 function M.outgoing_calls(opts)
-  opts = opts or {handler = outgoing_calls_handler}
+  opts = opts or { handler = outgoing_calls_handler }
   call_hierarchy(out_method, opts)
 end
 
@@ -306,8 +325,6 @@ function M.outgoing_calls_panel(opts)
   call_hierarchy(out_method, opts)
 end
 
-M.incoming_calls_handler = incoming_calls_handler
-M.outgoing_calls_handler = outgoing_calls_handler
 -- for testing
 M._call_hierarchy = call_hierarchy
 
@@ -317,4 +334,5 @@ function M.calltree(args)
   end
   M.incoming_calls_panel()
 end
+
 return M
