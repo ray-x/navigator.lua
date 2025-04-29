@@ -75,13 +75,6 @@ local function def_preview(timeout_ms, method, client, bufnr)
       vim.notify('no definition clients found for bufnr')
       return
     end
-    -- find first client support definition
-    -- for _, c in pairs(clients) do
-    -- if c:supports_method(ms_def, bufnr) then
-    -- client = c
-    -- break
-    -- end
-    -- end
     client = clients[1]
   end
   local params = vim.lsp.util.make_position_params(0, client.offset_encoding)

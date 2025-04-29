@@ -27,6 +27,9 @@ _NgConfigValues = {
   prompt_mode = 'insert', -- 'normal' | 'insert'
   -- fuzzy finder prompt will be shown
   combined_attach = 'both', -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
+  on_attach = function(client, bufnr)
+    -- your on_attach will be called at end of navigator on_attach
+  end,
   -- ts_fold = false, -- deprecated
   ts_fold = {
     enable = false,
@@ -332,10 +335,9 @@ M.setup = function(cfg)
   local has_nvim_011 = util.nvim_0_11()
   if not has_nvim_011 then
     vim.notify(
-      'navigator.nvim requires nvim 0.11 or higher use nvim_0.10 branch if you are using old version of nvim',
+      'recommand nvim 0.11 or higher or use nvim_0.10 branch if you are using old version of nvim',
       vim.log.levels.WARN
     )
-    return
   end
   cfg = cfg or {}
   extend_config(cfg)
