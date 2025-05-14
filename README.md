@@ -618,7 +618,7 @@ Another way to setup mason is disable navigator lsp setup and using mason setup 
                 on_attach = function(client, bufnr)
                   require("navigator.lspclient.mapping").setup({ client = client, bufnr = bufnr }) -- setup navigator keymaps here,
                   require("navigator.dochighlight").documentHighlight(bufnr)
-                  require("navigator.codeAction").code_action_prompt(bufnr)
+                  require("navigator.codeAction").code_action_prompt(client, bufnr)
                 end,
               })
             end,
