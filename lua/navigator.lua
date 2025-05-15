@@ -154,11 +154,6 @@ _NgConfigValues = {
     diagnostic_update_in_insert = false, -- update diagnostic message in insert mode
     diagnostic_scrollbar_sign = { '▃', '▆', '█' }, -- set to nil to disable, set to {'╍', 'ﮆ'} to enable diagnostic status in scroll bar area
     neodev = false,
-    lua_ls = {
-      -- sumneko_root_path = sumneko_root_path,
-      -- sumneko_binary = sumneko_binary,
-      -- cmd = {'lua-language-server'}
-    },
     servers = {}, -- you can add additional lsp server so navigator will load the default for you
   },
   mason = false, -- set to true if you would like use the lsp installed by williamboman/mason
@@ -237,10 +232,12 @@ M.deprecated = function(cfg)
     warn('ts_fold option changed, refer to README for more details')
     cfg.ts_fold = { enable = cfg.ts_fold }
   end
-  local has_nvim_010 = vim.fn.has('nvim-0.10') == 1
-  if not has_nvim_010 then
-    vim.lsp.get_clients = vim.lsp.get_active_clients
-    vim.islist = vim.tbl_islist
+  local has_nvim_011 = vim.fn.has('nvim-0.11') == 1
+  if not has_nvim_011 then
+    vim.notify(
+      'navigator.nvim requires nvim 0.11 or higher, please update your neovim version',
+      vim.log.levels.WARN
+    )
   end
   if cfg.lsp and cfg.lsp.hover and cfg.lsp.hover.keymaps then
     warn('lsp.hover.keymaps is deprecated, refer to README for more details')
@@ -334,6 +331,14 @@ end
 local cmd_group
 
 M.setup = function(cfg)
+  local util = require('navigator.util')
+  local has_nvim_011 = util.nvim_0_11()
+  if not has_nvim_011 then
+    vim.notify(
+      'recommand nvim 0.11 or higher or use nvim_0.10 branch if you are using old version of nvim',
+      vim.log.levels.WARN
+    )
+  end
   cfg = cfg or {}
   extend_config(cfg)
 
@@ -388,15 +393,42 @@ M.setup = function(cfg)
       require('navigator.foldts').on_attach()
     end
 
-    local _start_client = vim.lsp.start_client
-    vim.lsp.start_client = function(lsp_config)
-      -- add highlight for Lspxxx
-      require('navigator.lspclient.highlight').add_highlight()
-      require('navigator.lspclient.highlight').config_signs()
-      -- require('navigator.lspclient.mapping').setup()
-      require('navigator.lspclient.lspkind').init()
-      return _start_client(lsp_config)
-    end
+    vim.api.nvim_create_autocmd('LspAttach', {
+      group = vim.api.nvim_create_augroup('nv_lspattach', {}),
+      callback = function(args)
+        local bufnr = args.buf
+        local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
+
+        local kinds = {}
+        if
+          type(client.server_capabilities.codeActionProvider) == 'table'
+          and client.server_capabilities.codeActionProvider.codeActionKinds
+        then
+          for _, kind in ipairs(client.server_capabilities.codeActionProvider.codeActionKinds) do
+            if not vim.tbl_contains(_NgConfigValues.lsp.code_action.exclude, kind) then
+              table.insert(kinds, kind)
+            end
+          end
+        end
+
+        require('navigator.lspclient.mapping').setup({
+          client = client,
+          bufnr = bufnr,
+        })
+
+        require('navigator.dochighlight').documentHighlight(bufnr)
+        require('navigator.lspclient.highlight').add_highlight()
+        require('navigator.lspclient.highlight').config_signs()
+        require('navigator.lspclient.lspkind').init()
+        api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+          group = api.nvim_create_augroup('NGCodeActGroup_' .. tostring(bufnr), {}),
+          buffer = bufnr,
+          callback = function(args)
+            require('navigator.codeAction').code_action_prompt(client, bufnr, kinds)
+          end,
+        })
+      end,
+    })
   end, 1)
 end
 

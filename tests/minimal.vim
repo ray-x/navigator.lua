@@ -3,7 +3,6 @@ set rtp +=../plenary.nvim/
 set rtp +=../nvim-treesitter/
 set rtp +=../nvim-lspconfig/
 set rtp +=../guihua.lua/
-set rtp +=../navigator.lua/
 
 runtime! plugin/plenary.vim
 runtime! plugin/nvim-treesitter.vim
@@ -27,10 +26,10 @@ _G.test_rename = true
 _G.test_close = true
 require("plenary/busted")
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = {"go"}, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+  ensure_installed = { "go" },
   highlight = {
-    enable = true,              -- false will disable the whole extension
-  },
+    enable = true,
+  }
 }
 
 -- for testing load gopls ahead

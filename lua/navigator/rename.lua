@@ -7,6 +7,7 @@ local util = require('navigator.util')
 local log = util.log
 local api = vim.api
 local vfn = vim.fn
+local ms = require('vim.lsp.protocol').Methods
 
 local M = {
   hl_group = 'Substitute',
@@ -46,7 +47,7 @@ local function ts_symbol()
   local ft_to_lang = require('nvim-treesitter.parsers').ft_to_lang
 
   local lang = ft_to_lang(vim.bo[bufnr].filetype)
-  local query = (vim.fn.has('nvim-0.9') == 1) and vim.treesitter.query.get(lang, 'highlights')
+  local query = vim.treesitter.query.get(lang, 'highlights')
     or vim.treesitter.get_query(lang, 'highlights')
 
   local ts_utils = require('nvim-treesitter.ts_utils')
@@ -241,6 +242,7 @@ end
 
 local function perform_lsp_rename(opts)
   local new_name = opts.args
+  opts.bufnr = opts.bufnr or api.nvim_get_current_buf()
   local clients = vim.lsp.get_clients({
     method = 'textDocument/rename',
     bufnr = opts.bufnr,
@@ -251,7 +253,7 @@ local function perform_lsp_rename(opts)
 
   local params = opts.params or state.lsp_params
 
-  clients[1].request('textDocument/rename', params, function(err, result, ctx, _)
+  clients[1]:request(ms.textDocument_rename, params, function(err, result, ctx, _)
     if err and err.message then
       vim.notify('[nav-rename] Error while renaming: ' .. err.message, vim.log.levels.ERROR)
       return
@@ -289,7 +291,7 @@ local function perform_lsp_rename(opts)
     if M.config and M.config.post_hook then
       M.config.post_hook(result)
     end
-  end, 0)
+  end, opts.bufnr)
 end
 
 local function inc_rename_execute(opts)
@@ -368,9 +370,7 @@ M.rename_preview = function()
       log('cancel', new_name)
     end,
   }
-  if vim.fn.has('nvim-0.9.0') == 1 then
-    inputopts.title = 'symbol rename'
-  end
+  inputopts.title = 'symbol rename'
   ghinput.setup(inputopts)
   vim.ui.input = ghinput.input
 
@@ -438,7 +438,7 @@ function M.rename_inplace(new_name, options)
       params.newName = name
       local handler = client.handlers['textDocument/rename']
         or vim.lsp.handlers['textDocument/rename']
-      client.request('textDocument/rename', params, function(...)
+      client:request(ms.textDocument_rename, params, function(...)
         handler(...)
         try_use_client(next(clients, idx))
       end, bufnr)
@@ -446,7 +446,7 @@ function M.rename_inplace(new_name, options)
 
     if client.supports_method('textDocument/prepareRename') then
       -- log(params)
-      client.request('textDocument/prepareRename', params, function(err, result)
+      client:request(ms.textDocument_prepareRename, params, function(err, result)
         if err or result == nil then
           if next(clients, idx) then
             try_use_client(next(clients, idx))

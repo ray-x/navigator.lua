@@ -19,8 +19,14 @@ local function add_locs(bufnr, result)
   end
 
   local winid = vim.fn.bufwinid(0)
-  symbol =
-    string.format('%s_%i_%i_%i_%i', symbol, bufnr, result[1].range.start.line, result[1].range.start.character, winid)
+  symbol = string.format(
+    '%s_%i_%i_%i_%i',
+    symbol,
+    bufnr,
+    result[1].range.start.line,
+    result[1].range.start.character,
+    winid
+  )
   if _NG_hi_list[symbol] == nil then
     _NG_hi_list[symbol] = { range = {} }
   end
@@ -179,6 +185,7 @@ local function goto_adjent_reference(opt)
   local bufnr = vim.api.nvim_get_current_buf()
   local refs = references[bufnr]
   if not refs or #refs == 0 then
+    log('no refs')
     return nil
   end
 
@@ -186,6 +193,7 @@ local function goto_adjent_reference(opt)
   local nexti = nil
   local crow, ccol = unpack(vim.api.nvim_win_get_cursor(0))
   local crange = { start = { line = crow - 1, character = ccol } }
+  trace(refs)
 
   for i, ref in ipairs(refs) do
     local range = ref.range
@@ -226,7 +234,7 @@ local nav_doc_hl = function(bufnr)
     if client.server_capabilities.documentHighlightProvider == true then
       trace('sending doc highlight', client.name, bufnr)
       local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)
-      client.request('textDocument/documentHighlight', ref_params, handle_document_highlight, bufnr)
+      client:request(require('vim.lsp.protocol').Methods.textDocument_documentHighlight, ref_params, handle_document_highlight, bufnr)
     end
   end)
 end

@@ -13,7 +13,7 @@ local empty = util.empty
 local api = vim.api
 local ng_vt_diag_ns = api.nvim_create_namespace('navigator_lua_diag')
 
-util.nvim_0_8()
+util.nvim_0_11()
 
 local diag_map = {
   Error = vim.diagnostic.severity.ERROR,

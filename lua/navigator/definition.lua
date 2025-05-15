@@ -3,8 +3,10 @@ local lsphelper = require('navigator.lspwrapper')
 local locations_to_items = lsphelper.locations_to_items
 local gui = require('navigator.gui')
 local log = util.log
+local ms = require('vim.lsp.protocol').Methods
 local trace = util.trace
 local TextView = require('guihua.textview')
+local ms = require('vim.lsp.protocol').Methods
 -- callback for lsp definition, implementation and declaration handler
 local definition_hdlr = function(err, locations, ctx, _)
   if err ~= nil then
@@ -58,19 +60,26 @@ local function get_symbol()
   return currentWord
 end
 
-local function def_preview(timeout_ms, method)
-  method = method or 'textDocument/definition'
-  local clients = vim.lsp.get_clients({
-    bufnr = vim.api.nvim_get_current_buf(),
-    method = method,
-  })
+local function def_preview(timeout_ms, method, client, bufnr)
+  local ms_def = ms.textDocument_definition
+  method = method or ms_def
 
-  if not clients or #clients == 0 then
-    vim.notify('no definition clients found for bufnr')
-    return
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  if not client then
+    local clients = vim.lsp.get_clients({
+      bufnr = bufnr,
+      method = method,
+    })
+
+    if not clients or #clients == 0 then
+      vim.notify('no definition clients found for bufnr')
+      return
+    end
+    client = clients[1]
   end
-  local params = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
-  local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)
+  local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+  -- local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)
+  local result = client:request_sync(method, params, timeout_ms or 1000, bufnr)
 
   if result == nil or vim.tbl_isempty(result) then
     vim.notify('No result found: ' .. method, vim.log.levels.WARN)
@@ -145,14 +154,14 @@ local function def_preview(timeout_ms, method)
   end
   local width = 40
 
-  local maxwidth = math.floor(vim.api.nvim_get_option('columns') * 0.8)
+  local maxwidth = math.floor(vim.api.nvim_get_option_value('columns', { scope = 'global' }) * 0.8)
   for _, value in pairs(definition) do
     -- log(key, value, width)
     width = math.max(width, #value + 4)
     width = math.min(maxwidth, width)
   end
   definition = vim.list_extend({ '    [' .. get_symbol() .. '] Definition: ' }, definition)
-  local filetype = vim.api.nvim_buf_get_option(bufnr, 'filetype')
+  local filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
 
   -- TODO multiple resuts?
   local opts = {
@@ -168,13 +177,13 @@ local function def_preview(timeout_ms, method)
   local view = TextView:new(opts)
   log(view.buf)
   vim.keymap.set('n', 'K', function()
-    local par = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
+    local par = vim.lsp.util.make_position_params(0, client.offset_encoding)
     log(row, par, data[1])
     par.position.line = par.position.line + row - 1 -- header 1
     par.textDocument.uri = data[1].uri or data[1].targetUri
-    log(par, clients[1].name)
+    log(par, client.name)
     local bufnr_org = vim.uri_to_bufnr(data[1].uri or data[1].targetUri)
-    return clients[1].request('textDocument/hover', par, function(err, res, ctx, _)
+    return client:request(ms.textDocument_hover, par, function(err, res, ctx, _)
       if err ~= nil then
         log('error on hover', err)
         return
@@ -185,7 +194,7 @@ local function def_preview(timeout_ms, method)
       end
       log(res)
       local contents = vim.lsp.util.convert_input_to_markdown_lines(res.contents)
-      local ft = vim.api.nvim_buf_get_option(view.buf, 'filetype')
+      local ft = vim.api.nvim_get_option_value('filetype', { buf = view.buf })
       local hover_opts = {
         relative = 'cursor',
         style = 'minimal',
@@ -219,9 +228,24 @@ local function def_preview(timeout_ms, method)
   -- TODO:
   -- https://github.com/oblitum/goyo.vim/blob/master/autoload/goyo.vim#L108-L135
 end
+
+local def_preview_wrapper = function(client, bufnr)
+  return function()
+    local ms_def = require('vim.lsp.protocol').Methods.textDocument_definition
+    def_preview(1000, ms_def, client, bufnr)
+  end
+end
+
 local function type_preview(timeout_ms)
   return def_preview(timeout_ms, 'textDocument/typeDefinition')
 end
+local type_preview_wrapper = function(client, bufnr)
+  return function(ts)
+    ts = ts or 1000
+    return def_preview(1000, 'textDocument/typeDefinition', client, bufnr)
+  end
+end
+
 local def = function()
   local bufnr = vim.api.nvim_get_current_buf()
 
@@ -229,7 +253,7 @@ local def = function()
   util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
     if client.server_capabilities.definitionProvider then
       local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)
-      client.request('textDocument/definition', ref_params, definition_hdlr, _bufnr)
+      client:request(ms.textDocument_definition, ref_params, definition_hdlr, _bufnr or bufnr)
       return
     end
   end)
@@ -238,7 +262,10 @@ end
 return {
   definition = def,
   definition_handler = definition_hdlr,
+  definition_preview_wrapper = def_preview_wrapper,
+  definition_wrapper = def_preview_wrapper,
   definition_preview = def_preview,
+  type_definition_preview_wrapper = type_preview_wrapper,
   type_definition_preview = type_preview,
   declaration_handler = definition_hdlr,
   type_definition_handler = definition_hdlr,
