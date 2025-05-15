@@ -146,7 +146,7 @@ end
 
 local code_action_req = function(_call_back_fn, client, context)
   local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
-  params.context = vim.tbl_deep_extend( 'force', params.context or {}, context)
+  params.context = vim.tbl_deep_extend('force', params.context or {}, context)
   local line = params.range.start.line
   local callback = _call_back_fn(line, context.diagnostics)
   client:request(ms.textDocument_codeAction, params, callback, vim.api.nvim_get_current_buf())
@@ -185,6 +185,7 @@ code_action.code_action = function()
 end
 
 code_action.code_action_prompt = function(client, bufnr, only)
+  vim.validate({ client = { client, 't' } })
   bufnr = bufnr or api.nvim_get_current_buf()
   only = only or {}
   if special_buffers[vim.bo.filetype] then
