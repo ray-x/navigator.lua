@@ -21,6 +21,7 @@ return {
   'clangd',
   'ccls',
   'sqlls',
+  'sqls',
   'denols',
   'graphql',
   'dartls',

@@ -32,6 +32,7 @@ local remap = util.binding_remap
 -- stylua: ignore start
 local key_maps = {
   { key = 'grr',           func = require('navigator.reference').async_ref,                desc = 'async_ref' },
+  { key = 'gr',            func = function() print("navigator: gr lsp mapping changed to grr") vim.api.nvim_feedkeys("gr", "n", false) end,                desc = 'deprecated async_ref mapping' },
   { key = '<Leader>gr',    func = require('navigator.reference').reference,                desc = 'reference' },              -- reference deprecated
   { key = '<M-k>',         func = vim.lsp.buf.signature_help,                              desc = 'signature_help',                    mode = 'i' },
   { key = '<c-k>',         func = vim.lsp.buf.signature_help,                              desc = 'signature_help' },
@@ -41,13 +42,15 @@ local key_maps = {
   { key = 'gd',            func = require('navigator.definition').definition,              desc = 'definition',                        remap = 'gd' },
   { key = 'gD',            func = vim.lsp.buf.declaration,                                 desc = 'declaration',                       fallback = fallback_fn('gD') },              -- fallback used
   -- for lsp handler
-  { key = 'gp',            func = require('navigator.definition').definition_preview,      desc = 'definition_preview',                remap = 'gp' },
-  { key = 'gP',            func = require('navigator.definition').type_definition_preview, desc = 'type_definition_preview',           remap = 'gP' },
+  { key = 'gp',            func = function() print("navigator: gp mapping will be change to to <leader>gp") vim.api.nvim_feedkeys("gp", "n", false) end, desc = 'deprecated definition_preview mapping' },
+  { key = 'gP',            func =  function()  print("navigator: gP mapping will be change to to <leader>gP")  vim.api.nvim_feedkeys("gp", "n", false) end, desc = 'deprecated type_definition_preview mapping' },
+  { key = '<Leader>gp',    func = require('navigator.definition').definition_preview,      desc = 'definition_preview'},
+  { key = '<Leader>gP',    func =  require('navigator.definition').type_definition_preview, desc = 'type_definition_preview'},
   { key = '<Leader>gt',    func = require('navigator.treesitter').buf_ts,                  desc = 'buf_ts' },
   { key = '<Leader>gT',    func = require('navigator.treesitter').bufs_ts,                 desc = 'bufs_ts' },
   { key = '<Leader>ct',    func = require('navigator.ctags').ctags,                        desc = 'ctags' },
   { key = '<Space>ca',     func = require('navigator.codeAction').code_action,             desc = 'code_action',                       mode = { 'n', 'v' } },
-  -- { key = '<Leader>re', func = 'rename()' },
+  { key = '<Leader>rn',    func = require('navigator.rename').rename,                      desc = 'rename' },
   { key = 'grn',           func = require('navigator.rename').rename,                      desc = 'rename' },
   { key = '<Leader>gi',    func = require('navigator.hierarchy').incoming_calls,           desc = 'incoming_calls' },
   { key = '<Leader>go',    func = require('navigator.hierarchy').outgoing_calls,           desc = 'outgoing_calls' },
@@ -70,8 +73,8 @@ local key_maps = {
   { key = '<Space>gm',     func = require('navigator.formatting').range_format,            mode = 'n',                                 desc = 'range format operator e.g gmip' },
   { key = '<Space>wl',     func = require('navigator.workspace').list_workspace_folders,   desc = 'list_workspace_folders' },
   { key = '<Space>la',     func = require('navigator.codelens').run_action,                desc = 'run code lens action',              mode = 'n' }
-  -- stylua: ignore end
 }
+-- stylua: ignore end
 
 if _NgConfigValues.lsp.hover then
   table.insert(key_maps, {
