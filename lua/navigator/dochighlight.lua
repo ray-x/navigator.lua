@@ -230,7 +230,10 @@ end
 local nav_doc_hl = function(bufnr)
   trace('nav_doc_hl', bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  util.for_each_buffer_client(bufnr, function(client, _, _)
+  util.for_each_buffer_client(bufnr, function(client, id, bufnr)
+    if util.nvim_0_11() == false then
+      return
+    end
     if client.server_capabilities.documentHighlightProvider == true then
       trace('sending doc highlight', client.name, bufnr)
       local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)

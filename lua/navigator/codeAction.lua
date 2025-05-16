@@ -149,6 +149,9 @@ local code_action_req = function(_call_back_fn, client, context)
   params.context = vim.tbl_deep_extend('force', params.context or {}, context)
   local line = params.range.start.line
   local callback = _call_back_fn(line, context.diagnostics)
+  if util.nvim_0_11() == false then
+    return
+  end
   client:request(ms.textDocument_codeAction, params, callback, vim.api.nvim_get_current_buf())
 end
 
