@@ -1,6 +1,7 @@
 local gui = require('navigator.gui')
 local util = require('navigator.util')
 local log = util.log
+local lsp = vim.lsp
 local trace = util.trace
 local partial = util.partial
 local lsphelper = require('navigator.lspwrapper')
@@ -9,8 +10,11 @@ local path_sep = require('navigator.util').path_sep()
 local path_cur = require('navigator.util').path_cur()
 local uv = vim.uv or vim.loop
 local cwd = uv.cwd()
-local in_method = 'callHierarchy/incomingCalls'
-local out_method = 'callHierarchy/outgoingCalls'
+local ms = lsp.protocol.Methods
+
+local in_method = ms.callHierarchy_incomingCalls
+local out_method = ms.callHierarchy_outgoingCalls
+local prepare_callHierarchy = ms.textDocument_prepareCallHierarchy
 
 local lsp_method = { to = out_method, from = in_method }
 local panel_method = { to = out_method, from = in_method }
@@ -273,9 +277,13 @@ call_hierarchy = function(method, opts)
     ctx.opts = opts
     return opts.handler(err, result, ctx, cfg)
   end
+  if type(params) == 'function' then
+    -- call hierarchy require params to be a table
+    params = params(client, bufnr)
+  end
   -- log(opts, params)
   return client:request(
-    'textDocument/prepareCallHierarchy',
+    prepare_callHierarchy,
     params,
     util.lsp_with(function(err, result, ctx)
       if err then
