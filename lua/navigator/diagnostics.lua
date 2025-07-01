@@ -124,8 +124,7 @@ local function error_marker(result, ctx, config)
           if pos[#pos] == bar then
             bar = _NgConfigValues.lsp.diagnostic_scrollbar_sign[3]
           end
-          pos[#pos] =
-            { line = p, sign = bar, severity = math.min(diag.severity, pos[#pos].severity) }
+          pos[#pos] = { line = p, sign = bar, severity = math.min(diag.severity, pos[#pos].severity) }
         else
           table.insert(pos, {
             line = p,
@@ -308,8 +307,7 @@ local function diag_signs()
   end
   local icons = _NgConfigValues.icons
   if icons.icons then
-    local e, w, i, h =
-      icons.diagnostic_err, icons.diagnostic_warn, icons.diagnostic_info, icons.diagnostic_hint
+    local e, w, i, h = icons.diagnostic_err, icons.diagnostic_warn, icons.diagnostic_info, icons.diagnostic_hint
     local t = vim.fn.sign_getdefined('DiagnosticSignWarn')
     local text = {
       [vim.diagnostic.severity.ERROR] = e,
@@ -335,9 +333,7 @@ local function diag_signs()
         break
       end
     end
-    if
-      vim.tbl_isempty(t) or (t[1] and t[1].text and t[1].text:find('W')) and signs_valid == true
-    then
+    if vim.tbl_isempty(t) or (t[1] and t[1].text and t[1].text:find('W')) and signs_valid == true then
       log('set signs ', text)
       return {
         text = text,
@@ -368,6 +364,7 @@ function M.goto_prev(opts)
   end
   diagnostic.goto_prev(opts)
 end
+
 -- local diag_hdlr_async = function()
 --   local debounce = require('navigator.debounce').debounce_trailing
 --   return debounce(100, diag_hdlr)
@@ -393,9 +390,7 @@ function M.setup(cfg)
     diagnostic_cfg.signs = signs
   end
   diagnostic_cfg.virtual_text = _NgConfigValues.lsp.diagnostic.virtual_text
-  if
-    type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' and _NgConfigValues.icons.icons
-  then
+  if type(_NgConfigValues.lsp.diagnostic.virtual_text) == 'table' and _NgConfigValues.icons.icons then
     diagnostic_cfg.virtual_text.prefix = _NgConfigValues.icons.diagnostic_virtual_text
   end
   -- vim.lsp.handlers["textDocument/publishDiagnostics"]
@@ -452,9 +447,7 @@ M.show_buf_diagnostics = function()
     if #display_items > 0 then
       local listview = gui.new_list_view({
         items = display_items,
-        api = _NgConfigValues.icons.diagnostic_file
-          .. _NgConfigValues.icons.diagnostic_head
-          .. ' Diagnostic ',
+        api = _NgConfigValues.icons.diagnostic_file .. _NgConfigValues.icons.diagnostic_head .. ' Diagnostic ',
         enable_preview_edit = true,
         title = 'LSP Diagnostic',
       })
@@ -556,7 +549,7 @@ function M.show_diagnostics(pos)
 
   local lnum, col = unpack(api.nvim_win_get_cursor(0))
   lnum = lnum - 1
-  local opt = { border = 'single', severity_sort = true }
+  local opt = { border = 'round', severity_sort = true }
 
   if pos ~= nil and type(pos) == 'number' then
     opt.scope = 'buffer'
@@ -576,9 +569,7 @@ function M.show_diagnostics(pos)
 
   local line_length = #api.nvim_buf_get_lines(bufnr, lnum, lnum + 1, true)[1]
   local diags_cursor = vim.tbl_filter(function(d)
-    return d.lnum == lnum
-      and math.min(d.col, line_length - 1) <= col
-      and (d.end_col >= col or d.end_lnum > lnum)
+    return d.lnum == lnum and math.min(d.col, line_length - 1) <= col and (d.end_col >= col or d.end_lnum > lnum)
   end, diags)
   if #diags_cursor > 0 then
     opt.scope = 'cursor'
@@ -587,6 +578,11 @@ function M.show_diagnostics(pos)
   local diag1 = diags[1]
   opt.offset_x = -1 * (col - diag1.col)
   diagnostic.open_float(bufnr, opt)
+  local diagnostic_info = diag1.message or diag1.text
+  if diag1.releated_msg then
+    -- store the message in register for easy access
+    vim.fn.setreg('D', string.format('%s:%d:%d: %s', diag1.filename, diag1.lnum + 1, diag1.col + 1, diagnostic_info))
+  end
 end
 
 function M.config(cfg)
