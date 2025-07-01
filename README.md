@@ -308,16 +308,22 @@ require'navigator'.setup({
                                           -- default value: {}
     diagnostic = {
       underline = true,
-      virtual_text = true, -- show virtual for diagnostic message
+      virtual_text = { spacing = 3, source = true }, -- show virtual for diagnostic message
+                                                     -- set to false to prefer virtual lines
       update_in_insert = false, -- update diagnostic message in insert mode
-      float = {                 -- setup for floating windows style
+      severity_sort = { reverse = true },
+      float = {                 -- setup for floating windows style, set to false to disable floating window
         focusable = false,
-        sytle = 'minimal',
+        style = 'minimal',
         border = 'rounded',
         source = 'always',
         header = '',
         prefix = '',
       },
+      virtual_lines = {
+        current_line = false, -- show diagnostic only on current line
+      },
+      register = 'D',  -- yank the error into register
     },
 
     hover = {
