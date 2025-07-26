@@ -253,6 +253,22 @@ end
 
 local request = vim.lsp.buf_request
 
+local function pick_hierarchy_lsp_client(bufnr, method)
+  bufnr = bufnr or 0
+  method = method or vim.lsp.protocol.Methods.textDocument_prepareCallHierarchy
+  local file = vim.api.nvim_buf_get_name(bufnr)
+
+  for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr, method = method })) do
+    if client.server_capabilities.callHierarchyProvider then
+      local root = client.config and client.config.root_dir
+      if not root or file:find(root, 1, true) == 1 then
+        return client
+      end
+    end
+  end
+  return nil
+end
+
 -- call_hierarchy with floating window
 call_hierarchy = function(method, opts)
   local client = opts.client
@@ -260,15 +276,11 @@ call_hierarchy = function(method, opts)
 
   log(method, opts, client, bufnr)
   if not client then
-    local clients = vim.lsp.get_clients({
-      bufnr = bufnr,
-      method = method,
-    })
-    if not clients or #clients == 0 then
+    client = pick_hierarchy_lsp_client(bufnr, method)
+    if not client then
       vim.notify('no call hierarchy clients found for bufnr')
       return
     end
-    client = clients[1]
   end
   trace(method, opts)
   opts = opts or {}
