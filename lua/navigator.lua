@@ -12,19 +12,19 @@ local function info(msg)
 end
 
 _NgConfigValues = {
-  debug = false,            -- log output
-  width = 0.75,             -- value of cols
-  height = 0.38,            -- listview height
+  debug = false, -- log output
+  width = 0.75, -- value of cols
+  height = 0.38, -- listview height
   preview_height = 0.38,
-  preview_lines = 40,       -- total lines in preview screen
+  preview_lines = 40, -- total lines in preview screen
   preview_lines_before = 5, -- lines before the highlight line
   default_mapping = true,
-  keymaps = {},             -- e.g keymaps={{key = "GR", func = vim.lsp.buf.references}, } this replace gr default mapping
-  external = nil,           -- true: enable for goneovim multigrid otherwise false
+  keymaps = {}, -- e.g keymaps={{key = "GR", func = vim.lsp.buf.references}, } this replace gr default mapping
+  external = nil, -- true: enable for goneovim multigrid otherwise false
 
-  border = 'rounded',   -- {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}, -- border style, can be one of 'none', 'single', 'double',
-  lines_show_prompt = 10,   -- when the result list items number more than lines_show_prompt,
-  prompt_mode = 'insert',   -- 'normal' | 'insert'
+  border = 'rounded', -- {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}, -- border style, can be one of 'none', 'single', 'double',
+  lines_show_prompt = 10, -- when the result list items number more than lines_show_prompt,
+  prompt_mode = 'insert', -- 'normal' | 'insert'
   -- fuzzy finder prompt will be shown
   combined_attach = 'both', -- both: use both customized attach and navigator default attach, mine: only use my attach defined in vimrc
   on_attach = function(client, bufnr)
@@ -33,27 +33,27 @@ _NgConfigValues = {
   -- ts_fold = false, -- deprecated
   ts_fold = {
     enable = false,
-    comment = true,                                     -- ts fold text object
-    max_lines_scan_comments = 2000,                     -- maximum lines to scan for comments
+    comment = true, -- ts fold text object
+    max_lines_scan_comments = 2000, -- maximum lines to scan for comments
     disable_filetypes = { 'help', 'text', 'markdown' }, -- disable ts fold for specific filetypes
   },
-  treesitter_analysis = true,                           -- treesitter variable context
-  treesitter_navigation = true,                         -- bool|table
-  treesitter_analysis_max_num = 100,                    -- how many items to run treesitter analysis
-  treesitter_analysis_max_fnum = 20,                    -- how many files to run treesitter analysis
-  treesitter_analysis_condense = true,                  -- short format of function
-  treesitter_analysis_depth = 3,                        -- max depth
-  transparency = 50,                                    -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
-  lsp_signature_help = true,                            -- if you would like to hook ray-x/lsp_signature plugin in navigator
+  treesitter_analysis = true, -- treesitter variable context
+  treesitter_navigation = true, -- bool|table
+  treesitter_analysis_max_num = 100, -- how many items to run treesitter analysis
+  treesitter_analysis_max_fnum = 20, -- how many files to run treesitter analysis
+  treesitter_analysis_condense = true, -- short format of function
+  treesitter_analysis_depth = 3, -- max depth
+  transparency = 50, -- 0 ~ 100 blur the main window, 100: fully transparent, 0: opaque,  set to nil to disable it
+  lsp_signature_help = true, -- if you would like to hook ray-x/lsp_signature plugin in navigator
   -- setup here. if it is nil, navigator will not init signature help
-  signature_help_cfg = { debug = false },               -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
+  signature_help_cfg = { debug = false }, -- if you would like to init ray-x/lsp_signature plugin in navigator, pass in signature help
   ctags = {
     cmd = 'ctags',
     tagfile = '.tags',
     options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number',
   },
   lsp = {
-    enable = true,  -- if disabled make sure add require('navigator.lspclient.mapping').setup() in you on_attach
+    enable = true, -- if disabled make sure add require('navigator.lspclient.mapping').setup() in you on_attach
     code_action = {
       delay = 3000, -- how long the virtual text will be shown
       enable = true,
@@ -82,10 +82,10 @@ _NgConfigValues = {
       enable = true,
       underline = true,
       virtual_text = { spacing = 3, source = true }, -- show virtual for diagnostic message
-                                                     -- set to false to prefer virtual lines
-      update_in_insert = false,                      -- update diagnostic message in insert mode
+      -- set to false to prefer virtual lines
+      update_in_insert = false, -- update diagnostic message in insert mode
       severity_sort = { reverse = true },
-      float = {           -- set to false to prefer virtual text
+      float = { -- set to false to prefer virtual text
         focusable = false,
         style = 'minimal',
         border = 'rounded',
@@ -104,43 +104,7 @@ _NgConfigValues = {
     workspace = { enable = true },
     hover = {
       enable = true,
-      -- fallback if hover failed
-      -- go = function()
-      --   local w = vim.fn.expand('<cWORD>')
-      --   w = w:gsub('*', '')
-      --   vim.cmd('GoDoc ' .. w)
-      -- end,
-      python = function()
-        local w = vim.fn.expand('<cWORD>')
-        local setup = {
-          'pydoc',
-          w,
-        }
-        return vim.fn.jobstart(setup, {
-          on_stdout = function(_, data, _)
-            if not data or (#data == 1 and vim.fn.empty(data[1]) == 1) then
-              return
-            end
-            local close_events = { 'CursorMoved', 'CursorMovedI', 'BufHidden', 'InsertCharPre' }
-            local config = {
-              close_events = close_events,
-              focusable = true,
-              border = 'rounded',
-              width = 80,
-              zindex = 100,
-            }
-            vim.lsp.util.open_floating_preview(data, 'python', config)
-          end,
-        })
-      end,
-      default = function()
-        -- local w = vim.fn.expand('<cword>')
-        -- print('default ' .. w)
-        -- vim.lsp.buf.workspace_symbol(w)
-      end,
-      -- },
-      -- },
-    },                     -- bind hover action to keymap; there are other options e.g. noice, lspsaga provides lsp hover
+    }, -- bind hover action to keymap; there are other options e.g. noice, lspsaga provides lsp hover
     format_on_save = true, -- {true|false} set to false to disasble lsp code format on save (if you are using prettier/efm/formater etc)
     -- table: {enable = {'lua', 'go'}, disable = {'javascript', 'typescript'}} to enable/disable specific language
     -- enable: a whitelist of language that will be formatted on save
@@ -240,9 +204,6 @@ M.deprecated = function(cfg)
   local has_nvim_011 = vim.fn.has('nvim-0.11') == 1
   if not has_nvim_011 then
     vim.notify('navigator.nvim requires nvim 0.11 or higher, please update your neovim version', vim.log.levels.WARN)
-  end
-  if cfg.lsp and cfg.lsp.hover and cfg.lsp.hover.keymaps then
-    warn('lsp.hover.keymaps is deprecated, refer to README for more details')
   end
 end
 
@@ -388,9 +349,9 @@ M.setup = function(cfg)
     end
 
     if
-        _NgConfigValues.ts_fold.enable == true
-        and not vim.tbl_contains(_NgConfigValues.ts_fold.disable_filetypes, vim.o.filetype)
-        and not vim.wo.diff
+      _NgConfigValues.ts_fold.enable == true
+      and not vim.tbl_contains(_NgConfigValues.ts_fold.disable_filetypes, vim.o.filetype)
+      and not vim.wo.diff
     then
       require('navigator.foldts').on_attach()
     end
@@ -403,8 +364,8 @@ M.setup = function(cfg)
 
         local kinds = {}
         if
-            type(client.server_capabilities.codeActionProvider) == 'table'
-            and client.server_capabilities.codeActionProvider.codeActionKinds
+          type(client.server_capabilities.codeActionProvider) == 'table'
+          and client.server_capabilities.codeActionProvider.codeActionKinds
         then
           for _, kind in ipairs(client.server_capabilities.codeActionProvider.codeActionKinds) do
             if not vim.tbl_contains(_NgConfigValues.lsp.code_action.exclude, kind) then

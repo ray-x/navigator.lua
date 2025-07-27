@@ -31,21 +31,42 @@ local single = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' }
 local remap = util.binding_remap
 -- stylua: ignore start
 local key_maps = {
-  { key = 'grr',           func = require('navigator.reference').async_ref,                desc = 'async_ref' },
-  { key = 'gr',            func = function() print("navigator: gr lsp mapping changed to grr") vim.api.nvim_feedkeys("gr", "n", false) end,                desc = 'deprecated async_ref mapping' },
-  { key = '<Leader>gr',    func = require('navigator.reference').reference,                desc = 'reference' },              -- reference deprecated
-  { key = '<M-k>',         func = vim.lsp.buf.signature_help,                              desc = 'signature_help',                    mode = 'i' },
-  { key = '<c-k>',         func = vim.lsp.buf.signature_help,                              desc = 'signature_help' },
-  { key = 'gO',            func = require('navigator.symbols').document_symbols,           desc = 'document_symbols' },
-  { key = 'gW',            func = require('navigator.workspace').workspace_symbol_live,    desc = 'workspace_symbol_live' },
-  { key = '<c-]>',         func = require('navigator.definition').definition,              desc = 'definition' },
-  { key = 'gd',            func = require('navigator.definition').definition,              desc = 'definition',                        remap = 'gd' },
-  { key = 'gD',            func = vim.lsp.buf.declaration,                                 desc = 'declaration',                       fallback = fallback_fn('gD') },              -- fallback used
+  { key = 'grr',        func = require('navigator.reference').async_ref,             desc = 'async_ref' },
+  {
+    key = 'gr',
+    func = function()
+      print("navigator: gr lsp mapping changed to grr")
+      vim.api.nvim_feedkeys("gr", "n", false)
+    end,
+    desc = 'deprecated async_ref mapping'
+  },
+  { key = '<Leader>gr', func = require('navigator.reference').reference,             desc = 'reference' }, -- reference deprecated
+  { key = '<M-k>',      func = vim.lsp.buf.signature_help,                           desc = 'signature_help',       mode = 'i' },
+  { key = '<c-k>',      func = vim.lsp.buf.signature_help,                           desc = 'signature_help' },
+  { key = 'gO',         func = require('navigator.symbols').document_symbols,        desc = 'document_symbols' },
+  { key = 'gW',         func = require('navigator.workspace').workspace_symbol_live, desc = 'workspace_symbol_live' },
+  { key = '<c-]>',      func = require('navigator.definition').definition,           desc = 'definition' },
+  { key = 'gd',         func = require('navigator.definition').definition,           desc = 'definition',           remap = 'gd' },
+  { key = 'gD',         func = vim.lsp.buf.declaration,                              desc = 'declaration',          fallback = fallback_fn('gD') }, -- fallback used
   -- for lsp handler
-  { key = 'gp',            func = function() print("navigator: gp mapping will be change to to <leader>gp") vim.api.nvim_feedkeys("gp", "n", false) end, desc = 'deprecated definition_preview mapping' },
-  { key = 'gP',            func =  function()  print("navigator: gP mapping will be change to to <leader>gP")  vim.api.nvim_feedkeys("gp", "n", false) end, desc = 'deprecated type_definition_preview mapping' },
-  { key = '<Leader>gp',    func = require('navigator.definition').definition_preview,      desc = 'definition_preview'},
-  { key = '<Leader>gP',    func =  require('navigator.definition').type_definition_preview, desc = 'type_definition_preview'},
+  {
+    key = 'gp',
+    func = function()
+      print("navigator: gp mapping will be change to to <leader>gp")
+      vim.api.nvim_feedkeys("gp", "n", false)
+    end,
+    desc = 'deprecated definition_preview mapping'
+  },
+  {
+    key = 'gP',
+    func = function()
+      print("navigator: gP mapping will be change to to <leader>gP")
+      vim.api.nvim_feedkeys("gp", "n", false)
+    end,
+    desc = 'deprecated type_definition_preview mapping'
+  },
+  { key = '<Leader>gp',    func = require('navigator.definition').definition_preview,      desc = 'definition_preview' },
+  { key = '<Leader>gP',    func = require('navigator.definition').type_definition_preview, desc = 'type_definition_preview' },
   { key = '<Leader>gt',    func = require('navigator.treesitter').buf_ts,                  desc = 'buf_ts' },
   { key = '<Leader>gT',    func = require('navigator.treesitter').bufs_ts,                 desc = 'bufs_ts' },
   { key = '<Leader>ct',    func = require('navigator.ctags').ctags,                        desc = 'ctags' },
@@ -54,7 +75,7 @@ local key_maps = {
   { key = 'grn',           func = require('navigator.rename').rename,                      desc = 'rename' },
   { key = '<Leader>gi',    func = require('navigator.hierarchy').incoming_calls,           desc = 'incoming_calls' },
   { key = '<Leader>go',    func = require('navigator.hierarchy').outgoing_calls,           desc = 'outgoing_calls' },
-  { key = 'gri',           func = require('navigator.implementation').implementation,      desc = 'implementation', },                             -- insert
+  { key = 'gri',           func = require('navigator.implementation').implementation,      desc = 'implementation', }, -- insert
   { key = '<Space>D',      func = vim.lsp.buf.type_definition,                             desc = 'type_definition' },
   { key = 'gL',            func = require('navigator.diagnostics').show_diagnostics,       desc = 'show_diagnostics' },
   { key = 'gG',            func = require('navigator.diagnostics').show_buf_diagnostics,   desc = 'show_buf_diagnostics' },
@@ -72,21 +93,10 @@ local key_maps = {
   { key = '<Space>ff',     func = vim.lsp.buf.format,                                      desc = 'format',                            mode = { 'n', 'v', 'x' } },
   { key = '<Space>gm',     func = require('navigator.formatting').range_format,            mode = 'n',                                 desc = 'range format operator e.g gmip' },
   { key = '<Space>wl',     func = require('navigator.workspace').list_workspace_folders,   desc = 'list_workspace_folders' },
-  { key = '<Space>la',     func = require('navigator.codelens').run_action,                desc = 'run code lens action',              mode = 'n' }
+  { key = '<Space>la',     func = require('navigator.codelens').run_action,                desc = 'run code lens action',              mode = 'n' },
+  { key = 'K',             func = require('navigator.hover').hover,                        desc = 'hover',                             mode = { 'n', 'x' } },
 }
 -- stylua: ignore end
-
-if _NgConfigValues.lsp.hover then
-  table.insert(key_maps, {
-    key = 'K',
-    func = function()
-      return vim.lsp.buf.hover({
-        border = _NgConfigValues.border,
-      })
-    end,
-    desc = 'hover'
-  })
-end
 
 local key_maps_help = {}
 -- LuaFormatter on
@@ -196,10 +206,10 @@ local function set_mapping(lsp_attach_info)
       local exists = false
       for _, default in pairs(key_maps) do
         if
-        -- override only if func and mode are the same
-            v.func == default.func
-            and (v.mode or 'n') == (default.mode or 'n')
-            and not default.override
+          -- override only if func and mode are the same
+          v.func == default.func
+          and (v.mode or 'n') == (default.mode or 'n')
+          and not default.override
         then
           default.key, default.override, exists = v.key, true, true
           break
@@ -370,8 +380,8 @@ function M.setup(attach_opts)
 
   attach_opts = attach_opts or {}
   -- extend the default mapping
-  attach_opts = vim.tbl_deep_extend('force', { bufnr = vim.api.nvim_get_current_buf(), client = {}, cap = {} },
-    attach_opts)
+  attach_opts =
+    vim.tbl_deep_extend('force', { bufnr = vim.api.nvim_get_current_buf(), client = {}, cap = {} }, attach_opts)
 
   set_mapping(attach_opts)
   set_cmds(attach_opts)
@@ -387,25 +397,21 @@ function M.setup(attach_opts)
 
   log('lsp cap:', cap.codeActionProvider)
 
-  if
-      _NgConfigValues.lsp.call_hierarchy.enable and cap.call_hierarchy or cap.callHierarchyProvider
-  then
-    vim.lsp.handlers['callHierarchy/incomingCalls'] =
-        require('navigator.hierarchy').incoming_calls_handler
-    vim.lsp.handlers['callHierarchy/outgoingCalls'] =
-        require('navigator.hierarchy').outgoing_calls_handler
+  if _NgConfigValues.lsp.call_hierarchy.enable and cap.call_hierarchy or cap.callHierarchyProvider then
+    vim.lsp.handlers['callHierarchy/incomingCalls'] = require('navigator.hierarchy').incoming_calls_handler
+    vim.lsp.handlers['callHierarchy/outgoingCalls'] = require('navigator.hierarchy').outgoing_calls_handler
   end
 
   if _NgConfigValues.lsp.definition.enable then
     for _, value in pairs(key_maps) do
       if value.func == vim.lsp.buf.definition then
-        vim.lsp.handlers['textDocument/definition'] = util.mk_handler_remap(
-          require('navigator.definition').definition_handler, value.fallback)
+        vim.lsp.handlers['textDocument/definition'] =
+          util.mk_handler_remap(require('navigator.definition').definition_handler, value.fallback)
       end
 
       if value.func == vim.lsp.buf.type_definition then
-        vim.lsp.handlers['textDocument/typeDefinition'] = util.mk_handler_remap(
-          require('navigator.definition').definition_handler, value.fallback)
+        vim.lsp.handlers['textDocument/typeDefinition'] =
+          util.mk_handler_remap(require('navigator.definition').definition_handler, value.fallback)
       end
     end
   else
@@ -440,8 +446,7 @@ function M.setup(attach_opts)
   end
 
   if _NgConfigValues.lsp.implementation.enable then
-    vim.lsp.handlers['textDocument/implementation'] =
-        require('navigator.implementation').implementation_handler
+    vim.lsp.handlers['textDocument/implementation'] = require('navigator.implementation').implementation_handler
   end
 
   -- vim.lsp.handlers['textDocument/documentSymbol'] = require('navigator.symbols').document_symbol_handler
@@ -449,13 +454,10 @@ function M.setup(attach_opts)
     vim.lsp.handlers['workspace/symbol'] = require('navigator.symbols').workspace_symbol_handler
   end
   if _NgConfigValues.lsp.diagnostic.enable then
-    vim.lsp.handlers['textDocument/publishDiagnostics'] =
-        require('navigator.diagnostics').diagnostic_handler
+    vim.lsp.handlers['textDocument/publishDiagnostics'] = require('navigator.diagnostics').diagnostic_handler
   end
 
-  if
-      vim.fn.empty(_NgConfigValues.signature_help_cfg) == 0 or _NgConfigValues.lsp_signature_help
-  then
+  if vim.fn.empty(_NgConfigValues.signature_help_cfg) == 0 or _NgConfigValues.lsp_signature_help then
     log('setup signature from navigator')
     local hassig, sig = pcall(require, 'lsp_signature')
     if hassig then
