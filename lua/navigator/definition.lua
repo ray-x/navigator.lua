@@ -97,8 +97,8 @@ local function def_preview(timeout_ms, method, client, bufnr)
   local data = {}
 
   for _, value in pairs(result) do
-    if value ~= nil and value.result ~= nil and not vim.tbl_isempty(value.result) then
-      table.insert(data, value.result[1])
+    if value ~= nil and not vim.tbl_isempty(value) then
+      table.insert(data, value[1])
     end
   end
 
