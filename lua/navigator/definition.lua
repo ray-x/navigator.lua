@@ -75,7 +75,13 @@ local function def_preview(timeout_ms, method, client, bufnr)
       vim.notify('no definition clients found for bufnr')
       return
     end
-    client = clients[1]
+    -- find client with capability of definition
+    for _, c in pairs(clients) do
+      if c.server_capabilities.definitionProvider then
+        client = c
+        break
+      end
+    end
   end
   local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
   -- local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms or 1000)

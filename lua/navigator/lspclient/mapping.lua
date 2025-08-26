@@ -75,7 +75,8 @@ local key_maps = {
   { key = 'grn',           func = require('navigator.rename').rename,                      desc = 'rename' },
   { key = '<Leader>gi',    func = require('navigator.hierarchy').incoming_calls,           desc = 'incoming_calls' },
   { key = '<Leader>go',    func = require('navigator.hierarchy').outgoing_calls,           desc = 'outgoing_calls' },
-  { key = 'gri',           func = require('navigator.implementation').implementation,      desc = 'implementation', }, -- insert
+  { key = 'gri',           func = function() print('deprecated, use gi instead') return require('navigator.implementation').implementation() end,      desc = 'implementation', }, -- insert
+  { key = 'gi',            func = require('navigator.implementation').implementation,      desc = 'implementation', }, -- insert
   { key = '<Space>D',      func = vim.lsp.buf.type_definition,                             desc = 'type_definition' },
   { key = 'gL',            func = require('navigator.diagnostics').show_diagnostics,       desc = 'show_diagnostics' },
   { key = 'gG',            func = require('navigator.diagnostics').show_buf_diagnostics,   desc = 'show_buf_diagnostics' },
