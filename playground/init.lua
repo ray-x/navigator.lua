@@ -41,7 +41,7 @@ local function load_plugins()
     {
       'nvim-treesitter/nvim-treesitter',
       config = function()
-        require('nvim-treesitter.configs').setup({
+        require('nvim-treesitter').setup({
           ensure_installed = { 'go' },
           highlight = { enable = true },
         })
