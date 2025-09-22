@@ -1,8 +1,8 @@
-local util = require('lspconfig').util
 local hasgo = pcall(require, 'go')
 if hasgo then
   return require('go.lsp').config()
 end
+
 return {
   -- capabilities = cap,
   filetypes = { 'go', 'gomod', 'gohtmltmpl', 'gotexttmpl' },
