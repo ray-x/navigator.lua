@@ -3,8 +3,8 @@
 local log = require('navigator.util').log
 local trace = require('navigator.util').trace
 local api = vim.api
-local tsutils = require('nvim-treesitter.ts_utils')
-local query = require('nvim-treesitter.query')
+local tsutils = require('guihua.ts_obsolete.ts_utils')
+local query = require('guihua.ts_obsolete.query')
 local parsers = require('nvim-treesitter.parsers')
 local get_node_at_line = require('navigator.treesitter').get_node_at_line
 local M = {}
@@ -14,6 +14,7 @@ M.current_buf_folds = {}
 function M.on_attach()
   M.setup_fold()
 end
+
 local prefix = _NgConfigValues.icons.fold.prefix
 local sep = _NgConfigValues.icons.fold.separator
 
@@ -72,11 +73,7 @@ local function parse_line(linenr)
   while i <= #result do
     -- find first capture that is not in current range and apply highlights on the way
     local j = i + 1
-    while
-      j <= #result
-      and result[j].range[1] >= result[i].range[1]
-      and result[j].range[2] <= result[i].range[2]
-    do
+    while j <= #result and result[j].range[1] >= result[i].range[1] and result[j].range[2] <= result[i].range[2] do
       for k, v in ipairs(result[i][2]) do
         if not vim.tbl_contains(result[j][2], v) then
           table.insert(result[j][2], k, v)
@@ -158,7 +155,7 @@ function M.setup_fold()
         return
       end
       local current_window = api.nvim_get_current_win()
-      if not parsers.has_parser() then
+      if not parsers.has_parser or not parsers.has_parser() then
         api.nvim_win_set_option(current_window, 'foldmethod', 'indent')
         trace('fallback to indent folding')
         return
@@ -320,6 +317,9 @@ local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
 end)
 
 function M.get_fold_indic(lnum)
+  if parsers.has_parser == nil then
+    return '0'
+  end
   if not parsers.has_parser() or not lnum then
     return '0'
   end

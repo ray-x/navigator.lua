@@ -281,7 +281,7 @@ local function set_mapping(lsp_attach_info)
 
   if doc_fmt and _NgConfigValues.lsp.format_on_save then
     local fos = _NgConfigValues.lsp.format_on_save
-    local gn = api.nvim_create_augroup('NavAuGroupFormat', {})
+    local gn = api.nvim_create_augroup('NavAuGroupFormat_' .. bufnr, {})
 
     local fmt = false
     if type(fos) == 'boolean' then

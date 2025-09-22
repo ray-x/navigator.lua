@@ -43,9 +43,8 @@ local function ts_symbol()
   end
 
   local bufnr = api.nvim_get_current_buf()
-  local queries = require('nvim-treesitter.query')
-  local ft_to_lang = require('nvim-treesitter.parsers').ft_to_lang
 
+  local ft_to_lang = require('guihua.ts_obsolete.parsers').ft_to_lang
   local lang = ft_to_lang(vim.bo[bufnr].filetype)
   local query = vim.treesitter.query.get(lang, 'highlights')
     or vim.treesitter.get_query(lang, 'highlights')
