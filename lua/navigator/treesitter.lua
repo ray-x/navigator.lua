@@ -7,7 +7,7 @@ local lru = require('navigator.lru').new(500, 1024 * 1024)
 local ok, ts_locals = pcall(require, 'nvim-treesitter.locals')
 
 if not ok then
-  error('treesitter not installed')
+  error('treesitter master version not installed')
   return nil
 end
 
