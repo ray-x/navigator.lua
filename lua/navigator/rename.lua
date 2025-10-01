@@ -46,10 +46,10 @@ local function ts_symbol()
 
   local ft_to_lang = require('guihua.ts_obsolete.parsers').ft_to_lang
   local lang = ft_to_lang(vim.bo[bufnr].filetype)
-  local query = vim.treesitter.query.get(lang, 'highlights')
-    or vim.treesitter.get_query(lang, 'highlights')
+  local query = vim.treesitter.query.get(lang, 'highlights') or vim.treesitter.get_query(lang, 'highlights')
 
-  local ts_utils = require('nvim-treesitter.ts_utils')
+  local ts_utils = require('guihua.ts_obsolete.ts_utils')
+  local ts_utils = require('')
   local current_node = ts_utils.get_node_at_cursor()
   if not current_node then
     return
@@ -126,26 +126,22 @@ end
 
 local function fetch_lsp_references(bufnr, lsp_params, callback)
   log('fetch_lsp_references', bufnr, lsp_params)
-  require('navigator.reference').fetch_lsp_references(
-    bufnr,
-    lsp_params,
-    function(err, result, ctx, cfg)
-      if err then
-        log('[nav-rename] Error while finding references: ' .. err.message, ctx, cfg)
-        return
-      end
-      if not result or vim.tbl_isempty(result) then
-        log('[nav-rename] Nothing to rename', result)
-        return
-      end
-      state.total = #result
-      state.cached_lines = cache_lines(result)
-      state.should_fetch_references = false
-      if callback then
-        callback()
-      end
+  require('navigator.reference').fetch_lsp_references(bufnr, lsp_params, function(err, result, ctx, cfg)
+    if err then
+      log('[nav-rename] Error while finding references: ' .. err.message, ctx, cfg)
+      return
     end
-  )
+    if not result or vim.tbl_isempty(result) then
+      log('[nav-rename] Nothing to rename', result)
+      return
+    end
+    state.total = #result
+    state.cached_lines = cache_lines(result)
+    state.should_fetch_references = false
+    if callback then
+      callback()
+    end
+  end)
 end
 
 -- inspired by smjonas/inc-rename.nvim
@@ -295,10 +291,7 @@ end
 
 local function inc_rename_execute(opts)
   if vim.v.errmsg ~= '' then
-    log(
-      '[nav-rename] An error occurred in the preview function.' .. vim.v.errmsg,
-      vim.log.levels.ERROR
-    )
+    log('[nav-rename] An error occurred in the preview function.' .. vim.v.errmsg, vim.log.levels.ERROR)
   elseif state.err then
     log(state.err.msg, state.err.level)
   end
@@ -435,8 +428,7 @@ function M.rename_inplace(new_name, options)
     ---@private
     local function rename(name)
       params.newName = name
-      local handler = client.handlers['textDocument/rename']
-        or vim.lsp.handlers['textDocument/rename']
+      local handler = client.handlers['textDocument/rename'] or vim.lsp.handlers['textDocument/rename']
       client:request(ms.textDocument_rename, params, function(...)
         handler(...)
         try_use_client(next(clients, idx))
@@ -450,8 +442,7 @@ function M.rename_inplace(new_name, options)
           if next(clients, idx) then
             try_use_client(next(clients, idx))
           else
-            local msg = err and ('Error on prepareRename: ' .. (err.message or ''))
-              or 'Nothing to rename'
+            local msg = err and ('Error on prepareRename: ' .. (err.message or '')) or 'Nothing to rename'
             vim.notify(msg, vim.log.levels.INFO)
           end
           return
@@ -523,10 +514,7 @@ function M.rename_inplace(new_name, options)
         vim.cmd('noautocmd startinsert')
       end, bufnr)
     else
-      assert(
-        client.supports_method('textDocument/rename'),
-        'Client must support textDocument/rename'
-      )
+      assert(client.supports_method('textDocument/rename'), 'Client must support textDocument/rename')
       if new_name then
         rename(new_name)
         return
