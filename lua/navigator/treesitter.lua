@@ -11,7 +11,7 @@ if not ok then
   return nil
 end
 
-local locals = require('guihua.ts_obsolete.locals')
+local ts_locals = require('guihua.ts_obsolete.locals')
 local ts_utils = require('guihua.ts_obsolete.ts_utils')
 local is_in_node_range = vim.treesitter.is_in_node_range
 if not is_in_node_range then
@@ -43,14 +43,14 @@ function M.is_definition(bufnr)
     return
   end
 
-  local definition = locals.find_definition(node_at_point, bufnr)
+  local definition = ts_locals.find_definition(node_at_point, bufnr)
 
   return definition == node_at_point
 end
 
 function M.goto_definition(bufnr)
   if not M.is_definition(bufnr) then
-    local definition = locals.find_definition(node_at_point, bufnr)
+    local definition = ts_locals.find_definition(node_at_point, bufnr)
     log('def found:', definition:range())
     ts_utils.goto_node(definition)
   end
@@ -98,7 +98,7 @@ function M.find_definition(range, bufnr)
     return log('Err: no node at cursor', range)
   end
 
-  local definition = locals.find_definition(node_at_point, bufnr)
+  local definition = ts_locals.find_definition(node_at_point, bufnr)
   if definition ~= node_at_point then -- NOTE: it may not worksfor some of languages. if def not found, ts
     -- returns current node. if your node is def, then it also return self... then I have no idea weather it is
     -- def or not
@@ -939,14 +939,14 @@ function M.highlight_usages(bufnr)
   M.clear_usage_highlights(bufnr)
 
   local node_at_point = ts_utils.get_node_at_cursor()
-  local references = locals.get_references(bufnr)
+  local references = ts_locals.get_references(bufnr)
 
   if not node_at_point or not vim.tbl_contains(references, node_at_point) then
     return
   end
 
-  local def_node, scope = locals.find_definition(node_at_point, bufnr)
-  local usages = locals.find_usages(def_node, scope, bufnr)
+  local def_node, scope = ts_locals.find_definition(node_at_point, bufnr)
+  local usages = ts_locals.find_usages(def_node, scope, bufnr)
 
   for _, usage_node in ipairs(usages) do
     if usage_node ~= node_at_point then
