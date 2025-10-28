@@ -229,7 +229,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     local default_config = {}
     local lsp_config = vim.lsp.config or lspconfig
     local client_cfg = lsp_config[lspclient] or {}
-    local lspconfig_client_cfg = lspconfig[lspclient] or {}
+    local lspconfig_client_cfg = lsp_config[lspclient] or {}
     client_cfg = vim.tbl_deep_extend('keep', client_cfg, lspconfig_client_cfg)
     -- get config from lsp/lsp_name.lua
     local lsp_dot_cfg = {}
@@ -252,7 +252,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     if client_cfg.document_config and client_cfg.document_config.default_config then
-      default_config = lspconfig[lspclient].document_config.default_config
+      default_config = lsp_config[lspclient].document_config.default_config
     else
       vim.schedule(function()
         -- vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.log.levels.WARN)
@@ -303,7 +303,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       end
     end
 
-    log('loading', lspclient, 'name', lspconfig[lspclient].name)
+    log('loading', lspclient, 'name', lsp_config[lspclient].name)
     -- start up lsp
 
     if vfn.executable(cfg.cmd[1]) == 0 then
