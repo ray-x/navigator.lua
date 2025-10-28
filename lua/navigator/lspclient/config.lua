@@ -3,7 +3,7 @@ local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 function M.reload_lsp()
-  vim.cmd("LspStop")
+  vim.cmd('LspStop')
   local uv = vim.uv or vim.loop
   local timer = uv.new_timer()
   local i = 0
@@ -13,14 +13,14 @@ function M.reload_lsp()
     end
     i = i + 1
   end)
-  vim.cmd("LspStart")
+  vim.cmd('LspStart')
   vim.cmd([[write]])
   vim.cmd([[edit]])
 end
 
 function M.open_lsp_log()
-  local path = vim.lsp.get_log_path()
-  vim.cmd("edit " .. path)
+  local path = vim.lsp.log.get_filename()
+  vim.cmd('edit ' .. path)
 end
 
 return M
