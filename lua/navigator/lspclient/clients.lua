@@ -13,10 +13,15 @@ _LoadedFiletypes = {}
 
 local highlight = require('navigator.lspclient.highlight')
 
-local has_lsp, lspconfig = pcall(require, 'lspconfig')
 local has_nvim_011 = vfn.has('nvim-0.11')
-if not has_lsp and not has_nvim_011 then
-  vim.notify('loading lsp config failed LSP may not working correctly', vim.log.levels.WARN)
+if not has_nvim_011 then
+  vim.notify('loading lsp config failed LSP may not working correctly, please update to nvim 0.11+', vim.log.levels.WARN)
+end
+
+local lspconfig = vim.lsp.config
+if not lspconfig then
+  vim.notify('invalid nvim version pls use nvim 0.11+', vim.log.levels.INFO)
+  return {}
 end
 
 local config = require('navigator').config_values()
@@ -57,12 +62,13 @@ local ng_default_cfg = {
 local function load_cfg(ft, client, cfg, loaded, starting)
   log(ft, client, loaded, starting)
   trace(cfg)
-  if lspconfig[client] == nil then
+  if lspconfig[client] == nil or lspconfig[client].filetypes == nil then
     log('not supported by nvim', client)
+    error('client ' .. client .. ' not supported or invalid neovim version')
     return
   end
 
-  local lspft = lspconfig[client].document_config.default_config.filetypes
+  local lspft = lspconfig[client].filetypes
   local additional_ft = lspconfig[client] and lspconfig[client].filetypes or {}
   local bufnr = vim.api.nvim_get_current_buf()
   local cmd = cfg.cmd
@@ -254,11 +260,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if client_cfg.document_config and client_cfg.document_config.default_config then
       default_config = lsp_config[lspclient].document_config.default_config
     else
-      vim.schedule(function()
-        -- vim.notify('missing document config for client: ' .. vim.inspect(lspclient), vim.log.levels.WARN)
-        log('missing document_config for client: ' .. vim.inspect(lspclient))
-      end)
-      goto continue
+      default_config = lsp_config[lspclient]
     end
 
     default_config = vim.tbl_deep_extend('force', default_config, ng_default_cfg)
