@@ -232,7 +232,6 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       goto continue
     end
 
-    local default_config = {}
     local lsp_config = vim.lsp.config or lspconfig
     local client_cfg = lsp_config[lspclient] or {}
     local lspconfig_client_cfg = lsp_config[lspclient] or {}
@@ -257,7 +256,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       goto continue
     end
 
-    default_config = lsp_config[lspclient] or default_config
+    local default_config = lsp_config[lspclient] or {}
 
     default_config = vim.tbl_deep_extend('force', default_config, ng_default_cfg)
 
