@@ -257,11 +257,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       goto continue
     end
 
-    if client_cfg.document_config and client_cfg.document_config.default_config then
-      default_config = lsp_config[lspclient].document_config.default_config
-    else
-      default_config = lsp_config[lspclient]
-    end
+    default_config = lsp_config[lspclient] or default_config
 
     default_config = vim.tbl_deep_extend('force', default_config, ng_default_cfg)
 
