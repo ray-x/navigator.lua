@@ -30,9 +30,8 @@ local function order_locations(locations)
 end
 
 local function warmup_treesitter()
-  local parsers = require('nvim-treesitter.parsers')
   local bufnr = vim.api.nvim_get_current_buf()
-  local parser = parsers.get_parser(bufnr)
+  local parser = vim.treesitter.get_parser(bufnr)
   if not parser then
     log('err: ts not loaded ' .. vim.o.ft)
     return

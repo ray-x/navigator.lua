@@ -86,7 +86,7 @@ function M.find_definition(range, bufnr)
     return
   end
   bufnr = bufnr or api.nvim_get_current_buf()
-  local parser = parsers.get_parser(bufnr)
+  local parser = vim.treesitter.get_parser(bufnr)
   local symbolpos = { range.start.line, range.start.character } -- +1 or not?
   local root = ts_utils.get_root_for_position(range.start.line, range.start.character, parser)
   if not root then
@@ -127,7 +127,7 @@ function M.get_tsnode_at_pos(pos, bufnr, ignore_injected_langs)
   end
   local cursor_range = { pos.start.line, pos.start.character }
 
-  local root_lang_tree = parsers.get_parser(bufnr)
+  local root_lang_tree = vim.treesitter.get_parser(bufnr)
   if not root_lang_tree then
     log('Err: ts not loaded ' .. vim.o.ft, bufnr)
     return
@@ -180,7 +180,7 @@ end
 function M.ref_context(opts)
   local options = opts or {}
   local bufnr = options.bufnr or api.nvim_get_current_buf()
-  local parser = parsers.get_parser(bufnr)
+  local parser = vim.treesitter.get_parser(bufnr)
   if not parser then
     log('err: ts not loaded ' .. vim.o.ft)
     return
@@ -909,10 +909,6 @@ local function node_in_range(parser, range)
 end
 
 function M.get_node_at_line(lnum)
-  if not parsers.has_parser() then
-    return
-  end
-
   -- Get the position for the queried node
   if lnum == nil then
     local cursor = api.nvim_win_get_cursor(0)
@@ -922,7 +918,7 @@ function M.get_node_at_line(lnum)
   local range = { lnum - 1, first_non_whitespace_col, lnum - 1, first_non_whitespace_col }
 
   -- Get the language tree with nodes inside the given range
-  local root = parsers.get_parser()
+  local root = vim.treesitter.get_parser(vim.api.nvim_get_current_buf())
   local ts_tree = node_in_range(root, range)
   -- log(ts_tree:trees())
   local tree = ts_tree:trees()[1]

@@ -251,7 +251,7 @@ end
 -- This is cached on buf tick to avoid computing that multiple times
 -- Especially not for every line in the file when `zx` is hit
 local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
-  local parser = parsers.get_parser(bufnr)
+  local parser = vim.treesitter.get_parser(bufnr)
 
   if not parser then
     log('treesitter parser not loaded')
