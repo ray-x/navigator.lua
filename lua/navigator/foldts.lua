@@ -3,9 +3,25 @@
 local log = require('navigator.util').log
 local trace = require('navigator.util').trace
 local api = vim.api
-local tsutils = require('guihua.ts_obsolete.ts_utils')
-local query = require('guihua.ts_obsolete.query')
-local parsers = require('nvim-treesitter.parsers')
+
+local has_ts_main = pcall(require, 'nvim-treesitter.config')
+local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
+local tsutils, query
+
+if not ok then
+  error('treesitter master version not installed')
+  return nil
+end
+if has_ts_main then
+  parsers = require('guihua.ts_obsolete.parsers')
+
+  tsutils = require('guihua.ts_obsolete.ts_utils')
+  query = require('guihua.ts_obsolete.query')
+else
+  tsutils = require('nvim-treesitter.ts_utils')
+  query = require('nvim-treesitter.query')
+end
+
 local get_node_at_line = require('navigator.treesitter').get_node_at_line
 local M = {}
 

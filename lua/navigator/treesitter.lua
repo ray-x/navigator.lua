@@ -4,15 +4,25 @@ local gui = require('navigator.gui')
 local fn = vim.fn
 local lru = require('navigator.lru').new(500, 1024 * 1024)
 
+
+local has_ts_main = pcall(require, 'nvim-treesitter.config')
 local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
+local ts_locals, ts_utils
 
 if not ok then
   error('treesitter master version not installed')
   return nil
 end
+if has_ts_main then
+  parsers = require('guihua.ts_obsolete.parsers')
 
-local ts_locals = require('guihua.ts_obsolete.locals')
-local ts_utils = require('guihua.ts_obsolete.ts_utils')
+  ts_locals = require('guihua.ts_obsolete.locals')
+  ts_utils = require('guihua.ts_obsolete.ts_utils')
+else
+  ts_locals = require('nvim-treesitter.locals')
+  ts_utils = require('nvim-treesitter.ts_utils')
+end
+
 local is_in_node_range = vim.treesitter.is_in_node_range
 if not is_in_node_range then
   is_in_node_range = ts_utils.is_in_node_range
