@@ -237,14 +237,14 @@ end
 
 --- Get definitions of bufnr (unique and sorted by order of appearance).
 local function get_definitions(bufnr)
-  local local_nodes = ts_locals.get_locals(bufnr)
+  local local_nodes = locals.get_locals(bufnr)
   -- Make sure the nodes are unique.
   local nodes_set = {}
   for _, nodes in ipairs(local_nodes) do
     local loc = nodes["local"]
     trace(loc)
     if loc.definition then
-      ts_locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
+      locals.recurse_local_nodes(loc.definition, function(_, node, _, match)
         -- lua doesn't compare tables by value,
         -- use the value from byte count instead.
         local row, col, offset = node:start()
@@ -265,7 +265,7 @@ local function get_definitions(bufnr)
     end
 
     if loc.method then -- for go
-      ts_locals.recurse_local_nodes(loc.method, function(def, node, full_match, match)
+      locals.recurse_local_nodes(loc.method, function(def, node, full_match, match)
         local row, col, start = node:start()
         -- stylua: ignore start
         trace(row, col, start, def, node, full_match, match,
@@ -277,7 +277,7 @@ local function get_definitions(bufnr)
       end)
     end
     if loc.interface then -- for go using interface can output full method definition
-      ts_locals.recurse_local_nodes(loc.interface, function(def, node, full_match, match)
+      locals.recurse_local_nodes(loc.interface, function(def, node, full_match, match)
         local k, l, start = node:start()
         -- stylua: ignore start
         trace(k, l, start, def, node, full_match,
@@ -289,7 +289,7 @@ local function get_definitions(bufnr)
       end)
     end
     if loc.reference then -- for go
-      ts_locals.recurse_local_nodes(loc.reference, function(def, node, full_match, match)
+      locals.recurse_local_nodes(loc.reference, function(def, node, full_match, match)
         local row, col, start = node:start()
         local p1, p1t = '', ''
         local p2, p2t = '', ''
@@ -426,7 +426,7 @@ local function get_scope(type, source)
 end
 
 local function get_smallest_context(source)
-  local scopes = ts_locals.get_scopes()
+  local scopes = locals.get_scopes()
   for key, value in pairs(scopes) do
     trace(key, value)
   end
@@ -471,9 +471,9 @@ function M.goto_adjacent_usage(bufnr, delta)
     return
   end
 
-  local def_node, scope = ts_locals.find_definition(node_at_point, bufnr)
+  local def_node, scope = locals.find_definition(node_at_point, bufnr)
   trace(def_node, scope)
-  local usages = ts_locals.find_usages(def_node, scope, bufnr)
+  local usages = locals.find_usages(def_node, scope, bufnr)
   trace(usages)
 
   local index = index_of(usages, node_at_point)
@@ -750,7 +750,7 @@ function M.buf_func(bufnr)
   if vim.api.nvim_buf_get_option(bufnr, 'buftype') == 'nofile' then
     return
   end
-  if not ok or ts_locals == nil then
+  if not ok or locals == nil then
     error('treesitter not loaded: ' .. ft)
     return
   end
@@ -799,7 +799,7 @@ function M.buf_func(bufnr)
 end
 
 function M.all_ts_nodes(bufnr)
-  if ts_locals == nil then
+  if locals == nil then
     error('treesitter not loaded')
     return
   end
@@ -851,7 +851,7 @@ end
 M.get_all_nodes = get_all_nodes
 
 function M.bufs_ts()
-  if ts_locals == nil then
+  if locals == nil then
     error('treesitter not loaded')
     return
   end
