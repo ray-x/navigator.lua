@@ -305,6 +305,8 @@ M.setup = function(cfg)
   cfg = cfg or {}
   extend_config(cfg)
 
+  local has_ts_main = pcall(require, 'nvim-treesitter.config')
+  _NgConfigValues.has_ts_main = has_ts_main
   if not cmd_group then
     cmd_group = api.nvim_create_augroup('NGFtGroup', {})
     api.nvim_create_autocmd({ 'FileType', 'BufEnter' }, {

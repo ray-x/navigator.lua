@@ -134,7 +134,7 @@ local function def_preview(timeout_ms, method, client, bufnr)
   end
   if ok then
     local ts = require('navigator.treesitter')
-    local root = parsers.get_parser(bufnr)
+    local root = vim.treesitter.get_parser(bufnr)
     log(range)
     if ts == nil then
       return

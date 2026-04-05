@@ -3,9 +3,18 @@
 local log = require('navigator.util').log
 local trace = require('navigator.util').trace
 local api = vim.api
-local tsutils = require('guihua.ts_obsolete.ts_utils')
-local query = require('guihua.ts_obsolete.query')
-local parsers = require('nvim-treesitter.parsers')
+
+local has_ts_main = pcall(require, 'nvim-treesitter.config')
+local ts_utils, query
+
+if has_ts_main then
+  query = require('guihua.ts_obsolete.query')
+  ts_utils = require('guihua.ts_obsolete.ts_utils')
+else
+  query = require('nvim-treesitter.query')
+  ts_utils = require('nvim-treesitter.ts_utils')
+end
+
 local get_node_at_line = require('navigator.treesitter').get_node_at_line
 local M = {}
 
@@ -155,12 +164,13 @@ function M.setup_fold()
         return
       end
       local current_window = api.nvim_get_current_win()
-      if not parsers.has_parser or not parsers.has_parser() then
+      local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
+
+      if not lang or not pcall(vim.treesitter.language.add, lang) then
         api.nvim_win_set_option(current_window, 'foldmethod', 'indent')
-        trace('fallback to indent folding')
         return
       end
-      log('setup treesitter folding winid', current_window)
+
       api.nvim_set_option_value('foldexpr', 'folding#ngfoldexpr()', { win = current_window })
       api.nvim_set_option_value('foldmethod', 'expr', { win = current_window })
     end,
@@ -250,8 +260,8 @@ end
 
 -- This is cached on buf tick to avoid computing that multiple times
 -- Especially not for every line in the file when `zx` is hit
-local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
-  local parser = parsers.get_parser(bufnr)
+local folds_levels = ts_utils.memoize_by_buf_tick(function(bufnr)
+  local parser = vim.treesitter.get_parser(bufnr)
 
   if not parser then
     log('treesitter parser not loaded')
@@ -317,13 +327,11 @@ local folds_levels = tsutils.memoize_by_buf_tick(function(bufnr)
 end)
 
 function M.get_fold_indic(lnum)
-  if parsers.has_parser == nil then
-    return '0'
-  end
-  if not parsers.has_parser() or not lnum then
-    return '0'
-  end
   local buf = api.nvim_get_current_buf()
+  local lang = vim.treesitter.language.get_lang(vim.bo.filetype)
+  if not vim.treesitter.get_parser(buf, lang) then
+    return '0'
+  end
   local shown = false
   for i = 1, vim.fn.tabpagenr('$') do
     for _, value in pairs(vim.fn.tabpagebuflist(i)) do
