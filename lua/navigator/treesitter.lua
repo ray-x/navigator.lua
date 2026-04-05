@@ -7,6 +7,7 @@ local lru = require('navigator.lru').new(500, 1024 * 1024)
 
 local has_ts_main = pcall(require, 'nvim-treesitter.config')
 local ts_utils
+local locals = require('guihua.ts_obsolete.locals')
 
 if has_ts_main then
   ts_utils = require('guihua.ts_obsolete.ts_utils')
@@ -185,6 +186,30 @@ end
 local trim_line = function(line)
   line = line:gsub('%s*[%[%(%{]*%s*$', '')
   return line
+end
+
+local function collect_local_matches(bufnr)
+  return gh_ts_utils.collect_local_matches(bufnr)
+end
+
+local function get_scopes(bufnr)
+  return gh_ts_utils.get_scopes(bufnr)
+end
+
+local function get_references(bufnr)
+  return gh_ts_utils.get_references(bufnr)
+end
+
+local function find_definition_node(node, bufnr)
+  return gh_ts_utils.find_definition_node(node, bufnr, ts_utils.get_root_for_node)
+end
+
+local function find_usages(node, scope_node, bufnr)
+  return gh_ts_utils.find_usages(node, scope_node, bufnr, ts_utils.get_root_for_node)
+end
+
+M.find_ts_definition_node = function(node, bufnr)
+  return find_definition_node(node, bufnr)
 end
 
 function M.ref_context(opts)
@@ -533,6 +558,13 @@ function M.goto_adjacent_usage(bufnr, delta)
   local def_node, scope = locals.find_definition(node_at_point, bufnr)
   trace(def_node, scope)
   local usages = locals.find_usages(def_node, scope, bufnr)
+  if #usages == 0 then
+    trace('no treesitter usage found', node_at_point:type())
+    -- fallback to lsp reference
+    return lsp_reference(opt)
+  end
+
+  sort_nodes_by_pos(usages)
   trace(usages)
 
   local index = index_of(usages, node_at_point)
@@ -611,7 +643,7 @@ local function get_all_nodes(bufnr, filter, summary)
   summary = summary or false
   local ft = vim.api.nvim_buf_get_option(bufnr, 'filetype')
   -- if not parsers.has_parser() then
-  if not vim.treesitter.language.has(ft) then
+  if not vim.treesitter.language.get_lang(ft) then
     if not require('navigator.lspclient.clients').ft_disabled(ft) then
       vim.notify('ts not loaded ' .. ft, vim.log.levels.Debug)
       log('ts not loaded ' .. ft)

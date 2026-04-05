@@ -1,6 +1,6 @@
 local gui = require('navigator.gui')
 local uv = vim.uv or vim.loop
-local diagnostic = vim.diagnostic or vim.lsp.diagnostic
+local diagnostic = vim.diagnostic
 -- local hide = diagnostic.hide or diagnostic.clear
 local util = require('navigator.util')
 local log = util.log
@@ -18,8 +18,8 @@ util.nvim_0_11()
 local diag_map = {
   Error = vim.diagnostic.severity.ERROR,
   Warning = vim.diagnostic.severity.WARN,
-  Info = vim.diagnostic.severity.Info,
-  Hint = vim.diagnostic.severity.Hint,
+  Info = vim.diagnostic.severity.INFO,
+  Hint = vim.diagnostic.severity.HINT,
 }
 
 local diagnostic_cfg
@@ -38,9 +38,9 @@ M.diagnostic_list[vim.bo.filetype] = {}
 
 local function error_marker(result, ctx, config)
   if
-      _NgConfigValues.lsp.diagnostic_scrollbar_sign == nil
-      or empty(_NgConfigValues.lsp.diagnostic_scrollbar_sign)
-      or _NgConfigValues.lsp.diagnostic_scrollbar_sign == false
+    _NgConfigValues.lsp.diagnostic_scrollbar_sign == nil
+    or empty(_NgConfigValues.lsp.diagnostic_scrollbar_sign)
+    or _NgConfigValues.lsp.diagnostic_scrollbar_sign == false
   then -- not enabled or already shown
     return
   end
@@ -52,8 +52,7 @@ local function error_marker(result, ctx, config)
     end
     local first_line = vim.fn.line('w0')
     local last_line = vim.fn.line('w$')
-    local weight = last_line - first_line +
-    1                                         -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
+    local weight = last_line - first_line + 1 -- local rootfolder = vim.fn.expand('%:h:t') -- get the current file root folder
 
     local bufnr = ctx.bufnr
     if bufnr == nil and result.uri then
@@ -318,9 +317,9 @@ local function diag_signs()
     }
     -- in case there are duplicated signs defined in _NgConfigValues.lsp.diagnostic.signs
     if
-        _NgConfigValues.lsp.diagnostic.signs
-        and type(_NgConfigValues.lsp.diagnostic.signs) == 'table'
-        and _NgConfigValues.lsp.diagnostic.signs.text
+      _NgConfigValues.lsp.diagnostic.signs
+      and type(_NgConfigValues.lsp.diagnostic.signs) == 'table'
+      and _NgConfigValues.lsp.diagnostic.signs.text
     then
       for k, v in pairs(_NgConfigValues.lsp.diagnostic.signs) do
         text[k] = v
@@ -346,24 +345,26 @@ end
 --  goto next Error if none found, go to first
 function M.goto_next(opts)
   opts = opts or {}
+  opts.count = opts.count or 1
   local bufnr = api.nvim_get_current_buf()
   local diags = diagnostic.get(bufnr, { severity = vim.diagnostic.severity.ERROR })
   if diags and #diags > 0 then
     opts.severity = vim.diagnostic.severity.ERROR
-    return diagnostic.goto_next(opts)
+    return diagnostic.jump(opts)
   end
-  diagnostic.goto_next(opts)
+  diagnostic.jump(opts)
 end
 
 function M.goto_prev(opts)
   opts = opts or {}
+  opts.count = opts.count or -1
   local bufnr = api.nvim_get_current_buf()
   local diags = diagnostic.get(bufnr, { severity = vim.diagnostic.severity.ERROR })
   if diags and #diags > 0 then
     opts.severity = vim.diagnostic.severity.ERROR
-    return diagnostic.goto_prev(opts)
+    return diagnostic.jump(opts)
   end
-  diagnostic.goto_prev(opts)
+  diagnostic.jump(opts)
 end
 
 -- local diag_hdlr_async = function()
@@ -508,9 +509,9 @@ function M.update_err_marker()
   local bufnr = api.nvim_get_current_buf()
 
   local diag_cnt = get_count(bufnr, [[Error]])
-      + get_count(bufnr, [[Warning]])
-      + get_count(bufnr, [[Info]])
-      + get_count(bufnr, [[Hint]])
+    + get_count(bufnr, [[Warning]])
+    + get_count(bufnr, [[Info]])
+    + get_count(bufnr, [[Hint]])
 
   -- redraw
   if diag_cnt == 0 and ng_vt_diag_ns ~= nil then
