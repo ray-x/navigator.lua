@@ -201,9 +201,9 @@ M.deprecated = function(cfg)
     warn('ts_fold option changed, refer to README for more details')
     cfg.ts_fold = { enable = cfg.ts_fold }
   end
-  local has_nvim_011 = vim.fn.has('nvim-0.11') == 1
-  if not has_nvim_011 then
-    vim.notify('navigator.nvim requires nvim 0.11 or higher, please update your neovim version', vim.log.levels.WARN)
+  local has_nvim_012 = vim.fn.has('nvim-0.12') == 1
+  if not has_nvim_012 then
+    vim.notify('navigator.nvim requires nvim 0.12 or higher, please update your neovim version', vim.log.levels.WARN)
   end
 end
 
@@ -295,10 +295,10 @@ local cmd_group
 
 M.setup = function(cfg)
   local util = require('navigator.util')
-  local has_nvim_011 = util.nvim_0_11()
-  if not has_nvim_011 then
+  local has_nvim_012 = util.nvim_0_11()
+  if not has_nvim_012 then
     vim.notify(
-      'recommand nvim 0.11 or higher or use nvim_0.10 branch if you are using old version of nvim',
+      'recommend nvim 0.12 or higher or use the nvim_0.10 branch if you are using an old version of nvim',
       vim.log.levels.WARN
     )
   end

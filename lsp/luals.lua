@@ -25,7 +25,7 @@ library[vfn.expand('$VIMRUNTIME/lua/vim/lsp')] = true
 return {
   cmd = { 'lua-language-server' },
   filetypes = { 'lua' },
-  flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+  flags = { debounce_text_changes = 500 },
   settings = {
     Lua = {
       runtime = {

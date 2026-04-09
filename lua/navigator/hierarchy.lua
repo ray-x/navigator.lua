@@ -304,7 +304,7 @@ call_hierarchy = function(method, opts)
       end
       local client = vim.lsp.get_client_by_id(ctx.client_id)
       -- check if the client supports call hierarchy
-      if not client.supports_method(method, ctx.bufnr) then
+      if not client:supports_method(method, ctx.bufnr) then
         vim.notify('Client ' .. client.name .. ' does not support ' .. method, vim.log.levels.INFO)
         return
       end

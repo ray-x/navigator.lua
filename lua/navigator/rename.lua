@@ -432,7 +432,7 @@ function M.rename_inplace(new_name, options)
       end, bufnr)
     end
 
-    if client.supports_method('textDocument/prepareRename') then
+    if client:supports_method('textDocument/prepareRename') then
       -- log(params)
       client:request(ms.textDocument_prepareRename, params, function(err, result)
         if err or result == nil then
@@ -511,7 +511,7 @@ function M.rename_inplace(new_name, options)
         vim.cmd('noautocmd startinsert')
       end, bufnr)
     else
-      assert(client.supports_method('textDocument/rename'), 'Client must support textDocument/rename')
+      assert(client:supports_method('textDocument/rename'), 'Client must support textDocument/rename')
       if new_name then
         rename(new_name)
         return

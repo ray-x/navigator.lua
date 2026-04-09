@@ -9,7 +9,7 @@ return {
   end,
   cmd = { 'pyright-langserver', '--stdio' },
   filetypes = { 'python' },
-  flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+  flags = { debounce_text_changes = 500 },
   settings = {
     python = {
       venvPath = '.',

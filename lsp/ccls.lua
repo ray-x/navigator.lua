@@ -6,5 +6,5 @@ return {
     index = { threads = 2 },
     clang = { excludeArgs = { '-frounding-math' } },
   },
-  flags = { allow_incremental_sync = true },
+  flags = {},
 }

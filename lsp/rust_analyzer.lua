@@ -8,5 +8,5 @@ return {
       procMacro = { enable = true },
     },
   },
-  flags = { allow_incremental_sync = true, debounce_text_changes = 500 },
+  flags = { debounce_text_changes = 500 },
 }

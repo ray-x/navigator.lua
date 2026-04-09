@@ -398,7 +398,7 @@ function M.get_current_winid()
 end
 
 function M.nvim_0_11()
-  if vim.fn.has('nvim-0.11') == 1 then
+  if vim.fn.has('nvim-0.12') == 1 then
     nvim_0_11 = true
   else
     nvim_0_11 = false
@@ -585,12 +585,7 @@ function M.trim_empty_lines(lines)
 end
 
 function M.for_each_buffer_client(bufnr, fn)
-  local clients
-  if vim.lsp.get_clients then -- nightly nvim 0.10
-    clients = vim.lsp.get_clients({ bufnr = bufnr })
-  else
-    clients = vim.lsp.buf_get_clients()
-  end
+  local clients = vim.lsp.get_clients({ bufnr = bufnr })
   for _, client in pairs(clients) do
     fn(client, client.id, bufnr)
   end
@@ -623,7 +618,7 @@ function M.lsp_with(handler, override_config)
   end
 end
 M.make_position_params = function(extra_params)
-  if vim.fn.has('nvim-0.11') == 0 then
+  if vim.fn.has('nvim-0.12') == 0 then
     local params = vim.lsp.util.make_position_params()
     if extra_params then
       params = vim.tbl_deep_extend('force', params, extra_params)
@@ -641,7 +636,7 @@ M.make_position_params = function(extra_params)
 end
 
 M.make_range_params = function(extra_params)
-  if vim.fn.has('nvim-0.11') == 0 then
+  if vim.fn.has('nvim-0.12') == 0 then
     local params = vim.lsp.util.make_range_params()
     if extra_params then
       params = vim.tbl_deep_extend('force', params, extra_params)

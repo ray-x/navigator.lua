@@ -90,7 +90,7 @@ this line.
     - Visible Closing Brackets: Ensures that end or closing brackets stay visible even when code is folded.
     - Collapsible Comments: Allows users to fold and unfold comment sections.
     - Fold Indicator: Displays indicators for lines that are folded.
-    - Highlighted Folded Lines: Applies syntax highlighting to folded lines (supported in Neovim v0.10.x+).
+    - Highlighted Folded Lines: Applies syntax highlighting to folded lines (supported in Neovim v0.12+).
 
 - [Treesitter symbols sidebar](https://github.com/ray-x/navigator.lua/blob/master/doc/showcases.md#sidebar-folding-outline),
   LSP document symbol sidebar. Both with preview and folding
@@ -125,7 +125,7 @@ For more showcases, please check [showcases.md](https://github.com/ray-x/navigat
 
 ## Install
 
-Require nvim-0.9 or above, nightly (0.10 or greater) preferred
+Require nvim-0.12 or above
 
 You can remove your lspconfig setup and use this plugin. The plugin depends on lspconfig and
 [guihua.lua](https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(migrate from
@@ -239,7 +239,7 @@ require'navigator'.setup({
   preview_height = 0.35, -- max height of preview windows
   border = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}, -- border style, can be one of 'none', 'single', 'double',
                                                      -- 'shadow', or a list of chars which defines the border
-  on_attach = function(client, bufnr) -- no longer supported for nvim > 0.11 use your own LspAttach autocmd
+  on_attach = function(client, bufnr) -- no longer supported for nvim >= 0.12, use your own LspAttach autocmd
   end,
 
   ts_fold = {
@@ -278,7 +278,7 @@ require'navigator'.setup({
       separator = '',  -- e.g. shows   3 lines 
     },
   },
-  mason = false, -- Deprecated, mason no longer supported as setup lsp changed in nvim 0.11
+  mason = false, -- Deprecated, setup LSP in your own config and use LspAttach to hook navigator mappings
   lsp = {
     enable = true,  -- skip lsp setup, and only use treesitter in navigator.
                     -- Use this if you are not using LSP servers, and only want to enable treesitter support.
@@ -356,18 +356,8 @@ require'navigator'.setup({
       tagfile = 'tags',
       options = '-R --exclude=.git --exclude=node_modules --exclude=test --exclude=vendor --excmd=number',
     },
-    -- lsp setup and config no longer supported for nvim 0.11
-    -- refer to nvim 0.11 lsp setup doc and lspconfig for more info
-    ts_ls = {  -- no longer supported for nvim 0.11
-    },
-    gopls = {   -- no longer supported for nvim 0.11
-    },
-    -- the lsp setup can be a function, .e.g
-    gopls = function() -- no longer supported for nvim 0.11
-    end,
-
-    lua_ls = { }, -- no longer supported
-
+    -- setup LSP in your own config (nvim 0.12+), then hook navigator in LspAttach
+    -- refer to :help lsp and nvim-lspconfig docs for more info
     servers = {'cmake', 'ltex'}, -- by default empty, and it should load all LSP clients available based on filetype
     -- but if you want navigator load  e.g. `cmake` and `ltex` for you , you
     -- can put them in the `servers` list and navigator will auto load them.
@@ -393,7 +383,7 @@ local servers = {
 ```
 
 Navigator will try to load available lsp server/client based on filetype. The clients has none default on_attach.
-incremental sync and debounce is enabled by navigator. And the lsp snippet will be enabled. So you could use COQ and
+debounce is enabled by navigator, and LSP snippet support is enabled. So you could use COQ and
 nvim-cmp snippet expand.
 
 Other than above setup, additional none default setup are used for following lsp:
@@ -550,8 +540,8 @@ Terminal nerdfont and emoji capacity. I am using Kitty with nerdfont (Victor Mon
 
 ## Integrate with williamboman/mason.nvim
 
-Note: mason lspconfig no longger support as of navigator nvim 0.11 branch The only change you need in in LspAttach event
-add if you prefer to use mason lspconfig
+Note: mason-lspconfig setup is not managed by navigator on nvim 0.12+. If you prefer to use mason-lspconfig,
+add the following in your LspAttach callback.
 
 ```lua
 require("navigator.lspclient.mapping").setup({ client = client, bufnr = bufnr }) -- setup navigator keymaps here,
@@ -583,7 +573,7 @@ use {"ray-x/navigator.lua",
   }
 ```
 
-- Here is an example to setup rust with rust-tools (nvim < 0.11)
+- Here is an example to setup rust with rust-tools (nvim 0.12+)
 
 ```lua
 require('rust-tools').setup({
@@ -688,7 +678,7 @@ extensive comments.
 
 #### Condition (if) block folding with syntax highlight
 
-syntax highlight require treesitter and neovim 0.10 +
+syntax highlight requires treesitter and neovim 0.12+
 
 <img width="602" alt="image" src="https://user-images.githubusercontent.com/1681295/281574649-ecc911d3-bfe2-446a-9eb7-318600b37c30.png">
 

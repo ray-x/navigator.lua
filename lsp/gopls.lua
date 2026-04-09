@@ -16,11 +16,10 @@ return {
     -- "-rpc.trace",
   },
 
-  flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
+  flags = { debounce_text_changes = 1000 },
   settings = {
     gopls = {
       -- more settings: https://github.com/golang/tools/blob/master/gopls/doc/settings.md
-      -- flags = {allow_incremental_sync = true, debounce_text_changes = 500},
       -- not supported
       analyses = { unusedparams = true, unreachable = false },
       codelenses = {

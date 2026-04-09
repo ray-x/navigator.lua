@@ -1,28 +1,19 @@
 local M = {}
 
 local util = require('navigator.util')
-local log = util.log
 local health = vim.health
-if not vim.health then
-  health = require('health')
-end
 
-local nvim_011 = vim.fn.has('nvim-0.11') == 1
-
-local start = nvim_011 and health.start or health.report_start
-local ok = nvim_011 and health.ok or health.report_ok
-local error = nvim_011 and health.error or health.report_error
-local warn = nvim_011 and health.warn or health.report_warn
-local info = nvim_011 and health.info or health.report_info
-
-local vfn = vim.fn
+local start = health.start
+local ok = health.ok
+local error = health.error
+local warn = health.warn
 
 local function plugin_check()
   start('navigator Plugin Check')
 
   local plugins = {
     'lspconfig',
-    'nvim-treesitter',
+    -- 'nvim-treesitter',
     'guihua',
   }
   local any_warn = false
@@ -47,8 +38,9 @@ end
 
 
 function M.check()
-  if vim.fn.has('nvim-0.11') == 0 then
-    warn('Suggested neovim version 0.9 or higher')
+  if vim.fn.has('nvim-0.12') == 0 then
+    error('navigator.nvim requires neovim 0.12+. Neovim 0.11 is no longer supported.')
+    return
   end
   plugin_check()
 end

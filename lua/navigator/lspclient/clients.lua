@@ -13,14 +13,14 @@ _LoadedFiletypes = {}
 
 local highlight = require('navigator.lspclient.highlight')
 
-local has_nvim_011 = vfn.has('nvim-0.11')
-if not has_nvim_011 then
-  vim.notify('loading lsp config failed LSP may not working correctly, please update to nvim 0.11+', vim.log.levels.WARN)
+local has_nvim_012 = vfn.has('nvim-0.12')
+if not has_nvim_012 then
+  vim.notify('navigator.lua requires nvim 0.12+, please update neovim', vim.log.levels.WARN)
 end
 
 local lspconfig = vim.lsp.config
 if not lspconfig then
-  vim.notify('invalid nvim version pls use nvim 0.11+', vim.log.levels.INFO)
+  vim.notify('invalid nvim version pls use nvim 0.12+', vim.log.levels.INFO)
   return {}
 end
 
@@ -55,7 +55,7 @@ local disabled_ft = {
 local servers = require('navigator.lspclient.servers')
 
 local ng_default_cfg = {
-  flags = { allow_incremental_sync = true, debounce_text_changes = 1000 },
+  flags = { debounce_text_changes = 500 },
 }
 
 -- check and load based on file type
@@ -139,11 +139,8 @@ local function load_cfg(ft, client, cfg, loaded, starting)
     if not _NG_Loaded[client] then
       trace(client, 'loading for', ft, cfg)
       trace(lspconfig[client])
-      if vim.lsp.enable then
-        vim.lsp.enable(client)
-      else
-        lspconfig[client].setup(cfg)
-      end
+      vim.lsp.config[client] = vim.tbl_deep_extend('force', vim.lsp.config[client] or {}, cfg)
+      vim.lsp.enable(client)
       _NG_Loaded[client] = true
       table.insert(_NG_Loaded[bufnr].lsp, client)
       vim.defer_fn(function()
@@ -232,10 +229,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       goto continue
     end
 
-    local lsp_config = vim.lsp.config or lspconfig
+    local lsp_config = vim.lsp.config
     local client_cfg = lsp_config[lspclient] or {}
-    local lspconfig_client_cfg = lsp_config[lspclient] or {}
-    client_cfg = vim.tbl_deep_extend('keep', client_cfg, lspconfig_client_cfg)
     -- get config from lsp/lsp_name.lua
     local lsp_dot_cfg = {}
     local require_path = 'lsp.' .. lspclient
@@ -287,10 +282,9 @@ local function lsp_startup(ft, retry, user_lsp_opts)
       -- end
       cfg.on_init = function(client)
         if client and client.config and client.config.settings then
-          client.notify(
+          client:notify(
             'workspace/didChangeConfiguration',
-            { settings = client.config.settings },
-            vim.log.levels.WARN
+            { settings = client.config.settings }
           )
         end
       end
@@ -318,7 +312,6 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
 
     load_cfg(ft, lspclient, cfg, loaded, starting)
-    -- load_cfg(ft, lspclient, {}, loaded)
     ::continue::
   end
 
@@ -327,12 +320,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if nulls_cfg then
       local cfg = {}
       cfg = vim.tbl_deep_extend('keep', cfg, nulls_cfg)
-      if vim.lsp.config then
-        vim.lsp.config['null-ls'] = cfg
-        vim.lsp.enable('null-ls')
-      else
-        lspconfig['null-ls'].setup(cfg)
-      end
+      vim.lsp.config['null-ls'] = cfg
+      vim.lsp.enable('null-ls')
     end
   end
 
