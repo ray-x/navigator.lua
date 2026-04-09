@@ -5,15 +5,10 @@ local fn = vim.fn
 local lru = require('navigator.lru').new(500, 1024 * 1024)
 
 
-local has_ts_main = pcall(require, 'nvim-treesitter.config')
 local ts_utils
 local locals = require('guihua.ts_obsolete.locals')
 
-if has_ts_main then
-  ts_utils = require('guihua.ts_obsolete.ts_utils')
-else
-  ts_utils = require('nvim-treesitter.ts_utils')
-end
+ts_utils = require('guihua.ts_obsolete.ts_utils')
 
 local is_in_node_range = vim.treesitter.is_in_node_range
 if not is_in_node_range then

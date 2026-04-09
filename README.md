@@ -383,7 +383,7 @@ Built clients:
 
 ```lua
 local servers = {
-  "angularls", "gopls", "ts_ls", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
+  "angularls", "gopls", "tsgo", "bashls", "dockerls", "julials", "pylsp", "pyright",
   "jedi_language_server", "jdtls", "lua_ls", "vimls", "html", "jsonls", "solargraph", "cssls",
   "yamlls", "clangd", "ccls", "sqlls", "denols", "graphql", "dartls", "dotls",
   "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
@@ -566,7 +566,6 @@ There are lots of plugins provides lsp support
 - go.nvim allow you either hook gopls from go.nvim or from navigator and it can export the lsp setup from go.nvim.
 - rust-tools and clangd allow you to setup on_attach from config server
 - [neodev](https://github.com/folke/neodev.nvim) Dev setup for lua development. Navigator help you setup neodev
-
   - setup with neodev
 
 ```lua

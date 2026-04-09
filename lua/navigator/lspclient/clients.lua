@@ -303,7 +303,9 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     log('loading', lspclient, 'name', lsp_config[lspclient].name)
     -- start up lsp
 
-    if vfn.executable(cfg.cmd[1]) == 0 then
+    if type(cfg.cmd) == 'function' then
+      cfg.cmd = cfg.cmd()
+    elseif type(cfg.cmd) == 'table' and vfn.executable(cfg.cmd[1]) == 0 then
       log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.log.levels.WARN)
     end
 

@@ -352,6 +352,8 @@ function M.goto_next(opts)
     opts.severity = vim.diagnostic.severity.ERROR
     return diagnostic.jump(opts)
   end
+
+  opts.severity = vim.diagnostic.severity.WARN
   diagnostic.jump(opts)
 end
 
@@ -364,6 +366,7 @@ function M.goto_prev(opts)
     opts.severity = vim.diagnostic.severity.ERROR
     return diagnostic.jump(opts)
   end
+  opts.severity = vim.diagnostic.severity.WARN
   diagnostic.jump(opts)
 end
 
@@ -537,7 +540,6 @@ function M.get_line_diagnostic()
   local lnum = api.nvim_win_get_cursor(0)[1] - 1
   local diags = diagnostic.get(api.nvim_get_current_buf(), { lnum = lnum })
 
-  local l = 0
   local cmp = function(d1, d2)
     return d1.severity < d2.severity
   end
