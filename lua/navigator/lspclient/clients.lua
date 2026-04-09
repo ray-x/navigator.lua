@@ -59,8 +59,8 @@ local ng_default_cfg = {
 }
 
 -- check and load based on file type
-local function load_cfg(ft, client, cfg, loaded, starting)
-  log(ft, client, loaded, starting)
+local function load_cfg(ft, client, cfg)
+  log(ft, client)
   trace(cfg)
   if lspconfig[client] == nil or lspconfig[client].filetypes == nil then
     log('not supported by nvim', client)
@@ -73,7 +73,7 @@ local function load_cfg(ft, client, cfg, loaded, starting)
   local bufnr = vim.api.nvim_get_current_buf()
   local cmd = cfg.cmd
   trace(lspft, additional_ft, _NG_Loaded)
-  _NG_Loaded[bufnr] = _NG_Loaded[bufnr] or { cnt = 0, lsp = {} }
+  _NG_Loaded[bufnr] = _NG_Loaded[bufnr] or { lsp = {} }
   local should_load = false
   if lspft ~= nil and #lspft > 0 then
     for _, value in ipairs(lspft) do
@@ -91,38 +91,14 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       return
     end
 
-    for k, c in pairs(loaded) do
-      if client == k then
-        -- loaded
-        log(client, 'already been loaded for', ft, loaded, c)
-        if _NG_Loaded[bufnr].cnt < 4 then
-          log('doautocmd filetype')
-          vim.defer_fn(function()
-            vim.cmd('doautocmd FileType')
-            _NG_Loaded[bufnr].cnt = _NG_Loaded[bufnr].cnt + 1
-          end, 100)
-          return
-        end
-      end
-    end
-
-    local clients = vim.lsp.get_clients({ buffer = 0 })
+    local clients = vim.lsp.get_clients({ bufnr = bufnr })
     for _, c in pairs(clients or {}) do
       log("lsp start up in progress client", client, c.name)
       if c.name == client then
-        _NG_Loaded[bufnr].cnt = 10
-        table.insert(_NG_Loaded[bufnr].lsp, c.name)
+        _NG_Loaded[bufnr].lsp[c.name] = true
         _NG_Loaded[client] = true
         return
       end
-    end
-
-    if starting and (starting.cnt or 0) > 0 then
-      log("lsp start up in progress", starting)
-      return vim.defer_fn(function()
-          load_cfg(ft, client, cfg, loaded, { cnt = starting.cnt - 1 })
-        end,
-        100)
     end
 
     if lspconfig[client] == nil then
@@ -142,21 +118,9 @@ local function load_cfg(ft, client, cfg, loaded, starting)
       vim.lsp.config[client] = vim.tbl_deep_extend('force', vim.lsp.config[client] or {}, cfg)
       vim.lsp.enable(client)
       _NG_Loaded[client] = true
-      table.insert(_NG_Loaded[bufnr].lsp, client)
-      vim.defer_fn(function()
-        log('send filetype event')
-        vim.cmd([[doautocmd Filetype]])
-        _NG_Loaded[bufnr].cnt = _NG_Loaded[bufnr].cnt + 1
-      end, 400)
+      _NG_Loaded[bufnr].lsp[client] = true
     else
-      log('send filetype event')
-      if not _NG_Loaded[bufnr] or _NG_Loaded[bufnr].cnt < 4 then
-        log('doautocmd filetype')
-        vim.defer_fn(function()
-          vim.cmd('doautocmd FileType')
-          _NG_Loaded[bufnr].cnt = _NG_Loaded[bufnr].cnt + 1
-        end, 100)
-      end
+      _NG_Loaded[bufnr].lsp[client] = true
     end
   end
   -- need to verify the lsp server is up
@@ -197,20 +161,10 @@ local function update_capabilities()
 end
 
 -- run setup for lsp clients
-
-local loaded = {}
-local function lsp_startup(ft, retry, user_lsp_opts)
-  retry = retry or false
-  local path_sep = require('navigator.util').path_sep()
+local function lsp_startup(ft, user_lsp_opts)
   local capabilities = update_capabilities()
 
   for _, lspclient in ipairs(servers) do
-    local clients = vim.lsp.get_clients() or {}
-    for _, client in ipairs(clients) do
-      if client ~= nil then
-        loaded[client.name] = client.id
-      end
-    end
     -- check should load lsp
     -- for lazy loading
     -- e.g. {lsp={tsserver=function() if tsver>'1.17' then return {xxx} else return {xxx} end}}
@@ -306,12 +260,8 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     if _NG_Loaded[lspclient] then
       log('client loaded ?', lspclient, _NG_Loaded[lspclient])
     end
-    local starting = {}
-    if _NG_Loaded[lspclient] == true then
-      starting = { cnt = 1 }
-    end
 
-    load_cfg(ft, lspclient, cfg, loaded, starting)
+    load_cfg(ft, lspclient, cfg)
     ::continue::
   end
 
@@ -325,9 +275,7 @@ local function lsp_startup(ft, retry, user_lsp_opts)
     end
   end
 
-  if not retry or ft == nil then
-    return
-  end
+  return
 end
 
 -- append lsps to servers
@@ -428,7 +376,7 @@ local function setup(user_opts)
 
   trace(debug.traceback())
 
-  local clients = vim.lsp.get_clients({ buffer = bufnr })
+  local clients = vim.lsp.get_clients({ bufnr = bufnr })
   for key, client in pairs(clients) do
     if client.name ~= 'null_ls' and client.name ~= 'efm' then
       if vim.tbl_contains(client.filetypes or {}, vim.bo.ft) then
@@ -440,14 +388,14 @@ local function setup(user_opts)
   user_opts = vim.tbl_extend('keep', user_opts, config) -- incase setup was triggered from autocmd
 
   log('running lsp setup', ft, bufnr)
-  local retry = true
 
   log('loading for ft ', ft, uri)
   highlight.config_signs()
   highlight.add_highlight()
   local lsp_opts = user_opts.lsp or {}
 
-  lsp_startup(ft, retry, lsp_opts)
+  lsp_startup(ft, lsp_opts)
+  _LoadedFiletypes[ft .. tostring(bufnr)] = true
 end
 
 local function on_filetype()
@@ -462,30 +410,11 @@ local function on_filetype()
     trace('skip loading for ft ', ft, uri)
     return
   end
-  _NG_Loaded[bufnr] = _NG_Loaded[bufnr] or { cnt = 1, lsp = {} }
 
-  trace(_NG_Loaded)
-  local loaded
-  if _NG_Loaded[bufnr].cnt > 1 then
+  if _LoadedFiletypes[ft .. tostring(bufnr)] == true then
     log('navigator was loaded for ft', ft, bufnr)
-    -- check if lsp is loaded
-    local clients = vim.lsp.get_clients({ buffer = bufnr })
-    for key, client in pairs(clients) do
-      if client.name ~= 'null_ls' and client.name ~= 'efm' then
-        loaded = _NG_Loaded[bufnr].lsp[client.name]
-      end
-    end
-    if not loaded then
-      -- trigger filetype so that lsp can be loaded
-      -- fire the check in 200 ms
-      vim.cmd('setlocal filetype=' .. ft)
-    end
     return
   end
-
-  -- on_filetype should only be trigger only once for each bufnr
-  _NG_Loaded[bufnr].cnt = _NG_Loaded[bufnr].cnt + 1 -- do not hook and trigger filetype event multiple times
-  -- as setup will send  filetype event as well
   log(uri)
 
   local wids = vfn.win_findbuf(bufnr)
