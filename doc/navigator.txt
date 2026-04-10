@@ -345,7 +345,7 @@ LSP CLIENTS                                                *navigator-lsp_client
 Built clients:
 >
     local servers = {
-      "angularls", "gopls", "flow", "bashls", "dockerls", "julials", "pylsp", "pyright",
+      "angularls", "gopls", "bashls", "dockerls", "julials", "pylsp", "pyright",
       "jedi_language_server", "jdtls", "lua_ls", "vimls", "html", "jsonls", "solargraph", "cssls",
       "yamlls", "clangd", "ccls", "sqlls", "denols", "graphql", "dartls", "dotls",
       "kotlin_language_server", "nimls", "intelephense", "vuels", "phpactor", "omnisharp",
