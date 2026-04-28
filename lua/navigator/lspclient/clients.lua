@@ -58,6 +58,26 @@ local ng_default_cfg = {
   flags = { debounce_text_changes = 500 },
 }
 
+local function resolve_root_dir(bufnr, cfg)
+  local bufname = vim.api.nvim_buf_get_name(bufnr)
+
+  if type(cfg.root_dir) == 'function' and bufname ~= '' then
+    local ok, root_dir = pcall(cfg.root_dir, bufname)
+    if ok and type(root_dir) == 'string' and root_dir ~= '' then
+      return root_dir
+    end
+  elseif type(cfg.root_dir) == 'string' and cfg.root_dir ~= '' then
+    return cfg.root_dir
+  end
+
+  if type(cfg.root_markers) == 'table' and #cfg.root_markers > 0 then
+    local ok, root_dir = pcall(vim.fs.root, bufnr, cfg.root_markers)
+    if ok and type(root_dir) == 'string' and root_dir ~= '' then
+      return root_dir
+    end
+  end
+end
+
 -- check and load based on file type
 local function load_cfg(ft, client, cfg)
   log(ft, client)
@@ -72,6 +92,9 @@ local function load_cfg(ft, client, cfg)
   local additional_ft = lspconfig[client] and lspconfig[client].filetypes or {}
   local bufnr = vim.api.nvim_get_current_buf()
   local cmd = cfg.cmd
+  local root_dir = resolve_root_dir(bufnr, cfg)
+  local needs_root = type(cfg.root_dir) == 'function'
+    or (type(cfg.root_markers) == 'table' and #cfg.root_markers > 0)
   trace(lspft, additional_ft, _NG_Loaded)
   _NG_Loaded[bufnr] = _NG_Loaded[bufnr] or { lsp = {} }
   local should_load = false
@@ -85,8 +108,22 @@ local function load_cfg(ft, client, cfg)
       return
     end
 
+    if needs_root and (type(root_dir) ~= 'string' or root_dir == '') then
+      trace('skip loading for client without project root', client, ft, cfg.root_markers)
+      return
+    end
+
+    if type(root_dir) == 'string' and root_dir ~= '' then
+      cfg.root_dir = root_dir
+    end
+
     trace('lsp for client', client, cfg)
-    if cmd == nil or #cmd == 0 or vfn.executable(cmd[1]) == 0 then
+    if type(cmd) == 'string' and vfn.executable(cmd) == 0 then
+      log('lsp not installed for client', client, cmd, 'fallback')
+      return
+    end
+
+    if type(cmd) == 'table' and (#cmd == 0 or vfn.executable(cmd[1]) == 0) then
       log('lsp not installed for client', client, cmd, "fallback")
       return
     end
@@ -251,8 +288,8 @@ local function lsp_startup(ft, user_lsp_opts)
     log('loading', lspclient, 'name', lsp_config[lspclient].name)
     -- start up lsp
 
-    if type(cfg.cmd) == 'function' then
-      cfg.cmd = cfg.cmd()
+    if type(cfg.cmd) == 'string' and vfn.executable(cfg.cmd) == 0 then
+      log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.log.levels.WARN)
     elseif type(cfg.cmd) == 'table' and vfn.executable(cfg.cmd[1]) == 0 then
       log('lsp server not installed in path ' .. lspclient .. vim.inspect(cfg.cmd), vim.log.levels.WARN)
     end

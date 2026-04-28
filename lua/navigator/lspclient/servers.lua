@@ -9,7 +9,6 @@ return {
   'julials',
   'pylsp',
   'pyright',
-  'jedi_language_server',
   'jdtls',
   'lua_ls',
   'vimls',
