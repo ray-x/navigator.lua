@@ -81,7 +81,7 @@ function M.prepare_for_render(items, opts)
     items[i].symbol_name = items[i].symbol_name or '' -- some LSP API does not have range for this
 
     local fn = display_items[last_summary_idx].filename
-    local dfn = items[i].display_filename
+    local dfn = items[i].display_filename or ''
     if last_summary_idx == 1 then
       lspapi_display = items[i].symbol_name .. ' ' .. lspapi_display
 
@@ -119,8 +119,7 @@ function M.prepare_for_render(items, opts)
       lspapi_display = lspapi
       item = clone(items[i])
 
-      space, trim =
-        get_pads(opts.width, icon .. '  ' .. item.display_filename, lspapi_display .. ' 12 of 34')
+      space, trim = get_pads(opts.width, icon .. '  ' .. item.display_filename, lspapi_display .. ' 12 of 34')
       if trim and opts.width > 52 and #item.display_filename > opts.width - 20 then
         item.display_filename = string.sub(item.display_filename, 1, opts.width - 52)
           .. '󰇘'
