@@ -63,13 +63,7 @@ local function _update_sign(line)
 
   if line then
     -- log("updatasign", line, sign_group, sign_name)
-    local id = vim.fn.sign_place(
-      line,
-      sign_group,
-      sign_name,
-      '%',
-      { lnum = line + 1, priority = config.lsp.code_action.sign_priority }
-    )
+    local id = vim.fn.sign_place(line, sign_group, sign_name, '%', { lnum = line + 1, priority = config.lsp.code_action.sign_priority })
     code_action[winid].lightbulb_line = id
     log('sign updated', id, line, sign_group, sign_name)
   end
@@ -163,6 +157,12 @@ local function sort_select(action_tuples, opts, on_user_choice)
   end
 
   opts.width = config.width
+  opts.format_item = function(item)
+    local action = item.action or item
+    local kind = action.kind and ('[' .. action.kind .. '] ') or ''
+    local title = action.command and action.command.title or ''
+    return kind .. title
+  end
   trace(action_tuples)
   require('guihua.gui').select(action_tuples, opts, on_user_choice)
 end

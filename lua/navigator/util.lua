@@ -8,7 +8,7 @@ local guihua = require('guihua.util')
 local nvim_0_11
 local vfn = vim.fn
 local api = vim.api
-local uv = vim.uv or vim.loop
+local uv = vim.uv
 
 local os_name = uv.os_uname().sysname
 local is_win = os_name:find('Windows') or os_name:find('MINGW')

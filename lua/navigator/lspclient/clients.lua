@@ -51,7 +51,6 @@ local disabled_ft = {
 -- local cap = vim.lsp.protocol.make_client_capabilities()
 -- gopls["ui.completion.usePlaceholders"] = true
 
-
 local servers = require('navigator.lspclient.servers')
 
 local ng_default_cfg = {
@@ -93,8 +92,7 @@ local function load_cfg(ft, client, cfg)
   local bufnr = vim.api.nvim_get_current_buf()
   local cmd = cfg.cmd
   local root_dir = resolve_root_dir(bufnr, cfg)
-  local needs_root = type(cfg.root_dir) == 'function'
-    or (type(cfg.root_markers) == 'table' and #cfg.root_markers > 0)
+  local needs_root = type(cfg.root_dir) == 'function' or (type(cfg.root_markers) == 'table' and #cfg.root_markers > 0)
   trace(lspft, additional_ft, _NG_Loaded)
   _NG_Loaded[bufnr] = _NG_Loaded[bufnr] or { lsp = {} }
   local should_load = false
@@ -124,13 +122,13 @@ local function load_cfg(ft, client, cfg)
     end
 
     if type(cmd) == 'table' and (#cmd == 0 or vfn.executable(cmd[1]) == 0) then
-      log('lsp not installed for client', client, cmd, "fallback")
+      log('lsp not installed for client', client, cmd, 'fallback')
       return
     end
 
     local clients = vim.lsp.get_clients({ bufnr = bufnr })
     for _, c in pairs(clients or {}) do
-      log("lsp start up in progress client", client, c.name)
+      log('lsp start up in progress client', client, c.name)
       if c.name == client then
         _NG_Loaded[bufnr].lsp[c.name] = true
         _NG_Loaded[client] = true
@@ -153,7 +151,7 @@ local function load_cfg(ft, client, cfg)
       trace(client, 'loading for', ft, cfg)
       trace(lspconfig[client])
       vim.lsp.config[client] = vim.tbl_deep_extend('force', vim.lsp.config[client] or {}, cfg)
-      vim.lsp.enable(client)
+      pcall(vim.lsp.enable, client) -- in case lsp not installed etc
       _NG_Loaded[client] = true
       _NG_Loaded[bufnr].lsp[client] = true
     else
@@ -233,10 +231,7 @@ local function lsp_startup(ft, user_lsp_opts)
 
     if client_cfg == nil then
       vim.schedule(function()
-        vim.notify(
-          'lspclient: ' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue',
-          vim.log.levels.WARN
-        )
+        vim.notify('lspclient: ' .. vim.inspect(lspclient) .. 'no longer support by lspconfig, please submit an issue', vim.log.levels.WARN)
       end)
       log('lspclient', lspclient, 'not supported')
       goto continue
@@ -273,10 +268,7 @@ local function lsp_startup(ft, user_lsp_opts)
       -- end
       cfg.on_init = function(client)
         if client and client.config and client.config.settings then
-          client:notify(
-            'workspace/didChangeConfiguration',
-            { settings = client.config.settings }
-          )
+          client:notify('workspace/didChangeConfiguration', { settings = client.config.settings })
         end
       end
     else
@@ -385,7 +377,6 @@ local function setup(user_opts)
       end
     end
     log('no filetype, no ext return')
-
 
     ft = vim.api.nvim_get_option_value('ft', { buf = bufnr })
     log('get filetype', ft)
