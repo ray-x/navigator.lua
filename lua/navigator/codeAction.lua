@@ -174,7 +174,8 @@ code_action.code_action = function()
   local context
   if mode == 'n' or mode == 'i' then
     context = {}
-    context.diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
+    local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
+    context.diagnostics = vim.diagnostic.get(0, { lnum = lnum }) --vim.lsp.diagnostic.get_line_diagnostics()
     -- if there are diagnostics, we should fix it first
     if next(context.diagnostics) == nil then
       context = nil
