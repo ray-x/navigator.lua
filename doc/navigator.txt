@@ -4,7 +4,7 @@ navigator.txt
 CONTENTS                                                      *navigator-contents*
 
 1. Navigator.................................................|navigator-navigator|
-            1.1. Example: Javascript closure.|navigator-example:_javascript_closure|
+            1.1. Example: JavaScript closure.|navigator-example:_javascript_closure|
             1.2. Example: C++ definition.......|navigator-example:_c++_definition|
             1.3. Golang struct type.................|navigator-golang_struct_type|
 2. Features:.................................................|navigator-features:|
@@ -164,7 +164,7 @@ SIMILAR PROJECTS / SPECIAL MENTIONS: *navigator-similar_projects_/_special_menti
 ================================================================================
 INSTALL                                                        *navigator-install*
 
-Require nvim-0.6.1 or above, nightly (0.8) prefered
+Require nvim-0.6.1 or above, nightly (0.8) preferred
 
 You can remove your lspconfig setup and use this plugin.
 The plugin depends on lspconfig and guihua.lua (https://github.com/ray-x/guihua.lua), which provides GUI and fzy support(migrate from romgrk's project (romgrk/fzy-lua-native)).
@@ -869,7 +869,7 @@ TODO                                                              *navigator-tod
 ERRORS AND BUG REPORTING                      *navigator-errors_and_bug_reporting*
 
 *   Please double check your setup and check if minium setup works or not
-*   It should works for 0.6.1, neovim 0.7.x prefered.
+*   It should works for 0.6.1, neovim 0.7.x preferred.
 *   Check console output
 *   Check `LspInfo` and treesitter status with `checkhealth`
 *   Turn on log and attach the log to your issue if possible you can remove any personal/company info in the log

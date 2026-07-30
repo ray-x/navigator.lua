@@ -13,7 +13,7 @@
 
 Here are some examples:
 
-## Example: Javascript closure
+## Example: JavaScript closure
 
 The screenshot below shows javascript call tree 🌲 for variable `browser` within a closure. This feature parallels the
 LSP 'incoming & outgoing calls' feature. It is designed for the symbol analysis.
