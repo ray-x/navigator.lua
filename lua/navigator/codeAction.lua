@@ -159,10 +159,16 @@ local function sort_select(action_tuples, opts, on_user_choice)
   opts.width = config.width
   opts.format_item = function(item)
     local action = item.action or item
+    local title = action.title or (action.command and action.command.title) or ''
+
+    if title ~= '' then
+      return title
+    end
+
     local kind = action.kind and ('[' .. action.kind .. '] ') or ''
-    local title = action.command and action.command.title or ''
-    return kind .. title
+    return kind
   end
+
   trace(action_tuples)
   require('guihua.gui').select(action_tuples, opts, on_user_choice)
 end
