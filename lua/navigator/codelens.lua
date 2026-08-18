@@ -15,10 +15,7 @@ M.disabled = {}
 local config = require('navigator').config_values()
 local sign_name = 'NavigatorCodeLensLightBulb'
 if vim.tbl_isempty(vim.fn.sign_getdefined(sign_name)) then
-  vim.fn.sign_define(
-    sign_name,
-    { text = config.icons.code_lens_action_icon, texthl = 'LspDiagnosticsSignHint' }
-  )
+  vim.fn.sign_define(sign_name, { text = config.icons.code_lens_action_icon, texthl = 'LspDiagnosticsSignHint' })
 end
 
 local sign_group = 'nvcodelensaction'
@@ -40,13 +37,7 @@ local function _update_sign(line)
 
   if line then
     -- log("updatasign", line, sign_group, sign_name)
-    vim.fn.sign_place(
-      line,
-      sign_group,
-      sign_name,
-      '%',
-      { lnum = line + 1, priority = config.lsp.code_lens_action.sign_priority }
-    )
+    vim.fn.sign_place(line, sign_group, sign_name, '%', { lnum = line + 1, priority = config.lsp.code_lens_action.sign_priority })
     code_lens_action[winid].lightbulb_line = line
   end
 end
@@ -135,9 +126,8 @@ M.inline = function()
     return
   end
 
-
-  local on_codelens = vim.lsp.handlers['textDocument/codeLens']
-  local clients = vim.lsp.get_clients({ bufnr = bufnr, method = 'textDocument/codeLens' })
+  local on_codelens = lsp.codelens.on_codelens or vim.lsp.handlers['textDocument/codeLens']
+  local clients = lsp.get_clients({ bufnr = bufnr, method = 'textDocument/codeLens' })
   if not clients or #clients == 0 then
     log('no codeLens clients found for bufnr')
     return
@@ -146,29 +136,24 @@ M.inline = function()
 
   local parameter = vim.lsp.util.make_position_params(0, clients[1].offset_encoding)
   local ms = require('vim.lsp.protocol').Methods
-  local ids = clients[1]:request(
-    ms.textDocument_codeLens,
-    parameter,
-    function(err, response, ctx, _)
-      if err then
-        log('lsp code lens', vim.inspect(err), ctx)
-        -- lets disable code lens for this buffer
-        vim.list_extend(M.disabled, { vim.api.nvim_get_current_buf() })
-        return
-      end
-      -- Clear previous highlighting
-      api.nvim_buf_clear_namespace(bufnr, virtual_types_ns, 0, -1)
+  local ids = clients[1]:request(ms.textDocument_codeLens, parameter, function(err, response, ctx, _)
+    if err then
+      log('lsp code lens', vim.inspect(err), ctx)
+      -- lets disable code lens for this buffer
+      vim.list_extend(M.disabled, { vim.api.nvim_get_current_buf() })
+      return
+    end
+    -- Clear previous highlighting
+    api.nvim_buf_clear_namespace(bufnr, virtual_types_ns, 0, -1)
 
-      if response then
-        trace(response)
+    if response then
+      trace(response)
 
-        on_codelens(err, response, ctx, _)
+      on_codelens(err, response, ctx, _)
 
-        codelens_hdlr(err, response, ctx, _)
-      end
-    end,
-    bufnr
-  )
+      codelens_hdlr(err, response, ctx, _)
+    end
+  end, bufnr)
 end
 
 return M
