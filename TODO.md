@@ -1,3 +1,3 @@
-- Defination vs Reference (A seperate def call)
+- Defination vs Reference (A separate def call)
 - Called by (which function calls this or reference the variable)
 - inline edit in float window (Almost done)
