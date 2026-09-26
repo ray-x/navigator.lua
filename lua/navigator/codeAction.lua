@@ -138,15 +138,56 @@ local action_virtual_call_back = function(line, diagnostics)
   return code_action:render_action_virtual_text(line, diagnostics)
 end
 
+
+-- Helper to transform diagnostics to lsp object
+local function to_lsp_diagnostic(diagnostic)
+  if diagnostic.user_data and diagnostic.user_data.lsp then
+    return diagnostic.user_data.lsp
+  end
+
+  return {
+    range = {
+      start = {
+        line = diagnostic.lnum,
+        character = diagnostic.col or 0,
+      },
+      ["end"] = {
+        line = diagnostic.end_lnum or diagnostic.lnum,
+        character = diagnostic.end_col or diagnostic.col or 0,
+      },
+    },
+    message = diagnostic.message,
+    severity = diagnostic.severity,
+    source = diagnostic.source,
+    code = diagnostic.code,
+  }
+end
+
+
 local code_action_req = function(_call_back_fn, client, context)
-  local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
-  params.context = vim.tbl_deep_extend('force', params.context or {}, context)
-  local line = params.range.start.line
-  local callback = _call_back_fn(line, context.diagnostics)
   if util.nvim_0_11() == false then
     return
   end
-  client:request(ms.textDocument_codeAction, params, callback, vim.api.nvim_get_current_buf())
+
+  local params = vim.lsp.util.make_range_params(0, client.offset_encoding)
+  local line = params.range.start.line
+  local callback = _call_back_fn(line, context.diagnostics)
+
+  local lsp_diagnostics = {}
+
+  for _, diagnostic in ipairs(context.diagnostics or {}) do
+    table.insert(lsp_diagnostics, to_lsp_diagnostic(diagnostic))
+  end
+
+  params.context = vim.tbl_deep_extend('force', {}, context)
+  params.context.diagnostics = lsp_diagnostics
+
+  client:request(
+    ms.textDocument_codeAction,
+    params,
+    callback,
+    vim.api.nvim_get_current_buf()
+  )
 end
 
 local function sort_select(action_tuples, opts, on_user_choice)
