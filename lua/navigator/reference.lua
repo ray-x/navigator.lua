@@ -285,7 +285,7 @@ local ref = function()
 
   local ref_params = util.make_position_params()
   util.for_each_buffer_client(bufnr, function(client, _, _)
-    if client.server_capabilities.referencesProvider then
+    if client.supports_method('referencesProvider') then
       client:request(ms.textDocument_references, ref_params, ref_hdlr, bufnr)
     end
   end)

@@ -259,7 +259,7 @@ local function pick_hierarchy_lsp_client(bufnr, method)
   local file = vim.api.nvim_buf_get_name(bufnr)
 
   for _, client in ipairs(vim.lsp.get_clients({ bufnr = bufnr, method = method })) do
-    if client.server_capabilities.callHierarchyProvider then
+    if client.supports_method('callHierarchyProvider') then
       local root = client.config and client.config.root_dir
       if not root or file:find(root, 1, true) == 1 then
         return client
