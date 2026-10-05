@@ -134,10 +134,10 @@ local check_cap = function(opts)
   for _, value in pairs(vim.lsp.get_clients({ buffer = 0 })) do
     trace(value)
     if value ~= nil and value.server_capabilities ~= nil then
-      if value.server_capabilities.documentFormattingProvider then
+      if value.supports_method('documentFormattingProvider') then
         fmt = true
       end
-      if value.server_capabilities.documentRangeFormattingProvider then
+      if value.supports_method('documentRangeFormattingProvider') then
         rfmt = true
       end
 

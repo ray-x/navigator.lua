@@ -77,7 +77,7 @@ local function def_preview(timeout_ms, method, client, bufnr)
     end
     -- find client with capability of definition
     for _, c in pairs(clients) do
-      if c.server_capabilities.definitionProvider then
+      if c.supports_method('definitionProvider') then
         client = c
         break
       end
@@ -257,7 +257,7 @@ local def = function()
 
   -- check if the pos is already a definition with treesitter
   util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
-    if client.server_capabilities.definitionProvider then
+    if client.supports_method('definitionProvider') then
       local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)
       client:request(ms.textDocument_definition, ref_params, definition_hdlr, _bufnr or bufnr)
       return

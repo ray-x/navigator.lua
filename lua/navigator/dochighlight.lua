@@ -234,7 +234,7 @@ local nav_doc_hl = function(bufnr)
     if util.nvim_0_11() == false then
       return
     end
-    if client.server_capabilities.documentHighlightProvider == true then
+    if client.supports_method('documentHighlightProvider') then
       trace('sending doc highlight', client.name, bufnr)
       local ref_params = vim.lsp.util.make_position_params(0, client.offset_encoding)
       client:request(require('vim.lsp.protocol').Methods.textDocument_documentHighlight, ref_params, handle_document_highlight, bufnr)
