@@ -13,7 +13,7 @@ function M.workspace_symbols(query)
   local bufnr = vim.api.nvim_get_current_buf()
   local params = { query = query }
   util.for_each_buffer_client(bufnr, function(client, _, _bufnr)
-    if client.supports_method('workspaceSymbolProvider') then
+    if client:supports_method('workspaceSymbolProvider') then
       client:request(ms.workspace_symbol, params, M.workspace_symbol_handler, _bufnr)
     end
   end)
